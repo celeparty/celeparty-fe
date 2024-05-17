@@ -1,13 +1,13 @@
 "use client"
-import Basecontent from "@/components/basecontent"
+import Basecontent from "@/components/Basecontent"
 import { getData, getDataOpen } from "@/lib/services";
 import { useQuery } from "@tanstack/react-query"
 import Skeleton from "@/components/Skeleton";
-import ErrorNetwork from "@/components/errorNetwork";
+import ErrorNetwork from "@/components/ErrorNetwork";
 
 function ListPost() {
     const getQuery = async () => {
-        return await getDataOpen("/posts1")
+        return await getDataOpen("/posts")
     }
     const query = useQuery({
         queryKey: ["postsx"],

@@ -8,11 +8,11 @@ interface iSkeleton {
 export default function Skeleton(props: iSkeleton) {
     return (
         <div className="animate-pulse w-full">
-            <div className={`rounded-md bg-slate-200 my-5 mx-auto `} style={{
+            <div className={`rounded-lg bg-slate-200 my-5 mx-auto `} style={{
                 height: props.height,
                 width: props.width,
                 marginTop: props.spaceTop,
-                marginBottom: props.spaceBottom
+                marginBottom: props.spaceBottom,
             }}></div>
         </div>
     )

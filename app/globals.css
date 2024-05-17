@@ -1,3 +1,38 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Hind:wght@300;400;500;600;700&family=Kdam+Thmor+Pro&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+
+body {
+    @apply bg-[#F2F2F2] text-c-gray-text font-hind
+    
+}
+
+.wrapper {
+    @apply w-full max-w-[1100px] mx-auto px-[5px];
+}
+
+.btn {
+    @apply bg-c-green text-white rounded-lg px-4 py-1 text-[16px] font-hind font-semibold
+}
+
+.btnline {
+    @apply bg-none text-c-green border-solid border-c-green border-[1px] rounded-lg px-4 py-1 text-[16px] font-hind font-semibold
+}
+
+.mainslider .slick-dots {
+    @apply bottom-1
+}
+
+.mainslider .slick-dots li.slick-active button:before {
+    @apply text-white
+}
+
+.mainslider .slick-dots li button {
+    @apply p-0
+}
+
+.mainslider .slick-dots li {
+    @apply m-0
+}

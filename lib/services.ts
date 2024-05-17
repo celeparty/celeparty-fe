@@ -10,7 +10,6 @@ export const config = {
     }
 }
 
-
 export const getData = (url: string) => axios.get(`${process.env.URL_API + url}`, config)
     .then((res) => {
         return res

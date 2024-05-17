@@ -7,6 +7,21 @@ const nextConfig = {
         KEY_API: process.env.KEY_API
     },
     reactStrictMode: true,
+    images: {
+        remotePatterns: [
+            {
+                protocol: "https",
+                hostname: "celeparty.sgp1.digitaloceanspaces.com",
+                pathname: "**",
+            },
+            {
+                protocol: "https",
+                hostname: "fastly.picsum.photos",
+                pathname: "**",
+            },
+        ],
+    }
+
 }
 
 module.exports = nextConfig
