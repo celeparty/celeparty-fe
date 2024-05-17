@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query"
 import Skeleton from "@/components/Skeleton";
 import { getData } from "@/lib/services";
-import ErrorNetwork from "./ErrorNetwork";
+import ErrorNetwork from "@/components/ErrorNetwork";
 import Link from "next/link";
 import Image from "next/image";
 import Box from "./Box";

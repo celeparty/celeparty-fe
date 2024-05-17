@@ -7,7 +7,7 @@ import Image from "next/image";
 import { useQuery } from "@tanstack/react-query"
 import { getData } from "@/lib/services";
 import Link from "next/link";
-import ErrorNetwork from "./ErrorNetwork";
+import ErrorNetwork from "@/components/ErrorNetwork";
 
 function ItemSlide(props: any) {
     return (
