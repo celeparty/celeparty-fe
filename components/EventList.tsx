@@ -6,7 +6,7 @@ import ErrorNetwork from "@/components/ErrorNetwork";
 import Link from "next/link";
 import Image from "next/image";
 import Box from "./Box";
-
+import _ from "lodash";
 
 export default function EventList() {
     const getQuery = async () => {
@@ -30,21 +30,54 @@ export default function EventList() {
         )
     }
     const dataContent = query?.data?.data.data
+    const dataGroup = _.groupBy(dataContent, (item) => {
+        const categoryRecs = item?.category_recs?.map((categoryRec: any) => categoryRec.name);
+        if (categoryRecs?.includes("Lainnya di Event")) {
+            return "event";
+        } else {
+            return "product";
+        }
+    })
+
+    console.log(dataGroup?.event)
+
     return (
-        <Box title="Pilih Acara">
-            <div className="flex flex-wrap justify-around gap-2 align-top">
-                {
-                    dataContent?.map((item: any, i: number) => {
-                        return (
-                            <Link href="/" className="text-center max-w-[120px]" key={item.id}>
-                                <div className="relative w-[47px] h-[47px] text-center mx-auto mb-1" >
-                                    <Image src={item.icon_url ? item.icon_url : "/images/pic.png"} fill alt="" className="left-0 right-0 mx-auto" />
-                                </div>
-                                <div className="text-[10px] text-c-blue font-semibold">{item.name}</div>
-                            </Link>
-                        )
-                    })
-                }
+        <Box>
+            <div className="flex flex-wrap justify-around gap-5 align-top">
+                <div className="relative flex-1">
+                    <h4 className="font-semibold text-[16px] text-c-blue mb-2">Event</h4>
+                    <div className="flex justify-between border-solid min-h-[123px] border-gray-300 border-[1px] p-5 rounded-lg bg-gray-50">
+                        {
+                            dataGroup?.event?.map((item: any, i: number) => {
+                                return (
+                                    <Link href="/" className="text-center max-w-[120px]" key={item.id}>
+                                        <div className="relative w-[47px] h-[47px] text-center mx-auto mb-1" >
+                                            <Image src={item.icon_url ? item.icon_url : "/images/pic.png"} fill alt="" className="left-0 right-0 mx-auto" />
+                                        </div>
+                                        <div className="text-[10px] text-c-blue font-semibold">{item.name}</div>
+                                    </Link>
+                                )
+                            })
+                        }
+                    </div>
+                </div>
+                <div className="relative flex-1">
+                    <h4 className="font-semibold text-[16px] text-c-blue mb-2">Produk</h4>
+                    <div className="flex justify-between border-solid min-h-[123px]  border-gray-300 border-[1px] p-5 rounded-lg bg-gray-50">
+                        {
+                            dataGroup?.product?.map((item: any, i: number) => {
+                                return (
+                                    <Link href="/" className="text-center max-w-[120px]" key={item.id}>
+                                        <div className="relative w-[47px] h-[47px] text-center mx-auto mb-1" >
+                                            <Image src={item.icon_url ? item.icon_url : "/images/pic.png"} fill alt="" className="left-0 right-0 mx-auto" />
+                                        </div>
+                                        <div className="text-[10px] text-c-blue font-semibold">{item.name}</div>
+                                    </Link>
+                                )
+                            })
+                        }
+                    </div>
+                </div>
             </div>
         </Box>
     )

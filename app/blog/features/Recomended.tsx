@@ -7,11 +7,15 @@ import ErrorNetwork from "@/components/ErrorNetwork";
 import moment from "moment";
 import Basecontent from "@/components/Basecontent";
 import ItemProduct from "@/components/product/ItemProduct";
+import { useRouter, notFound } from 'next/navigation'
+
 interface iRecomended {
     slug: string
 }
 
 function RecomendedList(props: iRecomended) {
+    const router = useRouter()
+
     const getQuery = async () => {
         return await getData(`/blogs/${props.slug}/relateds?search&limit=10`)
     }
@@ -31,10 +35,7 @@ function RecomendedList(props: iRecomended) {
     }
 
     if (query.isError) {
-        console.log(query.error)
-        return (
-            <ErrorNetwork />
-        )
+        return notFound()
     }
     const dataContent = query?.data?.data.data
     console.log(dataContent)

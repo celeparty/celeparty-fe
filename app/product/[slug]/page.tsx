@@ -22,7 +22,7 @@ export default async function ProductDetail({ params }: { params: { slug: string
                                         dataContent?.photos?.map((item: any) => {
                                             return (
                                                 <div key={item.id} className="relative min-w-[350px] w-[350px] h-[350px]">
-                                                    <Image src={item.image_url} alt="" fill />
+                                                    <Image src={item.image_url ? item.image_url : "/images/no-image.png"} alt="" fill style={{ objectFit: "cover" }} />
                                                 </div>
                                             )
                                         })

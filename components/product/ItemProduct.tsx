@@ -19,8 +19,13 @@ export default function ItemProduct(props: iItemProduct) {
         <div className="p-2 w-1/5">
             <Link href={props.url} className=" rounded-lg shadow-md flex flex-col justify-between h-full p-3">
                 <div>
-                    <div className="relative w-[100px] h-[100px] mx-auto text-center my-3">
-                        <Image src={props.image_url ? props.image_url : "/images/noimage.png"} fill alt="image"
+
+                    <div className="relative fill-current w-full h-[100px] mx-auto text-center my-3">
+                        <Image
+                            src={props.image_url ? props.image_url : "/images/noimage.png"}
+                            fill
+                            alt="image"
+                            style={{ objectFit: "cover" }}
                         />
                     </div>
                     <h4 className="text-center text-sm">{props.title}</h4>
