@@ -30,7 +30,6 @@ export default function EventList() {
         )
     }
     const dataContent = query?.data?.data.data
-    console.log(dataContent)
     return (
         <Box title="Pilih Acara">
             <div className="flex flex-wrap justify-around gap-2 align-top">
@@ -39,7 +38,7 @@ export default function EventList() {
                         return (
                             <Link href="/" className="text-center max-w-[120px]" key={item.id}>
                                 <div className="relative w-[47px] h-[47px] text-center mx-auto mb-1" >
-                                    <Image src={item.icon_url} fill alt="" className="left-0 right-0 mx-auto" />
+                                    <Image src={item.icon_url ? item.icon_url : "/images/pic.png"} fill alt="" className="left-0 right-0 mx-auto" />
                                 </div>
                                 <div className="text-[10px] text-c-blue font-semibold">{item.name}</div>
                             </Link>
