@@ -27,7 +27,10 @@ export default function ItemProduct(props: iItemProduct) {
                     <div className="text-c-orange  text-center text-[12px] font-bold">{props.price}</div>
                 </div>
                 <div>
-                    <div className="flex items-center gap-1 text-[10px] font-medium mt-2 text-c-gray-text2"><FaStar className="text-[#FDD835]" />{props.rate} | Terjual {props.sold}</div>
+                    <div className="flex items-center gap-1 text-[10px] font-medium mt-2 text-c-gray-text2">
+                        {props.rate && props.sold ? <><FaStar className="text-[#FDD835]" />{props.rate} | Terjual {props.sold}</> : null}
+
+                    </div>
                     <div className="flex gap-1 items-center text-[10px] mt-2  text-c-gray-text2">
                         <FaLocationDot /> {props.location}
                     </div>
