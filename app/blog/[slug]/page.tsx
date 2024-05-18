@@ -4,7 +4,7 @@ import React from 'react'
 export default function BlogDetail() {
     return (
         <div className="relative wrapper py-7">
-            <Box>
+            <Box >
                 Hello
             </Box>
         </div>

@@ -17,7 +17,7 @@ export default function TopHeader() {
                 <ul className="flex items-center gap-7 text-sm ">
                     <li><Link href="/">Tentang Celeparty</Link></li>
                     <li><Link href="/">Mitra Celeparty</Link></li>
-                    <li><Link href="/">Blog</Link></li>
+                    <li><Link href="/blog">Blog</Link></li>
                     <li><Link href="/">Hubungi Kami</Link></li>
                 </ul>
             </div>
