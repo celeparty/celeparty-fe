@@ -48,7 +48,7 @@ export default function EventList() {
                         {
                             dataGroup?.event?.map((item: any, i: number) => {
                                 return (
-                                    <Link href="/" className="text-center max-w-[120px]" key={item.id}>
+                                    <Link href="/product" className="text-center max-w-[120px]" key={item.id}>
                                         <div className="relative w-[47px] h-[47px] text-center mx-auto mb-1" >
                                             <Image src={item.icon_url ? item.icon_url : "/images/pic.png"} fill alt="" className="left-0 right-0 mx-auto" />
                                         </div>
@@ -65,7 +65,7 @@ export default function EventList() {
                         {
                             dataGroup?.product?.map((item: any, i: number) => {
                                 return (
-                                    <Link href="/" className="text-center max-w-[120px]" key={item.id}>
+                                    <Link href="/product" className="text-center max-w-[120px]" key={item.id}>
                                         <div className="relative w-[47px] h-[47px] text-center mx-auto mb-1" >
                                             <Image src={item.icon_url ? item.icon_url : "/images/pic.png"} fill alt="" className="left-0 right-0 mx-auto" />
                                         </div>
