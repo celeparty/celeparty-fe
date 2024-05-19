@@ -39,7 +39,7 @@ export default function ProductList() {
 
     return (
         <Box title="Untuk Anda">
-            <div className="flex flex-wrap justify-between -mx-2">
+            <div className="flex flex-wrap  -mx-2">
                 {
                     dataContent?.map((item: any, i: number) => {
                         return (

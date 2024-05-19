@@ -10,9 +10,11 @@
     },
     "dependencies": {
         "@radix-ui/react-accordion": "^1.1.2",
+        "@radix-ui/react-slot": "^1.0.2",
         "@tanstack/react-query": "^5.24.1",
         "autoprefixer": "10.4.17",
         "axios": "^1.6.7",
+        "button": "^1.1.1",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.0",
         "framer-motion": "^11.0.6",
