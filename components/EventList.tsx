@@ -39,8 +39,6 @@ export default function EventList() {
         }
     })
 
-    console.log(dataGroup?.event)
-
     return (
         <Box>
             <div className="flex flex-wrap justify-around gap-5 align-top">

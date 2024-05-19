@@ -9,36 +9,38 @@ import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 
 export default function Header() {
     return (
-        <div className="bg-white shadow-sm w-full  px-4 py-4 flex z-10 items-start justify-between gap-16 sticky top-0">
-            <div className="flex items-center justify-between">
-                <Link href="/"><Image src="/images/logo.svg" width={234} height={63} alt="logo" /></Link>
-            </div>
-            <div className="relative flex-1 max-w-[900px]">
-                <div className="w-full relative">
-                    <IoIosSearch className="absolute left-5 text-3xl top-[50%] -translate-y-[50%]" />
-                    <input type="text" placeholder="Cari di Celeparty" className="input border-c-gray border-solid border-[1px] rounded-lg pr-5 pl-[60px] py-3 bg-white w-full" />
+        <div className="bg-white shadow-sm w-full px-4 py-4  z-10  sticky top-0">
+            <div className="wrapper-main flex items-start justify-between gap-16">
+                <div className="flex items-center justify-between">
+                    <Link href="/"><Image src="/images/logo.svg" width={234} height={63} alt="logo" /></Link>
                 </div>
-                <ul className="flex gap-6 justify-center pb-1 pt-2 text-sm ">
-                    <li><Link href="/" className="hover:text-c-blue">Tiket</Link></li>
-                    <li><Link href="/" className="hover:text-c-blue">Hampers</Link></li>
-                    <li><Link href="/" className="hover:text-c-blue">Kue Ulang Tahun</Link></li>
-                    <li><Link href="/" className="hover:text-c-blue">Makanan</Link></li>
-                    <li><Link href="/" className="hover:text-c-blue">Dekorasi</Link></li>
-                    <li><Link href="/" className="hover:text-c-blue">Sound System</Link></li>
-                </ul>
-            </div>
-            <div className="relative flex items-center text-3xl gap-4 text-c-gray-text font-semibold">
-                <div className="item">
-                    <MdOutlineShoppingCart />
+                <div className="relative flex-1 max-w-[900px]">
+                    <div className="w-full relative">
+                        <IoIosSearch className="absolute left-5 text-3xl top-[50%] -translate-y-[50%]" />
+                        <input type="text" placeholder="Cari di Celeparty" className="input border-c-gray border-solid border-[1px] rounded-lg pr-5 pl-[60px] py-3 bg-white w-full" />
+                    </div>
+                    <ul className="flex gap-6 justify-center pb-1 pt-2 text-sm ">
+                        <li><Link href="/" className="hover:text-c-blue">Tiket</Link></li>
+                        <li><Link href="/" className="hover:text-c-blue">Hampers</Link></li>
+                        <li><Link href="/" className="hover:text-c-blue">Kue Ulang Tahun</Link></li>
+                        <li><Link href="/" className="hover:text-c-blue">Makanan</Link></li>
+                        <li><Link href="/" className="hover:text-c-blue">Dekorasi</Link></li>
+                        <li><Link href="/" className="hover:text-c-blue">Sound System</Link></li>
+                    </ul>
                 </div>
-                <div className="item">
-                    <MdOutlineNotifications />
+                <div className="relative flex items-center text-3xl gap-4 text-c-gray-text font-semibold">
+                    <div className="item">
+                        <MdOutlineShoppingCart />
+                    </div>
+                    <div className="item">
+                        <MdOutlineNotifications />
+                    </div>
+                    <div className="item">
+                        <IoChatbubbleEllipsesOutline />
+                    </div>
+                    <Link href="/" className="btnline">Masuk</Link>
+                    <Link href="/" className="btn">Daftar</Link>
                 </div>
-                <div className="item">
-                    <IoChatbubbleEllipsesOutline />
-                </div>
-                <Link href="/" className="btnline">Masuk</Link>
-                <Link href="/" className="btn">Daftar</Link>
             </div>
         </div>
     )

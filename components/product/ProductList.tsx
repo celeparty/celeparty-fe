@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query"
 import Skeleton from "@/components/Skeleton";
 import { getData } from "@/lib/services";
 import ErrorNetwork from "@/components/ErrorNetwork";
+import Link from "next/link"
 
 export default function ProductList() {
     const getQuery = async () => {
@@ -56,6 +57,9 @@ export default function ProductList() {
                         )
                     })
                 }
+            </div>
+            <div className="flex justify-center mt-7">
+                <Link href="/product" className="border border-solid border-c-green rounded-lg px-5 py-3 text-c-green font-semibold hover:bg-c-green hover:text-white">Tampilkan Semua Produk</Link>
             </div>
         </Box>
     )

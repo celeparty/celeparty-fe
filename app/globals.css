@@ -17,6 +17,10 @@ body {
     @apply w-full max-w-[1370px] mx-auto px-[5px];
 }
 
+.wrapper-main {
+    @apply w-full max-w-[1400px] mx-auto px-[5px];
+}
+
 .btn {
     @apply bg-c-green text-white rounded-lg px-4 py-1 text-[16px] font-hind font-semibold
 }

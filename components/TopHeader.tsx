@@ -8,7 +8,7 @@ import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 export default function TopHeader() {
     return (
         <div className="relative bg-[#F0F3F7] px-4 ">
-            <div className="flex items-center justify-between">
+            <div className="wrapper-main flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <div className="text-sm ">Download Celeparty App</div>
                     <Link href="/"><Image src="/images/appstore.png" width={123} height={41} alt="app store" /></Link>
