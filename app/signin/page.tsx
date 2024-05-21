@@ -7,7 +7,7 @@ const Login = () => {
       <h1 className="font-hind font-semibold text-[24px]">Login</h1>
       <div className="mt-2 flex flex-col gap-4 [&_input]:text-black [&_input]:rounded-lg [&_input]:box-border [&_input]:p-2 [&_input]:font-light [&_input]:font-hind [&_input]:text-[14px]">
         <input type="text" placeholder="Alamat Email" />
-        <input type="text" placeholder="Kata Sandi" />
+        <input type="password" placeholder="Kata Sandi" />
       </div>
       <div className="flex justify-end mt-2">
         <Link
@@ -44,12 +44,12 @@ const Login = () => {
       </div>
       <div className="mt-7 flex justify-center">
         <div className="flex flex-col gap-2 justify-center">
-          <button className="w-[172px] h-[42px] text-center text-white rounded-lg bg-c-green">
+          <button className="w-[172px] h-[42px] text-center text-white rounded-full bg-c-green">
             Login
           </button>
           <p className="font-hind font-semibold text-[12px]">
             Belum punya akun?{" "}
-            <Link href={"/"} className="text-c-orange">
+            <Link href={"/signup"} className="text-c-orange">
               Registrasi
             </Link>
           </p>
