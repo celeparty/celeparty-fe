@@ -1,3 +1,47 @@
+"use client";
+
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+
+const formSchema = z.object({
+  name: z.string().nonempty({
+    message: "Nama Tidak Boleh Kosong",
+  }),
+
+  date: z
+    .string()
+    .nonempty({ message: "Tanggal Tidak Boleh Kosong" })
+    .regex(/^\d{2}-\d{2}-\d{4}$/, {
+      message: "Tanggal harus dalam format Hari-Bulan-Tahun dalam angka!",
+    }),
+
+  gender: z.string().nonempty({ message: "Jenis kelamin Tidak Boleh Kosong" }),
+
+  email: z
+    .string()
+    .nonempty({ message: "Email Tidak Boleh Kosong" })
+    .email({ message: "Email Tidak Valid" }),
+
+  phone: z
+    .string()
+    .nonempty({ message: "Nomor Telepon Tidak Boleh Kosong" })
+    .regex(/^\d+$/, { message: "Nomor telepon harus berisi angka!" })
+    .min(10, { message: "Nomor telepon minimal 10 angka!" })
+    .max(15, { message: "Nomor telepon maksimal 15 angka!" }),
+});
+
 interface NotificationItem {
   title: string;
   description: string;
@@ -104,71 +148,149 @@ const Notification = () => {
 };
 
 const InputUser = () => {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      date: "",
+      gender: "",
+      email: "",
+      phone: "",
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log(values);
+  }
   return (
-    <form className="[&_label]:font-medium [&_label]:font-hind [&_label]:text-[16px] [&_input]:border [&_input]:border-[#ADADAD] [&_input]:rounded-lg">
-      <div className="mb-6 flex items-center w-[500px]">
-        <label className="text-black w-[30%]" htmlFor="nama">
-          Nama
-        </label>
-        <input
-          type="text"
-          id="nama"
-          name="nama"
-          className="shadow appearance-none w-[70%] border rounded py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline"
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem className="mb-4">
+              <div className="flex items-center gap-8">
+                <FormLabel className="w-[30%] text-black font-semibold font-hind text-[16px]">
+                  Nama
+                </FormLabel>
+                <FormControl className="w-[320px]">
+                  <Input
+                    className="border border-[#ADADAD] rounded-lg"
+                    {...field}
+                  />
+                </FormControl>
+              </div>
+              <div className="ml-[160px]">
+                <FormMessage className="text-[9px]" />
+              </div>
+            </FormItem>
+          )}
         />
-      </div>
-      <div className="mb-6 flex items-center  w-[500px]">
-        <label className="text-black w-[30%]" htmlFor="tanggalLahir">
-          Tanggal Lahir
-        </label>
-        <input
-          type="date"
-          id="tanggalLahir"
-          name="tanggalLahir"
-          className="shadow appearance-none w-[70%] border rounded  py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline"
+        <FormField
+          control={form.control}
+          name="date"
+          render={({ field }) => (
+            <FormItem className="mb-4">
+              <div className="flex items-center gap-8">
+                <FormLabel className="w-[30%] text-black font-semibold font-hind text-[16px]">
+                  Tanggal Lahir
+                </FormLabel>
+                <FormControl className="w-[320px]">
+                  <Input
+                    className="border border-[#ADADAD] rounded-lg"
+                    {...field}
+                  />
+                </FormControl>
+              </div>
+              <div className="ml-[160px]">
+                <FormMessage className="text-[9px]" />
+              </div>
+            </FormItem>
+          )}
         />
-      </div>
-      <div className="mb-6 flex items-center  w-[500px]">
-        <label className="w-[30%] text-black" htmlFor="email">
-          Email
-        </label>
-        <input
-          type="email"
-          id="email"
+        <FormField
+          control={form.control}
+          name="gender"
+          render={({ field }) => (
+            <FormItem className="mb-4">
+              <div className="flex items-center gap-8">
+                <FormLabel className="w-[30%] text-black font-semibold font-hind text-[16px]">
+                  Jenis Kelamin
+                </FormLabel>
+                <FormControl className="w-[320px]">
+                  <Input
+                    className="border border-[#ADADAD] rounded-lg"
+                    {...field}
+                  />
+                </FormControl>
+              </div>
+              <div className="ml-[160px]">
+                <FormMessage className="text-[9px]" />
+              </div>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="email"
-          className="shadow appearance-none border rounded w-[70%] py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline"
+          render={({ field }) => (
+            <FormItem className="mb-4">
+              <div className="flex items-center gap-8">
+                <FormLabel className="w-[30%] text-black font-semibold font-hind text-[16px]">
+                  Email
+                </FormLabel>
+                <FormControl className="w-[320px]">
+                  <Input
+                    className="border border-[#ADADAD] rounded-lg"
+                    {...field}
+                  />
+                </FormControl>
+              </div>
+              <div className="ml-[160px]">
+                <FormMessage className="text-[9px]" />
+              </div>
+            </FormItem>
+          )}
         />
-      </div>
-      <div className="mb-8 flex items-center w-[500px]">
-        <label className="w-[30%] text-black" htmlFor="noHp">
-          No HP
-        </label>
-        <input
-          type="tel"
-          id="noHp"
-          name="noHp"
-          className="shadow appearance-none border rounded w-[70%] py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline"
+        <FormField
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <FormItem className="mb-4">
+              <div className="flex items-center gap-8">
+                <FormLabel className="w-[30%] text-black font-semibold font-hind text-[16px]">
+                  No HP
+                </FormLabel>
+                <FormControl className="w-[320px]">
+                  <Input
+                    className="border border-[#ADADAD] rounded-lg"
+                    {...field}
+                  />
+                </FormControl>
+              </div>
+              <div className="ml-[160px]">
+                <FormMessage className="text-[9px]" />
+              </div>
+            </FormItem>
+          )}
         />
-      </div>
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-end w-[500px] font-hind">
-          <button
+        <div className="flex flex-col gap-4 items-end mt-10">
+          <Button
             type="submit"
-            className="bg-[#CBD002] w-[350px] text-white py-2 px-4 rounded-lg font-medium text-[16px]"
+            className="w-[300px] hover:bg-[#CBD002] bg-[#CBD002] text-white py-2 px-4 rounded-lg font-semibold text-[16px]"
           >
-            Simpan
-          </button>
-        </div>
-        <div className="flex items-center justify-end w-[500px]">
-          <button
+            Submit
+          </Button>
+          <Button
             type="submit"
-            className="border-solid border border-black w-[350px] rounded-lg text-black font-medium text-[16px] py-2 px-4"
+            className="w-[300px] hover:bg-white bg-white border-solid border border-black rounded-lg text-black font-semibold text-[16px]"
           >
             Ubah Kata Sandi
-          </button>
+          </Button>
         </div>
-      </div>
-    </form>
+      </form>
+    </Form>
   );
 };
 
@@ -190,7 +312,7 @@ const ProfilePage = () => {
               Ekstensi file yang diperbolehkan: .JPG .JPEG .PNG
             </p>
           </div>
-          <div>
+          <div className="w-fit">
             <InputUser />
           </div>
         </div>
