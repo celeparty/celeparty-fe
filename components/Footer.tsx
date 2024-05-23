@@ -13,10 +13,10 @@ export default function Footer() {
                     <div className="item">
                         <h4>Celeparty</h4>
                         <ul>
-                            <li><Link href="/">Tentang Celeparty</Link></li>
-                            <li><Link href="/">Mitra Celeparty</Link></li>
+                            <li><Link href="/about">Tentang Celeparty</Link></li>
+                            <li><Link href="/login">Mitra Celeparty</Link></li>
                             <li><Link href="/blog">Blog</Link></li>
-                            <li><Link href="/">Hubungi Kami</Link></li>
+                            <li><Link href="/contact">Hubungi Kami</Link></li>
                         </ul>
                     </div>
                     <div className="item">
