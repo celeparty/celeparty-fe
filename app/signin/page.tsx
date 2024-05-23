@@ -20,10 +20,12 @@ import {
 const signInSchema = z.object({
   email: z
     .string()
+    .nonempty("Email wajib di isi")
     .email({ message: "Email tidak valid" })
     .max(254, { message: "Maksimal karakter untuk email yaitu 254 huruf" }),
   password: z
     .string()
+    .nonempty("Kata sandi wajib di isi")
     .min(6, { message: "Kata sandi minimal 6 karakter" })
     .max(64, { message: "Maksimal karakter untuk kata sandi yaitu 64 huruf" }),
 });
@@ -38,6 +40,7 @@ const Login = () => {
   });
 
   const Login = (values: z.infer<typeof signInSchema>) => {
+    form.reset();
     alert("Selamat Kamu Berhasil Login");
     console.log(values);
   };
