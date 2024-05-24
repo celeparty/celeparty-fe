@@ -160,6 +160,8 @@ const InputUser = () => {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    form.reset();
+    alert("Selamat! Data diri anda sudah masuk ke sistem");
     console.log(values);
   }
   return (
