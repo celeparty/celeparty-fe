@@ -59,13 +59,6 @@ const Registration = () => {
   return (
     <div>
       <h1 className="mb-4">Registrasi</h1>
-      {/* <div className="[&_input]:text-black flex flex-col gap-4 [&_input]:rounded-lg [&_input]:box-border [&_input]:p-2 [&_input]:font-light [&_input]:font-hind [&_input]:text-[14px]">
-        <input type="text" placeholder="Nama Lengkap" />
-        <input type="text" placeholder="Email" />
-        <input type="text" placeholder="No Telpon" />
-        <input type="password" placeholder="Kata Sandi" />
-        <input type="password" placeholder="Ulangin Kata Sandi" />
-      </div> */}
       <div className="">
         <Form {...form}>
           <form

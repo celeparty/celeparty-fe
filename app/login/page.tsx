@@ -47,10 +47,6 @@ const Login = () => {
   return (
     <div className="mt-8">
       <h1 className="font-hind font-semibold text-[24px]">Login</h1>
-      {/* <div className="mt-2 flex flex-col gap-4 [&_input]:text-black [&_input]:rounded-lg [&_input]:box-border [&_input]:p-2 [&_input]:font-light [&_input]:font-hind [&_input]:text-[14px]">
-        <input type="text" placeholder="Alamat Email" />
-        <input type="password" placeholder="Kata Sandi" />
-      </div> */}
       <div className="mt-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(Login)} className="space-y-8">
