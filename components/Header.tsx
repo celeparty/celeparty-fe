@@ -38,8 +38,8 @@ export default function Header() {
                     <div className="item">
                         <IoChatbubbleEllipsesOutline />
                     </div>
-                    <Link href="/" className="btnline">Masuk</Link>
-                    <Link href="/" className="btn">Daftar</Link>
+                    <Link href="/login" className="btnline">Masuk</Link>
+                    <Link href="/register" className="btn">Daftar</Link>
                 </div>
             </div>
         </div>

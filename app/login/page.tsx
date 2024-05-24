@@ -129,7 +129,7 @@ const Login = () => {
                 </Button>
                 <p className="font-hind font-semibold text-[12px]">
                   Belum punya akun?{" "}
-                  <Link href={"/signup"} className="text-c-orange">
+                  <Link href={"/register"} className="text-c-orange">
                     Registrasi
                   </Link>
                 </p>

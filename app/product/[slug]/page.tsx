@@ -5,7 +5,7 @@ import React from 'react'
 import { FaStar, FaRegStar } from "react-icons/fa";
 import parse from "html-react-parser";
 import { FcHighPriority } from "react-icons/fc";
-import { FaMinus, FaPlus } from "react-icons/fa";
+import SideBar from "./SideBar";
 
 export default async function ProductDetail({ params }: { params: { slug: string } }) {
     const dataProduct = await getData(`/products/${params.slug}`)
@@ -27,7 +27,6 @@ export default async function ProductDetail({ params }: { params: { slug: string
                                             )
                                         })
                                     }
-                                    {/* <Image src="/images/no-image.png" fill alt="image" /> */}
                                 </div>
                                 <div className="relative gap-1 ">
                                     <h5 className="font-hint text-sm mb-2 font-medium text-c-gray-text2">{dataContent?.category_name ? dataContent?.category_name : "Kategory Tidak Tersedia"}</h5>
@@ -66,29 +65,7 @@ export default async function ProductDetail({ params }: { params: { slug: string
                                 </div>
                             </div>
                             <div className="right min-w-[275px] sticky top-0 ">
-                                <div className="p-5 shadow-lg rounded-lg border-solid border-[1px]  border-gray-100">
-                                    <h4>Atur Jumlah dan Catatan</h4>
-                                    <div className="relative mt-5">
-                                        <label className="mb-1 block">Jumlah</label>
-                                        <div className=" border-solid w-auto inline-block border-[1px] rounded-lg border-c-gray">
-                                            <div className="flex items-center gap-2">
-                                                <div className="cursor-pointer p-3 hover:text-green-300"><FaMinus /></div>
-                                                <div>0</div>
-                                                <div className="cursor-pointer p-3 hover:text-green-300"><FaPlus /></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="relative mt-5">
-                                        <div>Minimal Order : 1  </div>
-                                        <div>Waktu Pemesanan : 2 Hari  </div>
-
-                                        <label className="mb-1 block text-black mt-3">Tambah Catatan</label>
-                                        <textarea className="w-full h-[100px] border-solid border-[1px] rounded-lg border-c-gray" />
-                                    </div>
-                                    <div className="text-center mx-auto max-w-[150px]">
-                                        <input type="submit" value="+ Kerajang" className="bg-c-green mt-5 text-white py-3 w-full rounded-lg" />
-                                    </div>
-                                </div>
+                                <SideBar />
                             </div>
                         </div>
                         : <div className="flex justify-center gap-1 items-center text-2xl py-20"><FcHighPriority /> Produk tidak tersedia</div>
