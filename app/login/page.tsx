@@ -19,6 +19,7 @@ import {
 import { useRouter } from "next/navigation";
 
 import { useSession, signIn, signOut } from "next-auth/react";
+import { useEffect } from "react";
 
 const signInSchema = z.object({
     email: z
@@ -57,6 +58,14 @@ const Login = () => {
         }
 
     };
+
+    useEffect(() => {
+        if (status === "authenticated") {
+            router.push("/")
+        } else {
+            router.push("/login")
+        }
+    })
     return (
         <div className="relative wrapper py-7 bg-c-blue my-5 rounded-lg">
             <div className="w-[260px] mx-auto py-8">
@@ -113,14 +122,14 @@ const Login = () => {
                                     Lupa Kata Sandi?
                                 </Link>
                             </div>
-                            <div className="mt-4">
+                            {/* <div className="mt-4">
                                 <div className="font-hind font-normal text-[10px] flex items-center justify-center gap-2 text-white">
                                     <div className="w-[43px] h-[2px] bg-white"></div>
                                     OR
                                     <div className="w-[43px] h-[2px] bg-white"></div>
                                 </div>
-                            </div>
-                            <div className="mt-2 flex justify-center gap-8">
+                            </div> */}
+                            {/* <div className="mt-2 flex justify-center gap-8">
                                 <div className="btn cursor-pointer" onClick={() => signIn("github")}>Login Github</div>
                                 <Link href={"/"}>
                                     <Image
@@ -130,7 +139,7 @@ const Login = () => {
                                         alt="Geogle Image"
                                     />
                                 </Link>
-                            </div>
+                            </div> */}
                             <div className="mt-7 flex justify-center">
                                 <div className="flex flex-col gap-2 justify-center">
                                     <Button
