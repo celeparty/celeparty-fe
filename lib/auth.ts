@@ -21,21 +21,51 @@ export const authOptions: NextAuthOptions = {
                 },
             },
             async authorize(credentials) {
-                const user = {
-                    id: "1",
-                    name: "John",
-                    email: "prasojodesigner@gmail.com",
-                    password: "123456"
+                const res = await fetch(
+                    `${process.env.URL_API}/login`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(credentials),
+                    }
+                );
+
+                const user = await res.json();
+
+
+                if (res.ok && user) {
+                    return user;
                 }
-                return user
+                return null;
             }
         }
-
         ),
         GithubProvider({
             clientId: process.env.GITHUB_ID as string,
             clientSecret: process.env.GITHUB_SECRET as string,
         })
+    ],
 
-    ]
+    pages: {
+        signIn: "/login",
+    },
+
+    callbacks: {
+        // async jwt({ token, user }) {
+        //     if (user) {
+        //         token.accessToken = user?.token;
+        //         token.user = user.data?.user;
+        //         token.message = user?.message;
+        //     }
+        //     return token;
+        // },
+        // async session({ session, token }) {
+        //     session.accessToken = token.accessToken;
+        //     session.message = token.message;
+        //     session.user = token.user;
+        //     return session;
+        // },
+    },
 }

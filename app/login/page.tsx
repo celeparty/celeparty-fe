@@ -16,6 +16,8 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
+import { useRouter } from "next/navigation";
+
 import { useSession, signIn, signOut } from "next-auth/react";
 
 const signInSchema = z.object({
@@ -30,8 +32,8 @@ const signInSchema = z.object({
 });
 
 const Login = () => {
-    const { data: session } = useSession()
-
+    const { data: session, status } = useSession()
+    const router = useRouter();
     const form = useForm<z.infer<typeof signInSchema>>({
         resolver: zodResolver(signInSchema),
         defaultValues: {
@@ -40,9 +42,20 @@ const Login = () => {
         },
     });
 
-    const Login = (values: z.infer<typeof signInSchema>) => {
-        signIn()
-        console.log(values);
+    const Login = async (values: z.infer<typeof signInSchema>) => {
+        const { email, password } = values;
+        const result = await signIn("credentials", {
+            email: email,
+            password: password,
+            callbackUrl: "/",
+        });
+
+        if (result?.error) {
+            console.error('Login failed:', result.error);
+        } else {
+            router.push("/");
+        }
+
     };
     return (
         <div className="relative wrapper py-7 bg-c-blue my-5 rounded-lg">

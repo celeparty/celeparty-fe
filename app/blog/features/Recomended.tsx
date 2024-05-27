@@ -38,7 +38,6 @@ function RecomendedList(props: iRecomended) {
         return notFound()
     }
     const dataContent = query?.data?.data.data
-    console.log(dataContent)
     return (
         <div>
             <h4 className="font-semibold text-[16px] text-black">Untuk Anda</h4>

@@ -1,3 +1,4 @@
+"use client"
 import Image from "next/image"
 import Link from "next/link"
 import React from 'react'
@@ -5,9 +6,12 @@ import { IoIosSearch } from "react-icons/io";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import { MdOutlineNotifications } from "react-icons/md";
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
+import { useSession, signIn, signOut } from "next-auth/react";
 
 
 export default function Header() {
+    const { data: session, status } = useSession()
+
     return (
         <div className="bg-white shadow-sm w-full px-4 py-4  z-10  sticky top-0">
             <div className="wrapper-main flex items-start justify-between gap-16">
@@ -38,7 +42,10 @@ export default function Header() {
                     <div className="item">
                         <IoChatbubbleEllipsesOutline />
                     </div>
-                    <Link href="/login" className="btnline">Masuk</Link>
+
+                    {
+                        status === "authenticated" ? <div className="btnline cursor-pointer" onClick={() => signOut()}>Keluar</div> : <Link href="/login" className="btnline">Masuk</Link>
+                    }
                     <Link href="/register" className="btn">Daftar</Link>
                 </div>
             </div>
