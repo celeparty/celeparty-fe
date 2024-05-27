@@ -16,8 +16,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { signIn, signOut } from "next-auth/react";
-
+import { useSession, signIn, signOut } from "next-auth/react";
 
 const signInSchema = z.object({
     email: z
@@ -31,6 +30,8 @@ const signInSchema = z.object({
 });
 
 const Login = () => {
+    const { data: session } = useSession()
+
     const form = useForm<z.infer<typeof signInSchema>>({
         resolver: zodResolver(signInSchema),
         defaultValues: {
@@ -44,121 +45,102 @@ const Login = () => {
         console.log(values);
     };
     return (
-        <div className="mt-8">
-            <h1 className="font-hind font-semibold text-[24px]">Login</h1>
-            <div className="mt-6">
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(Login)} className="space-y-8">
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormControl>
-                                        <Input
-                                            placeholder="Alamat Email"
-                                            className="text-black"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage className="text-[9px]" />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="password"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormControl>
-                                        <Input
-                                            placeholder="Kata Sandi"
-                                            className="text-black"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage className="text-[9px]" />
-                                </FormItem>
-                            )}
-                        />
-                        <div className="flex justify-end mt-2">
-                            <Link
-                                href={"/"}
-                                className="font-hind font-semibold text-[12px] text-c-orange"
-                            >
-                                Lupa Kata Sandi?
-                            </Link>
-                        </div>
-                        <div className="mt-4">
-                            <div className="font-hind font-normal text-[10px] flex items-center justify-center gap-2">
-                                <div className="w-[43px] h-[2px] bg-white"></div>
-                                OR
-                                <div className="w-[43px] h-[2px] bg-white"></div>
-                            </div>
-                        </div>
-                        <div className="mt-2 flex justify-center gap-8">
-                            <Link href={"/"}>
-                                <Image
-                                    src={"/images/geogle.png"}
-                                    width={30}
-                                    height={30}
-                                    alt="Geogle Image"
-                                />
-                            </Link>
-                            <Link href={"/"}>
-                                <Image
-                                    src={"/images/phone.png"}
-                                    width={41}
-                                    height={35}
-                                    alt="Phone Image"
-                                />
-                            </Link>
-                        </div>
-                        <div className="mt-7 flex justify-center">
-                            <div className="flex flex-col gap-2 justify-center">
-                                <Button
-                                    type="submit"
-                                    className="w-[172px] h-[42px] text-center text-white rounded-full bg-c-green hover:bg-c-green"
-                                >
-                                    Login
-                                </Button>
-                                <Button onClick={() => signOut()}>Logout</Button>
-                                <p className="font-hind font-semibold text-[12px]">
-                                    Belum punya akun?{" "}
-                                    <Link href={"/register"} className="text-c-orange">
-                                        Registrasi
-                                    </Link>
-                                </p>
-                            </div>
-                        </div>
-                    </form>
-                </Form>
-            </div>
-        </div>
-    );
-};
-
-const SignIn = () => {
-    return (
-        <div className="my-10 w-[973px] h-[745px] bg-c-blue rounded-lg mx-auto text-white">
+        <div className="relative wrapper py-7 bg-c-blue my-5 rounded-lg">
             <div className="w-[260px] mx-auto py-8">
-                <div>
-                    <div className="flex justify-center">
-                        <Image
-                            src={"/images/cake-color.png"}
-                            width={111}
-                            height={80}
-                            alt="Cake Color.."
-                        />
-                    </div>
-                    <h1 className="font-lato font-semibold text-[26px] leading-[30px] text-center mt-4">
-                        CELEPARTY
-                    </h1>
-                    <Login />
+                <div className="flex justify-center">
+                    <Image
+                        src={"/images/cake-color.png"}
+                        width={111}
+                        height={80}
+                        alt="Cake Color.."
+                    />
+                </div>
+                <h1 className="font-hind font-semibold text-[24px] text-white">Login</h1>
+                <div className="mt-6">
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(Login)} className="space-y-8">
+                            <FormField
+                                control={form.control}
+                                name="email"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="Alamat Email"
+                                                className="text-black"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage className="text-[9px]" />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="password"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="Kata Sandi"
+                                                className="text-black"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage className="text-[9px]" />
+                                    </FormItem>
+                                )}
+                            />
+                            <div className="flex justify-end mt-2">
+                                <Link
+                                    href={"/"}
+                                    className="font-hind font-semibold text-[12px] text-c-orange"
+                                >
+                                    Lupa Kata Sandi?
+                                </Link>
+                            </div>
+                            <div className="mt-4">
+                                <div className="font-hind font-normal text-[10px] flex items-center justify-center gap-2">
+                                    <div className="w-[43px] h-[2px] bg-white"></div>
+                                    OR
+                                    <div className="w-[43px] h-[2px] bg-white"></div>
+                                </div>
+                            </div>
+                            <div className="mt-2 flex justify-center gap-8">
+                                <div className="btn cursor-pointer" onClick={() => signIn("github")}>Login Github</div>
+                                <Link href={"/"}>
+                                    <Image
+                                        src={"/images/geogle.png"}
+                                        width={30}
+                                        height={30}
+                                        alt="Geogle Image"
+                                    />
+                                </Link>
+                            </div>
+                            <div className="mt-7 flex justify-center">
+                                <div className="flex flex-col gap-2 justify-center">
+                                    <Button
+                                        type="submit"
+                                        className="w-[172px] h-[42px] text-center text-white rounded-full bg-c-green hover:bg-c-green"
+                                    >
+                                        Login
+                                    </Button>
+                                    <Button onClick={() => signOut()}>Logout</Button>
+                                    <p className="font-hind font-semibold text-[12px]">
+                                        Belum punya akun?{" "}
+                                        <Link href={"/register"} className="text-c-orange">
+                                            Registrasi
+                                        </Link>
+                                    </p>
+                                </div>
+                            </div>
+                        </form>
+                    </Form>
                 </div>
             </div>
         </div>
     );
 };
 
-export default SignIn;
+
+export default Login;

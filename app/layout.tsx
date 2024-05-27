@@ -3,6 +3,7 @@ import TopHeader from "@/components/TopHeader";
 import "./globals.css";
 import { Inter, Quicksand } from "next/font/google";
 import Footer from "@/components/Footer";
+import SessionWrapper from "@/components/SessionWrapper";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const quick = Quicksand({
@@ -23,16 +24,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body
-        className={`${inter.variable} ${quick.variable} font-inter`}
-        suppressHydrationWarning={true}
-      >
-        <TopHeader />
-        <Header />
-        {children}
-        <Footer />
-      </body>
-    </html>
+    <SessionWrapper>
+      <html lang="en">
+        <body
+          className={`${inter.variable} ${quick.variable} font-inter`}
+          suppressHydrationWarning={true}
+        >
+          <TopHeader />
+          <Header />
+          {children}
+          <Footer />
+        </body>
+      </html>
+    </SessionWrapper>
   );
 }
