@@ -11,7 +11,7 @@ import { useSession, signIn, signOut } from "next-auth/react";
 
 export default function Header() {
     const { data: session, status } = useSession()
-
+    console.log(session?.user)
     return (
         <div className="bg-white shadow-sm w-full px-4 py-4  z-10  sticky top-0">
             <div className="wrapper-main flex items-start justify-between gap-16">

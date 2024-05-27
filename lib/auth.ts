@@ -2,6 +2,17 @@ import type { NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials"
 import GithubProvider from "next-auth/providers/github"
 
+interface iUser {
+    id: string
+    token: string
+    data: any
+    message: string
+}
+
+interface iUserResponse {
+    token: string;
+}
+
 export const authOptions: NextAuthOptions = {
     session: {
         strategy: "jwt",
@@ -32,10 +43,8 @@ export const authOptions: NextAuthOptions = {
                     }
                 );
 
-                const user = await res.json();
-
-
-                if (res.ok && user) {
+                const user: iUser = await res.json();
+                if (res.ok) {
                     return user;
                 }
                 return null;
@@ -55,17 +64,19 @@ export const authOptions: NextAuthOptions = {
     callbacks: {
         // async jwt({ token, user }) {
         //     if (user) {
-        //         token.accessToken = user?.token;
-        //         token.user = user.data?.user;
-        //         token.message = user?.message;
+        //         token.accessToken = user.token;
+        //         token.user = user.data.user;
+        //         token.message = user.message;
         //     }
         //     return token;
         // },
-        // async session({ session, token }) {
-        //     session.accessToken = token.accessToken;
-        //     session.message = token.message;
-        //     session.user = token.user;
-        //     return session;
-        // },
+        async session({ session, token }) {
+            // session.accessToken = token.accessToken;
+            // session.message = token.message;
+            session.user = token
+            return session;
+        },
     },
+
+
 }
