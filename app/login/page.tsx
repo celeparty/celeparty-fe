@@ -55,7 +55,8 @@ const Login = () => {
                         alt="Cake Color.."
                     />
                 </div>
-                <h1 className="font-hind font-semibold text-[24px] text-white">Login</h1>
+                <h1 className="text-[26px] text-center font-semibold text-white mb-7">CELEPARTY</h1>
+                <h2 className="font-hind font-semibold text-[24px] text-white">Login</h2>
                 <div className="mt-6">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(Login)} className="space-y-8">
@@ -100,7 +101,7 @@ const Login = () => {
                                 </Link>
                             </div>
                             <div className="mt-4">
-                                <div className="font-hind font-normal text-[10px] flex items-center justify-center gap-2">
+                                <div className="font-hind font-normal text-[10px] flex items-center justify-center gap-2 text-white">
                                     <div className="w-[43px] h-[2px] bg-white"></div>
                                     OR
                                     <div className="w-[43px] h-[2px] bg-white"></div>
@@ -125,8 +126,7 @@ const Login = () => {
                                     >
                                         Login
                                     </Button>
-                                    <Button onClick={() => signOut()}>Logout</Button>
-                                    <p className="font-hind font-semibold text-[12px]">
+                                    <p className="font-hind font-semibold text-white text-[12px]">
                                         Belum punya akun?{" "}
                                         <Link href={"/register"} className="text-c-orange">
                                             Registrasi
