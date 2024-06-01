@@ -58,7 +58,7 @@ const Registration = () => {
   };
   return (
     <div>
-      <h1 className="mb-4">Registrasi</h1>
+      <h1 className="mb-4 lg:text-start text-center">Registrasi</h1>
       <div className="">
         <Form {...form}>
           <form
@@ -146,11 +146,11 @@ const Registration = () => {
               )}
             />
             <div className="mt-16 flex justify-center">
-              <div className="flex flex-col gap-2 justify-center">
-                <Button className="w-[172px] h-[42px] text-center text-white rounded-full bg-c-green">
+              <div className="flex flex-col gap-2 justify-center lg:w-[172px] w-[350px]">
+                <Button className="h-[42px] text-center text-white rounded-full bg-c-green">
                   Register
                 </Button>
-                <p className="font-hind font-semibold text-[12px]">
+                <p className="font-hind font-semibold text-[12px] text-center">
                   Sudah punya akun?{" "}
                   <Link href={"/signin"} className="text-c-orange">
                     Login
@@ -167,8 +167,8 @@ const Registration = () => {
 
 const SignUp = () => {
   return (
-    <div className="my-10 w-[973px] h-[745px] bg-c-blue rounded-lg mx-auto text-white">
-      <div className="w-[260px] mx-auto py-14">
+    <div className="my-10 lg:w-[973px] w-[400px] h-[745px] bg-c-blue rounded-lg mx-auto text-white flex justify-center">
+      <div className="lg:w-[260px] w-[350px]lg:mx-auto py-14">
         <Registration />
       </div>
     </div>
