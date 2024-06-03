@@ -15,7 +15,6 @@ import { useRouter, useSearchParams } from "next/navigation"
 
 
 export default function ProductContent() {
-    const [sortDataBy, setSortDataBy] = useState("updated_at")
     const [sortDesc, setSortDesc] = useState(true)
     const router = useRouter()
     const params = useSearchParams()
@@ -46,7 +45,10 @@ export default function ProductContent() {
     const handleSort = ({ sortBy }: { sortBy: string }) => {
         router.push(`?sort=${sortBy}`)
         sortBy === "price" && setSortDesc(!sortDesc)
-        setSortDataBy(sortBy)
+    }
+    const priceMin = (e: any) => {
+        // console.log(e.target.value)
+        getSort ? router.push(`?sort=${getSort}&min=${e.target.value}`) : router.push(`?min=${e.target.value}`)
     }
     return (
         <div className="flex justify-between items-start gap-7">
@@ -105,7 +107,7 @@ export default function ProductContent() {
                             <Button variant={`${getSort === "sold_count" ? "default" : "outline"}`} onClick={() => { handleSort({ sortBy: "sold_count" }) }}>Terlaris</Button>
                             <Button variant={`${getSort === "price" ? "default" : "outline"}`} onClick={() => { handleSort({ sortBy: "price" }) }} className="flex gap-1 items-center">Harga {sortDesc ? <IoIosArrowDown /> : <IoIosArrowUp />}</Button>
                             <div className="flex items-center gap-2">
-                                Rp <Input placeholder="Harga Minimum" />
+                                Rp <Input placeholder="Harga Minimum" onChange={(e) => priceMin(e)} />
                             </div>
                             <div className="flex items-center gap-2">
                                 Rp <Input placeholder="Harga Maximum" />

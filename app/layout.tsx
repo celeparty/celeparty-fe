@@ -30,10 +30,10 @@ export default function RootLayout({
           className={`${inter.variable} ${quick.variable} font-inter`}
           suppressHydrationWarning={true}
         >
-          {/* <TopHeader />
-          <Header /> */}
+          <TopHeader />
+          <Header />
           {children}
-          {/* <Footer /> */}
+          <Footer />
         </body>
       </html>
     </SessionWrapper>
