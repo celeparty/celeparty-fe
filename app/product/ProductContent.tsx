@@ -11,10 +11,14 @@ import Skeleton from "@/components/Skeleton";
 import { getData } from "@/lib/services";
 import ErrorNetwork from "@/components/ErrorNetwork";
 import _ from "lodash";
+import { useRouter, useSearchParams } from "next/navigation"
+
 
 export default function ProductContent() {
     const [sortDataBy, setSortDataBy] = useState("updated_at")
     const [sortDesc, setSortDesc] = useState(true)
+    const router = useRouter()
+    const params = useSearchParams()
     const getQuery = async () => {
         return await getData(`/products`)
     }
@@ -35,9 +39,15 @@ export default function ProductContent() {
             <ErrorNetwork />
         )
     }
+    const getSort = params.get("sort")
     const dataContent = query?.data?.data.data
-    const dataSort = _.orderBy(dataContent, [`${sortDataBy}`], [`${sortDesc ? "desc" : "asc"}`]);
+    const dataSort = _.orderBy(dataContent, [`${getSort}`], [`${sortDesc ? "desc" : "asc"}`]);
 
+    const handleSort = ({ sortBy }: { sortBy: string }) => {
+        router.push(`?sort=${sortBy}`)
+        sortBy === "price" && setSortDesc(!sortDesc)
+        setSortDataBy(sortBy)
+    }
     return (
         <div className="flex justify-between items-start gap-7">
             <Box className="bg-c-blue text-white max-w-[280px]">
@@ -91,14 +101,9 @@ export default function ProductContent() {
                     <Box className="w-auto py-3">
                         <div className="flex  items-center gap-4">
                             <label className="mr-3">Urutkan</label>
-                            <Button variant="outline">Terkait</Button>
-                            <Button variant="outline" onClick={() => { setSortDataBy("updated_at") }}>Terbaru</Button>
-                            <Button variant="outline" onClick={() => { setSortDataBy("sold_count") }}>Terlaris</Button>
-                            <Button variant="outline" onClick={() => {
-                                setSortDataBy("price")
-                                setSortDesc(!sortDesc)
-
-                            }} className="flex gap-1 items-center">Harga {sortDesc ? <IoIosArrowDown /> : <IoIosArrowUp />}</Button>
+                            <Button variant={`${getSort === "updated_at" ? "default" : "outline"}`} onClick={() => { handleSort({ sortBy: "updated_at" }) }}>Terbaru</Button>
+                            <Button variant={`${getSort === "sold_count" ? "default" : "outline"}`} onClick={() => { handleSort({ sortBy: "sold_count" }) }}>Terlaris</Button>
+                            <Button variant={`${getSort === "price" ? "default" : "outline"}`} onClick={() => { handleSort({ sortBy: "price" }) }} className="flex gap-1 items-center">Harga {sortDesc ? <IoIosArrowDown /> : <IoIosArrowUp />}</Button>
                             <div className="flex items-center gap-2">
                                 Rp <Input placeholder="Harga Minimum" />
                             </div>
