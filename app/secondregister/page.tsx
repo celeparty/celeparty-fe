@@ -87,17 +87,17 @@ const Registration = () => {
     console.log(values);
   };
   return (
-    <div className="my-10 w-[973px] bg-c-blue rounded-lg mx-auto text-white">
+    <div className="my-10 lg:w-[973px] bg-c-blue rounded-lg mx-auto text-white">
       <div className=" mx-auto py-14">
         <div>
           <div>
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(signUp)}
-                className="flex flex-col gap-4"
+                className="flex flex-col gap-4 items-center lg:items-start"
               >
-                <div className="w-[491px] mx-auto">
-                  <h1 className="mb-4">Registrasi</h1>
+                <div className="w-[270px] lg:w-[491px] lg:mx-auto mx-0">
+                  <h1 className="mb-4 text-center lg:text-start">Registrasi</h1>
                   <div className="flex flex-col gap-4">
                     <FormField
                       control={form.control}
@@ -309,11 +309,11 @@ const Registration = () => {
                     />
                   </div>
                 </div>
-                <div className="mt-16">
+                <div className="mt-16 lg:mx-auto">
                   <FooterSection />
-                  <div className="mt-16 flex justify-center">
-                    <div className="flex flex-col gap-2 justify-center">
-                      <Button className="w-[172px] h-[42px] text-center text-white rounded-full bg-c-green">
+                  <div className="mt-16 flex justify-center lg:px-0 px-4">
+                    <div className="flex flex-col gap-2 justify-center lg:w-[172px] w-full h-[42px]">
+                      <Button className="text-center text-white rounded-full bg-c-green">
                         Register
                       </Button>
                     </div>
@@ -330,8 +330,8 @@ const Registration = () => {
 
 const FooterSection = () => {
   return (
-    <div className="w-[760px] mx-auto">
-      <div className="font-hind font-semibold text-justify text-[10px] leading-[16px]">
+    <div className="lg:w-[760px] mx-auto">
+      <div className="font-hind font-semibold text-justify text-[10px] leading-[16px] px-4 lg:px-0">
         KETENTUAN PENDAFTARAN MITRA CELEPARTY (CELEPARTNER) DENGAN MENGAJUKAN
         FORMULIR PENDAFTARAN INI, ANDA MEMAHAMI DAN SETUJU BAHWA SETIAP DATA
         DAN/ATAU INFORMASI (TERMASUK NAMUN TIDAK TERBATAS PADA INFORMASI
@@ -349,8 +349,8 @@ const FooterSection = () => {
         DIREKTUR PERTAMA/ PEMILIK UTAMA YANG TERDAFTAR UNTUK MENYELESAIKAN
         PROSES PENDAFTARAN LAYANAN CELEPARTNER.
       </div>
-      <div className="mt-8 flex gap-4 items-center">
-        <div className="rounded-lg overflow-hidden">
+      <div className="mt-8 flex gap-4 items-center px-4 lg:px-0">
+        <div className="rounded-lg lg:overflow-hidden">
           <Input type="checkbox" className="w-[20px] h-[20px] rounded-xl" />
         </div>
         <p className="font-hind font-semibold text-[10px] leading-[16px]">
