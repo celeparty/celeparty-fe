@@ -1,5 +1,6 @@
 import Image from "next/image"
 import Link from "next/link";
+import { ReactNode } from "react";
 import { FaStar } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 
@@ -11,7 +12,8 @@ interface iItemProduct {
     rate?: string
     sold?: string
     location?: string
-    url: string
+    url: string,
+    children?: ReactNode
 }
 
 export default function ItemProduct(props: iItemProduct) {
@@ -19,7 +21,7 @@ export default function ItemProduct(props: iItemProduct) {
         <div className="p-2 w-1/5">
             <Link href={props.url} className=" rounded-lg shadow-md flex flex-col justify-between h-full p-3">
                 <div>
-
+                    {props.children}
                     <div className="relative fill-current w-full h-[100px] mx-auto text-center my-3">
                         <Image
                             src={props.image_url ? props.image_url : "/images/noimage.png"}
