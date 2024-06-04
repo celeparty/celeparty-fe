@@ -16,6 +16,9 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
+import { useSession, signIn, signOut } from "next-auth/react";
+import { useEffect } from "react";
 
 const signInSchema = z.object({
     email: z
@@ -27,7 +30,10 @@ const signInSchema = z.object({
         .min(6, { message: "Kata sandi minimal 6 karakter" })
         .max(64, { message: "Maksimal karakter untuk kata sandi yaitu 64 huruf" }),
 });
-const SecondLogin = () => {
+
+const LoginMitra = () => {
+    const { data: session, status } = useSession()
+    const router = useRouter();
     const form = useForm<z.infer<typeof signInSchema>>({
         resolver: zodResolver(signInSchema),
         defaultValues: {
@@ -36,9 +42,28 @@ const SecondLogin = () => {
         },
     });
 
-    function onSubmit(values: z.infer<typeof signInSchema>) {
-        console.log(values);
-    }
+    const Login = async (values: z.infer<typeof signInSchema>) => {
+        const { email, password } = values;
+        const result = await signIn("credentials", {
+            email: email,
+            password: password,
+            callbackUrl: "/",
+        });
+
+        if (result?.error) {
+            console.error('Login failed:', result.error);
+        } else {
+            router.push("/mitra/home");
+        }
+
+    };
+    useEffect(() => {
+        if (status === "authenticated") {
+            router.push("/mitra/home")
+        } else {
+            router.push("/auth/mitra/login")
+        }
+    })
     return (
         <div className="relative wrapper py-7 bg-[#CBD002] my-5 rounded-lg">
             <div className="w-[260px] mx-auto py-8">
@@ -58,7 +83,7 @@ const SecondLogin = () => {
                 </h2>
                 <div className="mt-6">
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                        <form onSubmit={form.handleSubmit(Login)} className="space-y-8">
                             <FormField
                                 control={form.control}
                                 name="email"
@@ -125,4 +150,4 @@ const SecondLogin = () => {
     );
 };
 
-export default SecondLogin;
+export default LoginMitra;

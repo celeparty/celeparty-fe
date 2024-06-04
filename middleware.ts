@@ -17,4 +17,10 @@ export function middleware(request: NextRequest) {
             ? NextResponse.next(NextResponse.rewrite(new URL("/user", request.url)))
             : NextResponse.redirect(new URL("/login", request.url));
     }
+    if (request.nextUrl.pathname.startsWith("/mitra")) {
+        return cookie
+            ? NextResponse.next(NextResponse.rewrite(new URL("/mitra/abc", request.url)))
+            : NextResponse.redirect(new URL("/auth/mitra/login", request.url));
+    }
+
 }

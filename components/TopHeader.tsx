@@ -33,7 +33,7 @@ export default function TopHeader() {
             <Link href="/about">Tentang Celeparty</Link>
           </li>
           <li>
-            <Link href="/mitra/login">Mitra Celeparty</Link>
+            <Link href="/auth/mitra/login">Mitra Celeparty</Link>
           </li>
           <li>
             <Link href="/blog">Blog</Link>

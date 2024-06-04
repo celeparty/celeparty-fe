@@ -17,7 +17,6 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { useRouter } from "next/navigation";
-
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useEffect } from "react";
 
@@ -63,7 +62,7 @@ const LoginPage = () => {
         if (status === "authenticated") {
             router.push("/")
         } else {
-            router.push("/login")
+            router.push("/auth/login")
         }
     })
     return (

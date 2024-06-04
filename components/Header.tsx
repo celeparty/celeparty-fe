@@ -43,9 +43,9 @@ export default function Header() {
                     </div>
 
                     {
-                        status === "authenticated" ? <div className="btnline cursor-pointer" onClick={() => signOut()}>Keluar</div> : <Link href="/login" className="btnline">Masuk</Link>
+                        status === "authenticated" ? <div className="btnline cursor-pointer" onClick={() => signOut()}>Keluar</div> : <Link href="/auth/login" className="btnline">Masuk</Link>
                     }
-                    <Link href="/register" className="btn">Daftar</Link>
+                    <Link href="/auth/register" className="btn">Daftar</Link>
                 </div>
             </div>
         </div>

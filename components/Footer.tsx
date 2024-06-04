@@ -14,7 +14,7 @@ export default function Footer() {
                         <h4>Celeparty</h4>
                         <ul>
                             <li><Link href="/about">Tentang Celeparty</Link></li>
-                            <li><Link href="/login">Mitra Celeparty</Link></li>
+                            <li><Link href="/auth/mitra/login">Mitra Celeparty</Link></li>
                             <li><Link href="/blog">Blog</Link></li>
                             <li><Link href="/contact">Hubungi Kami</Link></li>
                         </ul>
