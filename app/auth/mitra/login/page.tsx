@@ -47,7 +47,7 @@ const LoginMitra = () => {
         const result = await signIn("credentials", {
             email: email,
             password: password,
-            callbackUrl: "/",
+            callbackUrl: "/mitra/home",
         });
 
         if (result?.error) {
