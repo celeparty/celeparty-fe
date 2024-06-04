@@ -28,7 +28,10 @@ const nextConfig = {
             },
     
         ],
-    }
+    },
+    experimental: {
+        missingSuspenseWithCSRBailout: false,
+    },
 
 }
 

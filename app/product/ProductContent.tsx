@@ -60,16 +60,20 @@ export default function ProductContent() {
 
 
 
-    const dataSort = _.orderBy(newDataContent, [`${getSort}`], [`${sortDesc ? "desc" : "asc"}`]);
-    // const dataSort = _.orderBy(
-    //     _.filter(dataContent, (item) => {
-    //         const price = parseFloat(item.price);
-    //         return (getMin === null || getMin === "" || price >= parseFloat(getMin)) &&
-    //             (getMax === null || getMax === "" || price <= parseFloat(getMax));
-    //     }),
-    //     [`${getSort}`],
-    //     [`${sortDesc ? "desc" : "asc"}`]
-    // );
+    // const dataSort = _.orderBy(newDataContent, [`${getSort}`], [`${sortDesc ? "desc" : "asc"}`]);
+    const dataSort = 
+        getMin || getMax ?
+    _.orderBy(
+        _.filter(newDataContent, (item) => {
+            const priceMin = parseFloat(item.price_min);
+            const priceMax = item.price_max ? parseFloat(item.price_max) : null;
+
+            return (getMin === null || getMin === "" || priceMin >= parseFloat(getMin)) &&
+                (getMax === null || getMax === "" || (priceMax !== null && priceMax <= parseFloat(getMax)));
+        }),
+        [`${getSort}`],
+        [`${sortDesc ? "desc" : "asc"}`]
+            ) : _.orderBy(newDataContent, [`${getSort}`], [`${sortDesc ? "desc" : "asc"}`]);
     // const dataSort = getMin && !getMax && !getSort
     //     ? console.log(getMin)
 
