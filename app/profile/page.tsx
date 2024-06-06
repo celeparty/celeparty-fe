@@ -56,50 +56,74 @@ const TableStatus = () => {
       <table className="min-w-full bg-white border-b-2 border-gray-200">
         <thead className="">
           <tr>
-            <th className="px-6 py-3 border-b-4 text-start text-xs font-bold text-[8px] text-black uppercase tracking-wider">
+            <th className="lg:px-6 px-4 py-3 border-b-4 text-start text-xs font-bold text-[8px] text-black uppercase tracking-wider">
               Order ID
             </th>
-            <th className="px-6 py-3 border-b-4 text-start text-xs font-bold text-[8px] text-black uppercase tracking-wider">
+            <th className="lg:px-6 px-4 py-3 border-b-4 text-start text-xs font-bold text-[8px] text-black uppercase tracking-wider">
               Item
             </th>
-            <th className="px-6 py-3 border-b-4 text-start text-xs font-bold text-[8px] text-black uppercase tracking-wider">
+            <th className="lg:px-6 px-4 py-3 border-b-4 text-start text-xs font-bold text-[8px] text-black uppercase tracking-wider">
               Status
             </th>
-            <th className="px-6 py-3 border-b-4 text-start text-xs font-bold text-[8px] text-black uppercase tracking-wider">
+            <th className="lg:px-6 px-4 py-3 border-b-4 text-start text-xs font-bold text-[8px] text-black uppercase tracking-wider">
               Total
             </th>
-            <th className="px-6 py-3 border-b-4 text-start text-xs font-bold text-[8px] text-black uppercase tracking-wider">
+            <th className="lg:px-6 px-4 py-3 border-b-4 text-start text-xs font-bold text-[8px] text-black uppercase tracking-wider">
               Vendor
             </th>
           </tr>
         </thead>
-        <tbody className="[&_td]:text-start [&_td]:font-normal [&_td]:text-[10px] [&_td]:font-hind [&_td]:text-[#3C3C3C] [&_td]:border-b-4">
+        <tbody className="[&_td]:text-start [&_td]:font-normal [&_td]:lg:text-[10px] [&_td]:text-[12px] [&_td]:font-hind [&_td]:text-[#3C3C3C] [&_td]:border-b-4">
           <tr>
-            <td className="px-6 py-4 border-b border-gray-200">2023/01/24/1</td>
-            <td className="px-6 py-4 border-b border-gray-200">
+            <td className="lg:px-6 px-4 py-4 border-b border-gray-200">
+              2023/01/24/1
+            </td>
+            <td className="lg:px-6 px-4 py-4 border-b border-gray-200">
               Matcha Drip Cake
             </td>
-            <td className="px-6 py-4 border-b border-gray-200">Pending</td>
-            <td className="px-6 py-4 border-b border-gray-200">Rp. 220.000</td>
-            <td className="px-6 py-4 border-b border-gray-200">ABC Cakes</td>
+            <td className="lg:px-6 px-4 py-4 border-b border-gray-200">
+              Pending
+            </td>
+            <td className="lg:px-6 px-4 py-4 border-b border-gray-200">
+              Rp. 220.000
+            </td>
+            <td className="lg:px-6 px-4 py-4 border-b border-gray-200">
+              ABC Cakes
+            </td>
           </tr>
           <tr>
-            <td className="px-6 py-4 border-b border-gray-200">2023/01/24/2</td>
-            <td className="px-6 py-4 border-b border-gray-200">
+            <td className="lg:px-6 px-4 py-4 border-b border-gray-200">
+              2023/01/24/2
+            </td>
+            <td className="lg:px-6 px-4 py-4 border-b border-gray-200">
               Matcha Drip Cake
             </td>
-            <td className="px-6 py-4 border-b border-gray-200">Processing</td>
-            <td className="px-6 py-4 border-b border-gray-200">Rp. 220.000</td>
-            <td className="px-6 py-4 border-b border-gray-200">ABC Cakes</td>
+            <td className="lg:px-6 px-4 py-4 border-b border-gray-200">
+              Processing
+            </td>
+            <td className="lg:px-6 px-4 py-4 border-b border-gray-200">
+              Rp. 220.000
+            </td>
+            <td className="lg:px-6 px-4 py-4 border-b border-gray-200">
+              ABC Cakes
+            </td>
           </tr>
           <tr>
-            <td className="px-6 py-4 border-b border-gray-200">2023/01/24/3</td>
-            <td className="px-6 py-4 border-b border-gray-200">
+            <td className="lg:px-6 px-4 py-4 border-b border-gray-200">
+              2023/01/24/3
+            </td>
+            <td className="lg:px-6 px-4 py-4 border-b border-gray-200">
               Matcha Drip Cake
             </td>
-            <td className="px-6 py-4 border-b border-gray-200">Shipping</td>
-            <td className="px-6 py-4 border-b border-gray-200">Rp. 220.000</td>
-            <td className="px-6 py-4 border-b border-gray-200">ABC Cakes</td>
+            <td className="lg:px-6 px-4 py-4 border-b border-gray-200">
+              Shipping
+            </td>
+            <td className="lg:px-6 px-4 py-4 border-b border-gray-200">
+              Rp. 220.000
+            </td>
+            <td className="lg:px-6 px-4 py-4 border-b border-gray-200">
+              ABC Cakes
+            </td>
           </tr>
         </tbody>
       </table>
@@ -113,10 +137,10 @@ const NotificationItem: React.FC<NotificationItem> = ({
 }) => {
   return (
     <div className="">
-      <h3 className="font-hind font-semibold text-[12px] text-black leading-[20px]">
+      <h3 className="font-hind font-semibold text-[15px] lg:text-[12px] text-black leading-[20px]">
         {title}
       </h3>
-      <p className="font-hind font-normal text-[10px] leading-[15px] text-[#3C3C3C]">
+      <p className="font-hind font-normal text-[13px] lg:text-[10px] leading-[15px] text-[#3C3C3C]">
         {description}
       </p>
     </div>
@@ -126,7 +150,7 @@ const NotificationItem: React.FC<NotificationItem> = ({
 const Notification = () => {
   return (
     <div className="mt-12">
-      <h1 className="text-[16px] my-4 leading-[26px] font-hind text-black font-semibold">
+      <h1 className="lg:text-[16px] text-[20px] my-4 leading-[26px] font-hind text-black font-semibold">
         Notifikasi
       </h1>
       <div className="flex flex-col gap-4">
@@ -166,7 +190,7 @@ const InputUser = () => {
   }
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="-mt-10 lg:mt-0">
         <FormField
           control={form.control}
           name="name"
@@ -280,13 +304,13 @@ const InputUser = () => {
         <div className="flex flex-col gap-4 items-end mt-10">
           <Button
             type="submit"
-            className="w-[300px] hover:bg-[#CBD002] bg-[#CBD002] text-white py-2 px-4 rounded-lg font-semibold text-[16px]"
+            className="w-full lg:w-[300px] hover:bg-[#CBD002] bg-[#CBD002] text-white py-2 px-4 rounded-lg font-semibold text-[16px]"
           >
             Submit
           </Button>
           <Button
             type="submit"
-            className="w-[300px] hover:bg-white bg-white border-solid border border-black rounded-lg text-black font-semibold text-[16px]"
+            className="w-full lg:w-[300px] hover:bg-white bg-white border-solid border border-black rounded-lg text-black font-semibold text-[16px]"
           >
             Ubah Kata Sandi
           </Button>
@@ -299,12 +323,12 @@ const InputUser = () => {
 const ProfilePage = () => {
   return (
     <div className="wrapper my-10">
-      <div className="px-10 py-6 border-2 border-gray-300 rounded-lg shadow-xl">
-        <h1 className="text-[16px] my-4 leading-[26px] font-hind text-black font-semibold">
+      <div className="px-10 py-6 lg:border-2 lg:border-gray-300 lg:rounded-lg lg:shadow-xl">
+        <h1 className="text-[20px] lg:text-[16px] text-center lg:text-start my-4 leading-[26px] font-hind text-black font-semibold">
           Biodata Diri
         </h1>
-        <div className="flex gap-24">
-          <div className="w-[300px]">
+        <div className="flex lg:flex-row flex-col gap-24">
+          <div className="w-[300px] mx-auto lg:mx-0">
             <div className="w-full h-[300px] mb-4 bg-black rounded-lg"></div>
             <button className="border-solid border border-black w-full py-2 rounded-lg mb-2">
               Pilih Foto
