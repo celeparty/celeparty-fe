@@ -29,7 +29,7 @@ const TopContactPage = () => {
           </div>
         </div>
       </div>
-      <div className="flex justify-center pt-2 lg:pt-20">
+      <div className="flex justify-center pt-2 lg:pt-6">
         <Link href={"/"}>
           <Image
             src={"/images/wa-item.png"}
