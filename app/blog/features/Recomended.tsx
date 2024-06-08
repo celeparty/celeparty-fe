@@ -45,7 +45,7 @@ function RecomendedList(props: iRecomended) {
         {dataContent?.map((item: any, i: number) => {
           return (
             <ItemProduct
-              url={`/product/${item.id}`}
+              url={`/blog/${item.id}`}
               key={item.id}
               title={item.title}
               image_url={

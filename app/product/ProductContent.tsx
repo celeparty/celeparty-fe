@@ -59,8 +59,6 @@ export default function ProductContent() {
     };
   });
 
-  console.log(newDataContent);
-
   // const dataSort = _.orderBy(newDataContent, [`${getSort}`], [`${sortDesc ? "desc" : "asc"}`]);
   const dataSort =
     getMin || getMax
@@ -86,10 +84,6 @@ export default function ProductContent() {
           [`${getSort}`],
           [`${sortDesc ? "desc" : "asc"}`]
         );
-  // const dataSort = getMin && !getMax && !getSort
-  //     ? console.log(getMin)
-
-  //     : console.log("no min")
 
   const handleSort = ({ sortBy }: { sortBy: string }) => {
     // router.push(`?sort=${sortBy}`)
@@ -112,7 +106,7 @@ export default function ProductContent() {
   };
   return (
     <div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
-      <Box className="bg-c-blue text-white w-full lg:max-w-[280px]">
+      <Box className="bg-c-blue text-white w-full lg:max-w-[280px] mt-0">
         <div className="relative mb-7 [&_h4]:mb-3">
           <h4>Informasi Acara</h4>
           <div className="flex flex-col gap-3">
@@ -175,7 +169,7 @@ export default function ProductContent() {
       </Box>
       <div className="lg:flex-1 w-full">
         <div className="w-auto lg:inline-block">
-          <Box className="w-auto py-3">
+          <Box className="w-auto py-3 mt-0">
             <div className="flex lg:flex-row flex-col items-center gap-4 ">
               <label className="mr-3 text-[15px] pb-1 lg:pb-0 border-b-2 border-solid border-black lg:border-none">
                 Urutkan
