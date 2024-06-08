@@ -11,9 +11,14 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
+
     if (!cookie && request.nextUrl.pathname.startsWith('/mitra')) {
         return Response.redirect(new URL('/auth/mitra/login', request.url))
     }
 
     console.log(cookie)
+}
+
+export const config = {
+    matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
 }

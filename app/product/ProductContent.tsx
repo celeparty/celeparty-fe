@@ -61,24 +61,19 @@ export default function ProductContent() {
 
 
     // const dataSort = _.orderBy(newDataContent, [`${getSort}`], [`${sortDesc ? "desc" : "asc"}`]);
-    const dataSort = 
+    const dataSort =
         getMin || getMax ?
-    _.orderBy(
-        _.filter(newDataContent, (item) => {
-            const priceMin = parseFloat(item.price_min);
-            const priceMax = item.price_max ? parseFloat(item.price_max) : null;
+            _.orderBy(
+                _.filter(newDataContent, (item) => {
+                    const priceMin = parseFloat(item.price_min);
+                    const priceMax = item.price_max ? parseFloat(item.price_max) : null;
 
-            return (getMin === null || getMin === "" || priceMin >= parseFloat(getMin)) &&
-                (getMax === null || getMax === "" || (priceMax !== null && priceMax <= parseFloat(getMax)));
-        }),
-        [`${getSort}`],
-        [`${sortDesc ? "desc" : "asc"}`]
+                    return (getMin === null || getMin === "" || priceMin >= parseFloat(getMin)) &&
+                        (getMax === null || getMax === "" || (priceMax !== null && priceMax <= parseFloat(getMax)));
+                }),
+                [`${getSort}`],
+                [`${sortDesc ? "desc" : "asc"}`]
             ) : _.orderBy(newDataContent, [`${getSort}`], [`${sortDesc ? "desc" : "asc"}`]);
-    // const dataSort = getMin && !getMax && !getSort
-    //     ? console.log(getMin)
-
-    //     : console.log("no min")
-
 
     const handleSort = ({ sortBy }: { sortBy: string }) => {
         // router.push(`?sort=${sortBy}`)
@@ -94,7 +89,7 @@ export default function ProductContent() {
     }
     return (
         <div className="flex justify-between items-start gap-7">
-            <Box className="bg-c-blue text-white max-w-[280px]">
+            <Box className="bg-c-blue text-white max-w-[280px] mt-0">
                 <div className="relative mb-7 [&_h4]:mb-3">
                     <h4>Informasi Acara</h4>
                     <div className="flex flex-col gap-3">
@@ -142,7 +137,7 @@ export default function ProductContent() {
             </Box>
             <div className="flex-1">
                 <div className="w-auto inline-block">
-                    <Box className="w-auto py-3">
+                    <Box className="w-auto py-3 mt-0">
                         <div className="flex  items-center gap-4">
                             <label className="mr-3">Urutkan</label>
                             <Button variant={`${getSort === "updated_at" ? "default" : "outline"}`} onClick={() => { handleSort({ sortBy: "updated_at" }) }}>Terbaru</Button>
