@@ -12,11 +12,9 @@ export function middleware(request: NextRequest) {
     }
 
 
-    if (!cookie && request.nextUrl.pathname.startsWith('/mitra')) {
+    if (!cookie && request.nextUrl.pathname.startsWith('/mitra/')) {
         return Response.redirect(new URL('/auth/mitra/login', request.url))
     }
-
-    console.log(cookie)
 }
 
 export const config = {
