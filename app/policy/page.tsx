@@ -1,11 +1,11 @@
 const Test = () => {
   return (
     <div className="mx-auto wrapper bg-c-blue rounded-lg">
-      <div className="max-w-[707px] mx-auto  leading-[20px] pt-8 pb-12">
+      <div className="max-w-[707px] mx-auto  leading-[20px] pt-8 pb-12 px-2 lg:px-0">
         <h1 className="font-hind font-semibold text-[24px] text-white mb-4">
           Kebijakan Privasi
         </h1>
-        <div className="font-hind font-normal text-[12px] text-white mb-4">
+        <div className="font-hind font-normal text-[14px] lg:text-[12px] text-white mb-4">
           <h5 className="mb-4">Terakhir diperbarui: 4 Oktober 2023</h5>
           <p>
             Kami di Celeparty sangat menghormati privasi Anda dan berkomitmen
@@ -16,10 +16,10 @@ const Test = () => {
             (secara bersama-sama disebut "Layanan").
           </p>
         </div>
-        <h4 className="font-hind font-bold text-white text-[12px]">
+        <h4 className="font-hind font-bold text-white [&_p]:text-[14px] [&_p]:lg:text-[12px] mb-4">
           1. Informasi yang Kami Kumpulkan
         </h4>
-        <div className="font-hind font-normal [&_h5]:font-bold text-[12px] text-white mb-4">
+        <div className="font-hind font-normal [&_h5]:font-bold [&_p]:text-[14px] [&_p]:lg:text-[12px] text-white mb-4">
           <h5>1.1 Informasi Pribadi</h5>
           <p>
             Kami dapat mengumpulkan informasi pribadi yang Anda berikan secara
@@ -28,7 +28,7 @@ const Test = () => {
             menggunakan Layanan kami.
           </p>
         </div>
-        <div className="font-hind font-normal [&_h5]:font-bold text-[12px] text-white mb-4">
+        <div className="font-hind font-normal [&_h5]:font-bold [&_p]:text-[14px] [&_p]:lg:text-[12px] text-white mb-4">
           <h5>1.1 Informasi Otomatis</h5>
           <p>
             Kami juga dapat mengumpulkan informasi otomatis tentang Anda ketika
@@ -37,10 +37,10 @@ const Test = () => {
             yang dikumpulkan melalui teknologi pelacakan dan analitik
           </p>
         </div>
-        <h4 className="font-hind font-bold text-white text-[12px]">
+        <h4 className="font-hind font-bold text-white [&_p]:text-[14px] [&_p]:lg:text-[12px] mb-4">
           2. Bagaimana Kami Menggunakan Informasi Anda
         </h4>
-        <div className="font-hind font-normal [&_h5]:font-bold text-[12px] text-white mb-4">
+        <div className="font-hind font-normal [&_h5]:font-bold [&_p]:text-[14px] [&_p]:lg:text-[12px] text-white mb-4">
           <h5>2.1 Penggunaan Informasi Pribadi</h5>
           <p>
             Kami menggunakan informasi pribadi Anda untuk menyediakan,
@@ -49,7 +49,7 @@ const Test = () => {
             memberikan informasi yang relevan.
           </p>
         </div>
-        <div className="font-hind font-normal [&_h5]:font-bold text-[12px] text-white mb-4">
+        <div className="font-hind font-normal [&_h5]:font-bold [&_p]:text-[14px] [&_p]:lg:text-[12px] text-white mb-4">
           <h5>2.2 Penggunaan Informasi Otomatis</h5>
           <p>
             Informasi otomatis digunakan untuk menganalisis penggunaan Layanan,
@@ -57,7 +57,7 @@ const Test = () => {
             pelanggaran hukum.
           </p>
         </div>
-        <div className="font-hind font-normal [&_h5]:font-bold text-[12px] text-white mb-4">
+        <div className="font-hind font-normal [&_h5]:font-bold [&_p]:text-[14px] [&_p]:lg:text-[12px] text-white mb-4">
           <h5>3. Bagaimana Kami Mengungkapkan Informasi Anda</h5>
           <p>
             Kami tidak akan menjual, menyewakan, atau menukar informasi pribadi
@@ -68,7 +68,7 @@ const Test = () => {
             operasional Layanan kami.
           </p>
         </div>
-        <div className="font-hind font-normal [&_h5]:font-bold text-[12px] text-white mb-4">
+        <div className="font-hind font-normal [&_h5]:font-bold [&_p]:text-[14px] [&_p]:lg:text-[12px] text-white mb-4">
           <h5>4. Keamanan Informasi</h5>
           <p>
             Kami memiliki langkah-langkah keamanan yang sesuai untuk melindungi
@@ -77,7 +77,7 @@ const Test = () => {
             keamanan informasi yang dikirimkan melalui internet.
           </p>
         </div>
-        <div className="font-hind font-normal [&_h5]:font-bold text-[12px] text-white mb-4">
+        <div className="font-hind font-normal [&_h5]:font-bold [&_p]:text-[14px] [&_p]:lg:text-[12px] text-white mb-4">
           <h5>5. Perubahan pada Kebijakan Privasi</h5>
           <p>
             Kami dapat memperbarui Kebijakan Privasi ini dari waktu ke waktu
@@ -86,7 +86,7 @@ const Test = () => {
             memperbarui halaman ini.
           </p>
         </div>
-        <div className="font-hind font-normal [&_h5]:font-bold text-[12px] text-white mb-4">
+        <div className="font-hind font-normal [&_h5]:font-bold [&_p]:text-[14px] [&_p]:lg:text-[12px] text-white mb-4">
           <h5>6. Kontak Kami</h5>
           <p>
             Jika Anda memiliki pertanyaan atau komentar tentang Kebijakan
