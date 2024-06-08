@@ -7,10 +7,12 @@ import { MdOutlineShoppingCart } from "react-icons/md";
 import { MdOutlineNotifications } from "react-icons/md";
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import { useSession, signIn, signOut } from "next-auth/react";
+import { useCart } from "@/lib/store/cart"
 
 
 export default function Header() {
     const { data: session, status } = useSession()
+    const { cart, setCart, cartLength, setCartLength }: any = useCart()
     return (
         <div className="bg-white shadow-sm w-full px-4 py-4  z-10  sticky top-0">
             <div className="wrapper-main flex items-start justify-between gap-16">
@@ -32,10 +34,14 @@ export default function Header() {
                     </ul>
                 </div>
                 <div className="relative flex items-center text-3xl gap-4 text-c-gray-text font-semibold">
-                    <div className="item">
+                    <div className="item relative">
                         <MdOutlineShoppingCart />
+                        {
+                            cart.length > 0 ? <div className="absolute top-[0] right-[0] bg-c-orange w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold">{cart.length}</div> : null
+                        }
+
                     </div>
-                    <div className="item">
+                    <div className="item" onClick={setCartLength}>
                         <MdOutlineNotifications />
                     </div>
                     <div className="item">

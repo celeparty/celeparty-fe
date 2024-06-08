@@ -34,7 +34,7 @@ export default async function ProductDetail({ params }: { params: { slug: string
                                     <h4 className="text-[20px] text-c-orange font-bold">{dataContent?.default_variant_price}</h4>
                                     <div className="flex gap-1 items-center">
                                         <div className="rate flex gap-">
-                                            <FaStar />
+                                            <FaStar className="text-[#FDD835]" />
                                         </div>
                                         <div>{dataContent?.average_rating}</div>
                                     </div>
@@ -44,7 +44,7 @@ export default async function ProductDetail({ params }: { params: { slug: string
                                             {
                                                 dataContent?.variants?.map((variant: any) => {
                                                     return (
-                                                        <div key={variant.id} className="bg-white border-[#000000] border-solid border-[1px] rounded-[10px] px-2 py-[2px] text-[14px]">{variant?.name}</div>
+                                                        <div key={variant.id} className="bg-white border-[#000000] border-solid border-[1px] rounded-[10px] px-2 py-1 text-[14px] cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green">{variant?.name}</div>
                                                     )
                                                 })
                                             }
