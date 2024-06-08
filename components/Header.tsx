@@ -13,15 +13,15 @@ export default function Header() {
   const { data: session, status } = useSession();
   const { cart, setCart, cartLength, setCartLength }: any = useCart();
   return (
-    <div className="bg-white shadow-sm w-full px-4 py-4  z-10  sticky top-0">
-      <div className="wrapper-main flex items-start justify-between gap-16">
-        <div className="flex items-center justify-between">
+    <div className="bg-white shadow-sm w-full px-4 py-4 lg:z-10 lg:sticky top-0">
+      <div className="wrapper-main flex flex-col lg:flex-row items-start justify-between gap-4 lg:gap-16">
+        <div className="flex items-center justify-center lg:justify-between w-full lg:w-fit">
           <Link href="/">
             <Image src="/images/logo.svg" width={234} height={63} alt="logo" />
           </Link>
         </div>
-        <div className="relative flex-1 max-w-[900px]">
-          <div className="w-full relative">
+        <div className="relative flex-1 w-full lg:max-w-[900px]">
+          <div className="w-full relative  mb-2 lg:mb-0">
             <IoIosSearch className="absolute left-5 text-3xl top-[50%] -translate-y-[50%]" />
             <input
               type="text"
@@ -29,7 +29,7 @@ export default function Header() {
               className="input border-c-gray border-solid border-[1px] rounded-lg pr-5 pl-[60px] py-3 bg-white w-full"
             />
           </div>
-          <ul className="flex gap-6 justify-center pb-1 pt-2 text-sm ">
+          <ul className="flex flex-wrap gap-2 lg:gap-6 justify-center pb-1 pt-2 text-sm [&_li]:w-24 lg:[&_li]:w-auto [&_li]:flex [&_li]:justify-center [&_li]:items-center [&_li]:text-center lg:[&_li]:text-start [&_li]:border [&_li]:border-solid [&_li]:border-black [&_li]:rounded-lg lg:[&_li]:rounded-none [&_li]:p-2 lg:[&_li]:p-0 lg:[&_li]:border-none lg:[&_li]:block">
             <li>
               <Link href="/" className="hover:text-c-blue">
                 Tiket
@@ -62,20 +62,22 @@ export default function Header() {
             </li>
           </ul>
         </div>
-        <div className="relative flex items-center text-3xl gap-4 text-c-gray-text font-semibold">
-          <div className="item relative">
-            <MdOutlineShoppingCart />
-            {cart.length > 0 ? (
-              <div className="absolute top-[0] right-[0] bg-c-orange w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold">
-                {cart.length}
-              </div>
-            ) : null}
-          </div>
-          <div className="item" onClick={setCartLength}>
-            <MdOutlineNotifications />
-          </div>
-          <div className="item">
-            <IoChatbubbleEllipsesOutline />
+        <div className="relative flex lg:flex-row flex-col items-center text-3xl gap-4 text-c-gray-text font-semibold lg:w-auto w-full">
+          <div className="flex gap-4 w-fit p-2 lg:p-0">
+            <div className="item relative">
+              <MdOutlineShoppingCart />
+              {cart.length > 0 ? (
+                <div className="absolute top-[0] right-[0] bg-c-orange w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold">
+                  {cart.length}
+                </div>
+              ) : null}
+            </div>
+            <div className="item" onClick={setCartLength}>
+              <MdOutlineNotifications />
+            </div>
+            <div className="item">
+              <IoChatbubbleEllipsesOutline />
+            </div>
           </div>
 
           {status === "authenticated" ? (
