@@ -10,11 +10,15 @@ export function middleware(request: NextRequest) {
     if (cookie && request.nextUrl.pathname.startsWith('/mitra')) {
         return NextResponse.next();
     }
+    if (cookie && request.nextUrl.pathname.startsWith('/auth/mitra/login')) {
+        return Response.redirect(new URL('/mitra/home', request.url))
+    }
 
 
     if (!cookie && request.nextUrl.pathname.startsWith('/mitra/')) {
         return Response.redirect(new URL('/auth/mitra/login', request.url))
     }
+
 }
 
 export const config = {
