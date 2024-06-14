@@ -96,14 +96,6 @@ export default function Header() {
           )}
         </div>
       </div>
-      ) : (
-      <Link href="/auth/login" className="btnline">
-        Masuk
-      </Link>
-      )
-      <Link href="/auth/register" className="btn">
-        Daftar
-      </Link>
     </div>
   );
 }
