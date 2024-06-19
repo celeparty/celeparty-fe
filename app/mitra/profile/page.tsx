@@ -6,6 +6,8 @@ import Skeleton from "@/components/Skeleton";
 import { getDataToken } from "@/lib/services";
 import ErrorNetwork from "@/components/ErrorNetwork";
 import { AiFillCustomerService } from "react-icons/ai";
+import { GrFormEdit, GrEdit } from "react-icons/gr";
+
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 
@@ -20,16 +22,34 @@ type SessionData = {
     user?: UserData; // Update the type of user to include the accessToken property
 };
 
-function ItemData({ label, value }: { label: string, value: string }) {
+function ItemData({ label, value, onClick, editData, children }: { label?: string, value?: string, children?: React.ReactNode, editData?: boolean, onClick?: () => void; }) {
+    const [inputValue, setInputValue] = React.useState(value);
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setInputValue(e.target.value);
+    };
     return (
         <div className="flex gap-2 mb-3">
             <div className="min-w-[210px]">{label}</div>
-            <div><strong>{value}</strong></div>
+            <>
+                {
+                    !children ? <div className="flex gap-2 items-center group">
+                        {
+                            editData ? (
+                                <input type="text" value={inputValue} onChange={handleChange} className="input input-bordered w-auto  flex-1 group-hover:bg-gray-100 rounded-sm px-3 py-1" />
+                            ) : (
+                                <div className="px-3 py-1">{value}</div>
+                            )}
+                        {editData ? <GrEdit className="hidden group-hover:block" /> : null}
+                    </div> : <div>
+                        {children}
+                    </div>
+                }
+
+            </>
         </div>
     )
 }
 export default function ProfilePage() {
-
     const session = useSession();
     const dataSession = session?.data as SessionData;
 
@@ -58,24 +78,27 @@ export default function ProfilePage() {
     }
 
     const dataContent = query?.data?.data.data;
-
     return (
         <div>
             <Box className="mt-0">
                 <h4 className="font-semibold text-[16px] mb-1">Info Profil</h4>
                 <div className="mt-7">
                     <ItemData label="Nama" value={dataContent?.name} />
-                    <ItemData label="Nama Usaha" value={dataContent?.vendor.name} />
-                    <ItemData label="Lokasi Pelayanan" value={dataContent?.region} />
+                    <ItemData label="Nama Usaha" value={dataContent?.vendor.name} editData={true} />
+
+                    <ItemData label="Lokasi Pelayanan" value={dataContent?.region} editData={true} />
                     <ItemData label="User ID" value={dataContent?.id} />
                     <ItemData label="Email" value={dataContent?.email} />
-                    <ItemData label="No Telepon" value={dataContent?.phonenumber} />
-                    <ItemData label="Jenis Kelamin" value={dataContent?.gender} />
-                    <ItemData label="Tanggal Lahir" value={dataContent?.birthdate} />
-                    <ItemData label="Alamat Usaha" value={dataContent?.address} />
-                    <ItemData label="Nama Bank" value={dataContent?.wallet.bank_name} />
-                    <ItemData label="Nomor Rekening" value={dataContent?.wallet.bank_account_number} />
-                    <ItemData label="Nama Pemilik Rekening" value={dataContent?.wallet.bank_account_name} />
+                    <ItemData label="No Telepon" value={dataContent?.phonenumber} editData={true} />
+                    <ItemData label="Jenis Kelamin" value={dataContent?.gender} editData={true} />
+                    <ItemData label="Tanggal Lahir" value={dataContent?.birthdate} editData={true} />
+                    <ItemData label="Alamat Usaha" value={dataContent?.address} editData={true} />
+                    <ItemData label="Nama Bank" value={dataContent?.wallet.bank_name} editData={true} />
+                    <ItemData label="Nomor Rekening" value={dataContent?.wallet.bank_account_number} editData={true} />
+                    <ItemData label="Nama Pemilik Rekening" value={dataContent?.wallet.bank_account_name} editData={true} />
+                    <ItemData>
+                        <input type="submit" className="border-[1px] mt-3 border-b-black px-2 py-2 border-solid min-w-[150px] rounded-lg cursor-pointer" value="Simpan" />
+                    </ItemData>
                 </div>
             </Box>
             <Box>
