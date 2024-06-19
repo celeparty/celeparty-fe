@@ -9,6 +9,7 @@ interface iItemMenu {
     iconWidth: number
     iconHeight: number
     link: string
+    status?: boolean
 }
 
 function ItemMenu({ title, icon, iconWidth, iconHeight, link }: iItemMenu) {
@@ -65,7 +66,7 @@ export default function DashboardLayout({
                                 icon="/images/icon-profile.svg"
                                 iconWidth={30}
                                 iconHeight={30}
-                                link="/mitra/home"
+                                link="/mitra/profile"
                             />
                         </div>
                     </Box>

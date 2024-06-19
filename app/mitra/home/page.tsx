@@ -1,3 +1,4 @@
+"use client"
 import React from 'react'
 import {
     Table,
@@ -23,7 +24,8 @@ function ItemStatus({ status, value, color }: iItemStatus): JSX.Element {
     </div>
 
 }
-export default function HomeMitra() {
+export default async function HomeMitra() {
+
     return (
         <div>
             <div className="flex justify-center items-center gap-3">

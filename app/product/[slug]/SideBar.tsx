@@ -3,10 +3,19 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
+import { useCart } from "@/lib/store/cart";
+import { useTransaction } from "@/lib/store/transaction";
+import Cookies from 'js-cookie';
 
-export default function SideBar() {
+export default function SideBar({ dataProducts }: any) {
   const [value, setValue] = useState(0);
   const { data: session, status } = useSession();
+  const { cart }: any = useCart();
+  const { transaction }: any = useTransaction();
+  const addCart = () => {
+    console.log("hello")
+  }
+  console.log({ session })
   return (
     <div className="p-5 shadow-lg rounded-lg border-solid border-[1px] border-gray-100 -mt-6 lg:-mt-0">
       {status === "authenticated" ? (
@@ -47,6 +56,7 @@ export default function SideBar() {
               type="button"
               value="+ Kerajang"
               className="bg-c-green mt-5 text-white text-[15px] py-3 w-full rounded-lg cursor-pointer"
+              onClick={() => { () => addCart() }}
             />
           </div>
         </>

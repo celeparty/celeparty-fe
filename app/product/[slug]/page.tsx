@@ -91,7 +91,7 @@ export default async function ProductDetail({
               </div>
             </div>
             <div className="right min-w-[275px] sticky top-0 ">
-              <SideBar />
+              <SideBar dataProducts={dataContent} />
             </div>
           </div>
         ) : (
