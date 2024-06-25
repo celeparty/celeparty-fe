@@ -15,7 +15,7 @@ const SectionLeftItem = () => {
 
 const SectionLeft = () => {
   return (
-    <div className="w-[321px] h-[580px] bg-c-blue">
+    <div className="w-[321px] h-[580px] px-8 py-5 bg-c-blue">
       <h5 className="text-white text-[12px] font-hind font-medium mb-4">
         Menu Mitra
       </h5>
