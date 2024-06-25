@@ -7,6 +7,7 @@ interface iUser {
     token: string
     data: any
     message: string
+    user?: any
 }
 
 interface iUserResponse {
@@ -59,23 +60,31 @@ export const authOptions: NextAuthOptions = {
 
     pages: {
         signIn: "/auth/login",
-        error: "/auth/error",
+        error: "*",
     },
 
     callbacks: {
-        // async jwt({ token, user }) {
-        //     if (user) {
-        //         token.accessToken = user.token;
-        //         token.user = user.data.user;
-        //         token.message = user.message;
-        //     }
-        //     return token;
-        // },
-        async session({ session, token }) {
-            // session.accessToken = token.accessToken;
-            // session.message = token.message;
+        async jwt({ token, user }: any) {
+            if (user) {
+                console.log({ user })
+                token.accessToken = user.token;
+                token.user = user.data.user;
+                token.message = user.message;
+            }
+            return token;
+        },
+        async session({ session, token, user }) {
             session.user = token
-            return session;
+            return {
+                ...session,
+                user: {
+                    ...session.user,
+                    accessToken: token.accessToken,
+                    message: token.message,
+                    user: token.user,
+                },
+                token: token.accessToken,
+            };
         },
     },
 
