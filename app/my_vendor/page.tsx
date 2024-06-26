@@ -1,13 +1,18 @@
 import Image from "next/image";
 
-const SectionLeftItem = () => {
+type Props = {
+  img: string;
+  title: string;
+};
+
+const SectionLeftItem = ({ img, title }: Props) => {
   return (
     <div className="flex items-center gap-6 mb-4">
       <div>
-        <Image src={"/images/vendor-one.png"} width={30} height={30} alt="" />
+        <Image src={img} width={30} height={30} alt="" />
       </div>
-      <button className="border border-solid border-white p-2 rounded-lg text-white font-hind text-[16px] font-semibold hover:bg-c-green hover:border-none w-[152px] text-start">
-        Pesanan
+      <button className="border border-solid border-white p-2 rounded-lg text-white font-hind text-[16px] font-semibold hover:bg-c-green hover:border-none w-[152px] text-start border-box">
+        {title}
       </button>
     </div>
   );
@@ -16,10 +21,14 @@ const SectionLeftItem = () => {
 const SectionLeft = () => {
   return (
     <div className="w-[321px] h-[580px] px-8 py-5 bg-c-blue">
-      <h5 className="text-white text-[12px] font-hind font-medium mb-4">
+      <h5 className="text-white text-[16px] font-hind font-medium mb-4">
         Menu Mitra
       </h5>
-      <SectionLeftItem />
+      <SectionLeftItem img="/images/vendor-one.png" title="Pesanan" />
+      <SectionLeftItem img="/images/vector-two.png" title="Produk Saya" />
+      <SectionLeftItem img="/images/vendor-three.png" title="Tambah Produk" />
+      <SectionLeftItem img="/images/vendor-four.png" title="Dompet Saya" />
+      <SectionLeftItem img="/images/vendor-five.png" title="Profil" />
     </div>
   );
 };
