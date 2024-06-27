@@ -26,7 +26,7 @@ const SectionLeftItem = ({ img, title }: Props) => {
       <div>
         <Image src={img} width={30} height={30} alt="" />
       </div>
-      <button className="border border-solid border-white p-2 rounded-lg text-white font-hind text-[16px] font-semibold hover:bg-c-green hover:border-none w-[152px] text-start border-box">
+      <button className="border border-solid border-white p-2 rounded-lg text-white font-hind text-[16px] font-semibold hover:bg-c-green hover:border-none text-start border-box lg:w-w-[152px] w-full">
         {title}
       </button>
     </div>
@@ -35,8 +35,8 @@ const SectionLeftItem = ({ img, title }: Props) => {
 
 const SectionLeft = () => {
   return (
-    <div className="w-[321px] h-[580px] px-8 py-5 bg-c-blue">
-      <h5 className="text-white text-[16px] font-hind font-medium mb-4">
+    <div className="w-full lg:w-[321px] h-fit lg:h-[580px] px-8 py-5 bg-c-blue">
+      <h5 className="text-white text-[20px] lg:text-[16px] font-hind font-semibold lg:font-medium mb-4 lg:text-start text-center">
         Menu Mitra
       </h5>
       <SectionLeftItem img="/images/vendor-one.png" title="Pesanan" />
@@ -52,7 +52,7 @@ const SectionRight = () => {
   return (
     <div className="flex-1">
       <div className="flex justify-center my-4">
-        <div className="flex gap-10">
+        <div className="flex flex-wrap lg:flex-nowrap gap-2 lg:gap-10 justify-center lg:justify-start">
           <ButtonStatus title="PENDING" count="1" className="bg-[#3E2882]" />
           <ButtonStatus title="PROCCES" count="1" className="bg-[#56C200]" />
           <ButtonStatus title="CANCEL" count="1" className="bg-[#F60E0E]" />
@@ -99,7 +99,7 @@ const SectionRight = () => {
                 Rp. 220.000
               </td>
               <td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-                <div className="flex gap-4">
+                <div className="flex lg:flex-row flex-col gap-4">
                   <ActionItem
                     src="/images/chcek-vendor.png"
                     title="Process"
@@ -131,7 +131,7 @@ const SectionRight = () => {
                 Rp. 220.000
               </td>
               <td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-                <div className="flex gap-4">
+                <div className="flex lg:flex-row flex-col gap-4">
                   <ActionItem
                     src="/images/airline-vendor.png"
                     title="Shipment"
@@ -163,13 +163,15 @@ const SectionRight = () => {
                 Rp. 220.000
               </td>
               <td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-                <ActionItem
-                  src=""
-                  title=""
-                  icon={false}
-                  className="font-hind font-semibold text-[10px] text-[#DA7E01]"
-                  status="Waiting Received Confirmation"
-                />
+                <div className="flex lg:flex-row flex-col gap-4">
+                  <ActionItem
+                    src=""
+                    title=""
+                    icon={false}
+                    className="font-hind font-semibold text-[10px] text-[#DA7E01]"
+                    status="Waiting Received Confirmation"
+                  />
+                </div>
               </td>
             </tr>
             <tr>
@@ -186,13 +188,15 @@ const SectionRight = () => {
                 Rp. 220.000
               </td>
               <td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-                <ActionItem
-                  src=""
-                  title=""
-                  icon={false}
-                  className="font-hind font-semibold text-[10px] text-[#56C200]"
-                  status="COMPLETED"
-                />
+                <div className="flex lg:flex-row flex-col gap-4">
+                  <ActionItem
+                    src=""
+                    title=""
+                    icon={false}
+                    className="font-hind font-semibold text-[10px] text-[#56C200]"
+                    status="COMPLETED"
+                  />
+                </div>
               </td>
             </tr>
             <tr>
@@ -209,13 +213,15 @@ const SectionRight = () => {
                 Rp. 220.000
               </td>
               <td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-                <ActionItem
-                  src=""
-                  title=""
-                  icon={false}
-                  className="font-hind font-semibold text-[10px] text-[#F60E0E]"
-                  status="CANCELLED"
-                />
+                <div className="flex lg:flex-row flex-col gap-4">
+                  <ActionItem
+                    src=""
+                    title=""
+                    icon={false}
+                    className="font-hind font-semibold text-[10px] text-[#F60E0E]"
+                    status="CANCELLED"
+                  />
+                </div>
               </td>
             </tr>
           </tbody>
@@ -228,7 +234,7 @@ const SectionRight = () => {
 const ButtonStatus = ({ title, count, className }: ButtonProps) => {
   return (
     <div
-      className={`w-[165px] h-[60] text-white px-10 py-4 [&_p]:text-center [&_h1]:text-center rounded-xl ${className}`}
+      className={`lg:w-[165px] w-[40%] h-[60] text-white px-10 py-4 [&_p]:text-center [&_h1]:text-center rounded-xl ${className}`}
     >
       <h1 className="font-hind font-normal text-[12px]">{title}</h1>
       <p className="font-hind font-normal text-[12px]">{count}</p>
@@ -261,7 +267,7 @@ const ActionItem = ({
 
 const MyVendor = () => {
   return (
-    <div className="flex gap-6">
+    <div className="flex gap-4 lg:gap-6 lg:flex-row flex-col">
       <SectionLeft />
       <SectionRight />
     </div>
