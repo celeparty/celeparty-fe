@@ -31,6 +31,20 @@ export const getDataToken = (url: string, token: string) => axios.get(`${process
         console.log(error)
     })
 
+export const putDataToken = (url: string, token: string, data: any) => axios.put(`${process.env.URL_API + url}`, data,
+    {
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    }
+)
+    .then((res) => {
+        console.log(res)
+        return res
+    }).catch((error) => {
+        console.log(error)
+    })
+
 
 export const getDataOpen = (url: string) => axios.get(`${process.env.URL_API + url}`)
     .then((res) => {

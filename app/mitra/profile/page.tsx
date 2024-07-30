@@ -3,13 +3,17 @@ import Box from "@/components/Box"
 import React from 'react'
 import { useQuery } from "@tanstack/react-query";
 import Skeleton from "@/components/Skeleton";
-import { getDataToken } from "@/lib/services";
+import { getDataToken, putDataToken } from "@/lib/services";
 import ErrorNetwork from "@/components/ErrorNetwork";
 import { AiFillCustomerService } from "react-icons/ai";
 import { GrFormEdit, GrEdit } from "react-icons/gr";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, SubmitHandler } from "react-hook-form";
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+
 
 type UserData = {
     name?: string | null | undefined;
@@ -22,36 +26,45 @@ type SessionData = {
     user?: UserData; // Update the type of user to include the accessToken property
 };
 
-function ItemData({ label, value, onClick, editData, children }: { label?: string, value?: string, children?: React.ReactNode, editData?: boolean, onClick?: () => void; }) {
-    const [inputValue, setInputValue] = React.useState(value);
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setInputValue(e.target.value);
-    };
-    return (
-        <div className="flex gap-2 mb-3">
-            <div className="min-w-[210px]">{label}</div>
-            <>
-                {
-                    !children ? <div className="flex gap-2 items-center group">
-                        {
-                            editData ? (
-                                <input type="text" value={inputValue} onChange={handleChange} className="input input-bordered w-auto  flex-1 group-hover:bg-gray-100 rounded-sm px-3 py-1" />
-                            ) : (
-                                <div className="px-3 py-1">{value}</div>
-                            )}
-                        {editData ? <GrEdit className="hidden group-hover:block" /> : null}
-                    </div> : <div>
-                        {children}
-                    </div>
-                }
 
-            </>
+function ItemInput({ label, children }: any) {
+    return (
+        <div className="flex justify-items-start w-full gap-2 mb-3 items-center">
+            <div className="w-[200px]">{label}</div>
+            {children}
         </div>
     )
 }
+
 export default function ProfilePage() {
     const session = useSession();
     const dataSession = session?.data as SessionData;
+    const {
+        register,
+        handleSubmit,
+        watch,
+        formState: { errors },
+    } = useForm<any>()
+
+    console.log(dataSession?.user?.accessToken)
+
+    const onSubmit: SubmitHandler<any> = async (data) => {
+        if (!dataSession?.user?.accessToken) {
+            throw new Error("Access token is undefined");
+        }
+        await putDataToken(`/users`, dataSession?.user?.accessToken, {
+            "name": data?.name,
+            "birthdate": data?.birthdate,
+            "gender": data?.gender,
+            "address": data?.address,
+            "province": data?.province,
+            "city": data?.city,
+            "region": data?.region,
+            "area": data?.area
+        }
+        )
+        console.log(data)
+    }
 
     const getQuery = async () => {
         if (!dataSession?.user?.accessToken) {
@@ -83,22 +96,64 @@ export default function ProfilePage() {
             <Box className="mt-0">
                 <h4 className="font-semibold text-[16px] mb-1">Info Profil</h4>
                 <div className="mt-7">
-                    <ItemData label="Nama" value={dataContent?.name} />
-                    <ItemData label="Nama Usaha" value={dataContent?.vendor.name} editData={true} />
+                    {
+                        dataContent ?
+                            <form onSubmit={handleSubmit(onSubmit)}>
+                                <ItemInput label="Nama">
+                                    <input className="border border-gray-300 rounded-md p-2" defaultValue={dataContent?.name} {...register("name", { required: true })} />
+                                </ItemInput>
+                                <ItemInput label="Nama Usaha">
+                                    <input className="border border-gray-300 rounded-md p-2" defaultValue={dataContent?.vendor?.name} {...register("company", { required: true })} />
+                                </ItemInput>
+                                <ItemInput label="Lokasi Pelayanan">
+                                    <input className="border border-gray-300 rounded-md p-2" defaultValue={dataContent?.area} {...register("area", { required: true })} />
+                                </ItemInput>
+                                <ItemInput label="Provinsi">
+                                    <input className="border border-gray-300 rounded-md p-2" defaultValue={dataContent?.province} {...register("province", { required: true })} />
+                                </ItemInput>
+                                <ItemInput label="Kota">
+                                    <input className="border border-gray-300 rounded-md p-2" defaultValue={dataContent?.city} {...register("city", { required: true })} />
+                                </ItemInput>
+                                <ItemInput label="Regional">
+                                    <input className="border border-gray-300 rounded-md p-2" defaultValue={dataContent?.region} {...register("region", { required: true })} />
+                                </ItemInput>
+                                <ItemInput label="User ID">
+                                    {dataContent?.id}
+                                </ItemInput>
+                                <ItemInput label="Email">
+                                    {dataContent?.email}
+                                </ItemInput>
+                                <ItemInput label="No Telepon">
+                                    <input className="border border-gray-300 rounded-md p-2" defaultValue={dataContent?.phonenumber} {...register("phonenumber", { required: true })} />
+                                </ItemInput>
+                                <ItemInput label="Jenis Kelamin">
+                                    <input className="border border-gray-300 rounded-md p-2" defaultValue={dataContent?.gender} {...register("gender", { required: true })} />
+                                </ItemInput>
+                                <ItemInput label="Tanggal Lahir">
+                                    <input className="border border-gray-300 rounded-md p-2" defaultValue={dataContent?.birthdate} {...register("birthdate", { required: true })} />
+                                </ItemInput>
+                                <ItemInput label="Alamat Usaha">
+                                    <input className="border border-gray-300 rounded-md p-2" defaultValue={dataContent?.address} {...register("address", { required: true })} />
+                                </ItemInput>
+                                <ItemInput label="Nama Bank">
+                                    {dataContent?.wallet?.bank_name}
+                                </ItemInput>
+                                <ItemInput label="Nomor Rekening">
+                                    {dataContent?.wallet?.bank_account_number}
+                                </ItemInput>
+                                <ItemInput label="Nama Pemilik Rekening">
+                                    {dataContent?.wallet?.bank_account_name}
+                                </ItemInput>
+                                <ItemInput label="">
+                                    <input type="submit" value="Simpan" className="border border-gray-300 rounded-md py-2 px-7 hover:bg-slate-300 cursor-pointer" />
+                                </ItemInput>
 
-                    <ItemData label="Lokasi Pelayanan" value={dataContent?.region} editData={true} />
-                    <ItemData label="User ID" value={dataContent?.id} />
-                    <ItemData label="Email" value={dataContent?.email} />
-                    <ItemData label="No Telepon" value={dataContent?.phonenumber} editData={true} />
-                    <ItemData label="Jenis Kelamin" value={dataContent?.gender} editData={true} />
-                    <ItemData label="Tanggal Lahir" value={dataContent?.birthdate} editData={true} />
-                    <ItemData label="Alamat Usaha" value={dataContent?.address} editData={true} />
-                    <ItemData label="Nama Bank" value={dataContent?.wallet.bank_name} editData={true} />
-                    <ItemData label="Nomor Rekening" value={dataContent?.wallet.bank_account_number} editData={true} />
-                    <ItemData label="Nama Pemilik Rekening" value={dataContent?.wallet.bank_account_name} editData={true} />
-                    <ItemData>
-                        <input type="submit" className="border-[1px] mt-3 border-b-black px-2 py-2 border-solid min-w-[150px] rounded-lg cursor-pointer" value="Simpan" />
-                    </ItemData>
+
+                            </form>
+                            :
+                            <Skeleton width="100%" height="200px" />
+                    }
+
                 </div>
             </Box>
             <Box>
