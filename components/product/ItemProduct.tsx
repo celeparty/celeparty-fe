@@ -11,7 +11,7 @@ interface iItemProduct {
   price?: number | string;
   rate?: string;
   sold?: string;
-  location?: string;
+  location?: string | boolean;
   url: string;
   children?: ReactNode;
 }
@@ -47,9 +47,12 @@ export default function ItemProduct(props: iItemProduct) {
               </>
             ) : null}
           </div>
-          <div className="flex gap-1 items-center text-[12px] lg:text-[10px] mt-2  text-c-gray-text2">
-            <FaLocationDot /> {props.location}
-          </div>
+          {
+            props.location ? <div className="flex gap-1 items-center text-[12px] lg:text-[10px] mt-2  text-c-gray-text2">
+              <FaLocationDot /> {props.location}
+            </div> : null
+          }
+
         </div>
       </Link>
     </div>

@@ -63,35 +63,35 @@ export default function ProductContent() {
   const dataSort =
     getMin || getMax
       ? _.orderBy(
-          _.filter(newDataContent, (item) => {
-            const priceMin = parseFloat(item.price_min);
-            const priceMax = item.price_max ? parseFloat(item.price_max) : null;
+        _.filter(newDataContent, (item) => {
+          const priceMin = parseFloat(item.price_min);
+          const priceMax = item.price_max ? parseFloat(item.price_max) : null;
 
-            return (
-              (getMin === null ||
-                getMin === "" ||
-                priceMin >= parseFloat(getMin)) &&
-              (getMax === null ||
-                getMax === "" ||
-                (priceMax !== null && priceMax <= parseFloat(getMax)))
-            );
-          }),
-          [`${getSort}`],
-          [`${sortDesc ? "desc" : "asc"}`]
-        )
+          return (
+            (getMin === null ||
+              getMin === "" ||
+              priceMin >= parseFloat(getMin)) &&
+            (getMax === null ||
+              getMax === "" ||
+              (priceMax !== null && priceMax <= parseFloat(getMax)))
+          );
+        }),
+        [`${getSort}`],
+        [`${sortDesc ? "desc" : "asc"}`]
+      )
       : _.orderBy(
-          newDataContent,
-          [`${getSort}`],
-          [`${sortDesc ? "desc" : "asc"}`]
-        );
+        newDataContent,
+        [`${getSort}`],
+        [`${sortDesc ? "desc" : "asc"}`]
+      );
 
   const handleSort = ({ sortBy }: { sortBy: string }) => {
     // router.push(`?sort=${sortBy}`)
     getMin && getMin
       ? router.push(`?sort=${sortBy}&min=${getMin}&max=${getMax}`)
       : getMin
-      ? router.push(`?sort=${sortBy}&min=${getMin}`)
-      : router.push(`?sort=${sortBy}`);
+        ? router.push(`?sort=${sortBy}&min=${getMin}`)
+        : router.push(`?sort=${sortBy}`);
     sortBy === "price" && setSortDesc(!sortDesc);
   };
   const priceMin = (e: any) => {
@@ -232,12 +232,12 @@ export default function ProductContent() {
                   price={
                     item.price_max
                       ? `Rp. ${parseInt(`${item.price_min}`).toLocaleString(
-                          "id-ID"
-                        )} - Rp. ${parseInt(`${item.price_max}`).toLocaleString(
-                          "id-ID"
-                        )}`
+                        "id-ID"
+                      )} - Rp. ${parseInt(`${item.price_max}`).toLocaleString(
+                        "id-ID"
+                      )}`
                       : "Rp. " +
-                        parseInt(`${item.price}`).toLocaleString("id-ID")
+                      parseInt(`${item.price}`).toLocaleString("id-ID")
                   }
                   rate={parseInt(item.average_rating).toFixed(1)}
                   sold={item.sold_count}

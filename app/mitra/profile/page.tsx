@@ -1,18 +1,19 @@
 "use client"
 import Box from "@/components/Box"
 import React from 'react'
+
 import { useQuery } from "@tanstack/react-query";
 import Skeleton from "@/components/Skeleton";
 import { getDataToken, putDataToken } from "@/lib/services";
 import ErrorNetwork from "@/components/ErrorNetwork";
+import { useSession } from "next-auth/react";
+
 import { AiFillCustomerService } from "react-icons/ai";
 import { GrFormEdit, GrEdit } from "react-icons/gr";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
-
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 
 
 type UserData = {
@@ -77,7 +78,7 @@ export default function ProfilePage() {
         return await getDataToken(`/users`, `${dataSession?.user?.accessToken}`);
     };
     const query = useQuery({
-        queryKey: ["qProducts"],
+        queryKey: ["qUserProfile"],
         queryFn: getQuery,
         staleTime: 5000,
         enabled: !!dataSession?.user?.accessToken,

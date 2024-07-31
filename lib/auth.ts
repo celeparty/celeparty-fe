@@ -8,6 +8,7 @@ interface iUser {
     data: any
     message: string
     user?: any
+    success?: boolean
 }
 
 interface iUserResponse {
@@ -17,6 +18,7 @@ interface iUserResponse {
 export const authOptions: NextAuthOptions = {
     session: {
         strategy: "jwt",
+        maxAge: 60 * 60,
     },
 
     providers: [
@@ -70,18 +72,20 @@ export const authOptions: NextAuthOptions = {
                 token.accessToken = user.token;
                 token.user = user.data.user;
                 token.message = user.message;
+                token.status = user.success ? user.success : false
             }
             return token;
         },
         async session({ session, token, user }) {
             session.user = token
+
             return {
                 ...session,
                 user: {
                     ...session.user,
-                    accessToken: token.accessToken,
                     message: token.message,
                     user: token.user,
+                    status: token.status
                 },
                 token: token.accessToken,
             };

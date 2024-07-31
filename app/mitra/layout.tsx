@@ -5,6 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react"
 
 interface iItemMenu {
     title: string
@@ -37,8 +38,9 @@ export default function DashboardLayout({
             router.push("/auth/mitra/login");
         }
     });
+    // const dataSession = session?.token as any
+    // console.log(dataSession)
 
-    console.log({ status })
     return (
         <div className="relative wrapper-main py-7">
             <Basecontent>
@@ -58,21 +60,21 @@ export default function DashboardLayout({
                                 icon="/images/icon-product.svg"
                                 iconWidth={30}
                                 iconHeight={30}
-                                link="/mitra/home"
+                                link="/mitra/products"
                             />
                             <ItemMenu
                                 title="Tambah Produk"
                                 icon="/images/icon-add-product.svg"
                                 iconWidth={30}
                                 iconHeight={30}
-                                link="/mitra/home"
+                                link="/mitra/add-product"
                             />
                             <ItemMenu
                                 title="Dompet Saya"
                                 icon="/images/icon-wallet.svg"
                                 iconWidth={30}
                                 iconHeight={30}
-                                link="/mitra/home"
+                                link="/mitra/wallet"
                             />
                             <ItemMenu
                                 title="Profil"

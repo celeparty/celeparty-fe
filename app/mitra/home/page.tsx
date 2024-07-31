@@ -1,5 +1,12 @@
 "use client"
 import React from 'react'
+import { useQuery } from "@tanstack/react-query";
+import Skeleton from "@/components/Skeleton";
+import { getDataToken } from "@/lib/services";
+import ErrorNetwork from "@/components/ErrorNetwork";
+import { useSession } from "next-auth/react";
+import _ from "lodash";
+
 import {
     Table,
     TableBody,
@@ -9,6 +16,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import Box from "@/components/Box";
 
 
 interface iItemStatus {
@@ -22,9 +30,30 @@ function ItemStatus({ status, value, color }: iItemStatus): JSX.Element {
         <h4>{status}</h4>
         <strong>{value}</strong>
     </div>
-
 }
 export default function HomeMitra() {
+    const session = useSession();
+    const dataSession = session?.data as any;
+
+    const getQuery = async () => {
+        if (!dataSession?.user?.accessToken) {
+            throw new Error("Access token is undefined");
+        }
+        return await getDataToken(`/transactions/vendor`, `${dataSession?.user?.accessToken}`);
+    };
+    const query = useQuery({
+        queryKey: ["qMyOrder"],
+        queryFn: getQuery,
+        enabled: !!dataSession?.user?.accessToken,
+    });
+
+    if (query.isLoading) {
+        return <Skeleton width="100%" height="150px" />
+    }
+    if (query.isError) {
+        return <ErrorNetwork style="mt-0" />
+    }
+    const dataContent = query?.data?.data.data
 
     return (
         <div>
@@ -50,35 +79,33 @@ export default function HomeMitra() {
                     color="#44CADC"
                 />
             </div>
-            <div className="mt-7">
-                <Table className="bg-white">
+            <Box>
+                <Table>
                     <TableHeader className="bg-white">
                         <TableRow>
                             <TableHead className="w-[150px]">ORDER DATE</TableHead>
                             <TableHead>ITEM</TableHead>
                             <TableHead>STATUS</TableHead>
                             <TableHead >TOTAL</TableHead>
-                            <TableHead >ACTION</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow className="bg-white">
-                            <TableCell className="font-medium">2023/01/24/1</TableCell>
-                            <TableCell>Matcha Drip Cake</TableCell>
-                            <TableCell>Pending</TableCell>
-                            <TableCell>Rp. 220.000</TableCell>
-                            <TableCell><div className="text-red-500">CANCELLED</div></TableCell>
-                        </TableRow>
-                        <TableRow className="bg-white">
-                            <TableCell className="font-medium">2023/01/24/1</TableCell>
-                            <TableCell>Matcha Drip Cake</TableCell>
-                            <TableCell>Completed</TableCell>
-                            <TableCell>Rp. 220.000</TableCell>
-                            <TableCell><div className="text-green-500">COMPLETED</div></TableCell>
-                        </TableRow>
+                        {
+                            dataContent?.map((item: any, i: number) => {
+                                return (
+                                    <TableRow className={`${i % 2 === 0 ? "bg-slate-200" : "bg-white"}`} key={item.id}>
+                                        <TableCell className="font-medium">Tanggal Belom ada di api</TableCell>
+                                        <TableCell>{item.name}</TableCell>
+                                        <TableCell>{item.status}</TableCell>
+                                        <TableCell>{item.price}</TableCell>
+                                    </TableRow>
+                                )
+                            })
+                        }
+
                     </TableBody>
                 </Table>
-            </div>
+            </Box>
         </div>
 
     )
