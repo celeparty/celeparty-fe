@@ -24,7 +24,7 @@ function ItemStatus({ status, value, color }: iItemStatus): JSX.Element {
     </div>
 
 }
-export default async function HomeMitra() {
+export default function HomeMitra() {
 
     return (
         <div>

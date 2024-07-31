@@ -1,7 +1,10 @@
+"use client"
 import Box from "@/components/Box"
 import Basecontent from "@/components/Basecontent"
 import Image from "next/image"
 import Link from "next/link"
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface iItemMenu {
     title: string
@@ -26,6 +29,16 @@ export default function DashboardLayout({
 }: {
     children: React.ReactNode
 }) {
+
+    const router = useRouter();
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            router.push("/auth/mitra/login");
+        }
+    });
+
+    console.log({ status })
     return (
         <div className="relative wrapper-main py-7">
             <Basecontent>

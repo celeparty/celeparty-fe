@@ -104,6 +104,7 @@ const LoginPage = () => {
                                     <FormItem>
                                         <FormControl>
                                             <Input
+                                                type="password"
                                                 placeholder="Kata Sandi"
                                                 className="text-black"
                                                 {...field}

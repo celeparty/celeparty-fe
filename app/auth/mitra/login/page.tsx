@@ -104,6 +104,7 @@ const LoginMitra = () => {
                                         <FormItem>
                                             <FormControl>
                                                 <Input
+                                                    type="password"
                                                     placeholder="Kata Sandi"
                                                     className="text-black rounded-xl"
                                                     {...field}

@@ -39,6 +39,7 @@ function ItemInput({ label, children }: any) {
 export default function ProfilePage() {
     const session = useSession();
     const dataSession = session?.data as SessionData;
+    const [notif, setNotif] = React.useState(false);
     const {
         register,
         handleSubmit,
@@ -46,7 +47,6 @@ export default function ProfilePage() {
         formState: { errors },
     } = useForm<any>()
 
-    console.log(dataSession?.user?.accessToken)
 
     const onSubmit: SubmitHandler<any> = async (data) => {
         if (!dataSession?.user?.accessToken) {
@@ -63,7 +63,11 @@ export default function ProfilePage() {
             "area": data?.area
         }
         )
-        console.log(data)
+        setNotif(true)
+        setTimeout(() => {
+            setNotif(false)
+        }, 5000)
+
     }
 
     const getQuery = async () => {
@@ -147,6 +151,14 @@ export default function ProfilePage() {
                                 <ItemInput label="">
                                     <input type="submit" value="Simpan" className="border border-gray-300 rounded-md py-2 px-7 hover:bg-slate-300 cursor-pointer" />
                                 </ItemInput>
+                                {
+                                    notif &&
+                                    <ItemInput label="">
+                                        <div className="text-green-500">Data Berhasil disimpan</div>
+                                    </ItemInput>
+
+
+                                }
 
 
                             </form>
