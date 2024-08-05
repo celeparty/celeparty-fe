@@ -36,7 +36,6 @@ export default function Wallet() {
         return <ErrorNetwork style="mt-0" />
     }
     const dataContent = query?.data?.data.data.wallet
-    console.log(dataSession.token)
 
     return (
         <div>

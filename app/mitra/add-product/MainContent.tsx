@@ -50,8 +50,14 @@ export default function MainContentAddProduct() {
     const router = useRouter();
     const session = useSession();
     const dataSession = session?.data as SessionData;
-    const [categoryActive, setCategoryActive] = useState(false);
-    const [categoryValue, setCategoryValue] = useState(0);
+    const [stateCategory, setStateCategory] = useState<any>({
+        status: false,
+        value: 0
+    });
+    const [stateTheme, setStateTheme] = useState<any>({
+        status: false,
+        value: 0
+    });
     const {
         register,
         handleSubmit,
@@ -65,12 +71,12 @@ export default function MainContentAddProduct() {
             throw new Error("Access token is undefined");
         }
         const dataForm = {
-            category_id: categoryValue,
+            category_id: stateCategory.value,
+            themes: stateTheme.value,
             data
 
         }
         console.log(dataForm)
-
     }
 
     const getQuery = async () => {
@@ -86,6 +92,20 @@ export default function MainContentAddProduct() {
         enabled: !!dataSession?.user?.accessToken,
         retry: 3,
     });
+    const getThemes = async () => {
+        if (!dataSession?.user?.accessToken) {
+            throw new Error("Access token is undefined");
+        }
+        return await getDataToken(`/themes`, `${dataSession?.user?.accessToken}`);
+    };
+    const queryThemes = useQuery({
+        queryKey: ["qThemes"],
+        queryFn: getThemes,
+        staleTime: 5000,
+        enabled: !!dataSession?.user?.accessToken,
+        retry: 3,
+    });
+
     if (query.isLoading) {
         return (
             <div className=" relative flex justify-center ">
@@ -99,13 +119,9 @@ export default function MainContentAddProduct() {
     if (query.data?.data.status === false) {
         router.push("/auth/mitra/login")
     }
-    const handleCategoryClick = (categoryId: any) => {
-        setCategoryValue(categoryId);
-        setCategoryActive(categoryId);
-    };
-
     const dataCategory = query?.data?.data.data;
-    console.log(errors)
+    const dataThemes = queryThemes.data?.data.data
+    console.log("dataThemes")
     return (
         <div>
             <form onSubmit={handleSubmit(onSubmit)}>
@@ -113,10 +129,12 @@ export default function MainContentAddProduct() {
                 <div className="flex flex-wrap gap-2 mb-5">
                     {
                         dataCategory?.map((item: any, i: number) => {
-                            const isActive = categoryActive === item.id;
+                            let isActive = stateCategory.value === item.id;
                             return (
                                 <div
-                                    onClick={() => handleCategoryClick(item.id)}
+                                    onClick={() => {
+                                        setStateCategory({ status: true, value: item.id });
+                                    }}
                                     key={item.id}
                                     className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-5 py-1 ${isActive ? "bg-c-green text-white border-c-green" : "text-c-black"}`}>
                                     {item.name}
@@ -151,45 +169,27 @@ export default function MainContentAddProduct() {
                 </ItemInput>
                 <ItemInput label="Tema">
                     <div className="flex flex-wrap gap-2 mb-5">
-                        <div
-                            className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-5 py-1 `}>
-                            Semua Tema
-                        </div>
-                        <div
-                            className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-5 py-1 `}>
-                            Candy's
-                        </div>
+                        {
+                            dataThemes?.map((item: any, i: number) => {
+                                let isActive = stateTheme.value === item.id;
+                                return (
+                                    <div
+                                        onClick={() => {
+                                            setStateTheme({ status: true, value: item.id });
+                                        }}
+                                        key={item.id}
+                                        className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-5 py-1 `}>
+                                        {item.name}
+                                    </div>
+
+                                )
+                            })
+                        }
                     </div>
                     {errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
                 </ItemInput>
                 <ItemInput label="Varian">
                     <div className="text-[#DA7E01] text-[12px] cursor-pointer">Tambah Varian</div>
-                    {errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
-                </ItemInput>
-                <ItemInput label="Topping">
-                    <div className="flex flex-wrap gap-2 mb-5">
-                        <div
-                            className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-5 py-1 `}>
-                            Butter
-                        </div>
-                        <div
-                            className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-5 py-1 `}>
-                            Fondant
-                        </div>
-                    </div>
-                    {errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
-                </ItemInput>
-                <ItemInput label="Ukuran">
-                    <div className="flex flex-wrap gap-2 mb-5">
-                        <div
-                            className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-5 py-1 `}>
-                            18 cm
-                        </div>
-                        <div
-                            className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-5 py-1 `}>
-                            20 cm
-                        </div>
-                    </div>
                     {errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
                 </ItemInput>
                 <div className="flex justify-center">
