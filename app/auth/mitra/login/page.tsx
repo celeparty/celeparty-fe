@@ -133,7 +133,7 @@ const LoginMitra = () => {
                                         <div>
                                             <p className="font-hind font-semibold text-white text-[12px] text-center mt-4">
                                                 Ingin menjadi Mitra Celeparty? <br />
-                                                <Link href={"#"} className="text-red-500">
+                                                <Link href="/auth/mitra/register" className="text-red-500">
                                                     Registrasi sebagai Mitra
                                                 </Link>
                                             </p>
