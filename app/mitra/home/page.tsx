@@ -54,7 +54,6 @@ export default function HomeMitra() {
         return <ErrorNetwork style="mt-0" />
     }
     const dataContent = query?.data?.data.data
-
     return (
         <div>
             <div className="flex justify-center items-center gap-3">

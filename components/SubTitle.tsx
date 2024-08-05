@@ -1,0 +1,13 @@
+import React from 'react'
+import { cn } from "@/lib/utils"
+
+interface iSUbtitle {
+    title?: string
+    className?: string
+}
+
+export default function SubTitle({ title, className }: iSUbtitle) {
+    return (
+        <h4 className={cn(`font-semibold text-[16px] mb-1`, className)}>{title}</h4>
+    )
+}
