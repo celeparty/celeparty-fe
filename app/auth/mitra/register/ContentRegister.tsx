@@ -16,17 +16,18 @@ import {
 } from "@/components/ui/form";
 import Link from "next/link";
 import { postDataOpen } from "@/lib/services";
+import axios from "axios";
 
 const signUpSchema = z.object({
     name: z.string().nonempty({ message: "Nama tidak boleh kosong" }),
     vendor_name: z.string().nonempty("Usaha wajib diisi"),
     vendor_desc: z.string().nonempty("Usaha wajib diisi"),
-    vendor_same_city_only: z.string().nonempty("Kota wajib diisi"),
+    vendor_same_city_only: z.boolean().optional(),
     email: z
         .string()
         .nonempty({ message: "Email tidak boleh kosong" })
         .email({ message: "Invalid email address" }),
-    phone: z
+    phonenumber: z
         .string()
         .nonempty({ message: "No Telepon tidak boleh kosong" })
         .regex(/^\d+$/, "No Telepon harus berisi angka saja"),
@@ -38,7 +39,7 @@ const signUpSchema = z.object({
         .regex(/[A-Z]/, "Kata sandi harus mengandung setidaknya satu huruf besar")
         .regex(/[a-z]/, "Kata sandi harus mengandung setidaknya satu huruf kecil")
         .regex(/[0-9]/, "Kata sandi harus mengandung setidaknya satu angka"),
-    confirmPassword: z
+    password_confirmation: z
         .string()
         .nonempty({ message: "Kata Sandi tidak boleh kosong" })
         .min(8, "Kata sandi harus memiliki minimal 8 karakter")
@@ -55,33 +56,43 @@ function ErrorMessage({ children }: { children: React.ReactNode }) {
 }
 export default function ContentRegister() {
     const [notif, setNotif] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState("");
     const { control, handleSubmit, register, formState: { errors }, watch } = useForm({
         resolver: zodResolver(signUpSchema),
         defaultValues: {
             name: "",
             vendor_name: "",
             vendor_desc: "",
-            vendor_same_city_only: "",
             email: "",
-            phone: "",
+            phonenumber: "",
             agreement: false,
+            vendor_same_city_only: false,
             password: "",
-            confirmPassword: "",
+            password_confirmation: "",
         },
     });
 
     const onSubmit: SubmitHandler<any> = async (data) => {
-        console.log(data);
-        console.log("he")
-        await postDataOpen(`/register-vendor`, data);
-        setNotif(true)
-        setTimeout(() => {
-            setNotif(false)
-        }, 5000)
+        axios.post(`${process.env.URL_API}/register-vendor`, data)
+            .then((res) => {
+                console.log({ res })
+            }).catch(errors => {
+                setErrorMessage(errors.response.data.message)
+                console.log({ errors })
+                console.log(errors.response.data.message)
+            })
+        // await postDataOpen(`/register-vendor`, data).then((res) => {
+        //     console.log({ res })
+        // })
+
+        // setNotif(true)
+        // setTimeout(() => {
+        //     setNotif(false)
+        // }, 5000)
     }
 
     const password = watch("password");
-    const confirmPassword = watch("confirmPassword");
+    const confirmPassword = watch("password_confirmation");
     console.log(errors)
     return (
         <div>
@@ -95,12 +106,16 @@ export default function ContentRegister() {
                         {errors.vendor_name && <ErrorMessage>{errors.vendor_name?.message}</ErrorMessage>}
                         <input {...register("vendor_desc")} placeholder="dekripsi usaha" className="w-full px-2 py-2 rounded-md" />
                         {errors.vendor_desc && <ErrorMessage>{errors.vendor_desc?.message}</ErrorMessage>}
-                        <input {...register("vendor_same_city_only")} placeholder="kota" className="w-full px-2 py-2 rounded-md" />
-                        {errors.vendor_same_city_only && <ErrorMessage>{errors.vendor_same_city_only?.message}</ErrorMessage>}
+                        {/* <input {...register("vendor_same_city_only")} placeholder="kota" className="w-full px-2 py-2 rounded-md" />
+                        {errors.vendor_same_city_only && <ErrorMessage>{errors.vendor_same_city_only?.message}</ErrorMessage>} */}
                         <input {...register("email")} placeholder="Email" className="w-full px-2 py-2 rounded-md" />
                         {errors.email && <ErrorMessage>{errors.email?.message}</ErrorMessage>}
-                        <input {...register("phone")} placeholder="No Telepon" className="w-full px-2 py-2 rounded-md" />
-                        {errors.phone && <ErrorMessage>{errors.phone?.message}</ErrorMessage>}
+                        <input {...register("phonenumber")} placeholder="No Telepon" className="w-full px-2 py-2 rounded-md" />
+                        {errors.phonenumber && <ErrorMessage>{errors.phonenumber?.message}</ErrorMessage>}
+                        <div className="flex gap-2 text-white">
+                            <Input {...register("vendor_same_city_only")} type="checkbox" className="w-[20px] h-[20px] rounded-xl" />
+                            <div>Di kota yang sama</div>
+                        </div>
                         <Controller
                             name="password"
                             control={control}
@@ -114,7 +129,7 @@ export default function ContentRegister() {
                             )}
                         />
                         <Controller
-                            name="confirmPassword"
+                            name="password_confirmation"
                             control={control}
                             render={({ field }) => (
                                 <input
@@ -173,6 +188,9 @@ export default function ContentRegister() {
                     {
                         notif &&
                         <div className="text-green-500">Data Berhasil dikirim</div>
+                    }
+                    {
+                        errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>
                     }
 
                 </div>
