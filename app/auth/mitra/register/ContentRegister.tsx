@@ -73,7 +73,7 @@ export default function ContentRegister() {
     const onSubmit: SubmitHandler<any> = async (data) => {
         console.log(data);
         console.log("he")
-        await postDataOpen(`register-vendor`, data);
+        await postDataOpen(`/register-vendor`, data);
         setNotif(true)
         setTimeout(() => {
             setNotif(false)
