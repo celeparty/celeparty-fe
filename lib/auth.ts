@@ -47,8 +47,10 @@ export const authOptions: NextAuthOptions = {
                 );
 
                 const user: iUser = await res.json();
-                if (res.ok) {
+                if (res?.ok) {
                     return user;
+                } else {
+                    console.log("Password Salah")
                 }
                 return null;
             }
