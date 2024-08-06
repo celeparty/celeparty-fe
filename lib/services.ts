@@ -51,4 +51,12 @@ export const getDataOpen = (url: string) => axios.get(`${process.env.URL_API + u
         return res
     }).catch((error) => {
         console.log(error)
+    })
+
+
+export const postDataOpen = (url: string, data: any) => axios.post(`${process.env.URL_API + url}`, data)
+    .then((res) => {
+        return res
+    }).catch((error) => {
+        console.log(error)
     })    

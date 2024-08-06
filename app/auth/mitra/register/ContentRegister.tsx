@@ -15,6 +15,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import Link from "next/link";
+import { postDataOpen } from "@/lib/services";
 
 const signUpSchema = z.object({
     name: z.string().nonempty({ message: "Nama tidak boleh kosong" }),
@@ -46,9 +47,14 @@ const signUpSchema = z.object({
         .regex(/[0-9]/, "Kata sandi harus mengandung setidaknya satu angka"),
     agreement: z
         .boolean()
-        .refine((val) => val, "Agreement harus di centang")
+        .refine((val) => val, "Agreement harus dichecklist")
 });
+
+function ErrorMessage({ children }: { children: React.ReactNode }) {
+    return <div className="text-red-400 w-full text-[10px]">{children}</div>;
+}
 export default function ContentRegister() {
+    const [notif, setNotif] = React.useState(false);
     const { control, handleSubmit, register, formState: { errors }, watch } = useForm({
         resolver: zodResolver(signUpSchema),
         defaultValues: {
@@ -67,23 +73,34 @@ export default function ContentRegister() {
     const onSubmit: SubmitHandler<any> = async (data) => {
         console.log(data);
         console.log("he")
+        await postDataOpen(`register-vendor`, data);
+        setNotif(true)
+        setTimeout(() => {
+            setNotif(false)
+        }, 5000)
     }
 
     const password = watch("password");
     const confirmPassword = watch("confirmPassword");
+    console.log(errors)
     return (
         <div>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="w-[270px] lg:w-[491px] lg:mx-auto mx-0">
                     <h1 className="mb-4 text-center lg:text-start">Registrasi</h1>
                     <div className="flex flex-col gap-4 text-c-gray-text [&_input]:text-black">
-                        <input {...register("name")} placeholder="Name" />
-                        <input {...register("vendor_name")} placeholder="vendor name" />
-                        <input {...register("vendor_desc")} placeholder="dekripsi usaha" />
-                        <input {...register("vendor_same_city_only")} placeholder="kota" />
-                        <input {...register("email")} placeholder="Email" />
-                        <input {...register("phone")} placeholder="No Telepon" />
-
+                        <input {...register("name")} placeholder="Name" className="w-full px-2 py-2 rounded-md" />
+                        {errors.name && <ErrorMessage>{errors.name?.message}</ErrorMessage>}
+                        <input {...register("vendor_name")} placeholder="vendor name" className="w-full px-2 py-2 rounded-md" />
+                        {errors.vendor_name && <ErrorMessage>{errors.vendor_name?.message}</ErrorMessage>}
+                        <input {...register("vendor_desc")} placeholder="dekripsi usaha" className="w-full px-2 py-2 rounded-md" />
+                        {errors.vendor_desc && <ErrorMessage>{errors.vendor_desc?.message}</ErrorMessage>}
+                        <input {...register("vendor_same_city_only")} placeholder="kota" className="w-full px-2 py-2 rounded-md" />
+                        {errors.vendor_same_city_only && <ErrorMessage>{errors.vendor_same_city_only?.message}</ErrorMessage>}
+                        <input {...register("email")} placeholder="Email" className="w-full px-2 py-2 rounded-md" />
+                        {errors.email && <ErrorMessage>{errors.email?.message}</ErrorMessage>}
+                        <input {...register("phone")} placeholder="No Telepon" className="w-full px-2 py-2 rounded-md" />
+                        {errors.phone && <ErrorMessage>{errors.phone?.message}</ErrorMessage>}
                         <Controller
                             name="password"
                             control={control}
@@ -92,10 +109,10 @@ export default function ContentRegister() {
                                     {...field}
                                     type="password"
                                     placeholder="Password"
+                                    className="w-full px-2 py-2 rounded-md"
                                 />
                             )}
                         />
-
                         <Controller
                             name="confirmPassword"
                             control={control}
@@ -104,12 +121,13 @@ export default function ContentRegister() {
                                     {...field}
                                     type="password"
                                     placeholder="Confirm Password"
+                                    className="w-full px-2 py-2 rounded-md"
                                 />
                             )}
                         />
-
+                        {errors.password && <ErrorMessage>{errors.password?.message}</ErrorMessage>}
                         {password !== confirmPassword && (
-                            <p>Password and confirm password must be the same</p>
+                            <ErrorMessage>Password and confirm password harus sama</ErrorMessage>
                         )}
                     </div>
                 </div>
@@ -134,7 +152,7 @@ export default function ContentRegister() {
                             DIREKTUR PERTAMA/ PEMILIK UTAMA YANG TERDAFTAR UNTUK MENYELESAIKAN
                             PROSES PENDAFTARAN LAYANAN CELEPARTNER.
                         </div>
-                        <div className="mt-8 flex gap-4 items-center px-4 lg:px-0">
+                        <div className="mt-8 mb-2 flex gap-4 items-center px-4 lg:px-0">
                             <div className="rounded-lg lg:overflow-hidden">
                                 <Input {...register("agreement")} type="checkbox" className="w-[20px] h-[20px] rounded-xl" />
 
@@ -147,8 +165,15 @@ export default function ContentRegister() {
                                 </Link>
                             </p>
                         </div>
+                        <ErrorMessage>{errors.agreement?.message}</ErrorMessage>
                     </div>
-                    <input type="submit" className="text-center cursor-pointer text-white rounded-full bg-c-green" value="Register" />
+                    <div className="flex justify-center mt-7">
+                        <input type="submit" className="text-center cursor-pointer px-3 py-1 min-w-[170px] text-white rounded-full bg-c-green" value="Register" />
+                    </div>
+                    {
+                        notif &&
+                        <div className="text-green-500">Data Berhasil dikirim</div>
+                    }
 
                 </div>
 
