@@ -4,12 +4,12 @@ const IconLowerAbout = () => {
   return (
     <div className="py-28 flex justify-center">
       <div>
-        <Image
+        {/* <Image
           src={"/images/icon-about.png"}
           width={956}
           height={134}
           alt="IconLowerAbout.."
-        />
+        /> */}
       </div>
     </div>
   );
@@ -55,8 +55,7 @@ const MainAbout = () => {
 const AboutPage = () => {
   return (
     <div>
-      <div className="bg-[url('/images/about.png')] w-[500px] h-[600px] lg:w-[1300px] lg:h-[600px] bg-no-repeat bg-cover lg:bg-cover">
-        {/* <h1 className="text-white text-center pt-20">About Us</h1> */}
+      <div className="bg-[url('/images/about.png')] w-full h-screen bg-no-repeat bg-cover">
         <div className="lg:pt-48 pt-32 px-4 lg:px-0">
           <MainAbout />
         </div>
