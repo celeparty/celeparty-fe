@@ -34,6 +34,7 @@ export const getDataToken = (url: string, token: string) =>
 			console.log(error);
 		});
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export const putDataToken = (url: string, token: string, data: any) =>
 	axios
 		.put(`${process.env.URL_API + url}`, data, {

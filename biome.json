@@ -21,12 +21,9 @@
 	},
 	"linter": {
 		"enabled": true,
-		"rules": {
-			"recommended": true
+		"rules": {			
+			"recommended": false
 		}
-	},
-	"lint": {
-		"enabled": true
 	},
 	"javascript": {
 		"formatter": {
