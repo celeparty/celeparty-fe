@@ -8,115 +8,115 @@ import { getData } from "@/lib/services";
 import ErrorNetwork from "@/components/ErrorNetwork";
 
 export default function MainBlog() {
-  const getQuery = async () => {
-    return await getData(`/blogs/populars?search&limit=4`);
-  };
-  const query = useQuery({
-    queryKey: ["qEventList"],
-    queryFn: getQuery,
-  });
-  if (query.isLoading) {
-    return (
-      <div className=" relative flex justify-center ">
-        <Skeleton width="100%" height="400px" spaceBottom={"10px"} />
-      </div>
-    );
-  }
+	const getQuery = async () => {
+		return await getData(`/blogs/populars?search&limit=4`);
+	};
+	const query = useQuery({
+		queryKey: ["qEventList"],
+		queryFn: getQuery,
+	});
+	if (query.isLoading) {
+		return (
+			<div className=" relative flex justify-center ">
+				<Skeleton width="100%" height="400px" spaceBottom={"10px"} />
+			</div>
+		);
+	}
 
-  if (query.isError) {
-    return <ErrorNetwork />;
-  }
+	if (query.isError) {
+		return <ErrorNetwork />;
+	}
 
-  const dataContent = query?.data?.data.data;
+	const dataContent = query?.data?.data.data;
 
-  return (
-    <div className="flex flex-col lg:flex-row gap-3 mt-2 lg:mt-0">
-      <div className="relative flex-1">
-        <div className="relative w-full min-h-[194px] lg:h-[400px] overflow-hidden">
-          <div className="relative fill-current w-full h-[194px] lg:h-[400px]">
-            <Image
-              src={
-                dataContent[0]?.thumbnail
-                  ? dataContent[0]?.thumbnail
-                  : "/images/noimage.png"
-              }
-              fill
-              alt="image"
-              style={{ objectFit: "cover" }}
-            />
-          </div>
-          <div className="absolute bottom-0 left-0 p-5 text-white bg-[linear-gradient(0deg,rgba(0,0,0,0.75)_6.82%,rgba(0,0,0,0.00)_90.44%)] w-full text-[14px] lg:text-[20px]">
-            <Link href={`/blog/${dataContent[0]?.slug}`}>
-              {dataContent[0]?.title}
-            </Link>
-          </div>
-        </div>
-      </div>
-      <div className="relative flex-1 flex-row justify-between  gap-3 overflow-hidden">
-        <div className="relative w-full  mb-3">
-          <div className="relative overflow-hidden">
-            <div className="relative fill-current w-full aspect-auto min-h-[194px]">
-              <Image
-                src={
-                  dataContent[1]?.thumbnail
-                    ? dataContent[1]?.thumbnail
-                    : "/images/noimage.png"
-                }
-                fill
-                alt="image"
-                style={{ objectFit: "cover" }}
-              />
-            </div>
-            <div className="absolute bottom-0 left-0 p-5 text-white bg-[linear-gradient(0deg,rgba(0,0,0,0.75)_6.82%,rgba(0,0,0,0.00)_90.44%)] w-full text-[14px] lg:text-[20px]">
-              <Link href={`/blog/${dataContent[1]?.slug}`}>
-                {dataContent[1]?.title}
-              </Link>
-            </div>
-          </div>
-        </div>
-        <div className="relative w-full  ">
-          <div className="flex flex-col lg:flex-row gap-3">
-            <div className="relative overflow-hidden w-full">
-              <div className="relative fill-current w-full h-[194px]">
-                <Image
-                  src={
-                    dataContent[2]?.thumbnail
-                      ? dataContent[2]?.thumbnail
-                      : "/images/noimage.png"
-                  }
-                  fill
-                  alt="image"
-                  style={{ objectFit: "cover" }}
-                />
-              </div>
-              <div className="absolute bottom-0 left-0 p-5 text-white bg-[linear-gradient(0deg,rgba(0,0,0,0.75)_6.82%,rgba(0,0,0,0.00)_90.44%)] w-full text-[14px] lg:text-[20px]">
-                <Link href={`/blog/${dataContent[2]?.slug}`}>
-                  {dataContent[2]?.title}
-                </Link>
-              </div>
-            </div>
-            <div className="relative overflow-hidden w-full">
-              <div className="relative fill-current w-full h-[190px]">
-                <Image
-                  src={
-                    dataContent[3]?.thumbnail
-                      ? dataContent[3]?.thumbnail
-                      : "/images/noimage.png"
-                  }
-                  fill
-                  alt="image"
-                  style={{ objectFit: "cover" }}
-                />
-              </div>
-              <div className="absolute bottom-0 left-0 p-5 text-white bg-[linear-gradient(0deg,rgba(0,0,0,0.75)_6.82%,rgba(0,0,0,0.00)_90.44%)] w-full text-[14px] lg:text-[20px]">
-                <Link href={`/blog/${dataContent[3]?.slug}`}>
-                  {dataContent[3]?.title}
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+	return (
+		<div className="flex flex-col lg:flex-row gap-3 mt-2 lg:mt-0">
+			<div className="relative flex-1">
+				<div className="relative w-full min-h-[194px] lg:h-[400px] overflow-hidden">
+					<div className="relative fill-current w-full h-[194px] lg:h-[400px]">
+						<Image
+							src={
+								dataContent[0]?.thumbnail
+									? dataContent[0]?.thumbnail
+									: "/images/noimage.png"
+							}
+							fill
+							alt="image"
+							style={{ objectFit: "cover" }}
+						/>
+					</div>
+					<div className="absolute bottom-0 left-0 p-5 text-white bg-[linear-gradient(0deg,rgba(0,0,0,0.75)_6.82%,rgba(0,0,0,0.00)_90.44%)] w-full text-[14px] lg:text-[20px]">
+						<Link href={`/blog/${dataContent[0]?.slug}`}>
+							{dataContent[0]?.title}
+						</Link>
+					</div>
+				</div>
+			</div>
+			<div className="relative flex-1 flex-row justify-between  gap-3 overflow-hidden">
+				<div className="relative w-full  mb-3">
+					<div className="relative overflow-hidden">
+						<div className="relative fill-current w-full aspect-auto min-h-[194px]">
+							<Image
+								src={
+									dataContent[1]?.thumbnail
+										? dataContent[1]?.thumbnail
+										: "/images/noimage.png"
+								}
+								fill
+								alt="image"
+								style={{ objectFit: "cover" }}
+							/>
+						</div>
+						<div className="absolute bottom-0 left-0 p-5 text-white bg-[linear-gradient(0deg,rgba(0,0,0,0.75)_6.82%,rgba(0,0,0,0.00)_90.44%)] w-full text-[14px] lg:text-[20px]">
+							<Link href={`/blog/${dataContent[1]?.slug}`}>
+								{dataContent[1]?.title}
+							</Link>
+						</div>
+					</div>
+				</div>
+				<div className="relative w-full  ">
+					<div className="flex flex-col lg:flex-row gap-3">
+						<div className="relative overflow-hidden w-full">
+							<div className="relative fill-current w-full h-[194px]">
+								<Image
+									src={
+										dataContent[2]?.thumbnail
+											? dataContent[2]?.thumbnail
+											: "/images/noimage.png"
+									}
+									fill
+									alt="image"
+									style={{ objectFit: "cover" }}
+								/>
+							</div>
+							<div className="absolute bottom-0 left-0 p-5 text-white bg-[linear-gradient(0deg,rgba(0,0,0,0.75)_6.82%,rgba(0,0,0,0.00)_90.44%)] w-full text-[14px] lg:text-[20px]">
+								<Link href={`/blog/${dataContent[2]?.slug}`}>
+									{dataContent[2]?.title}
+								</Link>
+							</div>
+						</div>
+						<div className="relative overflow-hidden w-full">
+							<div className="relative fill-current w-full h-[190px]">
+								<Image
+									src={
+										dataContent[3]?.thumbnail
+											? dataContent[3]?.thumbnail
+											: "/images/noimage.png"
+									}
+									fill
+									alt="image"
+									style={{ objectFit: "cover" }}
+								/>
+							</div>
+							<div className="absolute bottom-0 left-0 p-5 text-white bg-[linear-gradient(0deg,rgba(0,0,0,0.75)_6.82%,rgba(0,0,0,0.00)_90.44%)] w-full text-[14px] lg:text-[20px]">
+								<Link href={`/blog/${dataContent[3]?.slug}`}>
+									{dataContent[3]?.title}
+								</Link>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
 }

@@ -14,6 +14,7 @@ export default async function ProductDetail({
 }) {
   const dataProduct = await getData(`/products/${params.slug}`);
   const dataContent = dataProduct ? dataProduct?.data.data : null;
+
   return (
     <div className="relative wrapper-big py-7">
       <Box className="px-4">
@@ -64,16 +65,18 @@ export default async function ProductDetail({
                 <div className="relative text-[18px] lg:mt-5 mt-[10px]">
                   <h4>Varian</h4>
                   <div className="variant flex flex-wrap gap-2 ">
-                    {dataContent?.variants?.map((variant: any) => {
-                      return (
-                        <div
-                          key={variant.id}
-                          className="bg-white border-[#000000] border-solid border-[1px] rounded-[10px] px-2 py-1 text-[14px] cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green"
-                        >
-                          {variant?.name}
-                        </div>
-                      );
-                    })}
+                    {dataContent?.variants?.map(
+                      (variant: any) => {
+                        return (
+                          <div
+                            key={variant.id}
+                            className="bg-white border-[#000000] border-solid border-[1px] rounded-[10px] px-2 py-1 text-[14px] cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green"
+                          >
+                            {variant?.name}
+                          </div>
+                        );
+                      },
+                    )}
                   </div>
                 </div>
                 <div className="lg:mt-5 mt-[10px] text-[12px]">

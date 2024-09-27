@@ -1,9 +1,7 @@
-"use client"
+"use client";
 
-import React from 'react'
+import React from "react";
 
 export default function User() {
-    return (
-        <div>User Page</div>
-    )
+	return <div>User Page</div>;
 }
