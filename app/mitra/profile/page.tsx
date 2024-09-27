@@ -16,17 +16,22 @@ import { GrEdit, GrFormEdit } from "react-icons/gr";
 import { z } from "zod";
 
 type UserData = {
-	name?: string | null | undefined;
-	email?: string | null | undefined;
-	image?: string | null | undefined;
-	accessToken?: string | null | undefined; // Add the accessToken property
+	name?: string;
+	birthdate?: string;
+	gender?: string;
+	address?: string;
+	province?: string;
+	city?: string;
+	region?: string;
+	area?: string;
+	accessToken?: string;
 };
 
 type SessionData = {
 	user?: UserData; // Update the type of user to include the accessToken property
 };
 
-function ItemInput({ label, children }: any) {
+function ItemInput({ label, children }: {label: string, children: React.ReactNode}) {
 	return (
 		<div className="flex justify-items-start w-full gap-2 mb-3 items-center">
 			<div className="w-[200px]">{label}</div>
@@ -35,22 +40,25 @@ function ItemInput({ label, children }: any) {
 	);
 }
 
+
 export default function ProfilePage() {
 	const session = useSession();
-	const dataSession = session?.data as SessionData;
+	const dataSession: SessionData  = session?.data as SessionData;
 	const [notif, setNotif] = React.useState(false);
 	const {
 		register,
 		handleSubmit,
 		watch,
 		formState: { errors },
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	} = useForm<any>();
 
-	const onSubmit: SubmitHandler<any> = async (data) => {
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	const onSubmit: SubmitHandler<UserData> = async (data) => {
 		if (!dataSession?.user?.accessToken) {
 			throw new Error("Access token is undefined");
 		}
-		await putDataToken(`/users`, dataSession?.user?.accessToken, {
+		await putDataToken("/users", dataSession?.user?.accessToken, {
 			name: data?.name,
 			birthdate: data?.birthdate,
 			gender: data?.gender,
@@ -70,7 +78,7 @@ export default function ProfilePage() {
 		if (!dataSession?.user?.accessToken) {
 			throw new Error("Access token is undefined");
 		}
-		return await getDataToken(`/users`, `${dataSession?.user?.accessToken}`);
+		return await getDataToken("/users", `${dataSession?.user?.accessToken}`);
 	};
 	const query = useQuery({
 		queryKey: ["qUserProfile"],
