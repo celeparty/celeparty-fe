@@ -34,7 +34,7 @@ export const getDataToken = (url: string, token: string) =>
 			console.log(error);
 		});
 
-export const putDataToken = (url: string, token: string, data: [] | any) =>
+export const putDataToken = (url: string, token: string, data: any) =>
 	axios
 		.put(`${process.env.URL_API + url}`, data, {
 			headers: {
