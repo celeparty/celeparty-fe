@@ -2,18 +2,18 @@
 import Box from "@/components/Box";
 import React from "react";
 
-import { useQuery } from "@tanstack/react-query";
+import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
 import { getDataToken, putDataToken } from "@/lib/services";
-import ErrorNetwork from "@/components/ErrorNetwork";
+import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 
-import { AiFillCustomerService } from "react-icons/ai";
-import { GrFormEdit, GrEdit } from "react-icons/gr";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, SubmitHandler } from "react-hook-form";
 import Link from "next/link";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import { AiFillCustomerService } from "react-icons/ai";
+import { GrEdit, GrFormEdit } from "react-icons/gr";
+import { z } from "zod";
 
 type UserData = {
 	name?: string | null | undefined;
@@ -70,10 +70,7 @@ export default function ProfilePage() {
 		if (!dataSession?.user?.accessToken) {
 			throw new Error("Access token is undefined");
 		}
-		return await getDataToken(
-			`/users`,
-			`${dataSession?.user?.accessToken}`,
-		);
+		return await getDataToken(`/users`, `${dataSession?.user?.accessToken}`);
 	};
 	const query = useQuery({
 		queryKey: ["qUserProfile"],
@@ -145,12 +142,8 @@ export default function ProfilePage() {
 									{...register("region", { required: true })}
 								/>
 							</ItemInput>
-							<ItemInput label="User ID">
-								{dataContent?.id}
-							</ItemInput>
-							<ItemInput label="Email">
-								{dataContent?.email}
-							</ItemInput>
+							<ItemInput label="User ID">{dataContent?.id}</ItemInput>
+							<ItemInput label="Email">{dataContent?.email}</ItemInput>
 							<ItemInput label="No Telepon">
 								<input
 									className="border border-gray-300 rounded-md p-2"
@@ -183,12 +176,8 @@ export default function ProfilePage() {
 									{...register("address", { required: true })}
 								/>
 							</ItemInput>
-							<ItemInput label="Nama Bank">
-								{dataContent?.wallet?.bank_name}
-							</ItemInput>
-							<ItemInput label="Nomor Rekening">
-								{dataContent?.wallet?.bank_account_number}
-							</ItemInput>
+							<ItemInput label="Nama Bank">{dataContent?.wallet?.bank_name}</ItemInput>
+							<ItemInput label="Nomor Rekening">{dataContent?.wallet?.bank_account_number}</ItemInput>
 							<ItemInput label="Nama Pemilik Rekening">
 								{dataContent?.wallet?.bank_account_name}
 							</ItemInput>
@@ -201,9 +190,7 @@ export default function ProfilePage() {
 							</ItemInput>
 							{notif && (
 								<ItemInput label="">
-									<div className="text-green-500">
-										Data Berhasil disimpan
-									</div>
+									<div className="text-green-500">Data Berhasil disimpan</div>
 								</ItemInput>
 							)}
 						</form>

@@ -1,9 +1,9 @@
 "use client";
-import Box from "@/components/Box";
 import Basecontent from "@/components/Basecontent";
+import Box from "@/components/Box";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -18,17 +18,9 @@ interface iItemMenu {
 
 function ItemMenu({ title, icon, iconWidth, iconHeight, link }: iItemMenu) {
 	return (
-		<Link
-			href={link}
-			className="relative flex gap-3 items-center mb-5 group"
-		>
+		<Link href={link} className="relative flex gap-3 items-center mb-5 group">
 			<div className="relative">
-				<Image
-					src={`${icon}`}
-					width={iconWidth}
-					height={iconHeight}
-					alt={title}
-				/>
+				<Image src={`${icon}`} width={iconWidth} height={iconHeight} alt={title} />
 			</div>
 			<div className="text-white border border-solid border-white px-3 py-2 rounded-lg flex-1 group-hover:bg-c-green">
 				{title}

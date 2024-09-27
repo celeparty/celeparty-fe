@@ -1,9 +1,9 @@
 import Header from "@/components/Header";
 import TopHeader from "@/components/TopHeader";
 import "./globals.css";
-import { Inter, Quicksand } from "next/font/google";
 import Footer from "@/components/Footer";
 import SessionWrapper from "@/components/SessionWrapper";
+import { Inter, Quicksand } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const quick = Quicksand({
@@ -26,10 +26,7 @@ export default function RootLayout({
 	return (
 		<SessionWrapper>
 			<html lang="en">
-				<body
-					className={`${inter.variable} ${quick.variable} font-inter`}
-					suppressHydrationWarning={true}
-				>
+				<body className={`${inter.variable} ${quick.variable} font-inter`} suppressHydrationWarning={true}>
 					<TopHeader />
 					<Header />
 					{children}

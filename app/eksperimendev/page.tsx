@@ -17,15 +17,10 @@ const Test = () => {
 		<div className={`wrapper h-screen flex justify-center items-center`}>
 			<div className={``}>
 				<h1>PAGE TEST FOR BRANCH DEV</h1>
-				<button
-					className="text-center w-full mt-8"
-					onClick={() => handleButton()}
-				>
+				<button className="text-center w-full mt-8" onClick={() => handleButton()}>
 					{icons ? <IoClose /> : <HiOutlineMenu />}
 				</button>
-				{data ? (
-					<p className="mt-4">I am show because data it's true</p>
-				) : null}
+				{data ? <p className="mt-4">I am show because data it's true</p> : null}
 			</div>
 		</div>
 	);

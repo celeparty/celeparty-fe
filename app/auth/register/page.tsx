@@ -1,53 +1,30 @@
 "use client";
 
-import Link from "next/link";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-	Form,
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 const signUpSchema = z.object({
 	name: z.string().nonempty({ message: "Nama tidak boleh kosong" }),
-	email: z
-		.string()
-		.nonempty({ message: "Email tidak boleh kosong" })
-		.email({ message: "Invalid email address" }),
+	email: z.string().nonempty({ message: "Email tidak boleh kosong" }).email({ message: "Invalid email address" }),
 	phone: z.string().nonempty({ message: "No Telepon tidak boleh kosong" }),
 	password: z
 		.string()
 		.nonempty({ message: "Kata Sandi tidak boleh kosong" })
 		.min(8, "Kata sandi harus memiliki minimal 8 karakter")
-		.regex(
-			/[A-Z]/,
-			"Kata sandi harus mengandung setidaknya satu huruf besar",
-		)
-		.regex(
-			/[a-z]/,
-			"Kata sandi harus mengandung setidaknya satu huruf kecil",
-		)
+		.regex(/[A-Z]/, "Kata sandi harus mengandung setidaknya satu huruf besar")
+		.regex(/[a-z]/, "Kata sandi harus mengandung setidaknya satu huruf kecil")
 		.regex(/[0-9]/, "Kata sandi harus mengandung setidaknya satu angka"),
 	confirmPassword: z
 		.string()
 		.nonempty({ message: "Kata Sandi tidak boleh kosong" })
 		.min(8, "Kata sandi harus memiliki minimal 8 karakter")
-		.regex(
-			/[A-Z]/,
-			"Kata sandi harus mengandung setidaknya satu huruf besar",
-		)
-		.regex(
-			/[a-z]/,
-			"Kata sandi harus mengandung setidaknya satu huruf kecil",
-		)
+		.regex(/[A-Z]/, "Kata sandi harus mengandung setidaknya satu huruf besar")
+		.regex(/[a-z]/, "Kata sandi harus mengandung setidaknya satu huruf kecil")
 		.regex(/[0-9]/, "Kata sandi harus mengandung setidaknya satu angka"),
 });
 
@@ -73,21 +50,14 @@ const Registration = () => {
 			<h1 className="mb-4 lg:text-start text-center">Registrasi</h1>
 			<div className="">
 				<Form {...form}>
-					<form
-						onSubmit={form.handleSubmit(signUp)}
-						className="flex flex-col gap-4"
-					>
+					<form onSubmit={form.handleSubmit(signUp)} className="flex flex-col gap-4">
 						<FormField
 							control={form.control}
 							name="name"
 							render={({ field }) => (
 								<FormItem>
 									<FormControl>
-										<Input
-											placeholder="Nama Lengkap"
-											className="text-black"
-											{...field}
-										/>
+										<Input placeholder="Nama Lengkap" className="text-black" {...field} />
 									</FormControl>
 									<FormMessage className="text-[9px]" />
 								</FormItem>
@@ -99,11 +69,7 @@ const Registration = () => {
 							render={({ field }) => (
 								<FormItem>
 									<FormControl>
-										<Input
-											placeholder="Email"
-											className="text-black"
-											{...field}
-										/>
+										<Input placeholder="Email" className="text-black" {...field} />
 									</FormControl>
 									<FormMessage className="text-[9px]" />
 								</FormItem>
@@ -115,11 +81,7 @@ const Registration = () => {
 							render={({ field }) => (
 								<FormItem>
 									<FormControl>
-										<Input
-											placeholder="No Telepon"
-											className="text-black"
-											{...field}
-										/>
+										<Input placeholder="No Telepon" className="text-black" {...field} />
 									</FormControl>
 									<FormMessage className="text-[9px]" />
 								</FormItem>
@@ -131,11 +93,7 @@ const Registration = () => {
 							render={({ field }) => (
 								<FormItem>
 									<FormControl>
-										<Input
-											placeholder="Kata Sandi"
-											className="text-black"
-											{...field}
-										/>
+										<Input placeholder="Kata Sandi" className="text-black" {...field} />
 									</FormControl>
 									<FormMessage className="text-[9px]" />
 								</FormItem>
@@ -147,11 +105,7 @@ const Registration = () => {
 							render={({ field }) => (
 								<FormItem>
 									<FormControl>
-										<Input
-											placeholder="Ulangi Kata Sandi"
-											className="text-black"
-											{...field}
-										/>
+										<Input placeholder="Ulangi Kata Sandi" className="text-black" {...field} />
 									</FormControl>
 									<FormMessage className="text-[9px]" />
 								</FormItem>
@@ -164,10 +118,7 @@ const Registration = () => {
 								</Button>
 								<p className="font-hind font-semibold text-[12px] text-center">
 									Sudah punya akun?{" "}
-									<Link
-										href={"/signin"}
-										className="text-c-orange"
-									>
+									<Link href={"/signin"} className="text-c-orange">
 										Login
 									</Link>
 								</p>

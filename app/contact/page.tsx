@@ -9,12 +9,7 @@ const TopContactPage = () => {
 					<div className="flex gap-2">
 						<p className="text-white">CELEPARTY</p>
 						<div>
-							<Image
-								src={"/images/img-in-contact.png"}
-								width={12}
-								height={32}
-								alt="Img in Contact.."
-							/>
+							<Image src={"/images/img-in-contact.png"} width={12} height={32} alt="Img in Contact.." />
 						</div>
 					</div>
 				</div>
@@ -31,12 +26,7 @@ const TopContactPage = () => {
 			</div>
 			<div className="flex justify-center pt-2 lg:pt-6">
 				<Link href={"/"}>
-					<Image
-						src={"/images/wa-item.png"}
-						width={307}
-						height={94}
-						alt="Wa Image"
-					/>
+					<Image src={"/images/wa-item.png"} width={307} height={94} alt="Wa Image" />
 				</Link>
 			</div>
 		</div>
@@ -48,8 +38,7 @@ const BottomContactPage = () => {
 		<div className="bg-c-blue">
 			<div className="wrapper flex justify-center py-20">
 				<p className="text-center text-white px-4 lg:px-0 font-quick font-normal lg:font-semibold text-[18px] lg:text-[16px] leading-[20px]">
-					"Kami memahami betapa pentingnya setiap momen spesial dalam
-					hidupmu. <br />
+					"Kami memahami betapa pentingnya setiap momen spesial dalam hidupmu. <br />
 					Itulah alasan mengapa Celeparty hadir untuk mewujudkannya."
 				</p>
 			</div>

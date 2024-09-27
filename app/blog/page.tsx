@@ -1,8 +1,8 @@
+import Basecontent from "@/components/Basecontent";
 import Box from "@/components/Box";
 import React from "react";
-import MainBlog from "./features/MainBlog";
 import ListBlog from "./features/ListBlog";
-import Basecontent from "@/components/Basecontent";
+import MainBlog from "./features/MainBlog";
 
 export default function BlogPage() {
 	return (

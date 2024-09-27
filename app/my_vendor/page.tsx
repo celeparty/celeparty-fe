@@ -41,14 +41,8 @@ const SectionLeft = () => {
 			</h5>
 			<SectionLeftItem img="/images/vendor-one.png" title="Pesanan" />
 			<SectionLeftItem img="/images/vector-two.png" title="Produk Saya" />
-			<SectionLeftItem
-				img="/images/vendor-three.png"
-				title="Tambah Produk"
-			/>
-			<SectionLeftItem
-				img="/images/vendor-four.png"
-				title="Dompet Saya"
-			/>
+			<SectionLeftItem img="/images/vendor-three.png" title="Tambah Produk" />
+			<SectionLeftItem img="/images/vendor-four.png" title="Dompet Saya" />
 			<SectionLeftItem img="/images/vendor-five.png" title="Profil" />
 		</div>
 	);
@@ -59,26 +53,10 @@ const SectionRight = () => {
 		<div className="flex-1">
 			<div className="flex justify-center my-4">
 				<div className="flex flex-wrap lg:flex-nowrap gap-2 lg:gap-10 justify-center lg:justify-start">
-					<ButtonStatus
-						title="PENDING"
-						count="1"
-						className="bg-[#3E2882]"
-					/>
-					<ButtonStatus
-						title="PROCCES"
-						count="1"
-						className="bg-[#56C200]"
-					/>
-					<ButtonStatus
-						title="CANCEL"
-						count="1"
-						className="bg-[#F60E0E]"
-					/>
-					<ButtonStatus
-						title="INCOME"
-						count="Rp.220.000"
-						className="bg-[#44CADC]"
-					/>
+					<ButtonStatus title="PENDING" count="1" className="bg-[#3E2882]" />
+					<ButtonStatus title="PROCCES" count="1" className="bg-[#56C200]" />
+					<ButtonStatus title="CANCEL" count="1" className="bg-[#F60E0E]" />
+					<ButtonStatus title="INCOME" count="Rp.220.000" className="bg-[#44CADC]" />
 				</div>
 			</div>
 			<div>
@@ -104,18 +82,10 @@ const SectionRight = () => {
 					</thead>
 					<tbody className="[&_td]:text-start [&_td]:font-normal [&_td]:lg:text-[10px] [&_td]:text-[12px] [&_td]:font-hind [&_td]:text-[#3C3C3C] [&_td]:border-b-4">
 						<tr>
-							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-								2023/01/24/1
-							</td>
-							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-								Matcha Drip Cake
-							</td>
-							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-								Pending
-							</td>
-							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-								Rp. 220.000
-							</td>
+							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">2023/01/24/1</td>
+							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Matcha Drip Cake</td>
+							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Pending</td>
+							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Rp. 220.000</td>
 							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
 								<div className="flex lg:flex-row flex-col gap-4">
 									<ActionItem
@@ -136,18 +106,10 @@ const SectionRight = () => {
 							</td>
 						</tr>
 						<tr>
-							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-								2023/01/24/2
-							</td>
-							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-								Matcha Drip Cake
-							</td>
-							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-								Processing
-							</td>
-							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-								Rp. 220.000
-							</td>
+							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">2023/01/24/2</td>
+							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Matcha Drip Cake</td>
+							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Processing</td>
+							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Rp. 220.000</td>
 							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
 								<div className="flex lg:flex-row flex-col gap-4">
 									<ActionItem
@@ -168,18 +130,10 @@ const SectionRight = () => {
 							</td>
 						</tr>
 						<tr>
-							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-								2023/01/24/3
-							</td>
-							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-								Matcha Drip Cake
-							</td>
-							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-								Shipping
-							</td>
-							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-								Rp. 220.000
-							</td>
+							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">2023/01/24/3</td>
+							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Matcha Drip Cake</td>
+							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Shipping</td>
+							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Rp. 220.000</td>
 							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
 								<div className="flex lg:flex-row flex-col gap-4">
 									<ActionItem
@@ -193,18 +147,10 @@ const SectionRight = () => {
 							</td>
 						</tr>
 						<tr>
-							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-								2023/01/24/3
-							</td>
-							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-								Matcha Drip Cake
-							</td>
-							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-								Completed
-							</td>
-							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-								Rp. 220.000
-							</td>
+							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">2023/01/24/3</td>
+							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Matcha Drip Cake</td>
+							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Completed</td>
+							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Rp. 220.000</td>
 							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
 								<div className="flex lg:flex-row flex-col gap-4">
 									<ActionItem
@@ -218,18 +164,10 @@ const SectionRight = () => {
 							</td>
 						</tr>
 						<tr>
-							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-								2023/01/24/3
-							</td>
-							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-								Matcha Drip Cake
-							</td>
-							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-								Cancelled
-							</td>
-							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-								Rp. 220.000
-							</td>
+							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">2023/01/24/3</td>
+							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Matcha Drip Cake</td>
+							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Cancelled</td>
+							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Rp. 220.000</td>
 							<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
 								<div className="flex lg:flex-row flex-col gap-4">
 									<ActionItem
@@ -260,13 +198,7 @@ const ButtonStatus = ({ title, count, className }: ButtonProps) => {
 	);
 };
 
-const ActionItem = ({
-	src,
-	title,
-	icon,
-	status,
-	className,
-}: ActionItemProps) => {
+const ActionItem = ({ src, title, icon, status, className }: ActionItemProps) => {
 	return (
 		<div>
 			{icon ? (

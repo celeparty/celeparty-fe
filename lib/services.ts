@@ -6,7 +6,7 @@ export const axiosInstance = axios.create({
 
 export const config = {
 	headers: {
-		Authorization: "Bearer " + process.env.KEY_API,
+		Authorization: `Bearer ${process.env.KEY_API}`,
 	},
 };
 
@@ -24,7 +24,7 @@ export const getDataToken = (url: string, token: string) =>
 	axios
 		.get(`${process.env.URL_API + url}`, {
 			headers: {
-				Authorization: "Bearer " + token,
+				Authorization: `Bearer ${token}`,
 			},
 		})
 		.then((res) => {
@@ -34,11 +34,11 @@ export const getDataToken = (url: string, token: string) =>
 			console.log(error);
 		});
 
-export const putDataToken = (url: string, token: string, data: any) =>
+export const putDataToken = (url: string, token: string, data: []) =>
 	axios
 		.put(`${process.env.URL_API + url}`, data, {
 			headers: {
-				Authorization: "Bearer " + token,
+				Authorization: `Bearer ${token}`,
 			},
 		})
 		.then((res) => {
@@ -59,7 +59,7 @@ export const getDataOpen = (url: string) =>
 			console.log(error);
 		});
 
-export const postDataOpen = (url: string, data: any) =>
+export const postDataOpen = (url: string, data: []) =>
 	axios
 		.post(`${process.env.URL_API + url}`, data)
 		.then((res) => {

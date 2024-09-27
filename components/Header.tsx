@@ -1,13 +1,13 @@
 "use client";
+import { useCart } from "@/lib/store/cart";
+import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { IoIosSearch } from "react-icons/io";
+import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import { MdOutlineNotifications } from "react-icons/md";
-import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
-import { useSession, signIn, signOut } from "next-auth/react";
-import { useCart } from "@/lib/store/cart";
 
 export default function Header() {
 	const { data: session, status } = useSession();
@@ -17,12 +17,7 @@ export default function Header() {
 			<div className="wrapper-main flex flex-col lg:flex-row items-start justify-between gap-4 lg:gap-16">
 				<div className="flex items-center justify-center lg:justify-between w-full lg:w-fit">
 					<Link href="/">
-						<Image
-							src="/images/logo.svg"
-							width={234}
-							height={63}
-							alt="logo"
-						/>
+						<Image src="/images/logo.svg" width={234} height={63} alt="logo" />
 					</Link>
 				</div>
 				<div className="relative flex-1 w-full lg:max-w-[900px]">
@@ -86,10 +81,7 @@ export default function Header() {
 					</div>
 
 					{status === "authenticated" ? (
-						<div
-							className="btnline cursor-pointer"
-							onClick={() => signOut()}
-						>
+						<div className="btnline cursor-pointer" onClick={() => signOut()}>
 							Keluar
 						</div>
 					) : status === "unauthenticated" ? (

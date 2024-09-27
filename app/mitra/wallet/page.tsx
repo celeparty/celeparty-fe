@@ -1,15 +1,15 @@
 "use client";
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import Skeleton from "@/components/Skeleton";
-import { getDataToken } from "@/lib/services";
-import ErrorNetwork from "@/components/ErrorNetwork";
-import { useSession } from "next-auth/react";
-import _ from "lodash";
 import Box from "@/components/Box";
+import ErrorNetwork from "@/components/ErrorNetwork";
+import Skeleton from "@/components/Skeleton";
 import ItemProduct from "@/components/product/ItemProduct";
+import { getDataToken } from "@/lib/services";
+import { useQuery } from "@tanstack/react-query";
+import _ from "lodash";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
+import React from "react";
 
 export default function Wallet() {
 	const session = useSession();
@@ -19,10 +19,7 @@ export default function Wallet() {
 		if (!dataSession?.user?.accessToken) {
 			throw new Error("Access token is undefined");
 		}
-		return await getDataToken(
-			`/users`,
-			`${dataSession?.user?.accessToken}`,
-		);
+		return await getDataToken(`/users`, `${dataSession?.user?.accessToken}`);
 	};
 	const query = useQuery({
 		queryKey: ["qUserProfile"],
@@ -53,12 +50,8 @@ export default function Wallet() {
 						<div className="relatve text-c-gray-text2">
 							<div className="flex items-center justify-between">
 								<div className="relative">
-									<h5 className="text-black">
-										Total Saldo Aktif
-									</h5>
-									<div className="text-black font-bold text-2xl">
-										Rp. 1.000.000
-									</div>
+									<h5 className="text-black">Total Saldo Aktif</h5>
+									<div className="text-black font-bold text-2xl">Rp. 1.000.000</div>
 								</div>
 								<div className="bg-c-green text-white shadow-lg py-3 px-10 rounded-3xl cursor-pointer">
 									Tarik Saldo
@@ -75,18 +68,14 @@ export default function Wallet() {
 								</div>
 							</div>
 							<div className="mt-7 [&_label]:min-w-[220px]">
-								<h4 className="text-black text-[17px]">
-									Informasi Rekening
-								</h4>
+								<h4 className="text-black text-[17px]">Informasi Rekening</h4>
 								<div className="flex">
 									<label>Nama Bank</label>
 									<div>{dataContent?.bank_name}</div>
 								</div>
 								<div className="flex">
 									<label>Nomor Rekening</label>
-									<div>
-										{dataContent?.bank_account_number}
-									</div>
+									<div>{dataContent?.bank_account_number}</div>
 								</div>
 								<div className="flex">
 									<label>Nama Pemilik Rekening</label>

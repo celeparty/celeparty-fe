@@ -1,13 +1,13 @@
 "use client";
 
+import ErrorNetwork from "@/components/ErrorNetwork";
+import Skeleton from "@/components/Skeleton";
+import { getData } from "@/lib/services";
+import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import React from "react";
 import Box from "../Box";
 import ItemProduct from "./ItemProduct";
-import { useQuery } from "@tanstack/react-query";
-import Skeleton from "@/components/Skeleton";
-import { getData } from "@/lib/services";
-import ErrorNetwork from "@/components/ErrorNetwork";
-import Link from "next/link";
 
 export default function ProductList() {
 	const getQuery = async () => {
@@ -46,13 +46,9 @@ export default function ProductList() {
 							title={item.name}
 							image_url={item.photos[0].image_url}
 							price={item.price}
-							rate={parseInt(item.average_rating).toFixed(1)}
+							rate={Number.parseInt(item.average_rating).toFixed(1)}
 							sold={item.sold_count}
-							location={
-								item.vendor_region
-									? item.vendor_region
-									: "unknown"
-							}
+							location={item.vendor_region ? item.vendor_region : "unknown"}
 						/>
 					);
 				})}

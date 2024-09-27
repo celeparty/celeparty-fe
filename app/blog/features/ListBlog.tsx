@@ -1,11 +1,11 @@
 "use client";
-import React from "react";
-import ItemFeature from "./ItemFeature";
-import { useQuery } from "@tanstack/react-query";
+import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
 import { getData } from "@/lib/services";
-import ErrorNetwork from "@/components/ErrorNetwork";
+import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
+import React from "react";
+import ItemFeature from "./ItemFeature";
 
 export default function ListBlog() {
 	const getQuery = async () => {
@@ -30,9 +30,7 @@ export default function ListBlog() {
 	const dataContent = query?.data?.data.data;
 	return (
 		<div className="relative mt-7">
-			<h4 className="font-semibold text-[16px] text-c-blue mb-5">
-				Artikel Terbaru
-			</h4>
+			<h4 className="font-semibold text-[16px] text-c-blue mb-5">Artikel Terbaru</h4>
 			<div className="flex flex-wrap -mx-5">
 				{dataContent?.map((item: any, index: number) => {
 					return (
@@ -40,14 +38,8 @@ export default function ListBlog() {
 							slug={`/blog/${item.slug}`}
 							key={index}
 							title={item?.title}
-							date={moment(item?.publish_at).format(
-								"DD MMM YYYY",
-							)}
-							image={
-								item.thumbnail
-									? item.thumbnail
-									: "/images/no-image.png"
-							}
+							date={moment(item?.publish_at).format("DD MMM YYYY")}
+							image={item.thumbnail ? item.thumbnail : "/images/no-image.png"}
 						/>
 					);
 				})}

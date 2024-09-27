@@ -1,10 +1,10 @@
 "use client";
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
 import { getData } from "@/lib/services";
-import ErrorNetwork from "@/components/ErrorNetwork";
+import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
+import React from "react";
 import ItemFeature from "../features/ItemFeature";
 
 export default function NewArticles() {
@@ -41,11 +41,7 @@ export default function NewArticles() {
 						key={index}
 						title={item?.title}
 						date={moment(item?.publish_at).format("DD MMM YYYY")}
-						image={
-							item.thumbnail
-								? item.thumbnail
-								: "/images/no-image.png"
-						}
+						image={item.thumbnail ? item.thumbnail : "/images/no-image.png"}
 					/>
 				);
 			})}

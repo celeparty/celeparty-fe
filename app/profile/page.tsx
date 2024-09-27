@@ -1,19 +1,11 @@
 "use client";
 
-import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import {
-	Form,
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { z } from "zod";
 
 const formSchema = z.object({
 	name: z.string().nonempty({
@@ -27,14 +19,9 @@ const formSchema = z.object({
 			message: "Tanggal harus dalam format Hari-Bulan-Tahun dalam angka!",
 		}),
 
-	gender: z
-		.string()
-		.nonempty({ message: "Jenis kelamin Tidak Boleh Kosong" }),
+	gender: z.string().nonempty({ message: "Jenis kelamin Tidak Boleh Kosong" }),
 
-	email: z
-		.string()
-		.nonempty({ message: "Email Tidak Boleh Kosong" })
-		.email({ message: "Email Tidak Valid" }),
+	email: z.string().nonempty({ message: "Email Tidak Boleh Kosong" }).email({ message: "Email Tidak Valid" }),
 
 	phone: z
 		.string()
@@ -52,9 +39,7 @@ interface NotificationItem {
 const TableStatus = () => {
 	return (
 		<div className="mt-20 h-[400px]">
-			<h1 className="font-hind font-semibold text-[16px] text-black mb-6">
-				Status Pembelian
-			</h1>
+			<h1 className="font-hind font-semibold text-[16px] text-black mb-6">Status Pembelian</h1>
 			<table className="min-w-full bg-white border-b-2 border-gray-200">
 				<thead className="">
 					<tr>
@@ -77,55 +62,25 @@ const TableStatus = () => {
 				</thead>
 				<tbody className="[&_td]:text-start [&_td]:font-normal [&_td]:lg:text-[10px] [&_td]:text-[12px] [&_td]:font-hind [&_td]:text-[#3C3C3C] [&_td]:border-b-4">
 					<tr>
-						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-							2023/01/24/1
-						</td>
-						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-							Matcha Drip Cake
-						</td>
-						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-							Pending
-						</td>
-						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-							Rp. 220.000
-						</td>
-						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-							ABC Cakes
-						</td>
+						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">2023/01/24/1</td>
+						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Matcha Drip Cake</td>
+						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Pending</td>
+						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Rp. 220.000</td>
+						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">ABC Cakes</td>
 					</tr>
 					<tr>
-						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-							2023/01/24/2
-						</td>
-						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-							Matcha Drip Cake
-						</td>
-						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-							Processing
-						</td>
-						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-							Rp. 220.000
-						</td>
-						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-							ABC Cakes
-						</td>
+						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">2023/01/24/2</td>
+						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Matcha Drip Cake</td>
+						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Processing</td>
+						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Rp. 220.000</td>
+						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">ABC Cakes</td>
 					</tr>
 					<tr>
-						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-							2023/01/24/3
-						</td>
-						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-							Matcha Drip Cake
-						</td>
-						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-							Shipping
-						</td>
-						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-							Rp. 220.000
-						</td>
-						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">
-							ABC Cakes
-						</td>
+						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">2023/01/24/3</td>
+						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Matcha Drip Cake</td>
+						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Shipping</td>
+						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">Rp. 220.000</td>
+						<td className="lg:px-6 px-4 py-4 border-b border-gray-200">ABC Cakes</td>
 					</tr>
 				</tbody>
 			</table>
@@ -133,15 +88,10 @@ const TableStatus = () => {
 	);
 };
 
-const NotificationItem: React.FC<NotificationItem> = ({
-	title,
-	description,
-}) => {
+const NotificationItem: React.FC<NotificationItem> = ({ title, description }) => {
 	return (
 		<div className="">
-			<h3 className="font-hind font-semibold text-[15px] lg:text-[12px] text-black leading-[20px]">
-				{title}
-			</h3>
+			<h3 className="font-hind font-semibold text-[15px] lg:text-[12px] text-black leading-[20px]">{title}</h3>
 			<p className="font-hind font-normal text-[13px] lg:text-[10px] leading-[15px] text-[#3C3C3C]">
 				{description}
 			</p>
@@ -192,10 +142,7 @@ const InputUser = () => {
 	}
 	return (
 		<Form {...form}>
-			<form
-				onSubmit={form.handleSubmit(onSubmit)}
-				className="-mt-10 lg:mt-0"
-			>
+			<form onSubmit={form.handleSubmit(onSubmit)} className="-mt-10 lg:mt-0">
 				<FormField
 					control={form.control}
 					name="name"
@@ -206,10 +153,7 @@ const InputUser = () => {
 									Nama
 								</FormLabel>
 								<FormControl className="w-[320px]">
-									<Input
-										className="border border-[#ADADAD] rounded-lg"
-										{...field}
-									/>
+									<Input className="border border-[#ADADAD] rounded-lg" {...field} />
 								</FormControl>
 							</div>
 							<div className="ml-[160px]">
@@ -228,10 +172,7 @@ const InputUser = () => {
 									Tanggal Lahir
 								</FormLabel>
 								<FormControl className="w-[320px]">
-									<Input
-										className="border border-[#ADADAD] rounded-lg"
-										{...field}
-									/>
+									<Input className="border border-[#ADADAD] rounded-lg" {...field} />
 								</FormControl>
 							</div>
 							<div className="ml-[160px]">
@@ -250,10 +191,7 @@ const InputUser = () => {
 									Jenis Kelamin
 								</FormLabel>
 								<FormControl className="w-[320px]">
-									<Input
-										className="border border-[#ADADAD] rounded-lg"
-										{...field}
-									/>
+									<Input className="border border-[#ADADAD] rounded-lg" {...field} />
 								</FormControl>
 							</div>
 							<div className="ml-[160px]">
@@ -272,10 +210,7 @@ const InputUser = () => {
 									Email
 								</FormLabel>
 								<FormControl className="w-[320px]">
-									<Input
-										className="border border-[#ADADAD] rounded-lg"
-										{...field}
-									/>
+									<Input className="border border-[#ADADAD] rounded-lg" {...field} />
 								</FormControl>
 							</div>
 							<div className="ml-[160px]">
@@ -294,10 +229,7 @@ const InputUser = () => {
 									No HP
 								</FormLabel>
 								<FormControl className="w-[320px]">
-									<Input
-										className="border border-[#ADADAD] rounded-lg"
-										{...field}
-									/>
+									<Input className="border border-[#ADADAD] rounded-lg" {...field} />
 								</FormControl>
 							</div>
 							<div className="ml-[160px]">
@@ -339,9 +271,8 @@ const ProfilePage = () => {
 							Pilih Foto
 						</button>
 						<p className="font-hind font-normal text-[11px] text-center leading-[20px]">
-							Besar file: maksimum 10.000.000 bytes (10
-							Megabytes). <br /> Ekstensi file yang diperbolehkan:
-							.JPG .JPEG .PNG
+							Besar file: maksimum 10.000.000 bytes (10 Megabytes). <br /> Ekstensi file yang
+							diperbolehkan: .JPG .JPEG .PNG
 						</p>
 					</div>
 					<div className="w-fit">

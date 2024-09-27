@@ -1,17 +1,27 @@
 "use client";
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import Skeleton from "@/components/Skeleton";
-import { getData } from "@/lib/services";
-import ErrorNetwork from "@/components/ErrorNetwork";
-import moment from "moment";
 import Basecontent from "@/components/Basecontent";
+import ErrorNetwork from "@/components/ErrorNetwork";
+import Skeleton from "@/components/Skeleton";
 import ItemProduct from "@/components/product/ItemProduct";
-import { useRouter, notFound } from "next/navigation";
+import { getData } from "@/lib/services";
+import { useQuery } from "@tanstack/react-query";
+import moment from "moment";
+import { notFound, useRouter } from "next/navigation";
+import React from "react";
 
 interface iRecomended {
 	slug: string;
 }
+
+interface Iitem {
+	id: string | number;
+	title: string;
+	thumbnail: string | null;
+	price: number;
+	average_rating: string | number;
+	sold_count: number;
+	vendor_region: string | null;
+  }
 
 function RecomendedList(props: iRecomended) {
 	const router = useRouter();
@@ -37,30 +47,22 @@ function RecomendedList(props: iRecomended) {
 	if (query.isError) {
 		return notFound();
 	}
-	const dataContent = query?.data?.data.data;
+	const dataContent: Iitem[] = query?.data?.data.data;
 	return (
 		<div>
 			<h4 className="font-semibold text-[16px] text-black">Untuk Anda</h4>
 			<div className="flex flex-wrap  lg:-mx-2">
-				{dataContent?.map((item: any, i: number) => {
+				{dataContent?.map((item, i: number) => {
 					return (
 						<ItemProduct
 							url={`/blog/${item.id}`}
 							key={item.id}
 							title={item.title}
-							image_url={
-								item.thumbnail
-									? item.thumbnail
-									: "/images/noimage.png"
-							}
+							image_url={item.thumbnail ? item.thumbnail : "/images/noimage.png"}
 							price={item.price}
-							rate={parseInt(item.average_rating).toFixed(1)}
-							sold={item.sold_count}
-							location={
-								item.vendor_region
-									? item.vendor_region
-									: "unknown"
-							}
+							rate={Number.parseInt(`${item.average_rating}`).toFixed(1)}
+							sold={`${item.sold_count}`}
+							location={item.vendor_region ? item.vendor_region : "unknown"}
 						/>
 					);
 				})}

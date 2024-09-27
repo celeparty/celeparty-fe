@@ -24,11 +24,9 @@ const LowerAbout = () => {
 						APA ITU <br /> CELEPARTY?
 					</h1>
 					<p className="font-quick font-semibold text-[20px] leading-[30px] text-start lg:text-end">
-						Sebuah platform untuk membantu kamu merencanakan <br />{" "}
-						acara impianmu dengan mudah, dengan beragam produk{" "}
-						<br /> dan layanan yang berkualitas, dengan alur yang
-						mudah <br /> untuk membantu kamu merencanakan acara
-						dengan cepat..
+						Sebuah platform untuk membantu kamu merencanakan <br /> acara impianmu dengan mudah, dengan
+						beragam produk <br /> dan layanan yang berkualitas, dengan alur yang mudah <br /> untuk membantu
+						kamu merencanakan acara dengan cepat..
 					</p>
 				</div>
 				<div className="lg:block hidden">
@@ -36,9 +34,8 @@ const LowerAbout = () => {
 				</div>
 				<div className="flex justify-center text-white">
 					<p className="text-center pt-20 lg:pt-0 font-quick font-bold text-[16px] leading-[20px]">
-						"Kami memahami betapa pentingnya setiap momen spesial
-						dalam hidupmu. <br /> Itulah alasan mengapa Celeparty
-						hadir untuk mewujudkannya."
+						"Kami memahami betapa pentingnya setiap momen spesial dalam hidupmu. <br /> Itulah alasan
+						mengapa Celeparty hadir untuk mewujudkannya."
 					</p>
 				</div>
 			</div>

@@ -1,6 +1,6 @@
-import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import React from "react";
 
 interface iItemFeature {
 	title: string;
@@ -10,17 +10,9 @@ interface iItemFeature {
 	small?: boolean;
 }
 
-export default function ItemFeature({
-	title,
-	date,
-	image,
-	slug,
-	small,
-}: iItemFeature) {
+export default function ItemFeature({ title, date, image, slug, small }: iItemFeature) {
 	return (
-		<div
-			className={`${small ? "w-full mb-5" : "w-full lg:w-6/12 px-5 pb-5"}`}
-		>
+		<div className={`${small ? "w-full mb-5" : "w-full lg:w-6/12 px-5 pb-5"}`}>
 			<div className="flex gap-3">
 				<div
 					className={`relative fill-current ${small ? "w-[100px] h-[100px]" : "w-[150px] h-[150px]"} overflow-hidden`}

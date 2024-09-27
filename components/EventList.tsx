@@ -1,12 +1,12 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
 import { getData } from "@/lib/services";
-import ErrorNetwork from "@/components/ErrorNetwork";
-import Link from "next/link";
-import Image from "next/image";
-import Box from "./Box";
+import { useQuery } from "@tanstack/react-query";
 import _ from "lodash";
+import Image from "next/image";
+import Link from "next/link";
+import Box from "./Box";
 
 export default function EventList() {
 	const getQuery = async () => {
@@ -29,9 +29,7 @@ export default function EventList() {
 	}
 	const dataContent = query?.data?.data.data;
 	const dataGroup = _.groupBy(dataContent, (item) => {
-		const categoryRecs = item?.category_recs?.map(
-			(categoryRec: any) => categoryRec.name,
-		);
+		const categoryRecs = item?.category_recs?.map((categoryRec: any) => categoryRec.name);
 		if (categoryRecs?.includes("Lainnya di Event")) {
 			return "event";
 		} else {
@@ -43,64 +41,40 @@ export default function EventList() {
 		<Box className="lg:px-9 px-2 lg:py-7 py-2">
 			<div className="flex flex-wrap justify-around gap-5 align-top">
 				<div className="relative flex-1">
-					<h4 className="font-semibold text-[16px] text-c-blue mb-2">
-						Event
-					</h4>
+					<h4 className="font-semibold text-[16px] text-c-blue mb-2">Event</h4>
 					<div className="flex justify-between border-solid h-fit lg:min-h-[123px] border-gray-300 border-[1px] p-2 lg:p-5 rounded-lg bg-gray-50">
 						{dataGroup?.event?.map((item: any, i: number) => {
 							return (
-								<Link
-									href="/product"
-									className="text-center max-w-[120px]"
-									key={item.id}
-								>
+								<Link href="/product" className="text-center max-w-[120px]" key={item.id}>
 									<div className="relative w-[47px] h-[47px] text-center mx-auto mb-1">
 										<Image
-											src={
-												item.icon_url
-													? item.icon_url
-													: "/images/pic.png"
-											}
+											src={item.icon_url ? item.icon_url : "/images/pic.png"}
 											fill
 											alt=""
 											className="left-0 right-0 mx-auto"
 										/>
 									</div>
-									<div className="text-[10px] text-c-blue font-semibold">
-										{item.name}
-									</div>
+									<div className="text-[10px] text-c-blue font-semibold">{item.name}</div>
 								</Link>
 							);
 						})}
 					</div>
 				</div>
 				<div className="relative flex-1">
-					<h4 className="font-semibold text-[16px] text-c-blue mb-2">
-						Produk
-					</h4>
+					<h4 className="font-semibold text-[16px] text-c-blue mb-2">Produk</h4>
 					<div className="flex justify-between border-solid h-fit lg:min-h-[123px] border-gray-300 border-[1px]  p-2 lg:p-5 rounded-lg bg-gray-50">
 						{dataGroup?.product?.map((item: any, i: number) => {
 							return (
-								<Link
-									href="/product"
-									className="text-center max-w-[120px]"
-									key={item.id}
-								>
+								<Link href="/product" className="text-center max-w-[120px]" key={item.id}>
 									<div className="relative w-[47px] h-[47px] text-center mx-auto mb-1">
 										<Image
-											src={
-												item.icon_url
-													? item.icon_url
-													: "/images/pic.png"
-											}
+											src={item.icon_url ? item.icon_url : "/images/pic.png"}
 											fill
 											alt=""
 											className="left-0 right-0 mx-auto"
 										/>
 									</div>
-									<div className="text-[10px] text-c-blue font-semibold">
-										{item.name}
-									</div>
+									<div className="text-[10px] text-c-blue font-semibold">{item.name}</div>
 								</Link>
 							);
 						})}

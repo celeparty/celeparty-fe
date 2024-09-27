@@ -1,22 +1,14 @@
 "use client";
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
 import { getDataToken } from "@/lib/services";
-import ErrorNetwork from "@/components/ErrorNetwork";
-import { useSession } from "next-auth/react";
+import { useQuery } from "@tanstack/react-query";
 import _ from "lodash";
+import { useSession } from "next-auth/react";
+import React from "react";
 
-import {
-	Table,
-	TableBody,
-	TableCaption,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
 import Box from "@/components/Box";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface iItemStatus {
 	status: string;
@@ -43,10 +35,7 @@ export default function HomeMitra() {
 		if (!dataSession?.user?.accessToken) {
 			throw new Error("Access token is undefined");
 		}
-		return await getDataToken(
-			`/transactions/vendor`,
-			`${dataSession?.user?.accessToken}`,
-		);
+		return await getDataToken(`/transactions/vendor`, `${dataSession?.user?.accessToken}`);
 	};
 	const query = useQuery({
 		queryKey: ["qMyOrder"],
@@ -67,19 +56,13 @@ export default function HomeMitra() {
 				<ItemStatus status="PENDING" value={1} color="#3E2882" />
 				<ItemStatus status="PROCESS" value={1} color="#56C200" />
 				<ItemStatus status="CANCEL" value={1} color="#F60E0E" />
-				<ItemStatus
-					status="INCOME"
-					value="Rp. 1.000.000"
-					color="#44CADC"
-				/>
+				<ItemStatus status="INCOME" value="Rp. 1.000.000" color="#44CADC" />
 			</div>
 			<Box>
 				<Table>
 					<TableHeader className="bg-white">
 						<TableRow>
-							<TableHead className="w-[150px]">
-								ORDER DATE
-							</TableHead>
+							<TableHead className="w-[150px]">ORDER DATE</TableHead>
 							<TableHead>ITEM</TableHead>
 							<TableHead>STATUS</TableHead>
 							<TableHead>TOTAL</TableHead>
@@ -88,13 +71,8 @@ export default function HomeMitra() {
 					<TableBody>
 						{dataContent?.map((item: any, i: number) => {
 							return (
-								<TableRow
-									className={`${i % 2 === 0 ? "bg-slate-200" : "bg-white"}`}
-									key={item.id}
-								>
-									<TableCell className="font-medium">
-										Tanggal Belom ada di api
-									</TableCell>
+								<TableRow className={`${i % 2 === 0 ? "bg-slate-200" : "bg-white"}`} key={item.id}>
+									<TableCell className="font-medium">Tanggal Belom ada di api</TableCell>
 									<TableCell>{item.name}</TableCell>
 									<TableCell>{item.status}</TableCell>
 									<TableCell>{item.price}</TableCell>

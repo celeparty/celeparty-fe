@@ -1,23 +1,17 @@
 "use client";
-import React, { useState } from "react";
-import { GrFormEdit, GrEdit } from "react-icons/gr";
-import { z } from "zod";
+import ErrorNetwork from "@/components/ErrorNetwork";
+import Skeleton from "@/components/Skeleton";
+import SubTitle from "@/components/SubTitle";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getDataToken, putDataToken } from "@/lib/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import Skeleton from "@/components/Skeleton";
-import { getDataToken, putDataToken } from "@/lib/services";
-import ErrorNetwork from "@/components/ErrorNetwork";
 import { useSession } from "next-auth/react";
-import { useForm, SubmitHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import SubTitle from "@/components/SubTitle";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
+import React, { useState } from "react";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import { GrEdit, GrFormEdit } from "react-icons/gr";
+import { z } from "zod";
 
 type UserData = {
 	name?: string | null | undefined;
@@ -34,9 +28,7 @@ function ItemInput({ label, sublabel, children }: any) {
 	return (
 		<div className="flex flex-col justify-items-start w-full gap-2 mb-5  [&_input]:bg-gray-100 [&_input]:hover:bg-white [&_textarea]:bg-gray-100 [&_textarea]:hover:bg-white">
 			{label ? <div className="w-[full]">{label}</div> : null}
-			{sublabel ? (
-				<div className="text-[#DA7E01] text-[10px] ">{sublabel}</div>
-			) : null}
+			{sublabel ? <div className="text-[#DA7E01] text-[10px] ">{sublabel}</div> : null}
 			{children}
 		</div>
 	);
@@ -77,10 +69,7 @@ export default function MainContentAddProduct() {
 		if (!dataSession?.user?.accessToken) {
 			throw new Error("Access token is undefined");
 		}
-		return await getDataToken(
-			`/categories`,
-			`${dataSession?.user?.accessToken}`,
-		);
+		return await getDataToken(`/categories`, `${dataSession?.user?.accessToken}`);
 	};
 	const query = useQuery({
 		queryKey: ["qCategories"],
@@ -93,10 +82,7 @@ export default function MainContentAddProduct() {
 		if (!dataSession?.user?.accessToken) {
 			throw new Error("Access token is undefined");
 		}
-		return await getDataToken(
-			`/themes`,
-			`${dataSession?.user?.accessToken}`,
-		);
+		return await getDataToken(`/themes`, `${dataSession?.user?.accessToken}`);
 	};
 	const queryThemes = useQuery({
 		queryKey: ["qThemes"],
@@ -128,7 +114,7 @@ export default function MainContentAddProduct() {
 				<SubTitle title="Pilih Kategori Produk" />
 				<div className="flex flex-wrap gap-2 mb-5">
 					{dataCategory?.map((item: any, i: number) => {
-						let isActive = stateCategory.value === item.id;
+						const isActive = stateCategory.value === item.id;
 						return (
 							<div
 								onClick={() => {
@@ -151,11 +137,7 @@ export default function MainContentAddProduct() {
 						placeholder="Nama Produk"
 						{...register("name", { required: true })}
 					/>
-					{errors.name && (
-						<p className="text-red-500 text-[10px]">
-							Tidak Boleh Kosong
-						</p>
-					)}
+					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
 				</ItemInput>
 				<ItemInput sublabel="Tambah Foto">
 					<div className="w-full">
@@ -164,11 +146,7 @@ export default function MainContentAddProduct() {
 							className="border border-gray-300 rounded-md py-2 px-5 w-full"
 							{...register("image_urls", { required: true })}
 						/>
-						{errors.name && (
-							<p className="text-red-500 text-[10px]">
-								Tidak Boleh Kosong
-							</p>
-						)}
+						{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
 					</div>
 				</ItemInput>
 				<ItemInput>
@@ -177,11 +155,7 @@ export default function MainContentAddProduct() {
 						placeholder="Harga Produk (Rp)"
 						{...register("price", { required: true })}
 					/>
-					{errors.name && (
-						<p className="text-red-500 text-[10px]">
-							Tidak Boleh Kosong
-						</p>
-					)}
+					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
 				</ItemInput>
 				<ItemInput>
 					<textarea
@@ -189,11 +163,7 @@ export default function MainContentAddProduct() {
 						placeholder="Deskripsi Produk"
 						{...register("desc", { required: true })}
 					/>
-					{errors.name && (
-						<p className="text-red-500 text-[10px]">
-							Tidak Boleh Kosong
-						</p>
-					)}
+					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
 				</ItemInput>
 				<ItemInput label="Minimal Item Pembelian (Optional)">
 					<input
@@ -212,7 +182,7 @@ export default function MainContentAddProduct() {
 				<ItemInput label="Tema">
 					<div className="flex flex-wrap gap-2 mb-5">
 						{dataThemes?.map((item: any, i: number) => {
-							let isActive = stateTheme.value === item.id;
+							const isActive = stateTheme.value === item.id;
 							return (
 								<div
 									onClick={() => {
@@ -229,21 +199,11 @@ export default function MainContentAddProduct() {
 							);
 						})}
 					</div>
-					{errors.name && (
-						<p className="text-red-500 text-[10px]">
-							Tidak Boleh Kosong
-						</p>
-					)}
+					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
 				</ItemInput>
 				<ItemInput label="Varian">
-					<div className="text-[#DA7E01] text-[12px] cursor-pointer">
-						Tambah Varian
-					</div>
-					{errors.name && (
-						<p className="text-red-500 text-[10px]">
-							Tidak Boleh Kosong
-						</p>
-					)}
+					<div className="text-[#DA7E01] text-[12px] cursor-pointer">Tambah Varian</div>
+					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
 				</ItemInput>
 				<div className="flex justify-center">
 					<input

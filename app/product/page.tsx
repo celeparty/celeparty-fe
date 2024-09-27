@@ -1,6 +1,6 @@
+import Basecontent from "@/components/Basecontent";
 import React from "react";
 import ProductContent from "./ProductContent";
-import Basecontent from "@/components/Basecontent";
 
 export default function ProductPage() {
 	return (

@@ -1,36 +1,25 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import {
-	Form,
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useSession, signIn, signOut } from "next-auth/react";
 import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 const signInSchema = z.object({
 	email: z
 		.string()
 		.email({ message: "Email tidak valid" })
 		.max(254, { message: "Maksimal karakter untuk email yaitu 254 huruf" }),
-	password: z
-		.string()
-		.min(6, { message: "Kata sandi minimal 6 karakter" })
-		.max(64, {
-			message: "Maksimal karakter untuk kata sandi yaitu 64 huruf",
-		}),
+	password: z.string().min(6, { message: "Kata sandi minimal 6 karakter" }).max(64, {
+		message: "Maksimal karakter untuk kata sandi yaitu 64 huruf",
+	}),
 });
 
 const LoginMitra = () => {
@@ -65,25 +54,13 @@ const LoginMitra = () => {
 		<div className="relative wrapper py-7 bg-[#CBD002] my-5 rounded-lg">
 			<div className="w-[260px] mx-auto py-8">
 				<div className="flex justify-center">
-					<Image
-						src={"/images/cake-color-white.png"}
-						width={111}
-						height={80}
-						alt="Cake Color.."
-					/>
+					<Image src={"/images/cake-color-white.png"} width={111} height={80} alt="Cake Color.." />
 				</div>
-				<h1 className="text-[26px] text-center font-semibold text-white mb-7">
-					CELEPARTNER
-				</h1>
-				<h2 className="font-hind font-semibold text-[24px] text-white">
-					Login
-				</h2>
+				<h1 className="text-[26px] text-center font-semibold text-white mb-7">CELEPARTNER</h1>
+				<h2 className="font-hind font-semibold text-[24px] text-white">Login</h2>
 				<div className="mt-6">
 					<Form {...form}>
-						<form
-							onSubmit={form.handleSubmit(Login)}
-							className="space-y-8"
-						>
+						<form onSubmit={form.handleSubmit(Login)} className="space-y-8">
 							<FormField
 								control={form.control}
 								name="email"
@@ -118,10 +95,7 @@ const LoginMitra = () => {
 								)}
 							/>
 							<div className="flex justify-end mt-2">
-								<Link
-									href={"/"}
-									className="font-hind font-semibold text-[12px] text-c-orange"
-								>
+								<Link href={"/"} className="font-hind font-semibold text-[12px] text-c-orange">
 									Lupa Kata Sandi?
 								</Link>
 							</div>
@@ -135,12 +109,8 @@ const LoginMitra = () => {
 									</Button>
 									<div>
 										<p className="font-hind font-semibold text-white text-[12px] text-center mt-4">
-											Ingin menjadi Mitra Celeparty?{" "}
-											<br />
-											<Link
-												href="/auth/mitra/register"
-												className="text-red-500"
-											>
+											Ingin menjadi Mitra Celeparty? <br />
+											<Link href="/auth/mitra/register" className="text-red-500">
 												Registrasi sebagai Mitra
 											</Link>
 										</p>

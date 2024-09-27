@@ -1,10 +1,10 @@
 "use client";
-import React from "react";
 import { Button } from "@/components/ui/button";
-import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+import type React from "react";
+import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 
 interface iItemInfo {
 	image: string;

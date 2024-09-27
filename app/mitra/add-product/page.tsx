@@ -1,8 +1,8 @@
 "use client";
 import Box from "@/components/Box";
 
-import { AiFillCustomerService } from "react-icons/ai";
 import Link from "next/link";
+import { AiFillCustomerService } from "react-icons/ai";
 import MainContentAddProduct from "./MainContent";
 
 export default function ProfilePage() {

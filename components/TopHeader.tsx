@@ -1,34 +1,22 @@
-import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import React from "react";
 import { IoIosSearch } from "react-icons/io";
+import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import { MdOutlineNotifications } from "react-icons/md";
-import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 export default function TopHeader() {
 	return (
 		<div className="relative bg-[#F0F3F7] px-4 mb-4 lg:mb-0">
 			<div className="wrapper-main flex lg:flex-row flex-col gap-2 lg:gap-0 items-center justify-between">
 				<div className="flex lg:flex-row flex-col mt-4 lg:mt-0 items-center gap-2 mb-4 lg:mb-0">
-					<div className="lg:text-sm text-lg">
-						Download Celeparty App
-					</div>
+					<div className="lg:text-sm text-lg">Download Celeparty App</div>
 					<div className="flex lg:flex-row flex-row">
 						<Link href="/">
-							<Image
-								src="/images/appstore.png"
-								width={123}
-								height={41}
-								alt="app store"
-							/>
+							<Image src="/images/appstore.png" width={123} height={41} alt="app store" />
 						</Link>
 						<Link href="/">
-							<Image
-								src="/images/playstore.png"
-								width={123}
-								height={43}
-								alt="play store"
-							/>
+							<Image src="/images/playstore.png" width={123} height={43} alt="play store" />
 						</Link>
 					</div>
 				</div>

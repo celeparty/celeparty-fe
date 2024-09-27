@@ -1,12 +1,12 @@
+import Basecontent from "@/components/Basecontent";
 import Box from "@/components/Box";
 import { getData } from "@/lib/services";
-import React from "react";
+import parse from "html-react-parser";
 import moment from "moment";
 import Image from "next/image";
-import parse from "html-react-parser";
-import Basecontent from "@/components/Basecontent";
-import NewArticles from "./NewArticles";
+import React from "react";
 import Recomended from "../features/Recomended";
+import NewArticles from "./NewArticles";
 
 export default async function BlogDetail({
 	params,
@@ -22,16 +22,10 @@ export default async function BlogDetail({
 				<div className="wrapper">
 					<div className="flex lg:flex-row flex-col flex-wrap -mx-5">
 						<div className="w-11/12 lg:w-8/12 px-5">
-							<h1 className="text-[30px] text-black font-bold">
-								{dataContent?.title}
-							</h1>
+							<h1 className="text-[30px] text-black font-bold">{dataContent?.title}</h1>
 							<div className="relative text-sm text-c-gray-text2 my-2">
-								{dataContent?.author
-									? "Author: " + dataContent?.author + " - "
-									: null}
-								{moment(dataContent?.publish_at).format(
-									"DD MMM YYYY",
-								)}
+								{dataContent?.author ? "Author: " + dataContent?.author + " - " : null}
+								{moment(dataContent?.publish_at).format("DD MMM YYYY")}
 							</div>
 						</div>
 						<div className="w-4/12 px-5"></div>
@@ -57,9 +51,7 @@ export default async function BlogDetail({
 						</div>
 						<div className="w-full lg:w-4/12 px-5">
 							<div className="relative">
-								<h4 className="font-semibold text-[16px] text-black">
-									Artikel Terbaru
-								</h4>
+								<h4 className="font-semibold text-[16px] text-black">Artikel Terbaru</h4>
 								<Basecontent>
 									<div className="my-2">
 										<NewArticles />

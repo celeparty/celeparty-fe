@@ -1,13 +1,13 @@
 "use client";
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import Skeleton from "@/components/Skeleton";
-import { getDataToken } from "@/lib/services";
-import ErrorNetwork from "@/components/ErrorNetwork";
-import { useSession } from "next-auth/react";
-import _ from "lodash";
 import Box from "@/components/Box";
+import ErrorNetwork from "@/components/ErrorNetwork";
+import Skeleton from "@/components/Skeleton";
 import ItemProduct from "@/components/product/ItemProduct";
+import { getDataToken } from "@/lib/services";
+import { useQuery } from "@tanstack/react-query";
+import _ from "lodash";
+import { useSession } from "next-auth/react";
+import React from "react";
 
 interface iItemStatus {
 	status: string;
@@ -34,10 +34,7 @@ export default function Products() {
 		if (!dataSession?.user?.accessToken) {
 			throw new Error("Access token is undefined");
 		}
-		return await getDataToken(
-			`/products/vendor`,
-			`${dataSession?.user?.accessToken}`,
-		);
+		return await getDataToken(`/products/vendor`, `${dataSession?.user?.accessToken}`);
 	};
 	const query = useQuery({
 		queryKey: ["qProductsVendor"],
@@ -64,8 +61,8 @@ export default function Products() {
 								key={item.id}
 								title={item.name}
 								image_url={item.photos[0].image_url}
-								price={`Rp. ${parseInt(`${item.default_variant_price}`).toLocaleString("id-ID")}`}
-								rate={parseInt(item.average_rating).toFixed(1)}
+								price={`Rp. ${Number.parseInt(`${item.default_variant_price}`).toLocaleString("id-ID")}`}
+								rate={Number.parseInt(item.average_rating).toFixed(1)}
 								sold={item.sold_count}
 								location={false}
 							></ItemProduct>

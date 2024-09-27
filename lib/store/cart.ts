@@ -1,6 +1,6 @@
-import { create } from "zustand";
 import _ from "lodash";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 export const useCart = create(
 	persist(
@@ -12,8 +12,8 @@ export const useCart = create(
 					cartLength: state.cartLength + 1,
 				}));
 			},
-			setCart: (data: any) =>
-				set((state: { cart: any }) => ({
+			setCart: (data: []) =>
+				set((state: { cart: [] }) => ({
 					cart: [...state.cart, ...data],
 				})),
 			test: () => console.log("test"),

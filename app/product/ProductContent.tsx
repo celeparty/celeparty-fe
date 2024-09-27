@@ -1,17 +1,17 @@
 "use client";
-import React, { useState } from "react";
 import Box from "@/components/Box";
-import { ItemCategory, ItemInfo } from "./ItemCategory";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
-import ItemProduct from "@/components/product/ItemProduct";
-import { useQuery } from "@tanstack/react-query";
-import Skeleton from "@/components/Skeleton";
-import { getData } from "@/lib/services";
 import ErrorNetwork from "@/components/ErrorNetwork";
+import Skeleton from "@/components/Skeleton";
+import ItemProduct from "@/components/product/ItemProduct";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { getData } from "@/lib/services";
+import { useQuery } from "@tanstack/react-query";
 import _ from "lodash";
 import { useRouter, useSearchParams } from "next/navigation";
+import React, { useState } from "react";
+import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
+import { ItemCategory, ItemInfo } from "./ItemCategory";
 
 export default function ProductContent() {
 	const [sortDesc, setSortDesc] = useState(true);
@@ -44,12 +44,9 @@ export default function ProductContent() {
 		const priceRange = _.split(price, "-");
 		const priceMin =
 			priceRange.length === 2
-				? parseInt(priceRange[0].replace(/[^0-9]/g, ""))
-				: parseInt(price.replace(/[^0-9]/g, ""));
-		const priceMax =
-			priceRange.length === 2
-				? parseInt(priceRange[1].replace(/[^0-9]/g, ""))
-				: null;
+				? Number.parseInt(priceRange[0].replace(/[^0-9]/g, ""))
+				: Number.parseInt(price.replace(/[^0-9]/g, ""));
+		const priceMax = priceRange.length === 2 ? Number.parseInt(priceRange[1].replace(/[^0-9]/g, "")) : null;
 
 		return {
 			...item,
@@ -64,29 +61,20 @@ export default function ProductContent() {
 		getMin || getMax
 			? _.orderBy(
 					_.filter(newDataContent, (item) => {
-						const priceMin = parseFloat(item.price_min);
-						const priceMax = item.price_max
-							? parseFloat(item.price_max)
-							: null;
+						const priceMin = Number.parseFloat(item.price_min);
+						const priceMax = item.price_max ? Number.parseFloat(item.price_max) : null;
 
 						return (
-							(getMin === null ||
-								getMin === "" ||
-								priceMin >= parseFloat(getMin)) &&
+							(getMin === null || getMin === "" || priceMin >= Number.parseFloat(getMin)) &&
 							(getMax === null ||
 								getMax === "" ||
-								(priceMax !== null &&
-									priceMax <= parseFloat(getMax)))
+								(priceMax !== null && priceMax <= Number.parseFloat(getMax)))
 						);
 					}),
 					[`${getSort}`],
 					[`${sortDesc ? "desc" : "asc"}`],
 				)
-			: _.orderBy(
-					newDataContent,
-					[`${getSort}`],
-					[`${sortDesc ? "desc" : "asc"}`],
-				);
+			: _.orderBy(newDataContent, [`${getSort}`], [`${sortDesc ? "desc" : "asc"}`]);
 
 	const handleSort = ({ sortBy }: { sortBy: string }) => {
 		// router.push(`?sort=${sortBy}`)
@@ -98,15 +86,11 @@ export default function ProductContent() {
 		sortBy === "price" && setSortDesc(!sortDesc);
 	};
 	const priceMin = (e: any) => {
-		getSort
-			? router.push(`?sort=${getSort}&min=${e.target.value}`)
-			: router.push(`?min=${e.target.value}`);
+		getSort ? router.push(`?sort=${getSort}&min=${e.target.value}`) : router.push(`?min=${e.target.value}`);
 	};
 	const priceMax = (e: any) => {
 		getSort
-			? router.push(
-					`?sort=${getSort}&min=${getMin}&max=${e.target.value}`,
-				)
+			? router.push(`?sort=${getSort}&min=${getMin}&max=${e.target.value}`)
 			: router.push(`?min=${getMin}&max=${e.target.value}`);
 	};
 	return (
@@ -204,12 +188,7 @@ export default function ProductContent() {
 								}}
 								className="flex gap-1 items-center w-full lg:w-auto border-2 border-black border-solid lg:border-none"
 							>
-								Harga{" "}
-								{sortDesc ? (
-									<IoIosArrowDown />
-								) : (
-									<IoIosArrowUp />
-								)}
+								Harga {sortDesc ? <IoIosArrowDown /> : <IoIosArrowUp />}
 							</Button>
 							<div className="flex items-center gap-2 w-full lg:w-auto">
 								Rp{" "}
@@ -241,27 +220,14 @@ export default function ProductContent() {
 									image_url={item.photos[0].image_url}
 									price={
 										item.price_max
-											? `Rp. ${parseInt(
-													`${item.price_min}`,
-												).toLocaleString(
+											? `Rp. ${Number.parseInt(`${item.price_min}`).toLocaleString(
 													"id-ID",
-												)} - Rp. ${parseInt(
-													`${item.price_max}`,
-												).toLocaleString("id-ID")}`
-											: "Rp. " +
-												parseInt(
-													`${item.price}`,
-												).toLocaleString("id-ID")
+												)} - Rp. ${Number.parseInt(`${item.price_max}`).toLocaleString("id-ID")}`
+											: "Rp. " + Number.parseInt(`${item.price}`).toLocaleString("id-ID")
 									}
-									rate={parseInt(item.average_rating).toFixed(
-										1,
-									)}
+									rate={Number.parseInt(item.average_rating).toFixed(1)}
 									sold={item.sold_count}
-									location={
-										item.vendor_region
-											? item.vendor_region
-											: "unknown"
-									}
+									location={item.vendor_region ? item.vendor_region : "unknown"}
 								></ItemProduct>
 							);
 						})}

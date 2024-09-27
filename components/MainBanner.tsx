@@ -5,11 +5,11 @@ import "slick-carousel/slick/slick.css";
 
 import "slick-carousel/slick/slick-theme.css";
 
-import Image from "next/image";
-import { useQuery } from "@tanstack/react-query";
-import { getData } from "@/lib/services";
-import Link from "next/link";
 import ErrorNetwork from "@/components/ErrorNetwork";
+import { getData } from "@/lib/services";
+import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
+import Link from "next/link";
 
 function ItemSlide(props: any) {
 	return (
@@ -59,11 +59,7 @@ export default function MainBanner() {
 		<div className="mainslider rounded-lg w-full overflow-hidden relative">
 			<Slider {...settings}>
 				{dataContent?.map((item: any) => (
-					<ItemSlide
-						key={item.id}
-						link={item.target_url}
-						image={item.image_url}
-					/>
+					<ItemSlide key={item.id} link={item.target_url} image={item.image_url} />
 				))}
 			</Slider>
 		</div>

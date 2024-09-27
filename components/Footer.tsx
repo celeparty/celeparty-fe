@@ -20,9 +20,7 @@ export default function Footer() {
 									<Link href="/about">Tentang Celeparty</Link>
 								</li>
 								<li>
-									<Link href="/auth/mitra/login">
-										Mitra Celeparty
-									</Link>
+									<Link href="/auth/mitra/login">Mitra Celeparty</Link>
 								</li>
 								<li>
 									<Link href="/blog">Blog</Link>
@@ -38,36 +36,16 @@ export default function Footer() {
 							<h4>Ikuti Kami</h4>
 							<div className="flex gap-3">
 								<Link href="/">
-									<Image
-										src="/images/icon-ig.svg"
-										alt="image"
-										width={24}
-										height={27}
-									/>
+									<Image src="/images/icon-ig.svg" alt="image" width={24} height={27} />
 								</Link>
 								<Link href="/">
-									<Image
-										src="/images/icon-wa.svg"
-										alt="image"
-										width={24}
-										height={27}
-									/>
+									<Image src="/images/icon-wa.svg" alt="image" width={24} height={27} />
 								</Link>
 								<Link href="/">
-									<Image
-										src="/images/icon-tk.svg"
-										alt="image"
-										width={24}
-										height={27}
-									/>
+									<Image src="/images/icon-tk.svg" alt="image" width={24} height={27} />
 								</Link>
 								<Link href="/">
-									<Image
-										src="/images/icon-fb.svg"
-										alt="image"
-										width={24}
-										height={27}
-									/>
+									<Image src="/images/icon-fb.svg" alt="image" width={24} height={27} />
 								</Link>
 							</div>
 						</div>
@@ -75,12 +53,7 @@ export default function Footer() {
 					<div className="item flex justify-center [&_h4]:mb-4 lg:[&_h4]:mb-0 [&_h4]:text-center lg:[&_h4]:text-start">
 						<div>
 							<h4>Pembayaran</h4>
-							<Image
-								src="/images/payment.png"
-								width={368}
-								height={113}
-								alt="image"
-							/>
+							<Image src="/images/payment.png" width={368} height={113} alt="image" />
 						</div>
 					</div>
 					<div className="item text-center">
@@ -95,20 +68,10 @@ export default function Footer() {
 						</Link>
 						<div className="relative flex gap-3">
 							<Link href="/">
-								<Image
-									src="/images/appstore.png"
-									width={171}
-									height={53}
-									alt="image"
-								/>
+								<Image src="/images/appstore.png" width={171} height={53} alt="image" />
 							</Link>
 							<Link href="/">
-								<Image
-									src="/images/playstore.png"
-									width={171}
-									height={53}
-									alt="image"
-								/>
+								<Image src="/images/playstore.png" width={171} height={53} alt="image" />
 							</Link>
 						</div>
 					</div>
