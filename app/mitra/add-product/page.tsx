@@ -1,26 +1,13 @@
-"use client";
-import Box from "@/components/Box";
+import Link from "next/link"
+import React from 'react'
 
-import Link from "next/link";
-import { AiFillCustomerService } from "react-icons/ai";
-import MainContentAddProduct from "./MainContent";
-
-export default function ProfilePage() {
+export default function page() {
 	return (
-		<div>
-			<Box className="mt-0">
-				<div className="mt-7">
-					<MainContentAddProduct />
-				</div>
-			</Box>
-			<Box>
-				<div className="flex justify-center items-center">
-					<Link href="/" className="flex gap-2 items-center">
-						<AiFillCustomerService className="text-3xl" />
-						<strong>Bantuan Celeparty Care</strong>
-					</Link>
-				</div>
-			</Box>
+		<div className="flex">
+			<div className="relative flex justify-between items-center w-full max-w-[500px] text-center gap-5">
+				<Link href="/mitra/add-product/tiket" className="p-5 bg-c-gray-text hover:bg-c-green text-white rounded-xl flex-1 h-full flex items-center justify-center">Add Tiket</Link>
+				<Link href="/mitra/add-product/party" className="p-5 bg-c-gray-text hover:bg-c-green text-white rounded-xl flex-1 h-full flex items-center justify-center">Add Produk Party</Link>
+			</div>
 		</div>
-	);
+	)
 }
