@@ -36,7 +36,7 @@ export default function ContentProduct(props:any) {
 		return <ErrorNetwork />;
 	}
 
-	console.log(dataContent);
+	const currentRate = dataContent?.rate;
 
 	return (
 			<Box className="px-4">
@@ -69,11 +69,26 @@ export default function ContentProduct(props:any) {
 								</h4>
 								<div className="flex gap-1 items-center">
 									<div className="rate flex gap-">
-										<FaStar className="text-[#FDD835]" />
+										{
+											[1, 2, 3, 4, 5].map((item) => {
+												return (
+													<FaStar
+														key={item}
+														className={
+															item <= currentRate
+																? "text-[#FDD835]"
+																: "text-gray-300"	
+														}
+													/>
+												)
+											})
+										}
 									</div>
 									<div>{dataContent?.average_rating}</div>
 								</div>
-								<div className="relative text-[18px] lg:mt-5 mt-[10px]">
+								{
+									dataContent?.variant.length >0 &&
+									<div className="relative text-[18px] lg:mt-5 mt-[10px]">
 									<h4>Varian</h4>
 									<div className="variant flex flex-wrap gap-2 ">
 										{dataContent?.variant?.map((variant: any) => {
@@ -88,6 +103,8 @@ export default function ContentProduct(props:any) {
 										})}
 									</div>
 								</div>
+
+								}
 								<div className="lg:mt-5 mt-[10px] text-[12px]">
 									<h4>Deskripsi</h4>
 									<div className="line-clamp-2">
