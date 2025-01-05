@@ -1,7 +1,7 @@
 "use client";
 import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
-import { getData } from "@/lib/services";
+import { axiosData, getData } from "@/lib/services";
 import { useQuery } from "@tanstack/react-query";
 import _ from "lodash";
 import Image from "next/image";
@@ -10,7 +10,7 @@ import Box from "./Box";
 
 export default function EventList() {
 	const getQuery = async () => {
-		return await getData(`/user-event-types`);
+		return await axiosData("GET", `/api/user-event-types?populate=*`);
 	};
 	const query = useQuery({
 		queryKey: ["qEventList"],
@@ -27,18 +27,20 @@ export default function EventList() {
 	if (query.isError) {
 		return <ErrorNetwork />;
 	}
-	const dataContent = query?.data?.data.data;
+	const dataContent = query?.data.data;
 	const dataGroup = _.groupBy(dataContent, (item) => {
-		const categoryRecs = item?.category_recs?.map((categoryRec: any) => categoryRec.name);
-		if (categoryRecs?.includes("Lainnya di Event")) {
+		const categoryRecs = item?.categories?.map((categories: any) => categories.title);
+		if (categoryRecs?.includes("Event")) {
 			return "event";
 		} else {
 			return "product";
 		}
 	});
+	console.log(dataGroup);
 
 	return (
 		<Box className="lg:px-9 px-2 lg:py-7 py-2">
+
 			<div className="flex flex-wrap justify-around gap-5 align-top">
 				<div className="relative flex-1">
 					<h4 className="font-semibold text-[16px] text-c-blue mb-2">Event</h4>
@@ -48,7 +50,7 @@ export default function EventList() {
 								<Link href="/product" className="text-center max-w-[120px]" key={item.id}>
 									<div className="relative w-[47px] h-[47px] text-center mx-auto mb-1">
 										<Image
-											src={item.icon_url ? item.icon_url : "/images/pic.png"}
+											src={item.image ? process.env.BASE_API+item.image.url : "/images/pic.png"}
 											fill
 											alt=""
 											className="left-0 right-0 mx-auto"
@@ -68,7 +70,7 @@ export default function EventList() {
 								<Link href="/product" className="text-center max-w-[120px]" key={item.id}>
 									<div className="relative w-[47px] h-[47px] text-center mx-auto mb-1">
 										<Image
-											src={item.icon_url ? item.icon_url : "/images/pic.png"}
+											src={item.image ? process.env.BASE_API+item.image.url : "/images/pic.png"}
 											fill
 											alt=""
 											className="left-0 right-0 mx-auto"
