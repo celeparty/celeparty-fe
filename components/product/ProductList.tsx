@@ -12,7 +12,7 @@ import { formatRupiah } from "@/lib/utils";
 
 export default function ProductList() {
 	const getQuery = async () => {
-		return await axiosData("GET", `/api/products?populate=*&pagination[pageSize]=5`);
+		return await axiosData("GET", `/api/products?populate=*&pagination[pageSize]=5&sort[0]=updatedAt%3Adesc`);
 	};
 	const query = useQuery({
 		queryKey: ["qProductHome"],
@@ -44,7 +44,7 @@ export default function ProductList() {
 				{dataContent?.map((item: any, i: number) => {
 					return (
 						<ItemProduct
-							url={`/product/${item.id}`}
+							url={`/products/${item.documentId}`}
 							key={item.id}
 							title={item.title}
 							image_url={item.main_image ?process.env.BASE_API+item.main_image.url : "/images/noimage.png"}
