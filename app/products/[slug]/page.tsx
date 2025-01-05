@@ -19,7 +19,6 @@ export default async function ProductDetail({
 		<div className="relative wrapper-big py-7">
 			<Basecontent>
 				<ContentProduct slug={`${params.slug}`}/>
-
 			</Basecontent>
 		</div>
 	);

@@ -64,14 +64,14 @@ export default function Header() {
 				</div>
 				<div className="relative flex lg:flex-row flex-col items-center text-3xl gap-4 text-c-gray-text font-semibold lg:w-auto w-full">
 					<div className="flex gap-4 w-fit p-2 lg:p-0">
-						<div className="item relative">
+						<Link href="/cart" className="item relative">
 							<MdOutlineShoppingCart />
 							{cart.length > 0 ? (
 								<div className="absolute top-[0] right-[0] bg-c-orange w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold">
 									{cart.length}
 								</div>
 							) : null}
-						</div>
+						</Link>
 						<div className="item" onClick={setCartLength}>
 							<MdOutlineNotifications />
 						</div>
