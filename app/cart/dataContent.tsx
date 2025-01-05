@@ -7,10 +7,41 @@ import { formatRupiah } from "@/lib/utils";
 import { RiDeleteBin6Fill } from "react-icons/ri";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import { PiSmileySadDuotone } from "react-icons/pi";
+import axios from "axios";
+
+declare global {
+    interface Window {
+        snap: any;
+    }
+}
 
 export default function CartContent() {
 	const { cart, setCart, updateQuantity, deleteItem, calculateTotal }: any = useCart();
     const [value, setValue] = useState(0);    
+
+    const data = cart.map((item:any) => {
+        return {
+            id: item.product_id,
+            name: item.product_name,
+            image: process.env.BASE_API+item.image,
+            price: parseInt(item.price),
+            quantity: item.quantity,
+            totalPriceItem: item.price * item.quantity
+        }
+    })
+
+
+    const handleCheckout = async () => {
+        const response = await axios.post(`/api/payment`, data)
+            .then(res => {
+                return res.data.token
+            })
+            .catch(error => {
+                console.log(error)
+            })
+            console.log(response)
+        window.snap.pay(response)
+    }
 
     return (
         <div className="wrapper">
@@ -88,7 +119,7 @@ export default function CartContent() {
                                         <div className="text-c-orange">{formatRupiah(calculateTotal())}</div>
                                     </div>                                    
                                 </div>
-                                <div className="bg-c-green text-white text-center py-3 mt-5 rounded-lg cursor-pointer">Pembayaran</div>
+                                <div className="bg-c-green text-white text-center py-3 mt-5 rounded-lg cursor-pointer" onClick={handleCheckout}>Pembayaran</div>
                             </Box>
                         </div>
 
