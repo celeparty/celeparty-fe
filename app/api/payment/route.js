@@ -50,22 +50,6 @@ export async function POST(req) {
         }
     }
 
-
-    // const parameter = {
-    //     item_details: [
-    //         {
-    //             id: _.random(100000, 999999),
-    //             price: 2000,
-    //             quantity: 1,
-    //             name:"ini name"
-    //         }
-    //     ],
-    //     transaction_details: {
-    //         "order_id":_.random(100000, 999999),
-    //         "gross_amount":2000
-    //     }
-    // }
-
     const token = await snap.createTransactionToken(parameter)
     
     return NextResponse.json({token})
