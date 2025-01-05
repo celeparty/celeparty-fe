@@ -36,7 +36,6 @@ export default function EventList() {
 			return "product";
 		}
 	});
-	console.log(dataGroup);
 
 	return (
 		<Box className="lg:px-9 px-2 lg:py-7 py-2">

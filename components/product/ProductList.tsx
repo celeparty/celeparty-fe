@@ -2,16 +2,17 @@
 
 import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
-import { getData } from "@/lib/services";
+import { axiosData, getData } from "@/lib/services";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import React from "react";
 import Box from "../Box";
 import ItemProduct from "./ItemProduct";
+import { formatRupiah } from "@/lib/utils";
 
 export default function ProductList() {
 	const getQuery = async () => {
-		return await getData(`/products`);
+		return await axiosData("GET", `/api/products?populate=*&pagination[pageSize]=5`);
 	};
 	const query = useQuery({
 		queryKey: ["qProductHome"],
@@ -33,7 +34,9 @@ export default function ProductList() {
 		return <ErrorNetwork />;
 	}
 
-	const dataContent = query?.data?.data.data;
+	const dataContent = query?.data?.data;
+	console.log(dataContent)
+
 
 	return (
 		<Box title="Untuk Anda" className="lg:px-9 px-2">
@@ -43,9 +46,9 @@ export default function ProductList() {
 						<ItemProduct
 							url={`/product/${item.id}`}
 							key={item.id}
-							title={item.name}
-							image_url={item.photos[0].image_url}
-							price={item.price}
+							title={item.title}
+							image_url={item.main_image ?process.env.BASE_API+item.main_image.url : "/images/noimage.png"}
+							price={ item.main_price ? formatRupiah(item.main_price) : formatRupiah(0)}
 							rate={Number.parseInt(item.average_rating).toFixed(1)}
 							sold={item.sold_count}
 							location={item.vendor_region ? item.vendor_region : "unknown"}
@@ -55,7 +58,7 @@ export default function ProductList() {
 			</div>
 			<div className="flex justify-center mt-7 border-c-green border border-solid py-2 lg:border-none lg:py-2  rounded-lg">
 				<Link
-					href="/product"
+					href="/products"
 					className="border border-solid lg:border-c-green rounded-lg lg:px-5 lg:py-3 text-c-green font-semibold lg:hover:bg-c-green lg:hover:text-white"
 				>
 					Tampilkan Semua Produk
