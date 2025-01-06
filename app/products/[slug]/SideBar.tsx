@@ -65,8 +65,9 @@ export default function SideBar({ dataProducts }: any) {
 					<div className="text-center mx-auto w-full lg:max-w-[150px]">
 						<input
 							type="button"
+							disabled={value >=1 ? false : true}
 							value="+ Kerajang"
-							className="bg-c-green mt-5 text-white text-[15px] py-3 w-full rounded-lg cursor-pointer"
+							className={`${value >=1 ? "bg-c-green cursor-pointer" : "bg-c-gray-text2 opacity-30 cursor-default"}  mt-5 text-white text-[15px] py-3 w-full rounded-lg `}
 							onClick={addCart}
 						/>
 					</div>
