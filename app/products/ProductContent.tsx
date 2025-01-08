@@ -9,7 +9,7 @@ import { axiosData, getData } from "@/lib/services";
 import { useQuery } from "@tanstack/react-query";
 import _ from "lodash";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { ItemCategory, ItemInfo } from "./ItemCategory";
 import { formatRupiah } from "@/lib/utils";
@@ -19,9 +19,15 @@ export default function ProductContent() {
 	const router = useRouter();
 	const params = useSearchParams();
 	const getType = params.get("type");
-
+	const getSearch = params.get("search");
+	const getCategory = params.get("cat");
+	const [cat, setCat] = useState(`${getCategory ? getCategory : ""}`);
 	const getQuery = async () => {
-		return await axiosData("GET", `/api/products?populate=*${getType ? `&filters[user_event_type][name][$eq]=${getType}` : ""}`);
+		return await axiosData("GET", `/api/products?populate=*
+			${getType ? `&filters[user_event_type][name][$eq]=${getType}` : ""}
+			${getSearch ? `&filters[title][$containsi]=${getSearch}` : ""}
+			${getCategory ? `&filters[category][title][$eq]=${cat}` : ""}
+			`);
 	};
 	const query = useQuery({
 		queryKey: ["qProducts"],
@@ -95,9 +101,6 @@ export default function ProductContent() {
 			? router.push(`?sort=${getSort}&min=${getMin}&max=${e.target.value}`)
 			: router.push(`?min=${getMin}&max=${e.target.value}`);
 	};
-
-	console.log(getType)
-
 	return (
 		<div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
 			<Box className="bg-c-blue text-white w-full lg:max-w-[280px] mt-0">
@@ -216,12 +219,12 @@ export default function ProductContent() {
 				</div>
 				<Box className="mt-3 px-[10px] lg:px-9">
 					<div className="flex flex-wrap -mx-2">
-						{dataSort?.map((item: any) => {
+						{ dataSort.length >0 ? dataSort?.map((item: any) => {
 							return (
 								<ItemProduct
 									url={`/products/${item.documentId}`}
 									key={item.id}
-									title={item.name}
+									title={item.title}
 									image_url={item.main_image ? process.env.BASE_API + item.main_image.url : "/images/noimage.png"}
 									price={item.main_price ? formatRupiah(item.main_price) : formatRupiah(0)}
 									rate={Number.parseInt(item.rate).toFixed(1)}
@@ -229,7 +232,7 @@ export default function ProductContent() {
 									location={item.region ? item.region : "unknown"}
 								></ItemProduct>
 							);
-						})}
+						}) : <div className="text-center w-full">Produk Kosong</div> }
 					</div>
 				</Box>
 			</div>

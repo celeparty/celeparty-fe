@@ -3,15 +3,25 @@ import { useCart } from "@/lib/store/cart";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import { IoIosSearch } from "react-icons/io";
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import { MdOutlineNotifications } from "react-icons/md";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
 	const { data: session, status } = useSession();
 	const { cart, setCart, cartLength, setCartLength }: any = useCart();
+	const [searchValue, setSearchValue] = useState("");
+	const router = useRouter();
+
+	const handleSubmit = (e:any) => {
+		e.preventDefault();
+		if (searchValue.trim() !== "") {
+			window.location.href = `/products?search=${encodeURIComponent(searchValue)}`;
+		}
+	  };
 	return (
 		<div className="bg-white shadow-sm w-full px-4 py-4 lg:z-10 lg:sticky top-0">
 			<div className="wrapper-main flex flex-col lg:flex-row items-start justify-between gap-4 lg:gap-16">
@@ -22,45 +32,18 @@ export default function Header() {
 				</div>
 				<div className="relative flex-1 w-full lg:max-w-[900px]">
 					<div className="w-full relative  mb-2 lg:mb-0">
-						<IoIosSearch className="absolute left-5 text-3xl top-[50%] -translate-y-[50%]" />
-						<input
-							type="text"
-							placeholder="Cari di Celeparty"
-							className="input border-c-gray border-solid border-[1px] rounded-lg pr-5 pl-[60px] py-3 bg-white w-full"
-						/>
+						<form onSubmit={handleSubmit}>
+							<IoIosSearch className="absolute left-5 text-3xl top-[50%] -translate-y-[50%]" />
+							<input
+								type="text"
+								placeholder="Cari di Celeparty"
+								className="input border-c-gray border-solid border-[1px] rounded-lg pr-5 pl-[60px] py-3 bg-white w-full"
+								value={searchValue}
+								onChange={(e) => setSearchValue(e.target.value)}
+							/>
+						</form>
 					</div>
-					<ul className="flex flex-wrap gap-2 lg:gap-6 justify-center pb-1 pt-2 text-sm [&_li]:w-24 lg:[&_li]:w-auto [&_li]:flex [&_li]:justify-center [&_li]:items-center [&_li]:text-center lg:[&_li]:text-start [&_li]:border [&_li]:border-solid [&_li]:border-black [&_li]:rounded-lg lg:[&_li]:rounded-none [&_li]:p-2 lg:[&_li]:p-0 lg:[&_li]:border-none lg:[&_li]:block">
-						<li>
-							<Link href="/" className="hover:text-c-blue">
-								Tiket
-							</Link>
-						</li>
-						<li>
-							<Link href="/" className="hover:text-c-blue">
-								Hampers
-							</Link>
-						</li>
-						<li>
-							<Link href="/" className="hover:text-c-blue">
-								Kue Ulang Tahun
-							</Link>
-						</li>
-						<li>
-							<Link href="/" className="hover:text-c-blue">
-								Makanan
-							</Link>
-						</li>
-						<li>
-							<Link href="/" className="hover:text-c-blue">
-								Dekorasi
-							</Link>
-						</li>
-						<li>
-							<Link href="/" className="hover:text-c-blue">
-								Sound System
-							</Link>
-						</li>
-					</ul>
+
 				</div>
 				<div className="relative flex lg:flex-row flex-col items-center text-3xl gap-4 text-c-gray-text font-semibold lg:w-auto w-full">
 					<div className="flex gap-4 w-fit p-2 lg:p-0">
