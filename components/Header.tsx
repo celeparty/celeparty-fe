@@ -14,7 +14,6 @@ export default function Header() {
 	const { data: session, status } = useSession();
 	const { cart, setCart, cartLength, setCartLength }: any = useCart();
 	const [searchValue, setSearchValue] = useState("");
-	const router = useRouter();
 
 	const handleSubmit = (e:any) => {
 		e.preventDefault();
