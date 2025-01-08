@@ -16,6 +16,7 @@ import { formatRupiah } from "@/lib/utils";
 
 export default function ProductContent() {
 	const [sortDesc, setSortDesc] = useState(true);
+	const [price, setPrice] = useState<{ min: any; max: any }>({ min: 0, max: 0 });
 	const [mainData, setMainData] = useState([]);
 	const router = useRouter();
 	const params = useSearchParams();
@@ -41,6 +42,31 @@ export default function ProductContent() {
 		}
 	}, [query.isSuccess, query.data]);
 
+	useEffect(() => {
+		if (price?.min  && price?.max ) {
+			const dataSort: any = _.filter(dataContent, (item:any) => {
+				return item.main_price >= price.min && item.main_price <= price.max;
+			});
+			console.log(price)
+			setMainData(dataSort);
+		}
+		else if (price?.min  && price.max === 0 && price.max === "") {
+			const dataSort: any = _.filter(dataContent, (item:any) => {
+				return item.main_price >= price.min && item.main_price <= price.max;
+			});
+			console.log(price)
+			setMainData(dataSort);
+		}
+		else if (!price?.min  && price?.max ) {
+			const dataSort: any = _.filter(dataContent, (item:any) => {
+				return item.main_price <= price.max;
+			});
+			console.log(price)
+			setMainData(dataSort);
+		}
+		else null
+	}, [price]);
+
 	if (query.isLoading) {
 		return (
 			<div className=" relative flex justify-center ">
@@ -59,11 +85,12 @@ export default function ProductContent() {
 
 	const handleSort = (sort:any) => {
 		const dataSort: any = _.sortBy(dataContent, (item)=> {			
-			return sort.sortBy === "sold_count" ?  item.sold_count : sort.sortBy === "main_price" ?  item.main_price : item.updatedAt
+			return sort.sortBy === "sold_count" ?  item.sold_count : 
+				sort.sortBy === "main_price" ?  item.main_price : 
+					item.updatedAt
 		});
 		setMainData(dataSort);
 	};
-
 
 	return (
 		<div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
@@ -167,7 +194,7 @@ export default function ProductContent() {
 								<Input
 									className="border-2 border-black border-solid lg:border-none"
 									placeholder="Harga Minimum"
-									// onChange={(e) => priceMin(e)}
+									onChange={(e) => setPrice({ ...price, min: e.target.value })}
 								/>
 							</div>
 							<div className="flex items-center gap-2 w-full lg:w-auto">
@@ -175,7 +202,7 @@ export default function ProductContent() {
 								<Input
 									className="border-2 border-black border-solid lg:border-none"
 									placeholder="Harga Maximum"
-									// onChange={(e) => priceMax(e)}
+									onChange={(e) => setPrice({ ...price, max: e.target.value })}
 								/>
 							</div>
 						</div>
