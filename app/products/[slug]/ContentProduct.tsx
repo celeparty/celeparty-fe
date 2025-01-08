@@ -24,8 +24,11 @@ export default function ContentProduct(props:any) {
 	});
 
 	const dataContent = query?.data?.data;
-	const [currentPrice, setCurrentPrice] = React.useState(dataContent?.main_price);
+	const [currentPrice, setCurrentPrice] = useState(dataContent?.main_price);
 
+	useEffect(() => {
+		setCurrentPrice(dataContent?.main_price);
+	},[])
 	if (query.isLoading) {
 		return (
 			<div className="mt-[80px]">
@@ -70,7 +73,7 @@ export default function ContentProduct(props:any) {
 									{dataContent?.title ? dataContent.title : "Produk Tidak Tersedia"}{" "}
 								</h1>
 								<h4 className="text-[20px] text-c-orange font-bold">
-									{currentPrice ? formatRupiah(currentPrice) : formatRupiah(0)}
+									{currentPrice > 0 ? formatRupiah(currentPrice) : formatRupiah(dataContent.main_price)}
 								</h4>
 								<div className="flex gap-1 items-center">
 									<div className="rate flex gap-">
@@ -128,7 +131,7 @@ export default function ContentProduct(props:any) {
 							</div>
 						</div>
 						<div className="right min-w-[275px] sticky top-0 ">
-							<SideBar dataProducts={dataContent} currentPrice={currentPrice} />
+							<SideBar dataProducts={dataContent} currentPrice={currentPrice >0 ? currentPrice : dataContent?.main_price } />
 						</div>
 					</div>
 				) : (

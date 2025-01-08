@@ -91,7 +91,7 @@ export default function ProductContent() {
 
 	return (
 		<div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
-			<Box className="bg-c-blue text-white w-full lg:max-w-[280px] mt-0">
+			<Box className="bg-c-blue text-white w-full lg:max-w-[280px] mt-0 hidden lg:block">
 				<div className="relative mb-7 [&_h4]:mb-3">
 					<h4>Informasi Acara</h4>
 					<div className="flex flex-col gap-3">
