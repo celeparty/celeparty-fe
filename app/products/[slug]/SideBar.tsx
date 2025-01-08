@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
 
-export default function SideBar({ dataProducts }: any) {
+export default function SideBar({ dataProducts, currentPrice }: any) {
 	const [value, setValue] = useState(0);
 	const { data: session, status } = useSession();
 	const { cart, setCart }: any = useCart();
@@ -18,7 +18,7 @@ export default function SideBar({ dataProducts }: any) {
 				...cart,
 				product_id: dataProducts.id,
 				product_name: dataProducts.title,
-				price: dataProducts.main_price,
+				price: currentPrice,
 				image: dataProducts.main_image.url,
 				quantity: value,
 				transaction_id: transaction.id,
