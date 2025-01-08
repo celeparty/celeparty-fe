@@ -46,7 +46,7 @@ export default function EventList() {
 					<div className="flex justify-between border-solid h-fit lg:min-h-[123px] border-gray-300 border-[1px] p-2 lg:p-5 rounded-lg bg-gray-50">
 						{dataGroup?.event?.map((item: any, i: number) => {
 							return (
-								<Link href="/product" className="text-center max-w-[120px]" key={item.id}>
+								<Link href={`/products?type=${item.name}`} className="text-center max-w-[120px]" key={item.id}>
 									<div className="relative w-[47px] h-[47px] text-center mx-auto mb-1">
 										<Image
 											src={item.image ? process.env.BASE_API+item.image.url : "/images/pic.png"}
@@ -66,7 +66,7 @@ export default function EventList() {
 					<div className="flex justify-between border-solid h-fit lg:min-h-[123px] border-gray-300 border-[1px]  p-2 lg:p-5 rounded-lg bg-gray-50">
 						{dataGroup?.product?.map((item: any, i: number) => {
 							return (
-								<Link href="/product" className="text-center max-w-[120px]" key={item.id}>
+								<Link href={`/products?type=${item.name}`} className="text-center max-w-[120px]" key={item.id}>
 									<div className="relative w-[47px] h-[47px] text-center mx-auto mb-1">
 										<Image
 											src={item.image ? process.env.BASE_API+item.image.url : "/images/pic.png"}

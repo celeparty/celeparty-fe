@@ -18,8 +18,10 @@ export default function ProductContent() {
 	const [sortDesc, setSortDesc] = useState(true);
 	const router = useRouter();
 	const params = useSearchParams();
+	const getType = params.get("type");
+
 	const getQuery = async () => {
-		return await axiosData("GET", `/api/products?populate=*`);
+		return await axiosData("GET", `/api/products?populate=*${getType ? `&filters[user_event_type][name][$eq]=${getType}` : ""}`);
 	};
 	const query = useQuery({
 		queryKey: ["qProducts"],
@@ -93,6 +95,9 @@ export default function ProductContent() {
 			? router.push(`?sort=${getSort}&min=${getMin}&max=${e.target.value}`)
 			: router.push(`?min=${getMin}&max=${e.target.value}`);
 	};
+
+	console.log(getType)
+
 	return (
 		<div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
 			<Box className="bg-c-blue text-white w-full lg:max-w-[280px] mt-0">
