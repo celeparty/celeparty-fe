@@ -16,12 +16,15 @@ import { formatRupiah } from "@/lib/utils";
 
 export default function ProductContent() {
 	const [sortDesc, setSortDesc] = useState(true);
+	const [price, setPrice] = useState<{ min: any; max: any }>({ min: 0, max: 0 });
+	const [mainData, setMainData] = useState([]);
 	const router = useRouter();
 	const params = useSearchParams();
 	const getType = params.get("type");
 	const getSearch = params.get("search");
 	const getCategory = params.get("cat");
 	const [cat, setCat] = useState(`${getCategory ? getCategory : ""}`);
+
 	const getQuery = async () => {
 		return await axiosData("GET", `/api/products?populate=*
 			${getType ? `&filters[user_event_type][name][$eq]=${getType}` : ""}
@@ -33,6 +36,37 @@ export default function ProductContent() {
 		queryKey: ["qProducts"],
 		queryFn: getQuery,
 	});
+	useEffect(() => {
+		if (query.isSuccess) {
+			setMainData(query.data.data); // Isi state mainData dengan dataContent
+		}
+	}, [query.isSuccess, query.data]);
+
+	useEffect(() => {
+		if (price?.min  && price?.max ) {
+			const dataSort: any = _.filter(dataContent, (item:any) => {
+				return item.main_price >= price.min && item.main_price <= price.max;
+			});
+			console.log(price)
+			setMainData(dataSort);
+		}
+		else if (price?.min  && price.max === 0 && price.max === "") {
+			const dataSort: any = _.filter(dataContent, (item:any) => {
+				return item.main_price >= price.min && item.main_price <= price.max;
+			});
+			console.log(price)
+			setMainData(dataSort);
+		}
+		else if (!price?.min  && price?.max ) {
+			const dataSort: any = _.filter(dataContent, (item:any) => {
+				return item.main_price <= price.max;
+			});
+			console.log(price)
+			setMainData(dataSort);
+		}
+		else null
+	}, [price]);
+
 	if (query.isLoading) {
 		return (
 			<div className=" relative flex justify-center ">
@@ -49,58 +83,15 @@ export default function ProductContent() {
 	const getMax = params.get("max");
 	const dataContent = query?.data.data;
 
-
-	const newDataContent = dataContent?.map((item: any) => {
-		const price = item.main_price ? item.main_price : 0;
-		const priceRange = _.split(price, "-");
-		const priceMin = item.price_min ? item.price_min : null;
-		const priceMax = item.price_max ? item.price_max : null;
-
-		return {
-			...item,
-			price: priceMin,
-			price_min: priceMin,
-			price_max: priceMax,
-		};
-	});
-
-
-	const dataSort =
-		getMin || getMax
-			? _.orderBy(
-					_.filter(newDataContent, (item) => {
-						const priceMin = Number.parseFloat(item.price_min);
-						const priceMax = item.price_max ? Number.parseFloat(item.price_max) : null;
-
-						return (
-							(getMin === null || getMin === "" || priceMin >= Number.parseFloat(getMin)) &&
-							(getMax === null ||
-								getMax === "" ||
-								(priceMax !== null && priceMax <= Number.parseFloat(getMax)))
-						);
-					}),
-					[`${getSort}`],
-					[`${sortDesc ? "desc" : "asc"}`],
-				)
-			: _.orderBy(newDataContent, [`${getSort}`], [`${sortDesc ? "desc" : "asc"}`]);
-
-	const handleSort = ({ sortBy }: { sortBy: string }) => {
-		// router.push(`?sort=${sortBy}`)
-		getMin && getMin
-			? router.push(`?sort=${sortBy}&min=${getMin}&max=${getMax}`)
-			: getMin
-				? router.push(`?sort[0]=${sortBy}&min=${getMin}`)
-				: router.push(`?sort[0]=${sortBy}`);
-		sortBy === "price" && setSortDesc(!sortDesc);
+	const handleSort = (sort:any) => {
+		const dataSort: any = _.sortBy(dataContent, (item)=> {			
+			return sort.sortBy === "sold_count" ?  item.sold_count : 
+				sort.sortBy === "main_price" ?  item.main_price : 
+					item.updatedAt
+		});
+		setMainData(dataSort);
 	};
-	const priceMin = (e: any) => {
-		getSort ? router.push(`?sort=${getSort}&min=${e.target.value}`) : router.push(`?min=${e.target.value}`);
-	};
-	const priceMax = (e: any) => {
-		getSort
-			? router.push(`?sort=${getSort}&min=${getMin}&max=${e.target.value}`)
-			: router.push(`?min=${getMin}&max=${e.target.value}`);
-	};
+
 	return (
 		<div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
 			<Box className="bg-c-blue text-white w-full lg:max-w-[280px] mt-0">
@@ -174,7 +165,7 @@ export default function ProductContent() {
 							<Button
 								variant={`${getSort === "updated_at" ? "default" : "outline"}`}
 								onClick={() => {
-									handleSort({ sortBy: "updated_at" });
+									handleSort({ sortBy: "updatedAt" });
 								}}
 								className="w-full lg:w-auto border-2 border-black border-solid lg:border-none"
 							>
@@ -192,7 +183,7 @@ export default function ProductContent() {
 							<Button
 								variant={`${getSort === "price" ? "default" : "outline"}`}
 								onClick={() => {
-									handleSort({ sortBy: "price" });
+									handleSort({ sortBy: "main_price" });
 								}}
 								className="flex gap-1 items-center w-full lg:w-auto border-2 border-black border-solid lg:border-none"
 							>
@@ -203,7 +194,7 @@ export default function ProductContent() {
 								<Input
 									className="border-2 border-black border-solid lg:border-none"
 									placeholder="Harga Minimum"
-									onChange={(e) => priceMin(e)}
+									onChange={(e) => setPrice({ ...price, min: e.target.value })}
 								/>
 							</div>
 							<div className="flex items-center gap-2 w-full lg:w-auto">
@@ -211,7 +202,7 @@ export default function ProductContent() {
 								<Input
 									className="border-2 border-black border-solid lg:border-none"
 									placeholder="Harga Maximum"
-									onChange={(e) => priceMax(e)}
+									onChange={(e) => setPrice({ ...price, max: e.target.value })}
 								/>
 							</div>
 						</div>
@@ -219,7 +210,7 @@ export default function ProductContent() {
 				</div>
 				<Box className="mt-3 px-[10px] lg:px-9">
 					<div className="flex flex-wrap -mx-2">
-						{ dataSort.length >0 ? dataSort?.map((item: any) => {
+						{ mainData?.map((item: any) => {
 							return (
 								<ItemProduct
 									url={`/products/${item.documentId}`}
@@ -232,7 +223,7 @@ export default function ProductContent() {
 									location={item.region ? item.region : "unknown"}
 								></ItemProduct>
 							);
-						}) : <div className="text-center w-full">Produk Kosong</div> }
+						})  }
 					</div>
 				</Box>
 			</div>
