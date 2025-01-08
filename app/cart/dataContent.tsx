@@ -39,7 +39,6 @@ export default function CartContent() {
             .catch(error => {
                 console.log(error)
             })
-            console.log(response)
         window.snap.pay(response)
     }
 

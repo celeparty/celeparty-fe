@@ -43,7 +43,6 @@ const Registration = () => {
 	const signUp = (values: z.infer<typeof signUpSchema>) => {
 		form.reset();
 		alert("Selamat!, Proses Register Kamu Berhasil!!");
-		console.log(values);
 	};
 	return (
 		<div>

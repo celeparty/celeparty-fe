@@ -47,21 +47,18 @@ export default function ProductContent() {
 			const dataSort: any = _.filter(dataContent, (item:any) => {
 				return item.main_price >= price.min && item.main_price <= price.max;
 			});
-			console.log(price)
 			setMainData(dataSort);
 		}
 		else if (price?.min  && price.max === 0 && price.max === "") {
 			const dataSort: any = _.filter(dataContent, (item:any) => {
 				return item.main_price >= price.min && item.main_price <= price.max;
 			});
-			console.log(price)
 			setMainData(dataSort);
 		}
 		else if (!price?.min  && price?.max ) {
 			const dataSort: any = _.filter(dataContent, (item:any) => {
 				return item.main_price <= price.max;
 			});
-			console.log(price)
 			setMainData(dataSort);
 		}
 		else null
@@ -210,7 +207,7 @@ export default function ProductContent() {
 				</div>
 				<Box className="mt-3 px-[10px] lg:px-9">
 					<div className="flex flex-wrap -mx-2">
-						{ mainData?.map((item: any) => {
+						{ mainData.length >0 ? mainData?.map((item: any) => {
 							return (
 								<ItemProduct
 									url={`/products/${item.documentId}`}
@@ -223,7 +220,7 @@ export default function ProductContent() {
 									location={item.region ? item.region : "unknown"}
 								></ItemProduct>
 							);
-						})  }
+						}) : <div className="text-center w-full">Product Tidak Ditemukan</div> }
 					</div>
 				</Box>
 			</div>
