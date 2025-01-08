@@ -16,6 +16,28 @@ export const useCart = create(
 				set((state: { cart: [] }) => ({
 					cart: [...state.cart, ...data],
 				})),
+			updateQuantity: (productId:any, newQuantity:any) => {
+				set((state:any) => ({
+					cart: state.cart.map((item:any) =>
+					item.product_id === productId
+						? { ...item, quantity: newQuantity }
+						: item
+					),
+				}));
+				},				
+				deleteItem: (productId:any) => {
+					set((state:any) => ({
+					  cart: state.cart.filter((item:any) => item.product_id !== productId),
+					}));
+				  },				
+				  calculateTotal: () => {
+					const cart = get() as any; // Type assertion agar get() diperlakukan sebagai `any`
+					return cart.cart.reduce((total: number, item: any) => {
+					  // Pastikan untuk memeriksa nested struktur
+					  const product = item?.product_id ? item : item[0];
+					  return total + (product.price * product.quantity || 0);
+					}, 0);
+				  },	
 			test: () => console.log("test"),
 		}),
 		{

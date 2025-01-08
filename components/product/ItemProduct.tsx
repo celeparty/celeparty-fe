@@ -31,7 +31,7 @@ export default function ItemProduct(props: iItemProduct) {
 						/>
 					</div>
 					<h4 className="text-center text-sm">{props.title}</h4>
-					<div className="text-c-orange  text-center text-[12px] font-bold">{props.price}</div>
+					<div className="text-c-orange  text-center text-[12px] font-bold">{ props.price}</div>
 				</div>
 				<div>
 					<div className="flex items-center gap-1 lg:text-[10px] text-[12px] font-medium mt-2 text-c-gray-text2">

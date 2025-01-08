@@ -10,12 +10,23 @@ import { FaMinus, FaPlus } from "react-icons/fa";
 export default function SideBar({ dataProducts }: any) {
 	const [value, setValue] = useState(0);
 	const { data: session, status } = useSession();
-	const { cart }: any = useCart();
+	const { cart, setCart }: any = useCart();
 	const { transaction }: any = useTransaction();
 	const addCart = () => {
-		console.log("hello");
+		setCart([
+			{
+				...cart,
+				product_id: dataProducts.id,
+				product_name: dataProducts.title,
+				price: dataProducts.main_price,
+				image: dataProducts.main_image.url,
+				quantity: value,
+				transaction_id: transaction.id,
+				note:""
+			}
+		])
 	};
-	console.log({ session });
+
 	return (
 		<div className="p-5 shadow-lg rounded-lg border-solid border-[1px] border-gray-100 -mt-6 lg:-mt-0">
 			{status === "authenticated" ? (
@@ -36,8 +47,8 @@ export default function SideBar({ dataProducts }: any) {
 								<div>{value}</div>
 								<div
 									className="cursor-pointer p-3 hover:text-green-300"
-									onClick={() => {
-										value < 1000 && setValue(value + 1);
+									onClick={()=> {
+										setValue(value + 1)
 									}}
 								>
 									<FaPlus />
@@ -54,11 +65,10 @@ export default function SideBar({ dataProducts }: any) {
 					<div className="text-center mx-auto w-full lg:max-w-[150px]">
 						<input
 							type="button"
+							disabled={value >=1 ? false : true}
 							value="+ Kerajang"
-							className="bg-c-green mt-5 text-white text-[15px] py-3 w-full rounded-lg cursor-pointer"
-							onClick={() => {
-								() => addCart();
-							}}
+							className={`${value >=1 ? "bg-c-green cursor-pointer" : "bg-c-gray-text2 opacity-30 cursor-default"}  mt-5 text-white text-[15px] py-3 w-full rounded-lg `}
+							onClick={addCart}
 						/>
 					</div>
 				</>

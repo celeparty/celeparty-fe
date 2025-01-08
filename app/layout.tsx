@@ -4,6 +4,7 @@ import "./globals.css";
 import Footer from "@/components/Footer";
 import SessionWrapper from "@/components/SessionWrapper";
 import { Inter, Quicksand } from "next/font/google";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const quick = Quicksand({
@@ -26,6 +27,9 @@ export default function RootLayout({
 	return (
 		<SessionWrapper>
 			<html lang="en">
+			<Script src="https://app.sandbox.midtrans.com/snap/snap.js"
+				data-client-key={process.env.NEXT_PUBLIC_CLIENT_KEY}
+			></Script>
 				<body className={`${inter.variable} ${quick.variable} font-inter`} suppressHydrationWarning={true}>
 					<TopHeader />
 					<Header />

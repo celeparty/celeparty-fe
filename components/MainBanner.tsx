@@ -6,7 +6,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 import ErrorNetwork from "@/components/ErrorNetwork";
-import { getData } from "@/lib/services";
+import { axiosData, getData } from "@/lib/services";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,7 +15,7 @@ function ItemSlide(props: any) {
 	return (
 		<div className="w-[415px] lg:w-full h-[200px] lg:h-[300px] relative  bg-gradient-to-r from-violet-600 to-indigo-600 ">
 			<Link href={props.link}>
-				<Image src={props.image} fill alt="image" />
+				<Image src={props.image} fill alt="image" className="object-cover" />
 			</Link>
 		</div>
 	);
@@ -33,7 +33,7 @@ const settings = {
 
 export default function MainBanner() {
 	const getQuery = async () => {
-		return await getData("/banners");
+		return await axiosData("GET", `/api/banners?populate=*`);
 	};
 	const query = useQuery({
 		queryKey: ["banner"],
@@ -53,13 +53,13 @@ export default function MainBanner() {
 	if (query.isError) {
 		return <ErrorNetwork />;
 	}
-	const dataContent = query?.data?.data.data;
+	const dataContent = query?.data.data;
 
 	return (
 		<div className="mainslider rounded-lg w-full overflow-hidden relative">
 			<Slider {...settings}>
 				{dataContent?.map((item: any) => (
-					<ItemSlide key={item.id} link={item.target_url} image={item.image_url} />
+					<ItemSlide key={item.id} link={item.url ?item.url : "/"} image={item.image ? process.env.BASE_API+item.image.url : "/images/noimage.png"} />
 				))}
 			</Slider>
 		</div>
