@@ -71,16 +71,23 @@ export default function LoginPage() {
 				<div className="mt-6">
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(Login)} className="space-y-8">
-							<input type="text"
-								placeholder="Alamat Email"
-								className="text-black"
-							 {...form.register("email")}
-							/>
-							<input type="password"
-								placeholder="Password"
-								className="text-black"
-							 {...form.register("password")}
-							/>
+							<div className="relative">
+								<input type="text"
+									placeholder="Alamat Email"
+									className="text-black px-4 py-2 rounded-lg min-w-[270px]"
+									{...form.register("email")}
+								/>
+							</div>
+							<div className="relative">
+								<input type={show ? "text" : "password"}
+									placeholder="Password"
+									className="text-black px-4 py-2 rounded-lg min-w-[270px]"
+									{...form.register("password")}
+								/>
+								<div className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer" onClick={() => setShow(!show)}>
+									{show ? <IoIosEye /> : <IoIosEyeOff />}
+								</div>								
+							</div>
 							<div className="flex justify-end mt-2">
 								<Link href={"/"} className="font-hind font-semibold text-[12px] text-c-orange">
 									Lupa Kata Sandi?
