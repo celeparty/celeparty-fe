@@ -14,9 +14,9 @@ export function middleware(request: NextRequest) {
 	if (cookie && request.nextUrl.pathname.startsWith("/user")) {
 	  return NextResponse.next();
 	}
-	if (cookie && request.nextUrl.pathname.startsWith("/auth/login")) {
-	  return Response.redirect(new URL("/user/home", request.url));
-	}
+	// if (cookie && request.nextUrl.pathname.startsWith("/auth/login")) {
+	//   return Response.redirect(new URL("/user/home", request.url));
+	// }
   
 	if (!cookie && request.nextUrl.pathname.startsWith("/user/")) {
 	  return Response.redirect(new URL("/auth/login", request.url));

@@ -35,26 +35,26 @@ export const authOptions: NextAuthOptions = {
                 },
 			},
 			async authorize(credentials) {
-                const res = await fetch(
-                    `${process.env.BASE_API}/api/auth/local/`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${process.env.KEY_API_POST}`,
-                        },
-                        body: JSON.stringify(credentials),
-                    }
-                );
+				console.log("Credentials:", credentials);
+				const res = await fetch(`${process.env.BASE_API}/api/auth/local`, {
+					method: "POST",
+					headers: {
+					  "Content-Type": "application/json",
+					},
+					body: JSON.stringify(credentials),
+				  });
+			  
+				  const user = await res.json();
+				  console.log("API Response:", user);
 
-				const user: iUser = await res.json();
-				if (res?.ok) {
-					return user;
-				} else {
-					console.log("Password Salah");
+			  
+				if (res.ok && user.jwt) {
+					console.log("Login sukses, user:", user);
+				  return user; // Kembalikan respons API langsung
 				}
-				return user;
-			},
+			  
+				return null; // Jika gagal
+			  }
 		}),
 		GithubProvider({
 			clientId: process.env.GITHUB_ID as string,
@@ -64,18 +64,21 @@ export const authOptions: NextAuthOptions = {
 
 
     callbacks: {
-        async jwt({ token, user }: { token: any, user: any }) {
-            if (user) {
-                token.accessToken = user?.jwt;
-                token.user = user?.user;
-            }
-            return token;
-        },
-        async session({ session, token }: { session: any, token: any }) {
-            session.jwt = token?.accessToken;
-            session.user = token?.user;
-            return session;
-        },
+		async jwt({ token, user }: { token: any; user: any }) {
+			// Jika ada `user`, tambahkan ke `token`
+			if (user) {
+			  token.accessToken = user.jwt; // Simpan JWT ke token
+			  token.user = user.user; // Simpan informasi user
+			}
+			return token; // Kembalikan token yang diperbarui
+		},
+		
+		async session({ session, token }: { session: any; token: any }) {
+			// Transfer token ke session
+			session.jwt = token.accessToken; // Simpan JWT ke session
+			session.user = token.user; // Simpan informasi user ke session
+			return session; // Kembalikan session yang diperbarui
+		},
     },
 	pages: {
 		signIn: "/auth/login",
