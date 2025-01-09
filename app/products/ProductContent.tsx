@@ -9,12 +9,12 @@ import { axiosData, getData } from "@/lib/services";
 import { useQuery } from "@tanstack/react-query";
 import _ from "lodash";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { ItemCategory, ItemInfo } from "./ItemCategory";
 import { formatRupiah } from "@/lib/utils";
 
-export default function ProductContent() {
+export function ProductContent() {
 	const [sortDesc, setSortDesc] = useState(true);
 	const [price, setPrice] = useState<{ min: any; max: any }>({ min: 0, max: 0 });
 	const [mainData, setMainData] = useState([]);
@@ -226,4 +226,12 @@ export default function ProductContent() {
 			</div>
 		</div>
 	);
+}
+
+export default function SectionProductContent() {
+	return (
+		<Suspense>
+			<ProductContent />
+		</Suspense>
+	)
 }

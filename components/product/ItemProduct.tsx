@@ -18,7 +18,7 @@ interface iItemProduct {
 
 export default function ItemProduct(props: iItemProduct) {
 	return (
-		<div className="lg:p-2 lg:w-1/5 w-1/2 shadow-md shadow-gray-400 lg:shadow-none">
+		<div className="lg:p-2 lg:w-1/5 w-1/2 p-2  lg:shadow-gray-400 lg:shadow-none">
 			<Link href={props.url} className=" rounded-lg shadow-md flex flex-col justify-between h-full p-3">
 				<div>
 					{props.children}
