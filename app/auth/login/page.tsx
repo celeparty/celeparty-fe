@@ -50,7 +50,6 @@ export default function LoginPage() {
         const result = await signIn("credentials", {
             identifier: email,
             password: password,
-            // callbackUrl: "/user/home",
         });
 
         if (result?.error) {
