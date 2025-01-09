@@ -6,7 +6,8 @@
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
-		"lint": "next lint"
+		"lint": "next lint",
+		"biome":"biome lint --write '**/*.{js,jsx,ts,tsx}'"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^3.4.2",
