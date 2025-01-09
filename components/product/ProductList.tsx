@@ -35,7 +35,6 @@ export default function ProductList() {
 	}
 
 	const dataContent = query?.data?.data;
-	console.log(dataContent)
 
 
 	return (

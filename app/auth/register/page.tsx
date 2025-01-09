@@ -3,15 +3,20 @@
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea"
+import { axiosData } from "@/lib/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const signUpSchema = z.object({
 	name: z.string().nonempty({ message: "Nama tidak boleh kosong" }),
+	username: z.string().nonempty({ message: "User Name tidak boleh kosong" }),
 	email: z.string().nonempty({ message: "Email tidak boleh kosong" }).email({ message: "Invalid email address" }),
 	phone: z.string().nonempty({ message: "No Telepon tidak boleh kosong" }),
+	address: z.string().nonempty({ message: "Alamat tidak boleh kosong" }),
 	password: z
 		.string()
 		.nonempty({ message: "Kata Sandi tidak boleh kosong" })
@@ -29,89 +34,104 @@ const signUpSchema = z.object({
 });
 
 const Registration = () => {
+	const [message, setMessage] = useState(false);
+	const [errorMessage, setErrorMessage] = useState<string | boolean | null>(
+	  false
+	);
+  
 	const form = useForm<z.infer<typeof signUpSchema>>({
 		resolver: zodResolver(signUpSchema),
 		defaultValues: {
 			name: "",
+			username:"",
 			email: "",
 			phone: "",
+			address: "",
 			password: "",
 			confirmPassword: "",
 		},
 	});
 
 	const signUp = (values: z.infer<typeof signUpSchema>) => {
+		const sendNow = async () => {
+			try {
+				const data = {
+					name: values.name,
+					username: values.name,
+					email: values.email,
+					phone: values.phone,
+					address: values.address,
+					password: values.password,
+				};
+		  
+				const response = await axiosData("POST", "/api/auth/local/register", data);	
+				setErrorMessage(false);
+				setMessage(true);		
+			} catch (error:any) {
+				console.error("Error:", error?.response.data.error.message);
+				setErrorMessage(error?.response.data.error.message);		
+			}
+		}
+		sendNow()		
 		form.reset();
-		alert("Selamat!, Proses Register Kamu Berhasil!!");
-		console.log(values);
 	};
 	return (
 		<div>
-			<h1 className="mb-4 lg:text-start text-center">Registrasi</h1>
-			<div className="">
+			<h1 className="mb-4 lg:text-start text-center text-2xl font-bold">Registrasi</h1>
+			<div className="relative">
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(signUp)} className="flex flex-col gap-4">
-						<FormField
-							control={form.control}
-							name="name"
-							render={({ field }) => (
-								<FormItem>
-									<FormControl>
-										<Input placeholder="Nama Lengkap" className="text-black" {...field} />
-									</FormControl>
-									<FormMessage className="text-[9px]" />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="email"
-							render={({ field }) => (
-								<FormItem>
-									<FormControl>
-										<Input placeholder="Email" className="text-black" {...field} />
-									</FormControl>
-									<FormMessage className="text-[9px]" />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="phone"
-							render={({ field }) => (
-								<FormItem>
-									<FormControl>
-										<Input placeholder="No Telepon" className="text-black" {...field} />
-									</FormControl>
-									<FormMessage className="text-[9px]" />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="password"
-							render={({ field }) => (
-								<FormItem>
-									<FormControl>
-										<Input placeholder="Kata Sandi" className="text-black" {...field} />
-									</FormControl>
-									<FormMessage className="text-[9px]" />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="confirmPassword"
-							render={({ field }) => (
-								<FormItem>
-									<FormControl>
-										<Input placeholder="Ulangi Kata Sandi" className="text-black" {...field} />
-									</FormControl>
-									<FormMessage className="text-[9px]" />
-								</FormItem>
-							)}
-						/>
-						<div className="mt-16 flex justify-center">
+					<div className="relative">
+							<input type="text"
+								placeholder="Nama Lengkap"
+								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
+								{...form.register("name")}
+							/>
+						</div>						
+						<div className="relative">
+							<input type="text"
+								placeholder="User Name"
+								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
+								{...form.register("username")}
+							/>
+						</div>						
+						<div className="relative">
+							<input type="email"
+								placeholder="Email"
+								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
+								{...form.register("email")}
+							/>
+						</div>						
+						<div className="relative">
+							<input type="text"
+								placeholder="No Telepon"
+								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
+								{...form.register("phone")}
+							/>
+						</div>						
+						<div className="relative">
+							<textarea
+								placeholder="Address"
+								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
+								{...form.register("address")}
+							/>
+						</div>						
+						<div className="relative">
+							<input type="password"
+								placeholder="Kata Sandi"
+								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
+								{...form.register("password")}
+							/>
+						</div>						
+						<div className="relative">
+							<input type="password"
+								placeholder="Ulangi Kata Sandi"
+								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
+								{...form.register("confirmPassword")}
+							/>
+						</div>						
+
+						<div className="mt-8 flex justify-center">
 							<div className="flex flex-col gap-2 justify-center lg:w-[172px] w-[350px]">
 								<Button className="h-[42px] text-center text-white rounded-full bg-c-green">
 									Register
@@ -126,6 +146,14 @@ const Registration = () => {
 						</div>
 					</form>
 				</Form>
+				{message ? (
+					<div className="mt-1 text-green-500">
+					Terima kasih
+					</div>
+				) : null}
+				{errorMessage ? (
+					<div className="text-c-red mt-1">{errorMessage}</div>
+				) : null}
 			</div>
 		</div>
 	);

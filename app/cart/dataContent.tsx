@@ -39,7 +39,6 @@ export default function CartContent() {
             .catch(error => {
                 console.log(error)
             })
-            console.log(response)
         window.snap.pay(response)
     }
 
@@ -107,8 +106,8 @@ export default function CartContent() {
                                     {
                                         cart.map((item:any, index:number) => {
                                             return (
-                                                <div className="flex justify-between text-sm w-full" key={index}>
-                                                    <div>{item.product_name}</div>
+                                                <div className="flex justify-between text-[14px] w-full" key={index}>
+                                                    <div>{item.product_name} <span className="text-[12px] opacity-70">@{item.quantity}</span></div>
                                                     <div>{formatRupiah(item.price)}</div>
                                                 </div>
                                             )

@@ -54,12 +54,12 @@ export default function Header() {
 								</div>
 							) : null}
 						</Link>
-						<div className="item" onClick={setCartLength}>
+						{/* <div className="item" onClick={setCartLength}>
 							<MdOutlineNotifications />
-						</div>
-						<div className="item">
+						</div> */}
+						{/* <div className="item">
 							<IoChatbubbleEllipsesOutline />
-						</div>
+						</div> */}
 					</div>
 
 					{status === "authenticated" ? (

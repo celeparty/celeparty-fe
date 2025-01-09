@@ -6,13 +6,15 @@ import Box from "@/components/Box";
 import { axiosData, getData } from "@/lib/services";
 import parse from "html-react-parser";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FaRegStar, FaStar } from "react-icons/fa";
 import { FcHighPriority } from "react-icons/fc";
 import SideBar from "./SideBar";
 import { formatRupiah } from "@/lib/utils";
 
 export default function ContentProduct(props:any) {
+	const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
+
 	const getQuery = async () => {
 		return await axiosData("GET", `/api/products/${props.slug}?populate=*`);
 	};
@@ -22,7 +24,11 @@ export default function ContentProduct(props:any) {
 	});
 
 	const dataContent = query?.data?.data;
+	const [currentPrice, setCurrentPrice] = useState(dataContent?.main_price);
 
+	useEffect(() => {
+		setCurrentPrice(dataContent?.main_price);
+	},[])
 	if (query.isLoading) {
 		return (
 			<div className="mt-[80px]">
@@ -35,8 +41,10 @@ export default function ContentProduct(props:any) {
 	if (query.isError) {
 		return <ErrorNetwork />;
 	}
-
 	const currentRate = dataContent?.rate;
+
+	
+
 
 	return (
 			<Box className="px-4">
@@ -65,7 +73,7 @@ export default function ContentProduct(props:any) {
 									{dataContent?.title ? dataContent.title : "Produk Tidak Tersedia"}{" "}
 								</h1>
 								<h4 className="text-[20px] text-c-orange font-bold">
-									{dataContent?.main_price ? formatRupiah(dataContent.main_price) : formatRupiah(0)}
+									{currentPrice > 0 ? formatRupiah(currentPrice) : formatRupiah(dataContent.main_price)}
 								</h4>
 								<div className="flex gap-1 items-center">
 									<div className="rate flex gap-">
@@ -92,10 +100,15 @@ export default function ContentProduct(props:any) {
 									<h4>Varian</h4>
 									<div className="variant flex flex-wrap gap-2 ">
 										{dataContent?.variant?.map((variant: any) => {
+											const isSelected = selectedVariantId === variant.id;
 											return (
 												<div
 													key={variant.id}
-													className="bg-white border-[#000000] border-solid border-[1px] rounded-[10px] px-2 py-1 text-[14px] cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green"
+													className={` border-[#000000] border-solid border-[1px] rounded-[10px] px-2 py-1 text-[14px] cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green ${isSelected ? "bg-c-green text-white border-c-green" : "bg-white"}`}
+													onClick={() => {
+														setCurrentPrice(variant.price)
+														setSelectedVariantId(variant.id);
+													}}
 												>
 													{variant?.name}
 												</div>
@@ -118,7 +131,7 @@ export default function ContentProduct(props:any) {
 							</div>
 						</div>
 						<div className="right min-w-[275px] sticky top-0 ">
-							<SideBar dataProducts={dataContent} />
+							<SideBar dataProducts={dataContent} currentPrice={currentPrice >0 ? currentPrice : dataContent?.main_price } />
 						</div>
 					</div>
 				) : (

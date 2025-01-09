@@ -62,7 +62,6 @@ export default function MainContentAddProduct() {
 			themes: stateTheme.value,
 			data,
 		};
-		console.log(dataForm);
 	};
 
 	const getQuery = async () => {
