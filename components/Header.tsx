@@ -21,6 +21,7 @@ export default function Header() {
 			window.location.href = `/products?search=${encodeURIComponent(searchValue)}`;
 		}
 	  };
+	  console.log({session})
 	return (
 		<div className="bg-white shadow-sm w-full px-4 py-4 lg:z-10 lg:sticky top-0">
 			<div className="wrapper-main flex flex-col lg:flex-row items-start justify-between gap-4 lg:gap-16">
