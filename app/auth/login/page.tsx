@@ -36,6 +36,10 @@ const signInSchema = z.object({
 export default function LoginPage() {
     // const { data: session, status } = useSession()
     const [show, setShow] = useState(false);
+	const [message, setMessage] = useState({
+		status: false,
+		info:""
+	})
     const router = useRouter();
     const form = useForm<z.infer<typeof signInSchema>>({
         resolver: zodResolver(signInSchema),
@@ -48,16 +52,18 @@ export default function LoginPage() {
     const Login = async (values: z.infer<typeof signInSchema>, e: any) => {
         const { email, password } = values;
         const result = await signIn("credentials", {
+			redirect: false,
             identifier: email,
             password: password,
         });
-
-        if (result?.error) {
-            e.preventDefault();
-            console.error('Login failed:', result.error);
-        } else {
-            router.push("/user/home");
-        }
+		if (result?.error) {
+			console.log(result)
+			setMessage({status:true, info:"Username atau password salah"})
+		  } 
+		else {
+			setMessage({status:false, info:""})
+			router.push("/user/home")
+		  }
     };
     return (
 		<div className="relative wrapper py-7 bg-c-blue my-5 rounded-lg">
@@ -87,6 +93,10 @@ export default function LoginPage() {
 									{show ? <IoIosEye /> : <IoIosEyeOff />}
 								</div>								
 							</div>
+							{
+								message.status ? <div className="text-red-500">{message.info}</div> : null
+							}
+
 							<div className="flex justify-end mt-2">
 								<Link href={"/"} className="font-hind font-semibold text-[12px] text-c-orange">
 									Lupa Kata Sandi?
