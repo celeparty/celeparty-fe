@@ -48,9 +48,9 @@ export default function ProductList() {
 							title={item.title}
 							image_url={item.main_image ?process.env.BASE_API+item.main_image.url : "/images/noimage.png"}
 							price={ item.main_price ? formatRupiah(item.main_price) : formatRupiah(0)}
-							rate={Number.parseInt(item.average_rating).toFixed(1)}
+							rate={item.rate ? `${item.rate}` : "1"}
 							sold={item.sold_count}
-							location={item.vendor_region ? item.vendor_region : "unknown"}
+							location={item.vendor_region ? item.vendor_region : null}
 						/>
 					);
 				})}

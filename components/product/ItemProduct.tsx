@@ -9,7 +9,7 @@ interface iItemProduct {
 	title: string;
 	image_url: string;
 	price?: number | string;
-	rate?: string;
+	rate?: string | number;
 	sold?: string;
 	location?: string | boolean;
 	url: string;
@@ -38,7 +38,7 @@ export default function ItemProduct(props: iItemProduct) {
 						{props.rate && props.sold ? (
 							<>
 								<FaStar className="text-[#FDD835]" />
-								{props.rate} | Terjual {props.sold}
+								{props.rate ? props.rate+" | " : null}  Terjual {props.sold}
 							</>
 						) : null}
 					</div>

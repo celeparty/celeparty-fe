@@ -1,5 +1,5 @@
 "use client";
-import { useCart } from "@/lib/store/cart";
+import { useCart, useNotif } from "@/lib/store/cart";
 import { useTransaction } from "@/lib/store/transaction";
 import Cookies from "js-cookie";
 import { useSession } from "next-auth/react";
@@ -7,12 +7,29 @@ import Link from "next/link";
 import { useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
 
+export const Notification = () => {
+	const { statusNotif, message } = useNotif();
+  
+	return (
+		statusNotif && (
+		<div className="wrapper-big">
+			<div className=" bg-c-blue text-white p-4 rounded-md shadow-md mt-5">
+			{message}
+			</div>
+		</div>
+	  )
+	);
+  };
+
 export default function SideBar({ dataProducts, currentPrice }: any) {
 	const [value, setValue] = useState(0);
 	const { data: session, status } = useSession();
 	const { cart, setCart }: any = useCart();
 	const { transaction }: any = useTransaction();
+	const notifCart = useNotif((state) => state.notifCart);
+
 	const addCart = () => {
+		notifCart(`${dataProducts.title} ditambahkan ke keranjang`);
 		setCart([
 			{
 				...cart,
@@ -29,6 +46,8 @@ export default function SideBar({ dataProducts, currentPrice }: any) {
 
 	return (
 		<div className="p-5 shadow-lg rounded-lg border-solid border-[1px] border-gray-100 -mt-6 lg:-mt-0">
+
+
 			{status === "authenticated" ? (
 				<>
 					<h4 className="font-bold lg:font-normal">Atur Jumlah dan Catatan</h4>
