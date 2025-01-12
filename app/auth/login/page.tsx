@@ -62,7 +62,9 @@ export default function LoginPage() {
 		  } 
 		else {
 			setMessage({status:false, info:""})
-			router.push("/user/home")
+			router.replace("/user/home")
+			window.location.reload();
+			// window.location.href = `/products?search=${encodeURIComponent(searchValue)}`;
 		  }
     };
     return (
@@ -112,7 +114,7 @@ export default function LoginPage() {
 									</Button>
 									<p className="font-hind font-semibold text-white text-[12px]">
 										Belum punya akun?{" "}
-										<Link href={"/register"} className="text-c-orange">
+										<Link href={"/auth/register"} className="text-c-orange">
 											Registrasi
 										</Link>
 									</p>
