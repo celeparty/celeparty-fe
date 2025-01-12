@@ -59,19 +59,20 @@ export default function DashboardLayout({
 								link="/user/home"
 							/>
 							<ItemMenu
+								title="Produk Saya"
+								icon="/images/icon-product.svg"
+								iconWidth={30}
+								iconHeight={30}
+								link="/user/vendor/products"
+							/>							
+							<ItemMenu
 								title="Pesanan"
 								icon="/images/icon-order.svg"
 								iconWidth={30}
 								iconHeight={30}
 								link="/user/pesanan"
 							/>
-							<ItemMenu
-								title="Produk Saya"
-								icon="/images/icon-product.svg"
-								iconWidth={30}
-								iconHeight={30}
-								link="/user/products"
-							/>
+
 							<ItemMenu
 								title="Tambah Produk"
 								icon="/images/icon-add-product.svg"
