@@ -63,9 +63,15 @@ export default function Header() {
 					</div>
 
 					{status === "authenticated" ? (
-						<div className="btnline cursor-pointer" onClick={() => signOut()}>
-							Keluar
-						</div>
+						<>
+							<Link href="/user/home" className="btn">
+								Dashboard
+							</Link>
+
+							<div className="btnline cursor-pointer" onClick={() => signOut()}>
+								Keluar
+							</div>
+						</>
 					) : status === "unauthenticated" ? (
 						<>
 							<Link href="/auth/login" className="btnline">

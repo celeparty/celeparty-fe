@@ -27,6 +27,23 @@ export const axiosData = async (method: Method, url: string, data?: any) => {
     }
 };
 
+export const axiosUser = async (method: Method, url: string, token?: string, data?: any) => {
+	try {
+		const headers: Record<string, string> = {};
+		headers['Authorization'] = `Bearer ${token}`;
+		const response = await axios({
+			method,
+			url: `${process.env.BASE_API}${url}`,
+			data,
+			headers,
+		});
+		return response?.data;
+	} catch (err) {
+		console.error('Request failed:', err);
+		throw err;
+	}
+}
+
 
 
 export const getData = (url: string) =>

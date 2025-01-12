@@ -15,6 +15,23 @@ interface iUserResponse {
 	token: string;
 }
 
+declare module "next-auth" {
+	interface Session {
+	  jwt?: string; // JWT token
+	  user?: any; // Informasi user yang berasal dari API
+	}
+  
+	interface User {
+	  jwt?: string; // Token dari API Anda
+	  user?: any; // Informasi tambahan user
+	}
+  
+	interface JWT {
+	  accessToken?: string; // Nama token yang Anda gunakan
+	  user?: any; // Informasi user yang berasal dari token
+	}
+  }
+
 export const authOptions: NextAuthOptions = {
 	session: {
 		strategy: "jwt",
@@ -36,7 +53,7 @@ export const authOptions: NextAuthOptions = {
 			},
 			async authorize(credentials) {
 				console.log("Credentials:", credentials);
-				const res = await fetch(`${process.env.BASE_API}/api/auth/local`, {
+				const res = await fetch(`${process.env.BASE_API}/api/auth/local?populate=*`, {
 					method: "POST",
 					headers: {
 					  "Content-Type": "application/json",
