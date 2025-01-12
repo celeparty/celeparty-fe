@@ -32,7 +32,7 @@ export default function SideBar({ dataProducts, currentPrice }: any) {
 	const notifCart = useNotif((state) => state.notifCart);
 
 	const addCart = () => {
-		notifCart(`${dataProducts.title} ditambahkan ke keranjang`);
+		notifCart(`${dataProducts.title} berhasil dimasukan ke keranjang`);
 		setCart([
 			{
 				...cart,
