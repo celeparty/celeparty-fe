@@ -12,9 +12,11 @@ export const Notification = () => {
   
 	return (
 		statusNotif && (
-		<div className="wrapper-big">
-			<div className=" bg-c-blue text-white p-4 rounded-md shadow-md mt-5">
-			{message}
+		<div className="fixed top-0 left-0 right-0 z-50">
+			<div className="wrapper-big">
+				<div className=" bg-c-blue text-center text-white p-4 rounded-md shadow-md mt-1">
+				{message}
+				</div>
 			</div>
 		</div>
 	  )
