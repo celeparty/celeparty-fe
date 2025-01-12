@@ -16,11 +16,12 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession, signIn, signOut } from "next-auth/react";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { IoIosEye, IoIosEyeOff } from "react-icons/io";
+import { get } from "http";
 
 const signInSchema = z.object({
     email: z
@@ -33,7 +34,7 @@ const signInSchema = z.object({
         .max(64, { message: "Maksimal karakter untuk kata sandi yaitu 64 huruf" }),
 });
 
-export default function LoginPage() {
+function LoginPage() {
     // const { data: session, status } = useSession()
     const [show, setShow] = useState(false);
 	const [message, setMessage] = useState({
@@ -41,6 +42,9 @@ export default function LoginPage() {
 		info:""
 	})
     const router = useRouter();
+	const params = useSearchParams();
+	const getTheme = params.get("theme");
+
     const form = useForm<z.infer<typeof signInSchema>>({
         resolver: zodResolver(signInSchema),
         defaultValues: {
@@ -67,13 +71,14 @@ export default function LoginPage() {
 			// window.location.href = `/products?search=${encodeURIComponent(searchValue)}`;
 		  }
     };
+
     return (
-		<div className="relative wrapper py-7 bg-c-blue my-5 rounded-lg">
+		<div className={`relative wrapper py-7 my-5 rounded-lg ${getTheme=="vendor" ? "bg-c-green" : "bg-c-blue"}`}>
 			<div className="w-[260px] mx-auto py-8">
 				<div className="flex justify-center">
-					<Image src={"/images/cake-color.png"} width={111} height={80} alt="Cake Color.." />
+					<Image src={`${getTheme=="vendor" ? "/images/cake-color-white.png" : "/images/cake-color.png"}`} width={111} height={80} alt="Cake Color.." />
 				</div>
-				<h1 className="text-[26px] text-center font-semibold text-white mb-7">CELEPARTY</h1>
+				<h1 className="text-[26px] text-center font-semibold text-white mb-7">{getTheme=="vendor" ? "CELEPARTNER" : "CELEPARTY"}</h1>
 				<h2 className="font-hind font-semibold text-[24px] text-white">Login</h2>
 				<div className="mt-6">
 					<Form {...form}>
@@ -108,16 +113,21 @@ export default function LoginPage() {
 								<div className="flex flex-col gap-2 justify-center">
 									<Button
 										type="submit"
-										className="w-[172px] h-[42px] text-center text-white rounded-full bg-c-green hover:bg-c-green"
+										className={`w-[172px] h-[42px] text-center text-white rounded-full ${getTheme==="vendor" ? "bg-c-blue hover:bg-c-blue" : "bg-c-green hover:bg-c-green"}`}
 									>
 										Login
 									</Button>
-									<p className="font-hind font-semibold text-white text-[12px]">
+									{
+										getTheme=="vendor" ? 
+										<div className="font-hind font-semibold text-white text-center text-[12px]">Ingin menjadi Mitra Celeparty?  <Link href={"/auth/register/mitra"} className="text-c-orange block">Registrasi sebagai Mitra</Link></div> : 									
+										<p className="font-hind font-semibold text-white text-[12px]">
 										Belum punya akun?{" "}
 										<Link href={"/auth/register"} className="text-c-orange">
 											Registrasi
 										</Link>
 									</p>
+
+									}
 								</div>
 							</div>
 						</form>
@@ -126,4 +136,12 @@ export default function LoginPage() {
 			</div>
 		</div>
     );
+}
+
+export default function page() {
+	return (
+		<Suspense fallback={<div>Loading...</div>}>
+			<LoginPage />
+		</Suspense>
+	)
 }

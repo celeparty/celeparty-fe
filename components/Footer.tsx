@@ -20,7 +20,7 @@ export default function Footer() {
 									<Link href="/about">Tentang Celeparty</Link>
 								</li>
 								<li>
-									<Link href="/auth/login">Mitra Celeparty</Link>
+									<Link href="/auth/login?theme=vendor">Mitra Celeparty</Link>
 								</li>
 								<li>
 									<Link href="/blog">Blog</Link>
