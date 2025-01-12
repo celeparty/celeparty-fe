@@ -2,7 +2,13 @@ import _ from "lodash";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-export const useCart = create(
+interface NotifState {
+	statusNotif: boolean;
+	message?: string | null;
+	notifCart: (message: string) => void;
+  }
+
+export const useCart = create(	
 	persist(
 		(set, get) => ({
 			cart: [],
@@ -46,3 +52,14 @@ export const useCart = create(
 		},
 	),
 );
+
+export const useNotif = create<NotifState>((set) => ({
+	statusNotif: false,
+	message: null,
+	notifCart: (message: string) => {
+	  set({ statusNotif: true, message }); // Tampilkan notifikasi
+	  setTimeout(() => {
+		set({ statusNotif: false, message: null }); // Sembunyikan setelah 3 detik
+	  }, 3000);
+	},
+  }));
