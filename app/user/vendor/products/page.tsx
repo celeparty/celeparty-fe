@@ -3,11 +3,12 @@ import Box from "@/components/Box";
 import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
 import ItemProduct from "@/components/product/ItemProduct";
-import { getDataToken } from "@/lib/services";
+import { axiosUser, getDataToken } from "@/lib/services";
 import { useQuery } from "@tanstack/react-query";
 import _ from "lodash";
 import { useSession } from "next-auth/react";
 import React from "react";
+import { formatRupiah } from "@/lib/utils";
 
 interface iItemStatus {
 	status: string;
@@ -27,19 +28,18 @@ function ItemStatus({ status, value, color }: iItemStatus): JSX.Element {
 	);
 }
 export default function Products() {
-	const session = useSession();
-	const dataSession = session?.data as any;
+	const { data: session, status } = useSession();
+	
 
 	const getQuery = async () => {
-		if (!dataSession?.user?.accessToken) {
-			throw new Error("Access token is undefined");
+		if (status === "authenticated") {
+			return await axiosUser("GET",`/api/products?populate=*&filters[users_permissions_user][documentId]=${session?.user.documentId}`,`${session && session?.jwt}`);
 		}
-		return await getDataToken(`/products/vendor`, `${dataSession?.user?.accessToken}`);
 	};
 	const query = useQuery({
 		queryKey: ["qProductsVendor"],
 		queryFn: getQuery,
-		enabled: !!dataSession?.user?.accessToken,
+		enabled: status === "authenticated"
 	});
 
 	if (query.isLoading) {
@@ -48,7 +48,7 @@ export default function Products() {
 	if (query.isError) {
 		return <ErrorNetwork style="mt-0" />;
 	}
-	const dataContent = query?.data?.data.data;
+	const dataContent = query?.data?.data;
 
 	return (
 		<div>
@@ -56,16 +56,17 @@ export default function Products() {
 				<div className="flex flex-wrap -mx-2">
 					{dataContent?.map((item: any) => {
 						return (
-							<ItemProduct
-								url={`/product/${item.id}`}
-								key={item.id}
-								title={item.name}
-								image_url={item.photos[0].image_url}
-								price={`Rp. ${Number.parseInt(`${item.default_variant_price}`).toLocaleString("id-ID")}`}
-								rate={Number.parseInt(item.average_rating).toFixed(1)}
-								sold={item.sold_count}
-								location={false}
-							></ItemProduct>
+								<ItemProduct
+									url={`/products/${item.documentId}`}
+									key={item.id}
+									title={item.title}
+									image_url={item.main_image ? process.env.BASE_API + item.main_image.url : "/images/noimage.png"}
+									price={item.main_price ? formatRupiah(item.main_price) : formatRupiah(0)}
+									rate={item.rate ? `${item.rate}` : "1"}
+									sold={item.sold_count}
+									location={item.region ? item.region : null}
+								></ItemProduct>
+
 						);
 					})}
 				</div>
