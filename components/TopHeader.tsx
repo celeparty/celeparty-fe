@@ -25,7 +25,7 @@ export default function TopHeader() {
 						<Link href="/about">Tentang Celeparty</Link>
 					</li>
 					<li className=" w-1/4 lg:w-auto text-center lg:text-start">
-						<Link href="/auth/mitra/login">Mitra Celeparty</Link>
+						<Link href="/auth/login">Mitra Celeparty</Link>
 					</li>
 					<li className=" w-1/4 lg:w-auto text-center lg:text-start">
 						<Link href="/blog">Blog</Link>
