@@ -106,7 +106,6 @@ export default function MainContentAddProduct() {
 	}
 	const dataCategory = query?.data?.data.data;
 	const dataThemes = queryThemes.data?.data.data;
-	console.log("dataThemes");
 	return (
 		<div>
 			<form onSubmit={handleSubmit(onSubmit)}>

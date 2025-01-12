@@ -89,6 +89,8 @@ export function ProductContent() {
 		setMainData(dataSort);
 	};
 
+	console.log({mainData})
+
 	return (
 		<div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
 			<Box className="bg-c-blue text-white w-full lg:max-w-[280px] mt-0 hidden lg:block">
@@ -215,9 +217,9 @@ export function ProductContent() {
 									title={item.title}
 									image_url={item.main_image ? process.env.BASE_API + item.main_image.url : "/images/noimage.png"}
 									price={item.main_price ? formatRupiah(item.main_price) : formatRupiah(0)}
-									rate={Number.parseInt(item.rate).toFixed(1)}
+									rate={item.rate ? `${item.rate}` : "1"}
 									sold={item.sold_count}
-									location={item.region ? item.region : "unknown"}
+									location={item.region ? item.region : null}
 								></ItemProduct>
 							);
 						}) : <div className="text-center w-full">Product Tidak Ditemukan</div> }
