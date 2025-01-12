@@ -18,10 +18,43 @@ export const useCart = create(
 					cartLength: state.cartLength + 1,
 				}));
 			},
-			setCart: (data: []) =>
-				set((state: { cart: [] }) => ({
-					cart: [...state.cart, ...data],
-				})),
+			setCart: (data: { product_id: string; quantity: number }[]) => {
+				console.log(data);
+			  
+				set((state: { cart: { product_id: string; quantity: number }[] }) => {
+				  // Untuk setiap item dalam `data`, tambahkan atau perbarui item di keranjang
+				  const updatedCart = [...state.cart];
+			  
+				  data.forEach((newItem) => {
+					const itemIndex = updatedCart.findIndex(
+					  (item) => item.product_id === newItem.product_id
+					);
+			  
+					if (itemIndex !== -1) {
+					  // Perbarui jumlah jika produk sudah ada
+					  updatedCart[itemIndex].quantity += newItem.quantity;
+					} else {
+					  // Tambahkan produk baru jika tidak ada
+					  updatedCart.push(newItem);
+					}
+				  });
+			  
+				  return {
+					cart: updatedCart,
+				  };
+				});
+			  },
+			  
+			updateNote: (productId:any, newNote:any) => {
+				set((state:any) => ({
+					cart: state.cart.map((item:any) =>
+					item.product_id === productId
+						? { ...item, note: newNote }
+						: item
+					),
+				}));
+			},
+
 			updateQuantity: (productId:any, newQuantity:any) => {
 				set((state:any) => ({
 					cart: state.cart.map((item:any) =>

@@ -16,9 +16,8 @@ declare global {
 }
 
 export default function CartContent() {
-	const { cart, setCart, updateQuantity, deleteItem, calculateTotal }: any = useCart();
+	const { cart, setCart, updateQuantity, updateNote, deleteItem, calculateTotal }: any = useCart();
     const [value, setValue] = useState(0);    
-
     const data = cart.map((item:any) => {
         return {
             id: item.product_id,
@@ -26,6 +25,7 @@ export default function CartContent() {
             image: process.env.BASE_API+item.image,
             price: parseInt(item.price),
             quantity: item.quantity,
+            note: item.note,
             totalPriceItem: item.price * item.quantity
         }
     })
@@ -51,7 +51,7 @@ export default function CartContent() {
                             {
                                 cart.map((item:any, index:number)=> {
                                     return (
-                                        <Box className="mb-7" title={item.product_name} key="number" >
+                                        <Box className="mb-7" title={item.product_name} key={index} >
                                             <div className="flex w-full">
                                                 <div className="w-[100px] h-[100px] relative">
                                                     <Image src={process.env.BASE_API+ item.image}  alt="image" fill className="object-cover" />
@@ -64,7 +64,11 @@ export default function CartContent() {
                                             <div className="flex gap-7">
                                                 <div className="flex-1">
                                                     <h5>Catatan</h5>
-                                                    <textarea className="w-full border-[1px] border-c-gray rounded-lg p-2"/>
+                                                    <textarea 
+                                                        className="w-full border-[1px] border-c-gray rounded-lg p-2" 
+                                                        value={item.note} 
+                                                        onChange={(e) => updateNote(item.product_id, e.target.value)}
+                                                    />
                                                 </div>
                                                 <div className="relative flex gap-5 items-start py-4">
                                                     <div className="flex flex-col items-center justify-center gap-1">Hapus <RiDeleteBin6Fill className="text-[#DA7E01] cursor-pointer text-2xl" onClick={() => deleteItem(item.product_id)}/></div>

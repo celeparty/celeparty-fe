@@ -25,6 +25,7 @@ export const Notification = () => {
 
 export default function SideBar({ dataProducts, currentPrice }: any) {
 	const [value, setValue] = useState(0);
+	const [note, setNote] = useState("");
 	const { data: session, status } = useSession();
 	const { cart, setCart }: any = useCart();
 	const { transaction }: any = useTransaction();
@@ -41,7 +42,7 @@ export default function SideBar({ dataProducts, currentPrice }: any) {
 				image: dataProducts.main_image.url,
 				quantity: value,
 				transaction_id: transaction.id,
-				note:""
+				note:note
 			}
 		])
 	};
@@ -81,7 +82,7 @@ export default function SideBar({ dataProducts, currentPrice }: any) {
 						<div>Minimal Order : 1 </div>
 						<div>Waktu Pemesanan : 2 Hari </div>
 						<label className="mb-1 block text-black mt-3">Tambah Catatan</label>
-						<textarea className="w-full h-[100px] border-solid border-[1px] rounded-lg border-c-gray p-3" />
+						<textarea className="w-full h-[100px] border-solid border-[1px] rounded-lg border-c-gray p-3" onChange={(e) => setNote(e.target.value)} />
 					</div>
 					<div className="text-center mx-auto w-full lg:max-w-[150px]">
 						<input
