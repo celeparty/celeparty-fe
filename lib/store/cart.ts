@@ -45,7 +45,15 @@ export const useCart = create(
 				});
 			  },
 			  
-
+			updateNote: (productId:any, newNote:any) => {
+				set((state:any) => ({
+					cart: state.cart.map((item:any) =>
+					item.product_id === productId
+						? { ...item, note: newNote }
+						: item
+					),
+				}));
+			},
 
 			updateQuantity: (productId:any, newQuantity:any) => {
 				set((state:any) => ({
