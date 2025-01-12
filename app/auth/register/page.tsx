@@ -138,7 +138,7 @@ const Registration = () => {
 								</Button>
 								<p className="font-hind font-semibold text-[12px] text-center">
 									Sudah punya akun?{" "}
-									<Link href={"/signin"} className="text-c-orange">
+									<Link href={"/auth/login"} className="text-c-orange">
 										Login
 									</Link>
 								</p>
