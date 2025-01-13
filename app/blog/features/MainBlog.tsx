@@ -2,6 +2,7 @@
 import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
 import { getData } from "@/lib/services";
+import { axiosData } from "@/lib/services";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
@@ -25,6 +26,10 @@ export default function MainBlog() {
 		}
 	};
 
+	// const getQuery = async () => {
+	// 	return await axiosData("GET", "/api/banners?populate=*");
+	// };
+
 	
 	const query = useQuery({
 		queryKey: ["qEventList"],
@@ -43,7 +48,6 @@ export default function MainBlog() {
 	}
 
 	const dataContent = query?.data?.data.data;
-
 	return (
 		<div className="flex flex-col lg:flex-row gap-3 mt-2 lg:mt-0">
 			<div className="relative flex-1">

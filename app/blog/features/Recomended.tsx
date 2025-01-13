@@ -4,6 +4,7 @@ import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
 import ItemProduct from "@/components/product/ItemProduct";
 import { getData } from "@/lib/services";
+import { axiosData } from "@/lib/services";
 import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
 import { notFound, useRouter } from "next/navigation";
@@ -26,8 +27,12 @@ interface Iitem {
 function RecomendedList(props: iRecomended) {
 	const router = useRouter();
 
+	// const getQuery = async () => {
+	// 	return await getData(`/blogs/${props.slug}/relateds?search&limit=10`);
+	// };
+
 	const getQuery = async () => {
-		return await getData(`/blogs/${props.slug}/relateds?search&limit=10`);
+		return await axiosData("GET", `/blogs/${props.slug}/relateds?search&limit=10`);
 	};
 	const query = useQuery({
 		queryKey: ["qRecomendedListxxx"],

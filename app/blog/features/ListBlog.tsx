@@ -2,6 +2,7 @@
 import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
 import { getData } from "@/lib/services";
+import { axiosData } from "@/lib/services";
 import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
 import React from "react";
@@ -9,7 +10,7 @@ import ItemFeature from "./ItemFeature";
 
 export default function ListBlog() {
 	const getQuery = async () => {
-		return await getData(`/blogs/news?search=&limit=50&page=1`);
+		return await axiosData("GET", "/api/banners?populate=*");
 	};
 	const query = useQuery({
 		queryKey: ["qEventList"],

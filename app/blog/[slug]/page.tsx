@@ -1,6 +1,7 @@
 import Basecontent from "@/components/Basecontent";
 import Box from "@/components/Box";
 import { getData } from "@/lib/services";
+import { axiosData } from "@/lib/services";
 import parse from "html-react-parser";
 import moment from "moment";
 import Image from "next/image";
@@ -14,7 +15,7 @@ export default async function BlogDetail({
 	params: { slug: string };
 }) {
 	const slug = params.slug;
-	const dataBlog = await getData(`/blogs/${slug}`);
+	const dataBlog = await axiosData("GET",`/blogs/${slug}`);
 	const dataContent = dataBlog ? dataBlog.data?.data : null;
 	return (
 		<div className="relative py-7">
