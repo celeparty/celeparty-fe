@@ -11,35 +11,37 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-const signUpSchema = z.object({
-	name: z.string().nonempty({ message: "Nama tidak boleh kosong" }),
-	username: z.string().nonempty({ message: "User Name tidak boleh kosong" }),
-	email: z.string().nonempty({ message: "Email tidak boleh kosong" }).email({ message: "Invalid email address" }),
-	phone: z.string().nonempty({ message: "No Telepon tidak boleh kosong" }),
-	address: z.string().nonempty({ message: "Alamat tidak boleh kosong" }),
-	birthplace: z.string().nonempty({ message: "Tempat lahir boleh kosong" }),
-	birthdate: z.string().nonempty({ message: "Tanggal lahir boleh kosong" }),
-	nik: z.string().nonempty({ message: "NIK boleh kosong" }),
-	companyName: z.string().nonempty({ message: "Nama usaha boleh kosong" }),
-	serviceLocation: z.string().nonempty({ message: "Lokasi layanan tidak boleh kosong" }),
-	bankName: z.string().nonempty({ message: "Nama bank boleh kosong" }),
-	accountNumber: z.string().nonempty({ message: "Nomer rekening boleh kosong" }),
-	accountName: z.string().nonempty({ message: "Nama pemegang rekening boleh kosong" }),
-	password: z
+const signUpSchema = z
+	.object({
+		name: z.string().nonempty({ message: "Nama tidak boleh kosong" }),
+		username: z.string().nonempty({ message: "User Name tidak boleh kosong" }),
+		email: z
+		.string()
+		.nonempty({ message: "Email tidak boleh kosong" })
+		.email({ message: "Alamat email tidak valid" }),
+		phone: z.string().nonempty({ message: "No Telepon tidak boleh kosong" }),
+		address: z.string().nonempty({ message: "Alamat tidak boleh kosong" }),
+		birthplace: z.string().nonempty({ message: "Tempat lahir tidak boleh kosong" }),
+		birthdate: z.string().nonempty({ message: "Tanggal lahir tidak boleh kosong" }),
+		nik: z.string().nonempty({ message: "NIK tidak boleh kosong" }),
+		companyName: z.string().nonempty({ message: "Nama usaha tidak boleh kosong" }),
+		serviceLocation: z.string().nonempty({ message: "Lokasi layanan tidak boleh kosong" }),
+		bankName: z.string().nonempty({ message: "Nama bank tidak boleh kosong" }),
+		accountNumber: z.string().nonempty({ message: "Nomor rekening tidak boleh kosong" }),
+		accountName: z.string().nonempty({ message: "Nama pemegang rekening tidak boleh kosong" }),
+		password: z
 		.string()
 		.nonempty({ message: "Kata Sandi tidak boleh kosong" })
 		.min(8, "Kata sandi harus memiliki minimal 8 karakter")
 		.regex(/[A-Z]/, "Kata sandi harus mengandung setidaknya satu huruf besar")
 		.regex(/[a-z]/, "Kata sandi harus mengandung setidaknya satu huruf kecil")
 		.regex(/[0-9]/, "Kata sandi harus mengandung setidaknya satu angka"),
-	confirmPassword: z
-		.string()
-		.nonempty({ message: "Kata Sandi tidak boleh kosong" })
-		.min(8, "Kata sandi harus memiliki minimal 8 karakter")
-		.regex(/[A-Z]/, "Kata sandi harus mengandung setidaknya satu huruf besar")
-		.regex(/[a-z]/, "Kata sandi harus mengandung setidaknya satu huruf kecil")
-		.regex(/[0-9]/, "Kata sandi harus mengandung setidaknya satu angka"),
-});
+		confirmPassword: z.string().nonempty({ message: "Konfirmasi kata sandi tidak boleh kosong" }),
+	})
+	.refine((data) => data.password === data.confirmPassword, {
+		path: ["confirmPassword"], // Arahkan pesan error ke field `confirmPassword`
+		message: "Konfirmasi kata sandi harus sama dengan kata sandi",
+	});
 
 const Registration = () => {
 	const [message, setMessage] = useState(false);
@@ -47,7 +49,11 @@ const Registration = () => {
 	  false
 	);
   
-	const form = useForm<z.infer<typeof signUpSchema>>({
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+	  } = useForm<z.infer<typeof signUpSchema>>({
 		resolver: zodResolver(signUpSchema),
 		defaultValues: {
 			name: "",
@@ -97,119 +103,132 @@ const Registration = () => {
 				setErrorMessage(error?.response.data.error.message);		
 			}
 		}
-		sendNow()		
-		form.reset();
+		sendNow()				
 	};
 	return (
 		<div>
 			<h1 className="mb-4 lg:text-start text-center text-2xl font-bold">Registrasi</h1>
 			<div className="relative">
-				<Form {...form}>
-					<form onSubmit={form.handleSubmit(signUp)} className="flex flex-col gap-4">
+					<form onSubmit={handleSubmit(signUp)} className="flex flex-col gap-4">
 					<div className="relative">
 							<input type="text"
 								placeholder="Nama Lengkap"
 								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...form.register("name")}
+								{...register("name")}
 							/>
+							{errors.name && <span className="text-red-500 text-xs">{errors.name.message}</span>}
 						</div>						
 						<div className="relative">
 							<input type="text"
 								placeholder="User Name"
 								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...form.register("username")}
+								{...register("username")}
 							/>
+							{errors.username && <span className="text-red-500 text-xs">{errors.username.message}</span>}
 						</div>						
 						<div className="relative">
 							<input type="email"
 								placeholder="Email"
 								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...form.register("email")}
+								{...register("email")}
 							/>
+							{errors.email && <span className="text-red-500 text-xs">{errors.email.message}</span>}
 						</div>						
 						<div className="relative">
 							<input type="text"
 								placeholder="Tempat Lahir"
 								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...form.register("birthplace")}
+								{...register("birthplace")}
 							/>
+							{errors.birthplace && <span className="text-red-500 text-xs">{errors.birthplace.message}</span>}
 						</div>						
 						<div className="relative">
-							<input type="text"
+							<input type="date"
 								placeholder="Tanggal Lahir"
 								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...form.register("birthdate")}
+								{...register("birthdate")}
 							/>
+							{errors.birthdate && <span className="text-red-500 text-xs">{errors.birthdate.message}</span>}
 						</div>						
 						<div className="relative">
 							<input type="text"
 								placeholder="NIK"
 								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...form.register("nik")}
+								{...register("nik")}
 							/>
+							{errors.nik && <span className="text-red-500 text-xs">{errors.nik.message}</span>}
 						</div>						
 						<div className="relative">
 							<input type="text"
 								placeholder="No Telepon"
 								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...form.register("phone")}
+								{...register("phone")}
 							/>
+							{errors.phone && <span className="text-red-500 text-xs">{errors.phone.message}</span>}
 						</div>						
 						<div className="relative">
 							<input type="password"
 								placeholder="Kata Sandi"
 								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...form.register("password")}
+								{...register("password")}
 							/>
+							{errors.password && <span className="text-red-500 text-xs">{errors.password.message}</span>}
 						</div>						
 						<div className="relative">
 							<input type="password"
 								placeholder="Ulangi Kata Sandi"
 								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...form.register("confirmPassword")}
+								{...register("confirmPassword")}
 							/>
+							{errors.confirmPassword && <span className="text-red-500 text-xs">{errors.confirmPassword.message}</span>}
 						</div>						
 						<div className="relative">
 							<input type="text"
 								placeholder="Nama Usaha"
 								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...form.register("companyName")}
+								{...register("companyName")}
 							/>
+							{errors.companyName && <span className="text-red-500 text-xs">{errors.companyName.message}</span>}
 						</div>						
 						<div className="relative">
 							<input type="text"
 								placeholder="Lokasi Pelayanan"
 								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...form.register("serviceLocation")}
+								{...register("serviceLocation")}
 							/>
+							{errors.serviceLocation && <span className="text-red-500 text-xs">{errors.serviceLocation.message}</span>}
 						</div>						
 						<div className="relative">
 							<textarea
 								placeholder="Address"
 								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...form.register("address")}
+								{...register("address")}
 							/>
+							{errors.address && <span className="text-red-500 text-xs">{errors.address.message}</span>}
 						</div>						
 						<div className="relative">
 							<input type="text"
 								placeholder="Nama Bank"
 								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...form.register("bankName")}
+								{...register("bankName")}
 							/>
+							{errors.bankName && <span className="text-red-500 text-xs">{errors.bankName.message}</span>}
 						</div>						
 						<div className="relative">
 							<input type="text"
 								placeholder="Nomor Rekening"
 								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...form.register("accountNumber")}
+								{...register("accountNumber")}
 							/>
+							{errors.accountNumber && <span className="text-red-500 text-xs">{errors.accountNumber.message}</span>}
 						</div>						
 						<div className="relative">
 							<input type="text"
 								placeholder="Nama Pemilik Rekening"
 								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...form.register("accountName")}
+								{...register("accountName")}
 							/>
+							{errors.accountName && <span className="text-red-500 text-xs">{errors.accountName.message}</span>}
 						</div>						
 
 						<div className="mt-8 flex justify-center">
@@ -226,7 +245,6 @@ const Registration = () => {
 							</div>
 						</div>
 					</form>
-				</Form>
 				{message ? (
 					<div className="mt-1 text-green-500">
 					Registrasi berhasil, silahkan cek email anda untuk konfirmasi
