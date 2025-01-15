@@ -53,9 +53,7 @@ const Registration = () => {
 	const [message, setMessage] = useState(false);
 	const [regionCode, setRegionCode] = useState("");
 	const [subRegions, setSubRegions] = useState<Array<Array<{ id: string; name: string }>>>([]);
-	const [errorMessage, setErrorMessage] = useState<string | boolean | null>(
-	  false
-	);
+	const [errorMessage, setErrorMessage] = useState<string | boolean | null>(false);
 
 	const getQuery = async() => {
 		return await axiosRegion("GET", "provinsi",)
@@ -72,7 +70,7 @@ const Registration = () => {
 		handleSubmit,
 		control,
 		formState: { errors },
-	  } = useForm<z.infer<typeof signUpSchema>>({
+	} = useForm<z.infer<typeof signUpSchema>>({
 		resolver: zodResolver(signUpSchema),
 		defaultValues: {
 			name: "",
@@ -98,18 +96,18 @@ const Registration = () => {
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: "serviceLocation" // Name of the field array
-	  });
+	});
 
-	  const getSubRegion = async (regionId: string) => {
+	const getSubRegion = async (regionId: string) => {
 		return await axiosRegion("GET", "kabupaten", regionId);
-	  };
+	};
 
-	  const handleRegionChange = async (regionId: string, index: number) => {
+	const handleRegionChange = async (regionId: string, index: number) => {
 		const response = await getSubRegion(regionId);
 		const updatedSubRegions = [...subRegions];
 		updatedSubRegions[index] = response?.value || [];
 		setSubRegions(updatedSubRegions);
-	  };	  
+	};	  
 
 	const signUp = (values: z.infer<typeof signUpSchema>) => {
 		const sendNow = async () => {
@@ -132,7 +130,8 @@ const Registration = () => {
 					role: 3,
 				};
 		  
-				const response = await axiosData("POST", "/api/auth/custom-register", data);	
+				// const response = await axiosData("POST", "/api/auth/custom-register", data);	
+				console.log(data)
 				setErrorMessage(false);
 				setMessage(true);		
 			} catch (error:any) {
@@ -143,10 +142,6 @@ const Registration = () => {
 		sendNow()				
 	};
 
-	// const getSubRegion = async (id?: string) => {
-	// 	return await axiosRegion("GET", "kabupaten", id)
-	// }
-
 	useEffect(()=> {
 		if (regionCode) {
 			getSubRegion(regionCode).then((res) => {
@@ -154,9 +149,6 @@ const Registration = () => {
 			})
 		}
 	},[regionCode])
-
-
-
 
 	return (
 		<div>
