@@ -14,6 +14,8 @@ import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { get } from "lodash";
+import { IoMdRemoveCircle, IoMdRemoveCircleOutline, IoMdAddCircleOutline } from "react-icons/io";
+
 
 const signUpSchema = z
 	.object({
@@ -231,21 +233,18 @@ const Registration = () => {
 							/>
 							{errors.companyName && <span className="text-red-500 text-xs">{errors.companyName.message}</span>}
 						</div>						
-						{/* <div className="relative">
-							<input type="text"
-								placeholder="Lokasi Pelayanan"
-								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...register("serviceLocation")}
-							/>
-							{errors.serviceLocation && <span className="text-red-500 text-xs">{errors.serviceLocation.message}</span>}
-						</div>						 */}
 						<div className="bg-[#553AA9] px-4 py-5 rounded-lg">
-							<h5 className="mb-5">Anda bisa menambahkan lokasi pelayanan lebih dari 1</h5>
+							<h5 className="mb-5">Silahkan isi lokasi pelayanan</h5>
 								{fields.map((item, index) => (
 									<div key={item.id} className="relative flex flex-col lg:flex-row gap-2 items-center mb-5">
 										<select 
 											className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-											onChange={(e: any) => setRegionCode(e.target.value)}
+											// onChange={(e: any) => setRegionCode(e.target.value)}
+											{...register(`serviceLocation.${index}.region`, {
+												onChange: (e) => {
+												  setRegionCode(e.target.value); 
+												},
+											  })}
 											>
 											<option  value="">Provinsi</option>	
 											{
@@ -258,6 +257,7 @@ const Registration = () => {
 										</select>
 										<select
 											className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full "
+											{...register(`serviceLocation.${index}.subregion`)}
 										>
 											{
 												subRegion.length >0 ? subRegion?.map((item:any)=> {
@@ -270,21 +270,30 @@ const Registration = () => {
 										</select>
 										<button
 											type="button"
-											className="text-red-500"
+											className="text-red-500 text-2xl"
 											onClick={() => remove(index)} // Remove the input field
 										>
-											<span className="hidden lg:block">X</span>
-											<span className="block lg:hidden bg-c-blue py-2 px-5 rounded-lg mt-2">Hapus</span>
+											<IoMdRemoveCircleOutline />
 											</button>
 									</div>
 								))}
-								<button
+							
+							{fields.length < 5 && 
+								<>
+									<button
 									type="button"
-									onClick={() => append({ location: "" })}
-									className="btn py-2"
-								>
-								Tambah Lokasi
-								</button>		  
+									className="flex gap-1 items-center bg-c-blue py-2 px-5 "
+									onClick={() =>
+									append({
+										region: "",
+										subregion: "",
+									})
+									}
+								><IoMdAddCircleOutline/> Tambah Lokasi</button>
+								
+							</>
+							}
+							{fields.length >=5 && <div className="text-red-500">Maximal 5 lokasi pelayanan</div>}
 						</div>
 
 

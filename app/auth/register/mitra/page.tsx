@@ -1,11 +1,11 @@
 import React from 'react'
-import SignUp from "./RegMitraContent"
+import Registration from "./RegMitraContent"
 import Basecontent from "@/components/Basecontent"
 
 export default function RegisterMitraContent() {
     return (
         <Basecontent>
-            <SignUp/>
+            <Registration/>
         </Basecontent>
     )
 }
