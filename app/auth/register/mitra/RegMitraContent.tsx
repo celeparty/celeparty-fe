@@ -52,7 +52,7 @@ const signUpSchema = z
 const Registration = () => {
 	const [message, setMessage] = useState(false);
 	const [regionCode, setRegionCode] = useState("");
-	const [subRegion, setSubRegion] = useState([]);
+	const [subRegions, setSubRegions] = useState<Array<Array<{ id: string; name: string }>>>([]);
 	const [errorMessage, setErrorMessage] = useState<string | boolean | null>(
 	  false
 	);
@@ -84,7 +84,7 @@ const Registration = () => {
 			birthdate:"",
 			nik:"",
 			companyName:"",
-			serviceLocation: [{ location: "" }],
+			serviceLocation: [{ region: "", subregion: "" }],
 			bankName:"",
 			accountNumber:"",
 			accountName:"",			
@@ -100,6 +100,16 @@ const Registration = () => {
 		name: "serviceLocation" // Name of the field array
 	  });
 
+	  const getSubRegion = async (regionId: string) => {
+		return await axiosRegion("GET", "kabupaten", regionId);
+	  };
+
+	  const handleRegionChange = async (regionId: string, index: number) => {
+		const response = await getSubRegion(regionId);
+		const updatedSubRegions = [...subRegions];
+		updatedSubRegions[index] = response?.value || [];
+		setSubRegions(updatedSubRegions);
+	  };	  
 
 	const signUp = (values: z.infer<typeof signUpSchema>) => {
 		const sendNow = async () => {
@@ -133,14 +143,14 @@ const Registration = () => {
 		sendNow()				
 	};
 
-	const getSubRegion = async (id?: string) => {
-		return await axiosRegion("GET", "kabupaten", id)
-	}
+	// const getSubRegion = async (id?: string) => {
+	// 	return await axiosRegion("GET", "kabupaten", id)
+	// }
 
 	useEffect(()=> {
 		if (regionCode) {
 			getSubRegion(regionCode).then((res) => {
-				setSubRegion(res?.value)
+				setSubRegions(res?.value)
 			})
 		}
 	},[regionCode])
@@ -241,31 +251,30 @@ const Registration = () => {
 											className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
 											// onChange={(e: any) => setRegionCode(e.target.value)}
 											{...register(`serviceLocation.${index}.region`, {
-												onChange: (e) => {
-												  setRegionCode(e.target.value); 
-												},
+												onChange: async (e) => {
+													const regionId = e.target.value;
+													await handleRegionChange(regionId, index);
+												  },
 											  })}
 											>
 											<option  value="">Provinsi</option>	
-											{
-												dataProvince?.map((item:any)=> {
-													return (
-														<option key={item.id} value={item.id}>{item.name }</option>
-													)
-												})
-											}
+											{dataProvince?.map((prov:any) => (
+												<option key={prov.id} value={prov.id}>
+													{prov.name}
+												</option>
+		                  					))}
 										</select>
 										<select
 											className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full "
 											{...register(`serviceLocation.${index}.subregion`)}
 										>
 											{
-												subRegion.length >0 ? subRegion?.map((item:any)=> {
-													return (
-														<option key={item.id} value={item.id}>{item.name }</option>
-													)
-												}) :
-												<option>Kabupaten</option>
+												 subRegions.length > 0 ? subRegions[index]?.map((kab) => (
+													<option key={kab.id} value={kab.id}>
+													{kab.name}
+													</option> 
+												)) : <option value="">Kota/Kabupaten</option>
+											
 											}
 										</select>
 										<button
