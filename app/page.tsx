@@ -14,7 +14,6 @@ export default function Home() {
 				<MainBanner />
 				<EventList />
 				<ProductList />
-				<TestPage/>
 			</Basecontent>
 		</div>
 	);
