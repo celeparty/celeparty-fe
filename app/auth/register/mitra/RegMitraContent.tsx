@@ -246,6 +246,7 @@ const Registration = () => {
 												onChange: async (e) => {
 													const regionId = e.target.value;
 													await handleRegionChange(regionId, index);
+													console.log({index})
 												  },
 											  })}
 											>
