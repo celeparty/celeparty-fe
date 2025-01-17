@@ -105,7 +105,7 @@ function LoginPage() {
 							}
 
 							<div className="flex justify-end mt-2">
-								<Link href={"/"} className="font-hind font-semibold text-[12px] text-c-orange">
+								<Link href={"/auth/forgot-password"} className="font-hind font-semibold text-[12px] text-c-orange">
 									Lupa Kata Sandi?
 								</Link>
 							</div>

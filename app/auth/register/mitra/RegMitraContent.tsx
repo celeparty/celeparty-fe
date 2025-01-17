@@ -160,7 +160,6 @@ const Registration = () => {
 					password: values.password,
 					role: 3,
 				};
-				console.log(data)
 				const response = await axiosData("POST", "/api/auth/custom-register", data);	
 				setErrorMessage(false);
 				setMessage(true);		
