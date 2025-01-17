@@ -32,6 +32,7 @@ export default function ResetPasswordContent() {
 		const {
 			register,
 			handleSubmit,
+			reset,
 			formState: { errors },
 		} = useForm<z.infer<typeof passwordSchema>>({
 			resolver: zodResolver(passwordSchema),
@@ -56,6 +57,7 @@ export default function ResetPasswordContent() {
 			}
 		}
 		sendNow()
+		reset()
 	}		
 
 	return (
