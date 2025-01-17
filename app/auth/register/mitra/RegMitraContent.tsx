@@ -13,7 +13,7 @@ import { z } from "zod";
 import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
 import { useQuery } from "@tanstack/react-query";
-import { get } from "lodash";
+import _, { get } from "lodash";
 import { IoMdRemoveCircle, IoMdRemoveCircleOutline, IoMdAddCircleOutline } from "react-icons/io";
 
 
@@ -54,7 +54,7 @@ const Registration = () => {
 	const [regionCode, setRegionCode] = useState("");
 	const [subRegions, setSubRegions] = useState<Array<Array<{ id: string; name: string }>>>([]);
 	const [errorMessage, setErrorMessage] = useState<string | boolean | null>(false);
-
+	const [dataRegion, setDataRegion] = useState([])
 	const getQuery = async() => {
 		return await axiosRegion("GET", "provinsi",)
 	}
@@ -104,10 +104,41 @@ const Registration = () => {
 
 	const handleRegionChange = async (regionId: string, index: number) => {
 		const response = await getSubRegion(regionId);
+	
+		// Update subregions untuk input saat ini
 		const updatedSubRegions = [...subRegions];
 		updatedSubRegions[index] = response?.value || [];
 		setSubRegions(updatedSubRegions);
-	};	  
+	
+		// Ambil data region terpilih berdasarkan ID
+		const selectedRegion = _.find(dataProvince, { id: regionId });
+	
+		// Simpan hanya nama region ke dalam state dataRegion
+		setDataRegion((prev) => {
+			const updatedData:any = [...prev];
+			updatedData[index] = {
+				...updatedData[index],
+				region: selectedRegion ? selectedRegion.name : null,
+			};
+			return updatedData;
+		});
+	};
+
+	const handleSubregionChange = (subregionId: string, index: number) => {
+		// Ambil data subregion terpilih berdasarkan ID
+		const selectedSubregion = _.find(subRegions[index], { id: subregionId });
+	
+		// Simpan hanya nama subregion ke dalam state dataRegion
+		setDataRegion((prev) => {
+			const updatedData:any = [...prev];
+			updatedData[index] = {
+				...updatedData[index],
+				subregion: selectedSubregion ? selectedSubregion.name : null,
+			};
+			return updatedData;
+		});
+	};
+	
 
 	const signUp = (values: z.infer<typeof signUpSchema>) => {
 		const sendNow = async () => {
@@ -121,7 +152,7 @@ const Registration = () => {
 					birthdate: values.birthdate,
 					nik: values.nik,
 					companyName: values.companyName,
-					serviceLocation: values.serviceLocation,
+					serviceLocation: dataRegion,
 					bankName: values.bankName,
 					accountNumber: values.accountNumber,
 					accountName: values.accountName,					
@@ -129,9 +160,8 @@ const Registration = () => {
 					password: values.password,
 					role: 3,
 				};
-		  
-				// const response = await axiosData("POST", "/api/auth/custom-register", data);	
 				console.log(data)
+				const response = await axiosData("POST", "/api/auth/custom-register", data);	
 				setErrorMessage(false);
 				setMessage(true);		
 			} catch (error:any) {
@@ -148,7 +178,12 @@ const Registration = () => {
 				setSubRegions(res?.value)
 			})
 		}
+		
 	},[regionCode])
+
+	useEffect(() => {
+		console.log("Data Region Terbaru:", dataRegion);
+	}, [dataRegion]);
 
 	return (
 		<div>
@@ -239,37 +274,39 @@ const Registration = () => {
 							<h5 className="mb-5">Silahkan isi lokasi pelayanan</h5>
 								{fields.map((item, index) => (
 									<div key={item.id} className="relative flex flex-col lg:flex-row gap-2 items-center mb-5">
-										<select 
-											className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-											// onChange={(e: any) => setRegionCode(e.target.value)}
-											{...register(`serviceLocation.${index}.region`, {
-												onChange: async (e) => {
-													const regionId = e.target.value;
-													await handleRegionChange(regionId, index);
-													console.log({index})
-												  },
-											  })}
-											>
-											<option  value="">Provinsi</option>	
-											{dataProvince?.map((prov:any) => (
-												<option key={prov.id} value={prov.id}>
-													{prov.name}
-												</option>
-		                  					))}
-										</select>
-										<select
-											className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full "
-											{...register(`serviceLocation.${index}.subregion`)}
-										>
-											{
-												 subRegions.length > 0 ? subRegions[index]?.map((kab) => (
-													<option key={kab.id} value={kab.id}>
-													{kab.name}
-													</option> 
-												)) : <option value="">Kota/Kabupaten</option>
-											
-											}
-										</select>
+<select 
+    className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
+    {...register(`serviceLocation.${index}.region`, {
+        onChange: async (e) => {
+            const regionId = e.target.value;
+            await handleRegionChange(regionId, index);
+        },
+    })}
+>
+    <option value="">Provinsi</option>
+    {dataProvince?.map((prov: any) => (
+        <option key={prov.id} value={prov.id}>
+            {prov.name}
+        </option>
+    ))}
+</select>
+
+<select
+    className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
+    {...register(`serviceLocation.${index}.subregion`, {
+        onChange: (e) => {
+            const subregionId = e.target.value;
+            handleSubregionChange(subregionId, index);
+        },
+    })}
+>
+    <option value="">Kota/Kabupaten</option>
+    {subRegions[index]?.map((kab: any) => (
+        <option key={kab.id} value={kab.id}>
+            {kab.name}
+        </option>
+    ))}
+</select>
 										<button
 											type="button"
 											className="text-red-500 text-2xl"
