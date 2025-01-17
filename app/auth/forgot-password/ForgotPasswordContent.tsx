@@ -35,6 +35,7 @@ export default function ForgotPasswordContent() {
 			register,
 			handleSubmit,
 			control,
+			reset,
 			formState: { errors },
 		} = useForm<z.infer<typeof passwordSchema>>({
 			resolver: zodResolver(passwordSchema),
@@ -56,6 +57,7 @@ export default function ForgotPasswordContent() {
 			}
 		}
 		sendNow()
+		reset()
 	}		
 
 	return (
@@ -80,7 +82,7 @@ export default function ForgotPasswordContent() {
 				</form>
 				{message ? (
 					<div className="mt-1 text-green-500">
-						Link reset password telah dikirim ke email anda
+						Jika email anda sudah terdaftar,Link reset password telah dikirim ke email anda
 					</div>
 				) : null}
 

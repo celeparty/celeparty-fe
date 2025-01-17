@@ -69,6 +69,7 @@ const Registration = () => {
 		register,
 		handleSubmit,
 		control,
+		reset,
 		formState: { errors },
 	} = useForm<z.infer<typeof signUpSchema>>({
 		resolver: zodResolver(signUpSchema),
@@ -164,11 +165,11 @@ const Registration = () => {
 				setErrorMessage(false);
 				setMessage(true);		
 			} catch (error:any) {
-				console.error("Error:", error?.response.data.error.message);
 				setErrorMessage(error?.response.data.error.message);		
 			}
 		}
-		sendNow()				
+		sendNow()			
+		reset()	
 	};
 
 	useEffect(()=> {
