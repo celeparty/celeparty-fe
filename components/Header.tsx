@@ -46,7 +46,7 @@ export default function Header() {
 						</div>
 
 					</div>
-					<div className="relative flex lg:flex-row flex-col items-center text-3xl gap-4 text-c-gray-text font-semibold lg:w-auto w-full">
+					<div className="relative justify-end flex  flex-row items-center text-3xl gap-4 text-c-gray-text font-semibold lg:w-auto w-full">
 						<div className="flex gap-4 w-fit p-2 lg:p-0">
 							<Link href="/cart" className="item relative">
 								<MdOutlineShoppingCart />
@@ -64,26 +64,28 @@ export default function Header() {
 							</div> */}
 						</div>
 
+						<div className="flex justify-around space-2">
 						{status === "authenticated" ? (
-							<>
-								<Link href="/user/home" className="btn">
+							<div className="flex gap-3">
+								<Link href="/user/home" className="btn px-3">
 									Dashboard
 								</Link>
 
-								<div className="btnline cursor-pointer" onClick={() => signOut()}>
+								<div className="btnline cursor-pointer px-3" onClick={() => signOut()}>
 									Keluar
 								</div>
-							</>
+							</div>
 						) : status === "unauthenticated" ? (
-							<>
-								<Link href="/auth/login" className="btnline">
+							<div className="flex gap-3">
+								<Link href="/auth/login" className="btnline px-3">
 									Masuk
 								</Link>
-								<Link href="/auth/register" className="btn">
+								<Link href="/auth/register" className="btn px-3">
 									Daftar
 								</Link>
-							</>
+							</div>
 						) : null}
+						</div>
 					</div>
 				</div>
 			</div>
