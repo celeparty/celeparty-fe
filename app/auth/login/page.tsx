@@ -35,7 +35,7 @@ const signInSchema = z.object({
 });
 
 function LoginPage() {
-    // const { data: session, status } = useSession()
+    const { data: session, status } = useSession()
     const [show, setShow] = useState(false);
 	const [message, setMessage] = useState({
 		status: false,
@@ -68,7 +68,6 @@ function LoginPage() {
 			setMessage({status:false, info:""})
 			router.replace("/user/home")
 			window.location.reload();
-			// window.location.href = `/products?search=${encodeURIComponent(searchValue)}`;
 		  }
     };
 
