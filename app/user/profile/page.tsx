@@ -292,7 +292,7 @@ const InputUser = () => {
 
 const ProfilePage = () => {
 	return (
-		<div className="wrapper">
+		<div className="wrapper my-10">
 			<div className="px-10 py-6 lg:border-2 lg:border-gray-300 bg-[#F2F2F2] lg:rounded-lg lg:shadow-xl">
 				<h1 className="text-[20px] lg:text-[16px] text-center lg:text-start my-4 leading-[26px] font-hind text-black font-semibold">
 					Biodata Diri
