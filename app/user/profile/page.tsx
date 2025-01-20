@@ -165,7 +165,6 @@ const InputUser = () => {
 		}
 	}, [status]);
 
-	console.log(myData)
 
 
 	function onSubmit(values: z.infer<typeof formSchema>) {
