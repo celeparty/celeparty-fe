@@ -56,7 +56,7 @@ export default function DashboardLayout({
 								icon="/images/icon-profile.svg"
 								iconWidth={30}
 								iconHeight={30}
-								link="/user/home"
+								link="/user/vendor/profile"
 							/>
 							<ItemMenu
 								title="Produk Saya"
