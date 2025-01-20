@@ -3,18 +3,20 @@ import { useCart } from "@/lib/store/cart";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoIosSearch } from "react-icons/io";
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import { MdOutlineNotifications } from "react-icons/md";
 import { useRouter } from "next/navigation";
 import { Notification } from "@/app/products/[slug]/SideBar";
+import { useUser } from "@/lib/store/user";
 
 export default function Header() {
 	const { data: session, status } = useSession();
 	const { cart, setCart, cartLength, setCartLength }: any = useCart();
 	const [searchValue, setSearchValue] = useState("");
+	const {userMe, setUserMe}:any = useUser()
 
 	const handleSubmit = (e:any) => {
 		e.preventDefault();
@@ -22,6 +24,14 @@ export default function Header() {
 			window.location.href = `/products?search=${encodeURIComponent(searchValue)}`;
 		}
 	  };
+
+	  useEffect(() => {
+		if (status === "authenticated" && session?.user) {
+		  setUserMe(session);
+		}
+	  }, [session, status, setUserMe]);
+
+
 	return (
 		<>
 			<div className="bg-white shadow-sm w-full px-4 py-4 lg:z-10 lg:sticky top-0">
