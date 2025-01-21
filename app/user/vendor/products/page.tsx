@@ -33,19 +33,12 @@ export default function Products() {
 	const { data: session, status } = useSession();
 	const [myData, setMyData] = useState<any>([]);
 	const {userMe}:any = useUser()
-	const [localId] = useLocalStorage<string>('documentId', "");
-
 	const getData =()=> {
-		if (!localId) {
-			console.warn("localId belum tersedia, menunggu...");
-			return;
-		}
 		axios.get(`${process.env.BASE_API}/api/products?populate=*&filters[users_permissions_user][documentId]=${userMe.user.documentId}`, {
 			headers: {
 				Authorization: `Bearer ${userMe.jwt}`,
 			},
 		}).then ((res)=> {
-			console.log(res.data)
 			setMyData(res?.data?.data)
 		})
 
@@ -54,11 +47,8 @@ export default function Products() {
 		if (status === "authenticated" && userMe?.user?.documentId ) {
 			getData();
 		}
-	}, [status, session, userMe]);
-	
+	}, [status, session, userMe]);	
 	const dataContent = myData;
-
-
 	return (
 		<div>
 			<Box className="mt-0">
