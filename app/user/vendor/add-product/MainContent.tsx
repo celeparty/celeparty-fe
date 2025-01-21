@@ -3,7 +3,7 @@ import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
 import SubTitle from "@/components/SubTitle";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getDataToken, putDataToken } from "@/lib/services";
+import { axiosUser, getDataToken, putDataToken } from "@/lib/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
@@ -36,8 +36,11 @@ function ItemInput({ label, sublabel, children }: any) {
 
 export default function MainContentAddProduct() {
 	const router = useRouter();
-	const session = useSession();
-	const dataSession = session?.data as SessionData;
+	const { data: session, status } = useSession();
+	const [message, setMessage] = useState(false);
+	const [errorMessage, setErrorMessage] = useState<string | boolean | null>(
+	  false
+	);
 	const [stateCategory, setStateCategory] = useState<any>({
 		status: false,
 		value: 0,
@@ -50,46 +53,60 @@ export default function MainContentAddProduct() {
 		register,
 		handleSubmit,
 		watch,
+		reset,
 		formState: { errors },
 	} = useForm<any>();
 
-	const onSubmit: SubmitHandler<any> = async (data) => {
-		if (!dataSession?.user?.accessToken) {
-			throw new Error("Access token is undefined");
+	const onSubmit: SubmitHandler<any> = async (values) => {
+		const sendNow = async () => {
+			try {
+				const data:any = {
+					title: values.title,
+					minimal_order: values.minimal_order ? values.minimal_order : 0,
+					minimal_order_date: values.minimal_order_date ? values.minimal_order_date : "2026-12-31",
+					main_price: values.main_price ? values.main_price : 0,
+					users_permissions_user: {
+						connect: {
+							id: session?.user.id
+						}
+					}
+				};
+		  
+				const response = await axiosUser("POST", "/api/products", `${session && session?.jwt}`, 
+					{
+						data
+					}
+				);	
+				console.log(data)
+				setErrorMessage(false);
+				setMessage(true);		
+			} catch (error:any) {
+				console.error("Error:", error?.response.data.error.message);
+				setMessage(false);	
+				setErrorMessage(error?.response.data.error.message);		
+			}
 		}
-		const dataForm = {
-			category_id: stateCategory.value,
-			themes: stateTheme.value,
-			data,
-		};
+		sendNow()	
+		reset()	
 	};
+	console.log(session?.jwt)
 
 	const getQuery = async () => {
-		if (!dataSession?.user?.accessToken) {
+		if (!session?.jwt) {
 			throw new Error("Access token is undefined");
 		}
-		return await getDataToken(`/categories`, `${dataSession?.user?.accessToken}`);
+		else {
+			return await axiosUser("GET", "/api/categories?populate=*", `${session && session?.jwt}`);
+		}
 	};
 	const query = useQuery({
 		queryKey: ["qCategories"],
 		queryFn: getQuery,
 		staleTime: 5000,
-		enabled: !!dataSession?.user?.accessToken,
+		enabled: !!session?.jwt,
 		retry: 3,
 	});
-	const getThemes = async () => {
-		if (!dataSession?.user?.accessToken) {
-			throw new Error("Access token is undefined");
-		}
-		return await getDataToken(`/themes`, `${dataSession?.user?.accessToken}`);
-	};
-	const queryThemes = useQuery({
-		queryKey: ["qThemes"],
-		queryFn: getThemes,
-		staleTime: 5000,
-		enabled: !!dataSession?.user?.accessToken,
-		retry: 3,
-	});
+
 
 	if (query.isLoading) {
 		return (
@@ -98,14 +115,8 @@ export default function MainContentAddProduct() {
 			</div>
 		);
 	}
-	if (query.isError) {
-		return <ErrorNetwork />;
-	}
-	if (query.data?.data.status === false) {
-		router.push("/auth/mitra/login");
-	}
-	const dataCategory = query?.data?.data.data;
-	const dataThemes = queryThemes.data?.data.data;
+	const dataCategory = query?.data?.data;
+
 	return (
 		<div>
 			<form onSubmit={handleSubmit(onSubmit)}>
@@ -124,7 +135,7 @@ export default function MainContentAddProduct() {
 								key={item.id}
 								className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-5 py-1 ${isActive ? "bg-c-green text-white border-c-green" : "text-c-black"}`}
 							>
-								{item.name}
+								{item.title}
 							</div>
 						);
 					})}
@@ -133,7 +144,7 @@ export default function MainContentAddProduct() {
 					<input
 						className="border border-gray-300 rounded-md py-2 px-5 w-full"
 						placeholder="Nama Produk"
-						{...register("name", { required: true })}
+						{...register("title", { required: true })}
 					/>
 					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
 				</ItemInput>
@@ -142,7 +153,7 @@ export default function MainContentAddProduct() {
 						<input
 							type="file"
 							className="border border-gray-300 rounded-md py-2 px-5 w-full"
-							{...register("image_urls", { required: true })}
+							{...register("image_urls", { required: false })}
 						/>
 						{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
 					</div>
@@ -151,7 +162,7 @@ export default function MainContentAddProduct() {
 					<input
 						className="border border-gray-300 rounded-md py-2 px-5 w-full"
 						placeholder="Harga Produk (Rp)"
-						{...register("price", { required: true })}
+						{...register("main_price", { required: false })}
 					/>
 					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
 				</ItemInput>
@@ -159,7 +170,7 @@ export default function MainContentAddProduct() {
 					<textarea
 						className="border border-gray-300 rounded-md py-2 px-5 w-full"
 						placeholder="Deskripsi Produk"
-						{...register("desc", { required: true })}
+						{...register("description", { required: false })}
 					/>
 					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
 				</ItemInput>
@@ -167,19 +178,19 @@ export default function MainContentAddProduct() {
 					<input
 						className="border border-gray-300 rounded-md py-2 px-5 w-full"
 						placeholder="Jumlah Pcs Minimal"
-						{...register("min_order_qty", { required: false })}
+						{...register("minimal_order", { required: false })}
 					/>
 				</ItemInput>
 				<ItemInput label="Maksimal Hari Pemesanan (Optional)">
 					<input
 						className="border border-gray-300 rounded-md py-2 px-5 w-full"
 						placeholder="(x) Hari Maksimal Pemesanan"
-						{...register("min_order_date", { required: false })}
+						{...register("minimal_order_date", { required: false })}
 					/>
 				</ItemInput>
 				<ItemInput label="Tema">
 					<div className="flex flex-wrap gap-2 mb-5">
-						{dataThemes?.map((item: any, i: number) => {
+						{/* {dataThemes?.map((item: any, i: number) => {
 							const isActive = stateTheme.value === item.id;
 							return (
 								<div
@@ -195,7 +206,7 @@ export default function MainContentAddProduct() {
 									{item.name}
 								</div>
 							);
-						})}
+						})} */}
 					</div>
 					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
 				</ItemInput>
@@ -211,6 +222,15 @@ export default function MainContentAddProduct() {
 					/>
 				</div>
 			</form>
+			{message ? (
+					<div className="mt-1 text-green-500">
+					Add product berhasil
+					</div>
+				) : null}
+				{errorMessage ? (
+					<div className="text-c-red mt-1">{errorMessage}</div>
+				) : null}
+
 		</div>
 	);
 }
