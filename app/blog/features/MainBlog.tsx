@@ -50,7 +50,7 @@ export default function MainBlog() {
 		return <ErrorNetwork />;
 	}
 
-	const dataContent = query.data.data
+	const dataContent = query?.data?.data
 
 	console.log(dataContent)
 	return (
