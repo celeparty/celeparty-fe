@@ -11,6 +11,7 @@ import { MdOutlineNotifications } from "react-icons/md";
 import { useRouter } from "next/navigation";
 import { Notification } from "@/app/products/[slug]/SideBar";
 import { useUser } from "@/lib/store/user";
+import { useLocalStorage } from "@/lib/hook/useLocalStorage";
 
 export default function Header() {
 	const { data: session, status } = useSession();

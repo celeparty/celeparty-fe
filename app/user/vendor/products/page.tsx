@@ -11,6 +11,7 @@ import React, { useEffect, useState } from "react";
 import { formatRupiah } from "@/lib/utils";
 import { useUser } from "@/lib/store/user";
 import axios from "axios";
+import { useLocalStorage } from "@/lib/hook/useLocalStorage";
 interface iItemStatus {
 	status: string;
 	value: number | string;
@@ -32,34 +33,37 @@ export default function Products() {
 	const { data: session, status } = useSession();
 	const [myData, setMyData] = useState<any>([]);
 	const {userMe}:any = useUser()
+	const [localId] = useLocalStorage<string>('documentId', "");
 
 	const getData =()=> {
-		if (!userMe?.user.documentId) {
-			console.error("Document ID tidak tersedia");
+		if (!localId) {
+			console.warn("localId belum tersedia, menunggu...");
 			return;
 		}
-		axios.get(`${process.env.BASE_API}/api/products?populate=*&filters[users_permissions_user][documentId]=${userMe && userMe.user.documentId}`, {
+		axios.get(`${process.env.BASE_API}/api/products?populate=*&filters[users_permissions_user][documentId]=${userMe.user.documentId}`, {
 			headers: {
 				Authorization: `Bearer ${userMe.jwt}`,
 			},
 		}).then ((res)=> {
 			console.log(res.data)
+			setMyData(res?.data?.data)
 		})
 
 	}
 	useEffect(() => {
 		if (status === "authenticated" && userMe?.user?.documentId ) {
-			getData()
+			getData();
 		}
-
 	}, [status, session, userMe]);
+	
+	const dataContent = myData;
 
 
 	return (
 		<div>
 			<Box className="mt-0">
 				<div className="flex flex-wrap -mx-2">
-					{/* {dataContent?.map((item: any) => {
+					{dataContent.length >0 ? dataContent?.map((item: any) => {
 						return (
 								<ItemProduct
 									url={`/products/${item.documentId}`}
@@ -73,7 +77,7 @@ export default function Products() {
 								></ItemProduct>
 
 						);
-					})} */}
+					}) : <div>Anda tidak memiliki produk</div>} 
 				</div>
 			</Box>
 		</div>
