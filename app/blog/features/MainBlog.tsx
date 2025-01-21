@@ -10,26 +10,6 @@ import React from "react";
 
 export default function MainBlog() {
 
-	// const getQuery = async () => {
-	// 	try {
-	// 		const response = await getData("/blogs/populars?search&limit=4");
-	// 		if (!response) {
-	// 			throw new Error("No response from server");
-	// 		}
-	// 		if (!response.data || !response.data.data) {
-	// 			throw new Error("Invalid response from server");
-	// 		}
-	// 		return response;
-	// 	} catch (error) {
-	// 		console.error(error);
-	// 		throw error;
-	// 	}
-	// };
-
-	// const getQuery = async () => {
-	// 	return await axiosData("GET", "/api/banners?populate=*");
-	// };
-
 	const getQuery = async () => {
         return await axiosData("GET", "/api/blogs?populate=*")
     }
@@ -51,8 +31,6 @@ export default function MainBlog() {
 	}
 
 	const dataContent = query?.data?.data
-
-	console.log(dataContent)
 	return (
 		<div className="flex flex-col lg:flex-row gap-3 mt-2 lg:mt-0">
 			<div className="relative flex-1">

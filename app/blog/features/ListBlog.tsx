@@ -28,7 +28,9 @@ export default function ListBlog() {
 		return <ErrorNetwork />;
 	}
 
-	const dataContent = query?.data?.data.data;
+	const dataContent = query?.data?.data;
+
+	console.log(dataContent)
 	return (
 		<div className="relative mt-7">
 			<h4 className="font-semibold text-[16px] text-c-blue mb-5">Artikel Terbaru</h4>
@@ -40,7 +42,7 @@ export default function ListBlog() {
 							key={index}
 							title={item?.title}
 							date={moment(item?.publish_at).format("DD MMM YYYY")}
-							image={item.thumbnail ? item.thumbnail : "/images/no-image.png"}
+							image={"/images/noimage.png"}
 						/>
 					);
 				})}
