@@ -111,7 +111,7 @@ export default function MainBlog() {
 								/>
 							</div>
 							<div className="absolute bottom-0 left-0 p-5 text-white bg-[linear-gradient(0deg,rgba(0,0,0,0.75)_6.82%,rgba(0,0,0,0.00)_90.44%)] w-full text-[14px] lg:text-[20px]">
-								<Link href={`/blog/${dataContent[3]?.slug}`}>{dataContent[1]?.title}</Link>
+								<Link href={`/blog/${dataContent[3]?.slug}`}>{dataContent[0]?.title}</Link>
 							</div>
 						</div>
 					</div>
