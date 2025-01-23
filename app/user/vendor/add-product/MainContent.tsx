@@ -8,21 +8,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { GrEdit, GrFormEdit } from "react-icons/gr";
 import { z } from "zod";
-
-type UserData = {
-	name?: string | null | undefined;
-	email?: string | null | undefined;
-	image?: string | null | undefined;
-	accessToken?: string | null | undefined; // Add the accessToken property
-};
-
-type SessionData = {
-	user?: UserData; // Update the type of user to include the accessToken property
-};
+import { SchemaProduct } from "./SchemaProduct";
+import { connect } from "http2";
 
 function ItemInput({ label, sublabel, children }: any) {
 	return (
@@ -38,33 +29,45 @@ export default function MainContentAddProduct() {
 	const router = useRouter();
 	const { data: session, status } = useSession();
 	const [message, setMessage] = useState(false);
+	const [selectedFile, setSelectedFile] = useState(null);
 	const [errorMessage, setErrorMessage] = useState<string | boolean | null>(
 	  false
 	);
 	const [stateCategory, setStateCategory] = useState<any>({
 		status: false,
-		value: 0,
-	});
-	const [stateTheme, setStateTheme] = useState<any>({
-		status: false,
-		value: 0,
+		value: null,
 	});
 	const {
 		register,
 		handleSubmit,
 		watch,
 		reset,
+		setValue,
 		formState: { errors },
-	} = useForm<any>();
+	} = useForm<any>({
+		resolver: zodResolver(SchemaProduct),
+        defaultValues: {
+            main_price: 0,
+        },
+
+	});
 
 	const onSubmit: SubmitHandler<any> = async (values) => {
+		const formData:any = new FormData();
+		formData.append('files', selectedFile);
+
 		const sendNow = async () => {
-			try {
+			try {		
+				const uploadRes = await axiosUser("POST", "/api/upload", `${session && session?.jwt}`, formData)
+				const idImage = uploadRes[0].id		
 				const data:any = {
 					title: values.title,
 					minimal_order: values.minimal_order ? values.minimal_order : 0,
 					minimal_order_date: values.minimal_order_date ? values.minimal_order_date : "2026-12-31",
-					main_price: values.main_price ? values.main_price : 0,
+					main_price: values.main_price ? parseInt(values.main_price) : 0,
+					main_image:idImage,
+					description: values.description,
+					category: stateCategory.value ? { connect: parseInt(`${stateCategory.value}`)-1 } : null,
 					users_permissions_user: {
 						connect: {
 							id: session?.user.id
@@ -72,24 +75,24 @@ export default function MainContentAddProduct() {
 					}
 				};
 		  
-				const response = await axiosUser("POST", "/api/products", `${session && session?.jwt}`, 
+				const response = stateCategory.value !== null && await axiosUser("POST", "/api/products?status=draft'", `${session && session?.jwt}`, 
 					{
 						data
 					}
 				);	
-				console.log(data)
+				console.log(response, data)
 				setErrorMessage(false);
 				setMessage(true);		
 			} catch (error:any) {
-				console.error("Error:", error?.response.data.error.message);
+				console.error("Error:", error);
 				setMessage(false);	
-				setErrorMessage(error?.response.data.error.message);		
+				setErrorMessage(error.message ? error.message :  error?.response?.data.error.message);		
 			}
 		}
-		sendNow()	
-		reset()	
+		sendNow()
+		//reset()
+			
 	};
-	console.log(session?.jwt)
 
 	const getQuery = async () => {
 		if (!session?.jwt) {
@@ -116,6 +119,8 @@ export default function MainContentAddProduct() {
 		);
 	}
 	const dataCategory = query?.data?.data;
+	console.log(stateCategory)
+
 
 	return (
 		<div>
@@ -129,7 +134,7 @@ export default function MainContentAddProduct() {
 								onClick={() => {
 									setStateCategory({
 										status: true,
-										value: item.id,
+										value: parseInt(`${item.id}`),
 									});
 								}}
 								key={item.id}
@@ -146,33 +151,37 @@ export default function MainContentAddProduct() {
 						placeholder="Nama Produk"
 						{...register("title", { required: true })}
 					/>
-					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
+					{errors.title && <p className="text-red-500 text-[10px]">{`${errors.title.message}`}</p>}
 				</ItemInput>
 				<ItemInput sublabel="Tambah Foto">
 					<div className="w-full">
 						<input
 							type="file"
 							className="border border-gray-300 rounded-md py-2 px-5 w-full"
-							{...register("image_urls", { required: false })}
+							{...register("main_image", { required: false })}
+							onChange={(e:any) => setSelectedFile(e.target.files[0])}
+
 						/>
-						{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
+					{errors.main_image && <p className="text-red-500 text-[10px]">Gambar produk harus diisi</p>}
 					</div>
 				</ItemInput>
 				<ItemInput>
 					<input
 						className="border border-gray-300 rounded-md py-2 px-5 w-full"
 						placeholder="Harga Produk (Rp)"
-						{...register("main_price", { required: false })}
+						inputMode="numeric"
+  						pattern="[0-9]*"
+						{...register("main_price", { required: true, valueAsNumber: true })}
 					/>
-					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
+					{errors.main_price && <p className="text-red-500 text-[10px]">{`${errors.main_price.message}`}</p>}
 				</ItemInput>
 				<ItemInput>
 					<textarea
 						className="border border-gray-300 rounded-md py-2 px-5 w-full"
 						placeholder="Deskripsi Produk"
-						{...register("description", { required: false })}
+						{...register("description", { required: true })}
 					/>
-					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
+					{errors.description && <p className="text-red-500 text-[10px]">{`${errors.description.message}`}</p>}
 				</ItemInput>
 				<ItemInput label="Minimal Item Pembelian (Optional)">
 					<input
@@ -188,9 +197,9 @@ export default function MainContentAddProduct() {
 						{...register("minimal_order_date", { required: false })}
 					/>
 				</ItemInput>
-				<ItemInput label="Tema">
+				{/* <ItemInput label="Tema">
 					<div className="flex flex-wrap gap-2 mb-5">
-						{/* {dataThemes?.map((item: any, i: number) => {
+						{dataThemes?.map((item: any, i: number) => {
 							const isActive = stateTheme.value === item.id;
 							return (
 								<div
@@ -206,29 +215,38 @@ export default function MainContentAddProduct() {
 									{item.name}
 								</div>
 							);
-						})} */}
+						})}
 					</div>
 					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
-				</ItemInput>
+				</ItemInput> */}
 				<ItemInput label="Varian">
 					<div className="text-[#DA7E01] text-[12px] cursor-pointer">Tambah Varian</div>
-					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
 				</ItemInput>
 				<div className="flex justify-center">
+					{
+						stateCategory.status ? 					
 					<input
 						type="submit"
 						value="Simpan Produk"
 						className="border border-gray-300 rounded-[30px] py-4 px-7 min-w-[250px] hover:bg-slate-300 cursor-pointer bg-c-green text-white shadow"
 					/>
+					: 					
+					<input
+						type="disabled"
+						value="Simpan Produk"
+						className="border-0 outline-none border-gray-300 text-center rounded-[30px] py-4 px-7 min-w-[250px] bg-slate-300 cursor-default  text-white shadow"
+					/>
+
+					}
 				</div>
 			</form>
 			{message ? (
 					<div className="mt-1 text-green-500">
-					Add product berhasil
+					Add product berhasil, produk akan direview oleh admin
 					</div>
 				) : null}
 				{errorMessage ? (
-					<div className="text-c-red mt-1">{errorMessage}</div>
+					<div className="text-red-500 mt-1">{errorMessage === "Network Error" ? "Pilih gambar lebih kecil": errorMessage}</div>
 				) : null}
 
 		</div>
