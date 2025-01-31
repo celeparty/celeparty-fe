@@ -1,14 +1,13 @@
-import Box from "@/components/Box"
 import React from 'react'
+import { Suspense } from "react";
+import ResetPasswordContent from "./ResetPasswordContent";
 
-export default function page() {
-  return (
-	<div className="relative wrapper-main py-7">
-		<div className="flex justify-between items-start gap-7">
-			<Box className=" w-full max-w-[600px] mx-auto mt-0">
-				Reset Password
-			</Box>
-		</div>
-	</div>
-  )
+export default function PageReset() {
+	return (
+		<Suspense fallback={<div>Loading...</div>}>			
+			<ResetPasswordContent/>
+		</Suspense>
+	)
 }
+
+

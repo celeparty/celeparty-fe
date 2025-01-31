@@ -7,9 +7,11 @@ import { axiosUser, getDataToken } from "@/lib/services";
 import { useQuery } from "@tanstack/react-query";
 import _ from "lodash";
 import { useSession } from "next-auth/react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { formatRupiah } from "@/lib/utils";
-
+import { useUser } from "@/lib/store/user";
+import axios from "axios";
+import { useLocalStorage } from "@/lib/hook/useLocalStorage";
 interface iItemStatus {
 	status: string;
 	value: number | string;
@@ -29,32 +31,29 @@ function ItemStatus({ status, value, color }: iItemStatus): JSX.Element {
 }
 export default function Products() {
 	const { data: session, status } = useSession();
-	
+	const [myData, setMyData] = useState<any>([]);
+	const {userMe}:any = useUser()
+	const getData =()=> {
+		axios.get(`${process.env.BASE_API}/api/products?populate=*&filters[users_permissions_user][documentId]=${userMe.user.documentId}`, {
+			headers: {
+				Authorization: `Bearer ${userMe.jwt}`,
+			},
+		}).then ((res)=> {
+			setMyData(res?.data?.data)
+		})
 
-	const getQuery = async () => {
-		if (status === "authenticated") {
-			return await axiosUser("GET",`/api/products?populate=*&filters[users_permissions_user][documentId]=${session?.user.documentId}`,`${session && session?.jwt}`);
+	}
+	useEffect(() => {
+		if (status === "authenticated" && userMe?.user?.documentId ) {
+			getData();
 		}
-	};
-	const query = useQuery({
-		queryKey: ["qProductsVendor"],
-		queryFn: getQuery,
-		enabled: status === "authenticated"
-	});
-
-	if (query.isLoading) {
-		return <Skeleton width="100%" height="150px" />;
-	}
-	if (query.isError) {
-		return <ErrorNetwork style="mt-0" />;
-	}
-	const dataContent = query?.data?.data;
-
+	}, [status, session, userMe]);	
+	const dataContent = myData;
 	return (
 		<div>
 			<Box className="mt-0">
 				<div className="flex flex-wrap -mx-2">
-					{dataContent?.map((item: any) => {
+					{dataContent.length >0 ? dataContent?.map((item: any) => {
 						return (
 								<ItemProduct
 									url={`/products/${item.documentId}`}
@@ -68,7 +67,7 @@ export default function Products() {
 								></ItemProduct>
 
 						);
-					})}
+					}) : <div>Anda tidak memiliki produk</div>} 
 				</div>
 			</Box>
 		</div>

@@ -7,7 +7,7 @@ import { MdOutlineShoppingCart } from "react-icons/md";
 import { MdOutlineNotifications } from "react-icons/md";
 export default function TopHeader() {
 	return (
-		<div className="relative bg-[#F0F3F7] px-4 mb-4 lg:mb-0">
+		<div className="relative bg-[#F0F3F7] px-4 mb-4 lg:mb-0 lg:block hidden">
 			<div className="wrapper-main flex lg:flex-row flex-col gap-2 lg:gap-0 items-center justify-between">
 				<div className="flex lg:flex-row flex-col mt-4 lg:mt-0 items-center gap-2 mb-4 lg:mb-0">
 					<div className="lg:text-sm text-lg">Download Celeparty App</div>

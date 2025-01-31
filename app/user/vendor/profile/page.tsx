@@ -1,10 +1,10 @@
 "use client";
 import Box from "@/components/Box";
-import React from "react";
+import React, { useState } from "react";
 
 import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
-import { getDataToken, putDataToken } from "@/lib/services";
+import { axiosUser, getDataToken, putDataToken } from "@/lib/services";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 
@@ -33,17 +33,19 @@ type SessionData = {
 
 function ItemInput({ label, children }: {label: string, children: React.ReactNode}) {
 	return (
-		<div className="flex justify-items-start w-full gap-2 mb-3 items-center">
-			<div className="w-[200px]">{label}</div>
-			{children}
+		<div className="flex justify-items-start w-full gap-2 mb-3 items-start">
+			<div className="w-[200px] py-2">{label}</div>
+			<div className="flex-1">
+				{children}
+			</div>
 		</div>
 	);
 }
 
 
 export default function ProfilePage() {
-	const session = useSession();
-	const dataSession: SessionData  = session?.data as SessionData;
+	const { data: session, status } = useSession();
+	const [myData, setMyData] = useState<any>();
 	const [notif, setNotif] = React.useState(false);
 	const {
 		register,
@@ -55,36 +57,38 @@ export default function ProfilePage() {
 
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	const onSubmit: SubmitHandler<UserData> = async (data) => {
-		if (!dataSession?.user?.accessToken) {
-			throw new Error("Access token is undefined");
-		}
-		await putDataToken("/users", dataSession?.user?.accessToken, {
-			name: data?.name,
-			birthdate: data?.birthdate,
-			gender: data?.gender,
-			address: data?.address,
-			province: data?.province,
-			city: data?.city,
-			region: data?.region,
-			area: data?.area,
-		});
-		setNotif(true);
-		setTimeout(() => {
-			setNotif(false);
-		}, 5000);
+		// if (!dataSession?.user?.accessToken) {
+		// 	throw new Error("Access token is undefined");
+		// }
+		// await putDataToken("/users", dataSession?.user?.accessToken, {
+		// 	name: data?.name,
+		// 	birthdate: data?.birthdate,
+		// 	gender: data?.gender,
+		// 	address: data?.address,
+		// 	province: data?.province,
+		// 	city: data?.city,
+		// 	region: data?.region,
+		// 	area: data?.area,
+		// });
+		// setNotif(true);
+		// setTimeout(() => {
+		// 	setNotif(false);
+		// }, 5000);
 	};
 
 	const getQuery = async () => {
-		if (!dataSession?.user?.accessToken) {
+		if (!session?.jwt) {
 			throw new Error("Access token is undefined");
 		}
-		return await getDataToken("/users", `${dataSession?.user?.accessToken}`);
+		else {
+			return await axiosUser("GET", "/api/users/me", `${session && session?.jwt}`);
+		}
 	};
 	const query = useQuery({
 		queryKey: ["qUserProfile"],
 		queryFn: getQuery,
 		staleTime: 5000,
-		enabled: !!dataSession?.user?.accessToken,
+		enabled: !!session?.jwt,
 		retry: 3,
 	});
 	if (query.isLoading) {
@@ -98,7 +102,7 @@ export default function ProfilePage() {
 		return <ErrorNetwork />;
 	}
 
-	const dataContent = query?.data?.data.data;
+	const dataContent = query?.data;
 	return (
 		<div>
 			<Box className="mt-0">
@@ -116,56 +120,43 @@ export default function ProfilePage() {
 							<ItemInput label="Nama Usaha">
 								<input
 									className="border border-gray-300 rounded-md p-2"
-									defaultValue={dataContent?.vendor?.name}
+									defaultValue={dataContent?.companyName}
 									{...register("company", { required: true })}
 								/>
 							</ItemInput>
-							<ItemInput label="Lokasi Pelayanan">
-								<input
-									className="border border-gray-300 rounded-md p-2"
-									defaultValue={dataContent?.area}
-									{...register("area", { required: true })}
-								/>
-							</ItemInput>
-							<ItemInput label="Provinsi">
-								<input
-									className="border border-gray-300 rounded-md p-2"
-									defaultValue={dataContent?.province}
-									{...register("province", {
-										required: true,
-									})}
-								/>
-							</ItemInput>
-							<ItemInput label="Kota">
-								<input
-									className="border border-gray-300 rounded-md p-2"
-									defaultValue={dataContent?.city}
-									{...register("city", { required: true })}
-								/>
-							</ItemInput>
-							<ItemInput label="Regional">
-								<input
-									className="border border-gray-300 rounded-md p-2"
-									defaultValue={dataContent?.region}
-									{...register("region", { required: true })}
-								/>
-							</ItemInput>
+							<div className="flex items-start align-top">
+								<ItemInput  label="Lokasi Pelayanan">
+								<div className="flex flex-col">
+								{
+									dataContent?.serviceLocation?.map((item: any, i:number) => {
+										return (
+											<div key={i} className="flex gap-1 w-full">
+												<input
+													className="border flex-1 mb-2 border-gray-300 rounded-md p-2"
+													defaultValue={item?.region}
+													{...register(`${"region-"+i}`, { required: true })}
+												/>	
+												<input
+													className="border flex-1 mb-2 border-gray-300 rounded-md p-2"
+													defaultValue={item?.subregion}
+													{...register(`${"subregion-"+i}`, { required: true })}
+												/>	
+											</div>
+										)
+									})
+								}
+								</div>
+								</ItemInput>
+							</div>
 							<ItemInput label="User ID">{dataContent?.id}</ItemInput>
 							<ItemInput label="Email">{dataContent?.email}</ItemInput>
 							<ItemInput label="No Telepon">
 								<input
 									className="border border-gray-300 rounded-md p-2"
-									defaultValue={dataContent?.phonenumber}
+									defaultValue={dataContent?.phone}
 									{...register("phonenumber", {
 										required: true,
 									})}
-								/>
-							</ItemInput>
-							<ItemInput label="Jenis Kelamin">
-								<input
-									className="border border-gray-300 rounded-md p-2"
-									defaultValue={dataContent?.gender}
-									{...register("gender", { required: true })}
 								/>
 							</ItemInput>
 							<ItemInput label="Tanggal Lahir">
@@ -177,17 +168,26 @@ export default function ProfilePage() {
 									})}
 								/>
 							</ItemInput>
-							<ItemInput label="Alamat Usaha">
+							<ItemInput label="Tempat Lahir">
 								<input
 									className="border border-gray-300 rounded-md p-2"
+									defaultValue={dataContent?.birthplace}
+									{...register("birthplace", {
+										required: true,
+									})}
+								/>
+							</ItemInput>
+							<ItemInput label="Alamat Usaha">
+								<textarea
+									className="border border-gray-300 rounded-md p-2 w-full min-h-[100px]"
 									defaultValue={dataContent?.address}
 									{...register("address", { required: true })}
 								/>
 							</ItemInput>
-							<ItemInput label="Nama Bank">{dataContent?.wallet?.bank_name}</ItemInput>
-							<ItemInput label="Nomor Rekening">{dataContent?.wallet?.bank_account_number}</ItemInput>
+							<ItemInput label="Nama Bank"><div className="py-2">{dataContent?.bankName}</div></ItemInput>
+							<ItemInput label="Nomor Rekening"><div className="py-2">{dataContent?.accountNumber}</div></ItemInput>
 							<ItemInput label="Nama Pemilik Rekening">
-								{dataContent?.wallet?.bank_account_name}
+								<div className="py-2">{dataContent?.accountName}</div>
 							</ItemInput>
 							<ItemInput label="">
 								<input

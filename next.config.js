@@ -6,6 +6,8 @@ const nextConfig = {
 		BASE_API: process.env.BASE_API,
 		URL_MEDIA: process.env.URL_MEDIA,
 		KEY_API: process.env.KEY_API,
+		BASE_API_REGION: process.env.BASE_API_REGION,
+		KEY_REGION: process.env.KEY_REGION,
 		NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
 		NEXTAUTH_URL: process.env.NEXTAUTH_URL,
 		JWT_SECRET: process.env.JWT_SECRET,

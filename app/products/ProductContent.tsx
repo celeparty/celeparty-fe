@@ -2,11 +2,11 @@
 import Box from "@/components/Box";
 import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
+import { useQuery } from "@tanstack/react-query";
 import ItemProduct from "@/components/product/ItemProduct";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { axiosData, getData } from "@/lib/services";
-import { useQuery } from "@tanstack/react-query";
 import _ from "lodash";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";

@@ -2,6 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import React, { useEffect, useState } from "react";
+import { signIn, signOut, useSession } from "next-auth/react";
+import { axiosUser } from "@/lib/services";
+
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -36,7 +40,10 @@ interface NotificationItem {
 	description: string;
 }
 
+
+
 const TableStatus = () => {
+	
 	return (
 		<div className="mt-20 h-[400px]">
 			<h1 className="font-hind font-semibold text-[16px] text-black mb-6">Status Pembelian</h1>
@@ -124,6 +131,9 @@ const Notification = () => {
 };
 
 const InputUser = () => {
+	const { data: session, status } = useSession();
+	const [myData, setMyData] = useState<any>();
+
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -134,6 +144,28 @@ const InputUser = () => {
 			phone: "",
 		},
 	});
+
+	useEffect(() => {
+		if (myData) {
+		  form.reset({
+			name: myData.name || "",
+			date: myData.birthdate || "",
+			gender: "male",
+			email: myData.email || "",
+			phone: myData.phone || "",
+		  });
+		}
+	  }, [myData, form]);
+
+	useEffect(() => {
+		if (status === "authenticated") {
+			axiosUser("GET", "/api/users/me", `${session && session?.jwt}`).then((res) => {
+				setMyData(res)
+			})
+		}
+	}, [status]);
+
+
 
 	function onSubmit(values: z.infer<typeof formSchema>) {
 		form.reset();
@@ -260,7 +292,7 @@ const InputUser = () => {
 const ProfilePage = () => {
 	return (
 		<div className="wrapper my-10">
-			<div className="px-10 py-6 lg:border-2 lg:border-gray-300 lg:rounded-lg lg:shadow-xl">
+			<div className="px-10 py-6 lg:border-2 lg:border-gray-300 bg-[#F2F2F2] lg:rounded-lg lg:shadow-xl">
 				<h1 className="text-[20px] lg:text-[16px] text-center lg:text-start my-4 leading-[26px] font-hind text-black font-semibold">
 					Biodata Diri
 				</h1>
@@ -279,7 +311,7 @@ const ProfilePage = () => {
 						<InputUser />
 					</div>
 				</div>
-				<Notification />
+				{/* <Notification /> */}
 				<TableStatus />
 			</div>
 		</div>

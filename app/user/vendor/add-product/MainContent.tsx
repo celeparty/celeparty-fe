@@ -3,26 +3,17 @@ import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
 import SubTitle from "@/components/SubTitle";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getDataToken, putDataToken } from "@/lib/services";
+import { axiosUser, getDataToken, putDataToken } from "@/lib/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { GrEdit, GrFormEdit } from "react-icons/gr";
 import { z } from "zod";
-
-type UserData = {
-	name?: string | null | undefined;
-	email?: string | null | undefined;
-	image?: string | null | undefined;
-	accessToken?: string | null | undefined; // Add the accessToken property
-};
-
-type SessionData = {
-	user?: UserData; // Update the type of user to include the accessToken property
-};
+import { SchemaProduct } from "./SchemaProduct";
+import { connect } from "http2";
 
 function ItemInput({ label, sublabel, children }: any) {
 	return (
@@ -36,60 +27,89 @@ function ItemInput({ label, sublabel, children }: any) {
 
 export default function MainContentAddProduct() {
 	const router = useRouter();
-	const session = useSession();
-	const dataSession = session?.data as SessionData;
+	const { data: session, status } = useSession();
+	const [message, setMessage] = useState(false);
+	const [selectedFile, setSelectedFile] = useState(null);
+	const [errorMessage, setErrorMessage] = useState<string | boolean | null>(
+	  false
+	);
 	const [stateCategory, setStateCategory] = useState<any>({
 		status: false,
-		value: 0,
-	});
-	const [stateTheme, setStateTheme] = useState<any>({
-		status: false,
-		value: 0,
+		value: null,
 	});
 	const {
 		register,
 		handleSubmit,
 		watch,
+		reset,
+		setValue,
 		formState: { errors },
-	} = useForm<any>();
+	} = useForm<any>({
+		resolver: zodResolver(SchemaProduct),
+        defaultValues: {
+            main_price: 0,
+        },
 
-	const onSubmit: SubmitHandler<any> = async (data) => {
-		if (!dataSession?.user?.accessToken) {
-			throw new Error("Access token is undefined");
+	});
+
+	const onSubmit: SubmitHandler<any> = async (values) => {
+		const formData:any = new FormData();
+		formData.append('files', selectedFile);
+
+		const sendNow = async () => {
+			try {		
+				const uploadRes = await axiosUser("POST", "/api/upload", `${session && session?.jwt}`, formData)
+				const idImage = uploadRes[0].id		
+				const data:any = {
+					title: values.title,
+					minimal_order: values.minimal_order ? values.minimal_order : 0,
+					minimal_order_date: values.minimal_order_date ? values.minimal_order_date : "2026-12-31",
+					main_price: values.main_price ? parseInt(values.main_price) : 0,
+					main_image:idImage,
+					description: values.description,
+					category: stateCategory.value ? { connect: parseInt(`${stateCategory.value}`)-1 } : null,
+					users_permissions_user: {
+						connect: {
+							id: session?.user.id
+						}
+					}
+				};
+		  
+				const response = stateCategory.value !== null && await axiosUser("POST", "/api/products?status=draft'", `${session && session?.jwt}`, 
+					{
+						data
+					}
+				);	
+				console.log(response, data)
+				setErrorMessage(false);
+				setMessage(true);		
+			} catch (error:any) {
+				console.error("Error:", error);
+				setMessage(false);	
+				setErrorMessage(error.message ? error.message :  error?.response?.data.error.message);		
+			}
 		}
-		const dataForm = {
-			category_id: stateCategory.value,
-			themes: stateTheme.value,
-			data,
-		};
+		sendNow()
+		//reset()
+			
 	};
 
 	const getQuery = async () => {
-		if (!dataSession?.user?.accessToken) {
+		if (!session?.jwt) {
 			throw new Error("Access token is undefined");
 		}
-		return await getDataToken(`/categories`, `${dataSession?.user?.accessToken}`);
+		else {
+			return await axiosUser("GET", "/api/categories?populate=*", `${session && session?.jwt}`);
+		}
 	};
 	const query = useQuery({
 		queryKey: ["qCategories"],
 		queryFn: getQuery,
 		staleTime: 5000,
-		enabled: !!dataSession?.user?.accessToken,
+		enabled: !!session?.jwt,
 		retry: 3,
 	});
-	const getThemes = async () => {
-		if (!dataSession?.user?.accessToken) {
-			throw new Error("Access token is undefined");
-		}
-		return await getDataToken(`/themes`, `${dataSession?.user?.accessToken}`);
-	};
-	const queryThemes = useQuery({
-		queryKey: ["qThemes"],
-		queryFn: getThemes,
-		staleTime: 5000,
-		enabled: !!dataSession?.user?.accessToken,
-		retry: 3,
-	});
+
 
 	if (query.isLoading) {
 		return (
@@ -98,14 +118,10 @@ export default function MainContentAddProduct() {
 			</div>
 		);
 	}
-	if (query.isError) {
-		return <ErrorNetwork />;
-	}
-	if (query.data?.data.status === false) {
-		router.push("/auth/mitra/login");
-	}
-	const dataCategory = query?.data?.data.data;
-	const dataThemes = queryThemes.data?.data.data;
+	const dataCategory = query?.data?.data;
+	console.log(stateCategory)
+
+
 	return (
 		<div>
 			<form onSubmit={handleSubmit(onSubmit)}>
@@ -118,13 +134,13 @@ export default function MainContentAddProduct() {
 								onClick={() => {
 									setStateCategory({
 										status: true,
-										value: item.id,
+										value: parseInt(`${item.id}`),
 									});
 								}}
 								key={item.id}
 								className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-5 py-1 ${isActive ? "bg-c-green text-white border-c-green" : "text-c-black"}`}
 							>
-								{item.name}
+								{item.title}
 							</div>
 						);
 					})}
@@ -133,51 +149,55 @@ export default function MainContentAddProduct() {
 					<input
 						className="border border-gray-300 rounded-md py-2 px-5 w-full"
 						placeholder="Nama Produk"
-						{...register("name", { required: true })}
+						{...register("title", { required: true })}
 					/>
-					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
+					{errors.title && <p className="text-red-500 text-[10px]">{`${errors.title.message}`}</p>}
 				</ItemInput>
 				<ItemInput sublabel="Tambah Foto">
 					<div className="w-full">
 						<input
 							type="file"
 							className="border border-gray-300 rounded-md py-2 px-5 w-full"
-							{...register("image_urls", { required: true })}
+							{...register("main_image", { required: false })}
+							onChange={(e:any) => setSelectedFile(e.target.files[0])}
+
 						/>
-						{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
+					{errors.main_image && <p className="text-red-500 text-[10px]">Gambar produk harus diisi</p>}
 					</div>
 				</ItemInput>
 				<ItemInput>
 					<input
 						className="border border-gray-300 rounded-md py-2 px-5 w-full"
 						placeholder="Harga Produk (Rp)"
-						{...register("price", { required: true })}
+						inputMode="numeric"
+  						pattern="[0-9]*"
+						{...register("main_price", { required: true, valueAsNumber: true })}
 					/>
-					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
+					{errors.main_price && <p className="text-red-500 text-[10px]">{`${errors.main_price.message}`}</p>}
 				</ItemInput>
 				<ItemInput>
 					<textarea
 						className="border border-gray-300 rounded-md py-2 px-5 w-full"
 						placeholder="Deskripsi Produk"
-						{...register("desc", { required: true })}
+						{...register("description", { required: true })}
 					/>
-					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
+					{errors.description && <p className="text-red-500 text-[10px]">{`${errors.description.message}`}</p>}
 				</ItemInput>
 				<ItemInput label="Minimal Item Pembelian (Optional)">
 					<input
 						className="border border-gray-300 rounded-md py-2 px-5 w-full"
 						placeholder="Jumlah Pcs Minimal"
-						{...register("min_order_qty", { required: false })}
+						{...register("minimal_order", { required: false })}
 					/>
 				</ItemInput>
 				<ItemInput label="Maksimal Hari Pemesanan (Optional)">
 					<input
 						className="border border-gray-300 rounded-md py-2 px-5 w-full"
 						placeholder="(x) Hari Maksimal Pemesanan"
-						{...register("min_order_date", { required: false })}
+						{...register("minimal_order_date", { required: false })}
 					/>
 				</ItemInput>
-				<ItemInput label="Tema">
+				{/* <ItemInput label="Tema">
 					<div className="flex flex-wrap gap-2 mb-5">
 						{dataThemes?.map((item: any, i: number) => {
 							const isActive = stateTheme.value === item.id;
@@ -198,19 +218,37 @@ export default function MainContentAddProduct() {
 						})}
 					</div>
 					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
-				</ItemInput>
+				</ItemInput> */}
 				<ItemInput label="Varian">
 					<div className="text-[#DA7E01] text-[12px] cursor-pointer">Tambah Varian</div>
-					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
 				</ItemInput>
 				<div className="flex justify-center">
+					{
+						stateCategory.status ? 					
 					<input
 						type="submit"
 						value="Simpan Produk"
 						className="border border-gray-300 rounded-[30px] py-4 px-7 min-w-[250px] hover:bg-slate-300 cursor-pointer bg-c-green text-white shadow"
 					/>
+					: 					
+					<input
+						type="disabled"
+						value="Simpan Produk"
+						className="border-0 outline-none border-gray-300 text-center rounded-[30px] py-4 px-7 min-w-[250px] bg-slate-300 cursor-default  text-white shadow"
+					/>
+
+					}
 				</div>
 			</form>
+			{message ? (
+					<div className="mt-1 text-green-500">
+					Add product berhasil, produk akan direview oleh admin
+					</div>
+				) : null}
+				{errorMessage ? (
+					<div className="text-red-500 mt-1">{errorMessage === "Network Error" ? "Pilih gambar lebih kecil": errorMessage}</div>
+				) : null}
+
 		</div>
 	);
 }

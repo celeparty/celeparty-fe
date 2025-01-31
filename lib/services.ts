@@ -44,6 +44,20 @@ export const axiosUser = async (method: Method, url: string, token?: string, dat
 	}
 }
 
+export const axiosRegion = async (method: Method, region: string, subregioncode?:string, data?: any) => {
+	try {
+		const response = await axios({
+			method,
+			url: `${process.env.BASE_API_REGION}${region}?api_key=${process.env.KEY_REGION}${subregioncode ? `&id_provinsi=${subregioncode}` : ""}`,
+			data,
+		});
+		return response?.data;
+	} catch (err) {
+		console.error('Request failed:', err);
+		throw err;
+	}
+}
+
 
 
 export const getData = (url: string) =>
