@@ -7,7 +7,7 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
-		"biome":"biome lint --write '**/*.{js,jsx,ts,tsx}'"
+		"biome": "biome lint --write '**/*.{js,jsx,ts,tsx}'"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^3.4.2",
@@ -17,7 +17,7 @@
 		"@radix-ui/react-slot": "^1.0.2",
 		"@tanstack/react-query": "^5.24.1",
 		"autoprefixer": "10.4.17",
-		"axios": "^1.6.7",
+		"axios": "^1.7.9",
 		"button": "^1.1.1",
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.0",

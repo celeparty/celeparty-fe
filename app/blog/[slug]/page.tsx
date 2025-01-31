@@ -15,8 +15,8 @@ export default async function BlogDetail({
 	params: { slug: string };
 }) {
 	const slug = params.slug;
-	const dataBlog = await axiosData("GET",`/blogs/${slug}`);
-	const dataContent = dataBlog ? dataBlog.data?.data : null;
+	const dataBlog = await axiosData("GET",`/api/blogs/jry1s1641uyxngzd17jwe38k?populate=*`);
+	const dataContent = dataBlog ? dataBlog?.data : null;
 	return (
 		<div className="relative py-7">
 			<Box rounded={false}>
