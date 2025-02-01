@@ -31,6 +31,8 @@ export default function MainBlog() {
 	}
 
 	const dataContent = query?.data?.data
+
+	console.log(dataContent)
 	return (
 		<div className="flex flex-col lg:flex-row gap-3 mt-2 lg:mt-0">
 			<div className="relative flex-1">
@@ -44,7 +46,7 @@ export default function MainBlog() {
 						/>
 					</div>
 					<div className="absolute bottom-0 left-0 p-5 text-white bg-[linear-gradient(0deg,rgba(0,0,0,0.75)_6.82%,rgba(0,0,0,0.00)_90.44%)] w-full text-[14px] lg:text-[20px]">
-						<Link href={`/blog/${dataContent[0]?.slug}`}>{dataContent[0]?.title}</Link>
+						<Link href={`/blog/${dataContent[0]?.documentId}`}>{dataContent[0]?.title}</Link>
 					</div>
 				</div>
 			</div>
@@ -60,7 +62,7 @@ export default function MainBlog() {
 							/>
 						</div>
 						<div className="absolute bottom-0 left-0 p-5 text-white bg-[linear-gradient(0deg,rgba(0,0,0,0.75)_6.82%,rgba(0,0,0,0.00)_90.44%)] w-full text-[14px] lg:text-[20px]">
-							<Link href={`/blog/${dataContent[1]?.slug}`}>{dataContent[1]?.title}</Link>
+							<Link href={`/blog/${dataContent[0]?.documentId}`}>{dataContent[1]?.title}</Link>
 						</div>
 					</div>
 				</div>
@@ -76,7 +78,7 @@ export default function MainBlog() {
 								/>
 							</div>
 							<div className="absolute bottom-0 left-0 p-5 text-white bg-[linear-gradient(0deg,rgba(0,0,0,0.75)_6.82%,rgba(0,0,0,0.00)_90.44%)] w-full text-[14px] lg:text-[20px]">
-								<Link href={`/blog/${dataContent[2]?.slug}`}>{dataContent[0]?.title}</Link>
+								<Link href={`/blog/${dataContent[0]?.documentId}`}>{dataContent[0]?.title}</Link>
 							</div>
 						</div>
 						<div className="relative overflow-hidden w-full">
@@ -89,7 +91,7 @@ export default function MainBlog() {
 								/>
 							</div>
 							<div className="absolute bottom-0 left-0 p-5 text-white bg-[linear-gradient(0deg,rgba(0,0,0,0.75)_6.82%,rgba(0,0,0,0.00)_90.44%)] w-full text-[14px] lg:text-[20px]">
-								<Link href={`/blog/${dataContent[3]?.slug}`}>{dataContent[1]?.title}</Link>
+								<Link href={`/blog/${dataContent[0]?.documentId}`}>{dataContent[1]?.title}</Link>
 							</div>
 						</div>
 					</div>
