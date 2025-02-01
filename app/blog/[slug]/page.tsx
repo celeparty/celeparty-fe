@@ -1,6 +1,7 @@
 import Basecontent from "@/components/Basecontent";
 import Box from "@/components/Box";
 import { getData } from "@/lib/services";
+import { axiosData } from "@/lib/services";
 import parse from "html-react-parser";
 import moment from "moment";
 import Image from "next/image";
@@ -14,8 +15,8 @@ export default async function BlogDetail({
 	params: { slug: string };
 }) {
 	const slug = params.slug;
-	const dataBlog = await getData(`/blogs/${slug}`);
-	const dataContent = dataBlog ? dataBlog.data?.data : null;
+	const dataBlog = await axiosData("GET",`/api/blogs/${slug}?populate=*`);
+	const dataContent = dataBlog ? dataBlog?.data : null;
 	return (
 		<div className="relative py-7">
 			<Box rounded={false}>
@@ -61,7 +62,7 @@ export default async function BlogDetail({
 						</div>
 					</div>
 					<div className="relative">
-						<Recomended slug={`${dataContent?.slug}`} />
+						{/* <Recomended slug={`${dataContent?.slug}`} /> */}
 					</div>
 				</div>
 			</Box>
