@@ -29,8 +29,6 @@ export default function ListBlog() {
 	}
 
 	const dataContent = query?.data?.data;
-
-	console.log(dataContent)
 	return (
 		<div className="relative mt-7">
 			<h4 className="font-semibold text-[16px] text-c-blue mb-5">Artikel Terbaru</h4>
