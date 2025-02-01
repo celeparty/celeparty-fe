@@ -29,6 +29,8 @@ export default function ListBlog() {
 	}
 
 	const dataContent = query?.data?.data;
+
+	console.log(dataContent)
 	return (
 		<div className="relative mt-7">
 			<h4 className="font-semibold text-[16px] text-c-blue mb-5">Artikel Terbaru</h4>
@@ -36,7 +38,7 @@ export default function ListBlog() {
 				{dataContent?.map((item: any, index: number) => {
 					return (
 						<ItemFeature
-							slug={`/blog/${item.category.documentId}`}
+							slug={`/blog/${item?.documentId}`}
 							key={index}
 							title={item?.title}
 							date={moment(item?.publish_at).format("DD MMM YYYY")}
