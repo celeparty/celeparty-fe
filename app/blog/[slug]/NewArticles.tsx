@@ -36,7 +36,7 @@ export default function NewArticles() {
 				return (
 					<ItemFeature
 						small={true}
-						slug={`/blog/${item.category.documentId}`}
+						slug={`/blog/${item?.documentId}`}
 						key={index}
 						title={item?.title}
 						date={moment(item?.publish_at).format("DD MMM YYYY")}
