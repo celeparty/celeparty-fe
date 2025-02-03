@@ -88,9 +88,6 @@ export function ProductContent() {
 		});
 		setMainData(dataSort);
 	};
-
-	console.log({mainData})
-
 	return (
 		<div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
 			<Box className="bg-c-blue text-white w-full lg:max-w-[280px] mt-0 hidden lg:block">
