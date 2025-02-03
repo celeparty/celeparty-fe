@@ -31,8 +31,6 @@ export default function MainBlog() {
 	}
 
 	const dataContent = query?.data?.data
-
-	console.log(dataContent)
 	return (
 		<div className="flex flex-col lg:flex-row gap-3 mt-2 lg:mt-0">
 			<div className="relative flex-1">
