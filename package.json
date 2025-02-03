@@ -7,7 +7,7 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
-		"biome":"biome lint --write '**/*.{js,jsx,ts,tsx}'"
+		"biome": "biome lint --write '**/*.{js,jsx,ts,tsx}'"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^3.4.2",
@@ -17,7 +17,7 @@
 		"@radix-ui/react-slot": "^1.0.2",
 		"@tanstack/react-query": "^5.24.1",
 		"autoprefixer": "10.4.17",
-		"axios": "^1.6.7",
+		"axios": "^1.7.9",
 		"button": "^1.1.1",
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.0",
@@ -30,7 +30,7 @@
 		"lucide-react": "^0.341.0",
 		"midtrans-client": "^1.4.2",
 		"moment": "^2.30.1",
-		"next": "14.2.20",
+		"next": "^14.2.23",
 		"next-auth": "^4.24.7",
 		"postcss": "^8.4.35",
 		"react": "18.2.0",
@@ -54,6 +54,7 @@
 		"@types/node": "20.11.20",
 		"@types/react": "18.2.59",
 		"@types/react-dom": "18.2.19",
-		"@types/react-slick": "^0.23.13"
+		"@types/react-slick": "^0.23.13",
+		"punycode": "^2.3.1"
 	}
 }

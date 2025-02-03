@@ -119,8 +119,6 @@ export default function MainContentAddProduct() {
 		);
 	}
 	const dataCategory = query?.data?.data;
-	console.log(stateCategory)
-
 
 	return (
 		<div>
