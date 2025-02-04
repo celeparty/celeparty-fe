@@ -26,9 +26,6 @@ const TestPage = () => {
         if (query.isError) {
             return <ErrorNetwork />;
         }
-
-
-    console.log("ini data blogs/slug :",query.data.data)
     return (
         <div>HELLO WORLD!</div>
     )

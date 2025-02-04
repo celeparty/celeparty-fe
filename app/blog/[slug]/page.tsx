@@ -33,10 +33,10 @@ export default async function BlogDetail({
 						<div className="w-full lg:w-8/12 px-5">
 							<div className="relative">
 								<div className="relative">
-									{dataContent?.thumbnail && (
+									{dataContent?.image && (
 										<div className="relative fill-current w-full h-[194px] lg:h-[450px] overflow-hidden">
 											<Image
-												src={dataContent?.thumbnail}
+												src={dataContent?.image ? process.env.BASE_API + dataContent?.image?.formats?.large?.url : "/images/noimage.png"}
 												fill
 												alt={dataContent?.title}
 												style={{ objectFit: "cover" }}
