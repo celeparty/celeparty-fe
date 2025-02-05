@@ -2,7 +2,6 @@ import Basecontent from "@/components/Basecontent";
 import EventList from "@/components/EventList";
 import MainBanner from "@/components/MainBanner";
 import ProductList from "@/components/product/ProductList";
-import TestPage from "./test/testPage";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Image from "next/image";
 import Link from "next/link";
