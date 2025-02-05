@@ -1,4 +1,5 @@
 "use client";
+import useButtonStore from "@/lib/store/useButtonStore";
 import Box from "@/components/Box";
 import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
@@ -24,6 +25,7 @@ export function ProductContent() {
 	const getSearch = params.get("search");
 	const getCategory = params.get("cat");
 	const [cat, setCat] = useState(`${getCategory ? getCategory : ""}`);
+	const {activeButton, setActiveButton} = useButtonStore()
 
 	const getQuery = async () => {
 		return await axiosData("GET", `/api/products?populate=*
@@ -162,8 +164,9 @@ export function ProductContent() {
 								variant={`${getSort === "updated_at" ? "default" : "outline"}`}
 								onClick={() => {
 									handleSort({ sortBy: "updatedAt" });
+									setActiveButton("btn1")
 								}}
-								className="w-full lg:w-auto border-2 border-black border-solid lg:border-none"
+								className={`w-full lg:w-auto border-2 border-black border-solid lg:border-none ${ activeButton === "btn1" ? "bg-c-blue text-white" : null}`}
 							>
 								Terbaru
 							</Button>
@@ -171,8 +174,9 @@ export function ProductContent() {
 								variant={`${getSort === "sold_count" ? "default" : "outline"}`}
 								onClick={() => {
 									handleSort({ sortBy: "sold_count" });
+									setActiveButton("btn2")
 								}}
-								className="w-full lg:w-auto  border-2 border-black border-solid lg:border-none"
+								className={`w-full lg:w-auto  border-2 border-black border-solid lg:border-none ${ activeButton === "btn2" ? "bg-c-blue text-white" : null}`}
 							>
 								Terlaris
 							</Button>
@@ -180,8 +184,9 @@ export function ProductContent() {
 								variant={`${getSort === "price" ? "default" : "outline"}`}
 								onClick={() => {
 									handleSort({ sortBy: "main_price" });
+									setActiveButton("btn3")
 								}}
-								className="flex gap-1 items-center w-full lg:w-auto border-2 border-black border-solid lg:border-none"
+								className={`flex gap-1 items-center w-full lg:w-auto border-2 border-black border-solid lg:border-none ${ activeButton === "btn3" ? "bg-c-blue text-white" : null}`}
 							>
 								Harga {sortDesc ? <IoIosArrowDown /> : <IoIosArrowUp />}
 							</Button>
