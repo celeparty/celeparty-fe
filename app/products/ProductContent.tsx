@@ -112,33 +112,33 @@ export function ProductContent() {
 					<div className="flex flex-col gap-3">
 						<ItemInfo image="/images/food.svg">
 							<ItemCategory
-								title="Makanan"
+								title="Ulang Tahun"
 								onClick={() => {
-									console.log("Makanan");
+									console.log("Ulang Tahun");
 								}}
 							/>
 						</ItemInfo>
 						<ItemInfo image="/images/decoration.svg">
 							<ItemCategory
-								title="Dekorasi"
+								title="Event"
 								onClick={() => {
-									console.log("Dekorasi");
+									console.log("Event");
 								}}
 							/>
 						</ItemInfo>
 						<ItemInfo image="/images/cake.svg">
 							<ItemCategory
-								title="Kue"
+								title="Multimedia"
 								onClick={() => {
-									console.log("Kue");
+									console.log("Multimedia");
 								}}
 							/>
 						</ItemInfo>
 						<ItemInfo image="/images/hampers.svg">
 							<ItemCategory
-								title="Hampers"
+								title="Peralatan"
 								onClick={() => {
-									console.log("Hampers");
+									console.log("Peralatan");
 								}}
 							/>
 						</ItemInfo>
