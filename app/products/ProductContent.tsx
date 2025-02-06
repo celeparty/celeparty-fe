@@ -90,6 +90,14 @@ export function ProductContent() {
 		});
 		setMainData(dataSort);
 	};
+
+	const handleFilter = (category : string) => {
+		const filterCategory: any = _.filter(dataContent, (item) => {
+			return category ? item?.category?.title === category : item
+		})
+		setMainData(filterCategory)
+	}
+
 	return (
 		<div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
 			<Box className="bg-c-blue text-white w-full lg:max-w-[280px] mt-0 hidden lg:block">
@@ -110,35 +118,35 @@ export function ProductContent() {
 				<div className="relative mb-7 [&_h4]:mb-3">
 					<h4>Pilih Kategori Produk</h4>
 					<div className="flex flex-col gap-3">
-						<ItemInfo image="/images/food.svg">
+						<ItemInfo image="/images/ticket.svg">
 							<ItemCategory
-								title="Makanan"
+								title="Ticket"
 								onClick={() => {
-									console.log("Makanan");
+									handleFilter("Ticket")
 								}}
 							/>
 						</ItemInfo>
 						<ItemInfo image="/images/decoration.svg">
 							<ItemCategory
-								title="Dekorasi"
+								title="Tasyakuran"
 								onClick={() => {
-									console.log("Dekorasi");
+									handleFilter("Tasyakuran")
 								}}
 							/>
 						</ItemInfo>
-						<ItemInfo image="/images/cake.svg">
+						<ItemInfo image="/images/cake2.svg">
 							<ItemCategory
-								title="Kue"
+								title="Ulang Tahun"
 								onClick={() => {
-									console.log("Kue");
+									handleFilter("Ulang Tahun")
 								}}
 							/>
 						</ItemInfo>
-						<ItemInfo image="/images/hampers.svg">
+						<ItemInfo image="/images/calendar.svg">
 							<ItemCategory
-								title="Hampers"
+								title="Acara"
 								onClick={() => {
-									console.log("Hampers");
+									handleFilter("Acara")
 								}}
 							/>
 						</ItemInfo>
@@ -146,7 +154,7 @@ export function ProductContent() {
 							<ItemCategory
 								title="Lainnya"
 								onClick={() => {
-									console.log("lain nya");
+									handleFilter("")
 								}}
 							/>
 						</ItemInfo>
