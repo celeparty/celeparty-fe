@@ -90,6 +90,14 @@ export function ProductContent() {
 		});
 		setMainData(dataSort);
 	};
+
+	const handleFilter = (category : string) => {
+		const filterCategory: any = _.filter(dataContent, (item) => {
+			return category ? item?.category?.title === category : item
+		})
+		setMainData(filterCategory)
+	}
+
 	return (
 		<div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
 			<Box className="bg-c-blue text-white w-full lg:max-w-[280px] mt-0 hidden lg:block">
@@ -114,15 +122,15 @@ export function ProductContent() {
 							<ItemCategory
 								title="Ticket"
 								onClick={() => {
-									console.log("Ticket");
+									handleFilter("Ticket")
 								}}
 							/>
 						</ItemInfo>
-						<ItemInfo image="/images/event.svg">
+						<ItemInfo image="/images/decoration.svg">
 							<ItemCategory
 								title="Tasyakuran"
 								onClick={() => {
-									console.log("Tasyakuran");
+									handleFilter("Tasyakuran")
 								}}
 							/>
 						</ItemInfo>
@@ -130,7 +138,7 @@ export function ProductContent() {
 							<ItemCategory
 								title="Ulang Tahun"
 								onClick={() => {
-									console.log("Ulang Tahun");
+									handleFilter("Ulang Tahun")
 								}}
 							/>
 						</ItemInfo>
@@ -138,7 +146,7 @@ export function ProductContent() {
 							<ItemCategory
 								title="Acara"
 								onClick={() => {
-									console.log("Acara");
+									handleFilter("Acara")
 								}}
 							/>
 						</ItemInfo>
@@ -146,7 +154,7 @@ export function ProductContent() {
 							<ItemCategory
 								title="Lainnya"
 								onClick={() => {
-									console.log("lain nya");
+									handleFilter("")
 								}}
 							/>
 						</ItemInfo>
