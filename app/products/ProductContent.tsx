@@ -110,7 +110,7 @@ export function ProductContent() {
 				<div className="relative mb-7 [&_h4]:mb-3">
 					<h4>Pilih Kategori Produk</h4>
 					<div className="flex flex-col gap-3">
-						<ItemInfo image="/images/food.svg">
+						<ItemInfo image="/images/cake2.svg">
 							<ItemCategory
 								title="Ulang Tahun"
 								onClick={() => {
@@ -118,7 +118,7 @@ export function ProductContent() {
 								}}
 							/>
 						</ItemInfo>
-						<ItemInfo image="/images/decoration.svg">
+						<ItemInfo image="/images/event.svg">
 							<ItemCategory
 								title="Event"
 								onClick={() => {
@@ -126,7 +126,7 @@ export function ProductContent() {
 								}}
 							/>
 						</ItemInfo>
-						<ItemInfo image="/images/cake.svg">
+						<ItemInfo image="/images/multimedia.svg">
 							<ItemCategory
 								title="Multimedia"
 								onClick={() => {
@@ -134,7 +134,7 @@ export function ProductContent() {
 								}}
 							/>
 						</ItemInfo>
-						<ItemInfo image="/images/hampers.svg">
+						<ItemInfo image="/images/tool.svg">
 							<ItemCategory
 								title="Peralatan"
 								onClick={() => {
