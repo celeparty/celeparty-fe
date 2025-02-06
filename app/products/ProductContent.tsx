@@ -110,35 +110,35 @@ export function ProductContent() {
 				<div className="relative mb-7 [&_h4]:mb-3">
 					<h4>Pilih Kategori Produk</h4>
 					<div className="flex flex-col gap-3">
-						<ItemInfo image="/images/food.svg">
+						<ItemInfo image="/images/ticket.svg">
 							<ItemCategory
-								title="Makanan"
+								title="Ticket"
 								onClick={() => {
-									console.log("Makanan");
+									console.log("Ticket");
 								}}
 							/>
 						</ItemInfo>
 						<ItemInfo image="/images/decoration.svg">
 							<ItemCategory
-								title="Dekorasi"
+								title="Tasyakuran"
 								onClick={() => {
-									console.log("Dekorasi");
+									console.log("Tasyakuran");
 								}}
 							/>
 						</ItemInfo>
-						<ItemInfo image="/images/cake.svg">
+						<ItemInfo image="/images/cake2.svg">
 							<ItemCategory
-								title="Kue"
+								title="Ulang Tahun"
 								onClick={() => {
-									console.log("Kue");
+									console.log("Ulang Tahun");
 								}}
 							/>
 						</ItemInfo>
-						<ItemInfo image="/images/hampers.svg">
+						<ItemInfo image="/images/calendar.svg">
 							<ItemCategory
-								title="Hampers"
+								title="Acara"
 								onClick={() => {
-									console.log("Hampers");
+									console.log("Acara");
 								}}
 							/>
 						</ItemInfo>
