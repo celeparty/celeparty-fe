@@ -118,7 +118,7 @@ export function ProductContent() {
 								}}
 							/>
 						</ItemInfo>
-						<ItemInfo image="/images/decoration.svg">
+						<ItemInfo image="/images/event.svg">
 							<ItemCategory
 								title="Tasyakuran"
 								onClick={() => {
