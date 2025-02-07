@@ -109,7 +109,7 @@ export function ProductContent() {
 			}
 	)
 	}
-
+	
 	return (
 		<div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
 			<Box className="bg-c-blue text-white w-full lg:max-w-[280px] mt-0 hidden lg:block">
@@ -216,9 +216,18 @@ export function ProductContent() {
 								showOptions && (
 									<div className="absolute mt-2 w-40 bg-white border border-gray-300 rounded shadow-lg z-50">
 										<div className="flex flex-col gap-2">
-											<Button onClick={() => console.log("Harga Termurah")}>Harga Termurah</Button>
-											<Button onClick={() => console.log("Harga Termahal")}>Harga Termahal</Button>
-											<Button onClick={() => console.log("Seluruh Harga")}>Seluruh Harga</Button>
+											<Button onClick={() => {
+												setShowOptions(!showOptions)
+												console.log("Harga Termurah")
+											}}>Harga Termurah</Button>
+											<Button onClick={() => {
+												setShowOptions(!showOptions)
+												console.log("Harga Termahal")
+											}}>Harga Termahal</Button>
+											<Button onClick={() => {
+												setShowOptions(!showOptions)
+												console.log("Seluruh Harga")
+											}}>Seluruh Harga</Button>
 										</div>
 									</div>
 								)
