@@ -18,6 +18,7 @@ import { formatRupiah } from "@/lib/utils";
 export function ProductContent() {
 	const [sortDesc, setSortDesc] = useState<boolean>(true);
 	const [showOptions, setShowOptions] = useState<boolean>(false)
+	const [statusValue, setStatusValue] = useState<string>("Harga")
 	const [price, setPrice] = useState<{ min: any; max: any }>({ min: 0, max: 0 });
 	const [mainData, setMainData] = useState([]);
 	const router = useRouter();
@@ -26,7 +27,9 @@ export function ProductContent() {
 	const getSearch = params.get("search");
 	const getCategory = params.get("cat");
 	const [cat, setCat] = useState(`${getCategory ? getCategory : ""}`);
-	const {activeButton, setActiveButton} = useButtonStore()
+	
+	// const {activeButton, setActiveButton} = useButtonStore()
+	const [activeButton, setActiveButton] = useState<string | null>(null)
 
 	const getQuery = async () => {
 		return await axiosData("GET", `/api/products?populate=*
@@ -52,9 +55,9 @@ export function ProductContent() {
 			});
 			setMainData(dataSort);
 		}
-		else if (price?.min  && price.max === 0 && price.max === "") {
+		else if (price?.min  && !price?.max) {
 			const dataSort: any = _.filter(dataContent, (item:any) => {
-				return item.main_price >= price.min && item.main_price <= price.max;
+				return item.main_price >= price.min
 			});
 			setMainData(dataSort);
 		}
@@ -104,16 +107,7 @@ export function ProductContent() {
 	const toggleDropdown = (): void => {
 		setSortDesc(!sortDesc)
 		setShowOptions(!showOptions)
-		console.log(
-			{
-				"sortDesc": sortDesc,
-				"showOptions": showOptions
-			}
-	)
 	}
-	
-
-	console.log(mainData)
 	return (
 		<div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
 			<Box className="bg-c-blue text-white w-full lg:max-w-[280px] mt-0 hidden lg:block">
@@ -215,7 +209,7 @@ export function ProductContent() {
 								}}
 								className={`flex gap-1 items-center w-full lg:w-auto border-2 border-black border-solid lg:border-none ${ activeButton === "btn3" ? "bg-c-blue text-white" : null}`}
 							>
-								Harga {sortDesc ? <IoIosArrowDown /> : <IoIosArrowUp />}
+								{statusValue} {sortDesc ? <IoIosArrowDown /> : <IoIosArrowUp />}
 							</Button>
 							{
 								showOptions && (
@@ -225,16 +219,19 @@ export function ProductContent() {
 											onClick={() => {
 												handleSort({ sortBy: "price_min" });
 												setShowOptions(!showOptions)
+												setStatusValue("Harga Termurah")
 											}}>Harga Termurah</Button>
 
 											<Button onClick={() => {
 												handleSort({ sortBy: "price_max" });
 												setShowOptions(!showOptions)
+												setStatusValue("Harga Termahal")
 											}}>Harga Termahal</Button>
 
 											<Button onClick={() => {
 												handleSort({ sortBy: "main_price" });
 												setShowOptions(!showOptions)
+												setStatusValue("Seluruh Harga")
 											}}>Seluruh Harga</Button>
 										</div>
 									</div>
