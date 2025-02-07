@@ -16,7 +16,8 @@ import { ItemCategory, ItemInfo } from "./ItemCategory";
 import { formatRupiah } from "@/lib/utils";
 
 export function ProductContent() {
-	const [sortDesc, setSortDesc] = useState(true);
+	const [sortDesc, setSortDesc] = useState<boolean>(true);
+	const [showOptions, setShowOptions] = useState<boolean>(false)
 	const [price, setPrice] = useState<{ min: any; max: any }>({ min: 0, max: 0 });
 	const [mainData, setMainData] = useState([]);
 	const router = useRouter();
@@ -96,6 +97,17 @@ export function ProductContent() {
 			return category ? item?.category?.title === category : item
 		})
 		setMainData(filterCategory)
+	}
+
+	const toggleDropdown = (): void => {
+		setSortDesc(!sortDesc)
+		setShowOptions(!showOptions)
+		console.log(
+			{
+				"sortDesc": sortDesc,
+				"showOptions": showOptions
+			}
+	)
 	}
 
 	return (
@@ -188,16 +200,30 @@ export function ProductContent() {
 							>
 								Terlaris
 							</Button>
+							<div className="relative">
 							<Button
 								variant={`${getSort === "price" ? "default" : "outline"}`}
 								onClick={() => {
 									handleSort({ sortBy: "main_price" });
 									setActiveButton("btn3")
+									toggleDropdown()
 								}}
 								className={`flex gap-1 items-center w-full lg:w-auto border-2 border-black border-solid lg:border-none ${ activeButton === "btn3" ? "bg-c-blue text-white" : null}`}
 							>
 								Harga {sortDesc ? <IoIosArrowDown /> : <IoIosArrowUp />}
 							</Button>
+							{
+								showOptions && (
+									<div className="absolute mt-2 w-40 bg-white border border-gray-300 rounded shadow-lg z-50">
+										<div className="flex flex-col gap-2">
+											<Button onClick={() => console.log("Harga Termurah")}>Harga Termurah</Button>
+											<Button onClick={() => console.log("Harga Termahal")}>Harga Termahal</Button>
+											<Button onClick={() => console.log("Seluruh Harga")}>Seluruh Harga</Button>
+										</div>
+									</div>
+								)
+							}
+							</div>
 							<div className="flex items-center gap-2 w-full lg:w-auto">
 								Rp{" "}
 								<Input
