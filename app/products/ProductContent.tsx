@@ -16,7 +16,9 @@ import { ItemCategory, ItemInfo } from "./ItemCategory";
 import { formatRupiah } from "@/lib/utils";
 
 export function ProductContent() {
-	const [sortDesc, setSortDesc] = useState(true);
+	const [sortDesc, setSortDesc] = useState<boolean>(true);
+	const [showOptions, setShowOptions] = useState<boolean>(false)
+	const [statusValue, setStatusValue] = useState<string>("Harga")
 	const [price, setPrice] = useState<{ min: any; max: any }>({ min: 0, max: 0 });
 	const [mainData, setMainData] = useState([]);
 	const router = useRouter();
@@ -25,7 +27,9 @@ export function ProductContent() {
 	const getSearch = params.get("search");
 	const getCategory = params.get("cat");
 	const [cat, setCat] = useState(`${getCategory ? getCategory : ""}`);
-	const {activeButton, setActiveButton} = useButtonStore()
+	
+	// const {activeButton, setActiveButton} = useButtonStore()
+	const [activeButton, setActiveButton] = useState<string | null>(null)
 
 	const getQuery = async () => {
 		return await axiosData("GET", `/api/products?populate=*
@@ -51,9 +55,9 @@ export function ProductContent() {
 			});
 			setMainData(dataSort);
 		}
-		else if (price?.min  && price.max === 0 && price.max === "") {
+		else if (price?.min  && !price?.max) {
 			const dataSort: any = _.filter(dataContent, (item:any) => {
-				return item.main_price >= price.min && item.main_price <= price.max;
+				return item.main_price >= price.min
 			});
 			setMainData(dataSort);
 		}
@@ -86,7 +90,9 @@ export function ProductContent() {
 		const dataSort: any = _.sortBy(dataContent, (item)=> {			
 			return sort.sortBy === "sold_count" ?  item.sold_count : 
 				sort.sortBy === "main_price" ?  item.main_price : 
-					item.updatedAt
+					sort.sortBy === "price_min" ? item.price_min :
+						sort.sortBy === "price_max" ? item.price_max :
+							 item.updatedAt
 		});
 		setMainData(dataSort);
 	};
@@ -98,6 +104,10 @@ export function ProductContent() {
 		setMainData(filterCategory)
 	}
 
+	const toggleDropdown = (): void => {
+		setSortDesc(!sortDesc)
+		setShowOptions(!showOptions)
+	}
 	return (
 		<div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
 			<Box className="bg-c-blue text-white w-full lg:max-w-[280px] mt-0 hidden lg:block">
@@ -173,6 +183,7 @@ export function ProductContent() {
 								onClick={() => {
 									handleSort({ sortBy: "updatedAt" });
 									setActiveButton("btn1")
+									setShowOptions(false)
 								}}
 								className={`w-full lg:w-auto border-2 border-black border-solid lg:border-none ${ activeButton === "btn1" ? "bg-c-blue text-white" : null}`}
 							>
@@ -183,21 +194,50 @@ export function ProductContent() {
 								onClick={() => {
 									handleSort({ sortBy: "sold_count" });
 									setActiveButton("btn2")
+									setShowOptions(false)
 								}}
 								className={`w-full lg:w-auto  border-2 border-black border-solid lg:border-none ${ activeButton === "btn2" ? "bg-c-blue text-white" : null}`}
 							>
 								Terlaris
 							</Button>
+							<div className="relative">
 							<Button
 								variant={`${getSort === "price" ? "default" : "outline"}`}
 								onClick={() => {
-									handleSort({ sortBy: "main_price" });
 									setActiveButton("btn3")
+									toggleDropdown()
 								}}
 								className={`flex gap-1 items-center w-full lg:w-auto border-2 border-black border-solid lg:border-none ${ activeButton === "btn3" ? "bg-c-blue text-white" : null}`}
 							>
-								Harga {sortDesc ? <IoIosArrowDown /> : <IoIosArrowUp />}
+								{statusValue} {sortDesc ? <IoIosArrowDown /> : <IoIosArrowUp />}
 							</Button>
+							{
+								showOptions && (
+									<div className="absolute mt-2 w-40 bg-white border border-gray-300 rounded shadow-lg z-50">
+										<div className="flex flex-col gap-2">
+											<Button 
+											onClick={() => {
+												handleSort({ sortBy: "price_min" });
+												setShowOptions(!showOptions)
+												setStatusValue("Harga Termurah")
+											}}>Harga Termurah</Button>
+
+											<Button onClick={() => {
+												handleSort({ sortBy: "price_max" });
+												setShowOptions(!showOptions)
+												setStatusValue("Harga Termahal")
+											}}>Harga Termahal</Button>
+
+											<Button onClick={() => {
+												handleSort({ sortBy: "main_price" });
+												setShowOptions(!showOptions)
+												setStatusValue("Seluruh Harga")
+											}}>Seluruh Harga</Button>
+										</div>
+									</div>
+								)
+							}
+							</div>
 							<div className="flex items-center gap-2 w-full lg:w-auto">
 								Rp{" "}
 								<Input
