@@ -1,6 +1,6 @@
 const Test = () => {
 	return (
-		<div className="mx-auto wrapper bg-c-blue rounded-lg">
+		<div className="lg:mx-auto wrapper bg-c-blue lg:rounded-lg lg:my-8">
 			<div className="max-w-[707px] mx-auto  leading-[20px] pt-8 pb-12 px-2 lg:px-0">
 				<h1 className="font-hind font-semibold text-[24px] text-white mb-4">Kebijakan Privasi</h1>
 				<div className="font-hind font-normal text-[14px] lg:text-[12px] text-white mb-4">

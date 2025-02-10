@@ -57,8 +57,8 @@ export default function Header() {
 						</div>
 
 					</div>
-					<div className="relative justify-end flex  flex-row items-center text-3xl gap-4 text-c-gray-text font-semibold lg:w-auto w-full">
-						<div className="flex gap-4 w-fit p-2 lg:p-0">
+					<div className="relative lg:justify-end flex  flex-row items-center text-3xl gap-4 text-c-gray-text font-semibold lg:w-auto w-full">
+						<div className="flex gap-4 w-fit p-2 lg:p-0 ">
 							<Link href="/cart" className="item relative">
 								<MdOutlineShoppingCart />
 								{cart.length > 0 ? (
@@ -88,7 +88,7 @@ export default function Header() {
 							</div>
 						) : status === "unauthenticated" ? (
 							<div className="flex gap-3">
-								<Link href="/auth/login" className="btnline px-3">
+								<Link href="/auth/login" className="btnline px-3 w-32">
 									Masuk
 								</Link>
 								<Link href="/auth/register" className="btn px-3">
