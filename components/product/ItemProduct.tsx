@@ -13,6 +13,8 @@ interface iItemProduct {
 	sold?: string;
 	location?: string | boolean;
 	url: string;
+	onEdit?: () => void;
+	onDelete?: () => void;
 	children?: ReactNode;
 }
 
@@ -49,9 +51,13 @@ export default function ItemProduct(props: iItemProduct) {
 					) : null}
 				</div>
 			</Link>
-			<div>
-				<button onClick={() => console.log("Edit Click!")}>Edit</button>
-				<button onClick={() => console.log("Delete Click!")}>Delete</button>
+			<div className="flex gap-1 justify-end py-2">
+				<button onClick={() => props.onDelete}>
+					<Image src={"/images/edit.svg"} width={25} height={25} alt="Edit SVG..."/>
+				</button>
+				<button onClick={() => props.onEdit}>
+					<Image src={"/images/trash.svg"} width={25} height={25} alt="Edit SVG..."/>
+				</button>
 			</div>
 		</div>
 	);

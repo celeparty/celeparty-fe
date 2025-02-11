@@ -49,6 +49,15 @@ export default function Products() {
 		}
 	}, [status, session, userMe]);	
 	const dataContent = myData;
+
+	const deleteProducts = () => {
+		console.log("deleteProducts")
+	}
+
+	const editProducts = () => {
+		console.log("editProducts")
+	}
+
 	return (
 		<div>
 			<Box className="mt-0">
@@ -64,6 +73,8 @@ export default function Products() {
 									rate={item.rate ? `${item.rate}` : "1"}
 									sold={item.sold_count}
 									location={item.region ? item.region : null}
+									onDelete={deleteProducts}
+									onEdit={editProducts}
 								></ItemProduct>
 
 						);
