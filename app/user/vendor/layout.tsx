@@ -22,7 +22,7 @@ function ItemMenu({ title, icon, iconWidth, iconHeight, link }: iItemMenu) {
 			<div className="relative">
 				<Image src={`${icon}`} width={iconWidth} height={iconHeight} alt={title} />
 			</div>
-			<div className="text-white border border-solid border-white px-3 py-2 rounded-lg flex-1 group-hover:bg-c-green">
+			<div className="text-white border border-solid border-white px-3 py-2 rounded-lg flex-1 group-hover:bg-c-green text-[14px] lg:text-[16px]">
 				{title}
 			</div>
 		</Link>
@@ -47,7 +47,7 @@ export default function DashboardLayout({
 	return (
 		<div className="relative wrapper-main py-7">
 			<Basecontent>
-				<div className="flex lg:flex-row flex-col justify-between items-start gap-7">
+				<div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7 gap-2 mx-3 lg:mx-0">
 					<Box className="bg-c-blue text-white lg:max-w-[280px] w-full mt-0">
 						<h4 className="lg:text-start text-center font-extrabold lg:font-normal text-[20px] lg:text-[14px]">Menu Mitra</h4>
 						<div className="relative mt-5">

@@ -181,7 +181,7 @@ const InputUser = () => {
 					render={({ field }) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col lg:items-center items-start lg:gap-8 gap-1">
-								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind text-[16px] text-start">
+								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px] text-start">
 									Nama
 								</FormLabel>
 								<FormControl className="lg:w-[320px] w-[300px]">
@@ -200,7 +200,7 @@ const InputUser = () => {
 					render={({ field }) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
-								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind text-[16px]">
+								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
 									Tanggal Lahir
 								</FormLabel>
 								<FormControl className="lg:w-[320px] w-[300px]">
@@ -219,7 +219,7 @@ const InputUser = () => {
 					render={({ field }) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
-								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind text-[16px]">
+								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
 									Jenis Kelamin
 								</FormLabel>
 								<FormControl className="lg:w-[320px] w-[300px]">
@@ -238,7 +238,7 @@ const InputUser = () => {
 					render={({ field }) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
-								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind text-[16px]">
+								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
 									Email
 								</FormLabel>
 								<FormControl className="lg:w-[320px] w-[300px]">
@@ -257,7 +257,7 @@ const InputUser = () => {
 					render={({ field }) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
-								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind text-[16px]">
+								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
 									No HP
 								</FormLabel>
 								<FormControl className="lg:w-[320px] w-[300px]">
@@ -273,13 +273,13 @@ const InputUser = () => {
 				<div className="flex flex-col gap-4 items-end mt-10">
 					<Button
 						type="submit"
-						className="w-full lg:w-[300px] hover:bg-[#CBD002] bg-[#CBD002] text-white py-2 px-4 rounded-lg font-semibold text-[16px]"
+						className="w-full lg:w-[300px] hover:bg-[#CBD002] bg-[#CBD002] text-white py-2 px-4 rounded-lg font-semibold lg:text-[16px] text-[14px] "
 					>
 						Submit
 					</Button>
 					<Button
 						type="submit"
-						className="w-full lg:w-[300px] hover:bg-white bg-white border-solid border border-black rounded-lg text-black font-semibold text-[16px]"
+						className="w-full lg:w-[300px] hover:bg-white bg-white border-solid border border-black rounded-lg text-black font-semibold lg:text-[16px] text-[14px] "
 					>
 						Ubah Kata Sandi
 					</Button>
