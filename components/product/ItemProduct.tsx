@@ -49,6 +49,10 @@ export default function ItemProduct(props: iItemProduct) {
 					) : null}
 				</div>
 			</Link>
+			<div>
+				<button onClick={() => console.log("Edit Click!")}>Edit</button>
+				<button onClick={() => console.log("Delete Click!")}>Delete</button>
+			</div>
 		</div>
 	);
 }
