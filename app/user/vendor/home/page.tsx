@@ -19,11 +19,11 @@ interface iItemStatus {
 function ItemStatus({ status, value, color }: iItemStatus): JSX.Element {
 	return (
 		<div
-			className={`py-3 px-5 text-center rounded-lg text-white min-w-[160px]`}
+			className={`py-3 px-5 text-center rounded-lg text-white min-w-[160px] text-sm sm:text-base`}
 			style={{ backgroundColor: `${color}` }}
 		>
-			<h4>{status}</h4>
-			<strong>{value}</strong>
+			<h4 className="text-xs sm:text-sm">{status}</h4>
+			<strong className="text-base sm:text-lg">{value}</strong>
 		</div>
 	);
 }
@@ -52,7 +52,7 @@ export default function HomeMitra() {
 	const dataContent = query?.data?.data.data;
 	return (
 		<div>
-			<div className="flex justify-center items-center gap-3">
+			<div className="grid grid-cols-2 sm:grid-cols-4 gap-2 justify-center items-center">
 				<ItemStatus status="PENDING" value={1} color="#3E2882" />
 				<ItemStatus status="PROCESS" value={1} color="#56C200" />
 				<ItemStatus status="CANCEL" value={1} color="#F60E0E" />
@@ -62,20 +62,20 @@ export default function HomeMitra() {
 				<Table>
 					<TableHeader className="bg-white">
 						<TableRow>
-							<TableHead className="w-[150px]">ORDER DATE</TableHead>
-							<TableHead>ITEM</TableHead>
-							<TableHead>STATUS</TableHead>
-							<TableHead>TOTAL</TableHead>
+							<TableHead className="w-[150px] text-xs sm:text-sm">ORDER DATE</TableHead>
+							<TableHead className="text-xs sm:text-sm">ITEM</TableHead>
+							<TableHead className="text-xs sm:text-sm">STATUS</TableHead>
+							<TableHead className="text-xs sm:text-sm">TOTAL</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
 						{dataContent?.map((item: any, i: number) => {
 							return (
 								<TableRow className={`${i % 2 === 0 ? "bg-slate-200" : "bg-white"}`} key={item.id}>
-									<TableCell className="font-medium">Tanggal Belom ada di api</TableCell>
-									<TableCell>{item.name}</TableCell>
-									<TableCell>{item.status}</TableCell>
-									<TableCell>{item.price}</TableCell>
+									<TableCell className="font-medium text-xs sm:text-sm">Tanggal Belom ada di api</TableCell>
+									<TableCell className="text-xs sm:text-sm">{item.name}</TableCell>
+									<TableCell className="text-xs sm:text-sm">{item.status}</TableCell>
+									<TableCell className="text-xs sm:text-sm">{item.price}</TableCell>
 								</TableRow>
 							);
 						})}
