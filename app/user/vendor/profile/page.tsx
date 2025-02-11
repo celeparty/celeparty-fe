@@ -31,11 +31,11 @@ type SessionData = {
 	user?: UserData; // Update the type of user to include the accessToken property
 };
 
-function ItemInput({ label, children }: {label: string, children: React.ReactNode}) {
+function ItemInput({ label, children }: {label?: string, children: React.ReactNode}) {
 	return (
 		<div className="flex justify-items-start w-full gap-2 mb-3 items-start">
-			<div className="w-[200px] py-2">{label}</div>
-			<div className="flex-1">
+			<div className={`${label ? "w-[130px] lg:w-[200px]" : "w-0"} py-2 text-[14px] lg:text-[16px]`}>{label}</div>
+			<div className="flex-1 pt-[6px] lg:pt-[6px] text-[14px] lg:text-[16px]">
 				{children}
 			</div>
 		</div>
@@ -106,20 +106,20 @@ export default function ProfilePage() {
 	return (
 		<div>
 			<Box className="mt-0">
-				<h4 className="font-semibold text-[16px] mb-1">Info Profil</h4>
-				<div className="mt-7">
+				<h4 className="lg:font-semibold font-extrabold text-[14px] lg:text-[16px] mb-1">Info Profil</h4>
+				<div className="mt-2 lg:mt-7">
 					{dataContent ? (
 						<form onSubmit={handleSubmit(onSubmit)}>
 							<ItemInput label="Nama">
 								<input
-									className="border border-gray-300 rounded-md p-2"
+									className="border border-gray-300 rounded-md p-2 text-[14px] lg:text-[16px]"
 									defaultValue={dataContent?.name}
 									{...register("name", { required: true })}
 								/>
 							</ItemInput>
 							<ItemInput label="Nama Usaha">
 								<input
-									className="border border-gray-300 rounded-md p-2"
+									className="border border-gray-300 rounded-md p-2 text-[14px] lg:text-[16px]"
 									defaultValue={dataContent?.companyName}
 									{...register("company", { required: true })}
 								/>
@@ -130,14 +130,14 @@ export default function ProfilePage() {
 								{
 									dataContent?.serviceLocation?.map((item: any, i:number) => {
 										return (
-											<div key={i} className="flex gap-1 w-full">
+											<div key={i} className="flex lg:flex-row flex-col gap-1 w-full">
 												<input
-													className="border flex-1 mb-2 border-gray-300 rounded-md p-2"
+													className="border flex-1 mb-2 border-gray-300 rounded-md p-2 text-[14px] lg:text-[16px]"
 													defaultValue={item?.region}
 													{...register(`${"region-"+i}`, { required: true })}
 												/>	
 												<input
-													className="border flex-1 mb-2 border-gray-300 rounded-md p-2"
+													className="border flex-1 mb-2 border-gray-300 rounded-md p-2 text-[14px] lg:text-[16px]"
 													defaultValue={item?.subregion}
 													{...register(`${"subregion-"+i}`, { required: true })}
 												/>	
@@ -152,7 +152,7 @@ export default function ProfilePage() {
 							<ItemInput label="Email">{dataContent?.email}</ItemInput>
 							<ItemInput label="No Telepon">
 								<input
-									className="border border-gray-300 rounded-md p-2"
+									className="border border-gray-300 rounded-md p-2 text-[14px] lg:text-[16px]"
 									defaultValue={dataContent?.phone}
 									{...register("phonenumber", {
 										required: true,
@@ -161,7 +161,7 @@ export default function ProfilePage() {
 							</ItemInput>
 							<ItemInput label="Tanggal Lahir">
 								<input
-									className="border border-gray-300 rounded-md p-2"
+									className="border border-gray-300 rounded-md p-2 text-[14px] lg:text-[16px]"
 									defaultValue={dataContent?.birthdate}
 									{...register("birthdate", {
 										required: true,
@@ -170,7 +170,7 @@ export default function ProfilePage() {
 							</ItemInput>
 							<ItemInput label="Tempat Lahir">
 								<input
-									className="border border-gray-300 rounded-md p-2"
+									className="border border-gray-300 rounded-md p-2 text-[14px] lg:text-[16px]"
 									defaultValue={dataContent?.birthplace}
 									{...register("birthplace", {
 										required: true,
@@ -179,21 +179,21 @@ export default function ProfilePage() {
 							</ItemInput>
 							<ItemInput label="Alamat Usaha">
 								<textarea
-									className="border border-gray-300 rounded-md p-2 w-full min-h-[100px]"
+									className="border border-gray-300 rounded-md p-2 w-[210px] lg:w-full min-h-[100px] text-[14px] lg:text-[16px]"
 									defaultValue={dataContent?.address}
 									{...register("address", { required: true })}
 								/>
 							</ItemInput>
-							<ItemInput label="Nama Bank"><div className="py-2">{dataContent?.bankName}</div></ItemInput>
-							<ItemInput label="Nomor Rekening"><div className="py-2">{dataContent?.accountNumber}</div></ItemInput>
+							<ItemInput label="Nama Bank"><div className="py-2 text-[14px] lg:text-[16px]">{dataContent?.bankName}</div></ItemInput>
+							<ItemInput label="Nomor Rekening"><div className="py-2 text-[14px] lg:text-[16px]">{dataContent?.accountNumber}</div></ItemInput>
 							<ItemInput label="Nama Pemilik Rekening">
-								<div className="py-2">{dataContent?.accountName}</div>
+								<div className="py-2 text-[14px] lg:text-[16px]">{dataContent?.accountName}</div>
 							</ItemInput>
-							<ItemInput label="">
+							<ItemInput>
 								<input
 									type="submit"
 									value="Simpan"
-									className="border border-gray-300 rounded-md py-2 px-7 hover:bg-slate-300 cursor-pointer"
+									className="lg:border border-[3px] border-gray-300 rounded-md lg:py-2 py-3 px-7 hover:bg-slate-300 cursor-pointer text-[16px] lg:text-[14px] w-full lg:w-auto lg:font-normal font-extrabold"
 								/>
 							</ItemInput>
 							{notif && (
@@ -210,8 +210,8 @@ export default function ProfilePage() {
 			<Box>
 				<div className="flex justify-center items-center">
 					<Link href="/" className="flex gap-2 items-center">
-						<AiFillCustomerService className="text-3xl" />
-						<strong>Bantuan Celeparty Care</strong>
+						<AiFillCustomerService className="lg:text-3xl text-2xl" />
+						<strong className="text-[14px] lg:text-[16px]">Bantuan Celeparty Care</strong>
 					</Link>
 				</div>
 			</Box>

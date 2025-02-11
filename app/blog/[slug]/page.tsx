@@ -23,8 +23,8 @@ export default async function BlogDetail({
 				<div className="wrapper">
 					<div className="flex lg:flex-row flex-col flex-wrap -mx-5">
 						<div className="w-11/12 lg:w-8/12 px-5">
-							<h1 className="text-[30px] text-black font-bold">{dataContent?.title}</h1>
-							<div className="relative text-sm text-c-gray-text2 my-2">
+							<h1 className="lg:text-[30px] text-[25px] text-black font-bold">{dataContent?.title}</h1>
+							<div className="relative text-sm text-c-gray-text2 lg:my-2 mb-2">
 								{dataContent?.author ? "Author: " + dataContent?.author + " - " : null}
 								{moment(dataContent?.publish_at).format("DD MMM YYYY")}
 							</div>

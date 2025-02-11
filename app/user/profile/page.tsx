@@ -45,7 +45,7 @@ interface NotificationItem {
 const TableStatus = () => {
 	
 	return (
-		<div className="mt-20 h-[400px]">
+		<div className="mt-20 lg:h-[400px] h-auto overflow-x-auto">
 			<h1 className="font-hind font-semibold text-[16px] text-black mb-6">Status Pembelian</h1>
 			<table className="min-w-full bg-white border-b-2 border-gray-200">
 				<thead className="">
@@ -180,11 +180,11 @@ const InputUser = () => {
 					name="name"
 					render={({ field }) => (
 						<FormItem className="mb-4">
-							<div className="flex items-center gap-8">
-								<FormLabel className="w-[30%] text-black font-semibold font-hind text-[16px]">
+							<div className="flex lg:flex-row flex-col lg:items-center items-start lg:gap-8 gap-1">
+								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px] text-start">
 									Nama
 								</FormLabel>
-								<FormControl className="w-[320px]">
+								<FormControl className="lg:w-[320px] w-[300px]">
 									<Input className="border border-[#ADADAD] rounded-lg" {...field} />
 								</FormControl>
 							</div>
@@ -199,11 +199,11 @@ const InputUser = () => {
 					name="date"
 					render={({ field }) => (
 						<FormItem className="mb-4">
-							<div className="flex items-center gap-8">
-								<FormLabel className="w-[30%] text-black font-semibold font-hind text-[16px]">
+							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
+								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
 									Tanggal Lahir
 								</FormLabel>
-								<FormControl className="w-[320px]">
+								<FormControl className="lg:w-[320px] w-[300px]">
 									<Input className="border border-[#ADADAD] rounded-lg" {...field} />
 								</FormControl>
 							</div>
@@ -218,11 +218,11 @@ const InputUser = () => {
 					name="gender"
 					render={({ field }) => (
 						<FormItem className="mb-4">
-							<div className="flex items-center gap-8">
-								<FormLabel className="w-[30%] text-black font-semibold font-hind text-[16px]">
+							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
+								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
 									Jenis Kelamin
 								</FormLabel>
-								<FormControl className="w-[320px]">
+								<FormControl className="lg:w-[320px] w-[300px]">
 									<Input className="border border-[#ADADAD] rounded-lg" {...field} />
 								</FormControl>
 							</div>
@@ -237,11 +237,11 @@ const InputUser = () => {
 					name="email"
 					render={({ field }) => (
 						<FormItem className="mb-4">
-							<div className="flex items-center gap-8">
-								<FormLabel className="w-[30%] text-black font-semibold font-hind text-[16px]">
+							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
+								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
 									Email
 								</FormLabel>
-								<FormControl className="w-[320px]">
+								<FormControl className="lg:w-[320px] w-[300px]">
 									<Input className="border border-[#ADADAD] rounded-lg" {...field} />
 								</FormControl>
 							</div>
@@ -256,11 +256,11 @@ const InputUser = () => {
 					name="phone"
 					render={({ field }) => (
 						<FormItem className="mb-4">
-							<div className="flex items-center gap-8">
-								<FormLabel className="w-[30%] text-black font-semibold font-hind text-[16px]">
+							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
+								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
 									No HP
 								</FormLabel>
-								<FormControl className="w-[320px]">
+								<FormControl className="lg:w-[320px] w-[300px]">
 									<Input className="border border-[#ADADAD] rounded-lg" {...field} />
 								</FormControl>
 							</div>
@@ -273,13 +273,13 @@ const InputUser = () => {
 				<div className="flex flex-col gap-4 items-end mt-10">
 					<Button
 						type="submit"
-						className="w-full lg:w-[300px] hover:bg-[#CBD002] bg-[#CBD002] text-white py-2 px-4 rounded-lg font-semibold text-[16px]"
+						className="w-full lg:w-[300px] hover:bg-[#CBD002] bg-[#CBD002] text-white py-2 px-4 rounded-lg font-semibold lg:text-[16px] text-[14px] "
 					>
 						Submit
 					</Button>
 					<Button
 						type="submit"
-						className="w-full lg:w-[300px] hover:bg-white bg-white border-solid border border-black rounded-lg text-black font-semibold text-[16px]"
+						className="w-full lg:w-[300px] hover:bg-white bg-white border-solid border border-black rounded-lg text-black font-semibold lg:text-[16px] text-[14px] "
 					>
 						Ubah Kata Sandi
 					</Button>
@@ -292,11 +292,11 @@ const InputUser = () => {
 const ProfilePage = () => {
 	return (
 		<div className="wrapper my-10">
-			<div className="px-10 py-6 lg:border-2 lg:border-gray-300 bg-[#F2F2F2] lg:rounded-lg lg:shadow-xl">
+			<div className="px-10 lg:py-6 py-2 lg:border-2 lg:border-gray-300 bg-[#F2F2F2] lg:rounded-lg lg:shadow-xl">
 				<h1 className="text-[20px] lg:text-[16px] text-center lg:text-start my-4 leading-[26px] font-hind text-black font-semibold">
 					Biodata Diri
 				</h1>
-				<div className="flex lg:flex-row flex-col gap-24">
+				<div className="flex lg:flex-row flex-col lg:gap-24 gap-16">
 					<div className="w-[300px] mx-auto lg:mx-0">
 						<div className="w-full h-[300px] mb-4 bg-black rounded-lg"></div>
 						<button className="border-solid border border-black w-full py-2 rounded-lg mb-2">

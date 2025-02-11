@@ -21,11 +21,11 @@ body {
 }
 
 .btn {
-	@apply bg-c-green text-white rounded-lg text-center lg:text-start lg:px-4 lg:py-1 text-[16px] font-hind font-semibold w-full lg:w-auto;
+	@apply bg-c-green text-white rounded-lg text-center lg:text-start lg:px-4 lg:py-1 text-[16px] font-hind font-semibold w-32 lg:w-auto;
 }
 
 .btnline {
-	@apply text-center lg:text-start bg-none text-c-green border-solid border-c-green border-[1px] rounded-lg w-full lg:w-auto lg:px-4 lg:py-1 text-[16px] font-hind font-semibold;
+	@apply text-center lg:text-start bg-none text-c-green border-solid border-c-green border-[1px] rounded-lg w-32 lg:w-auto lg:px-4 lg:py-1 text-[16px] font-hind font-semibold;
 }
 
 .mainslider .slick-dots {

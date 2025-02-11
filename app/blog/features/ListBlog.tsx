@@ -31,7 +31,7 @@ export default function ListBlog() {
 	const dataContent = query?.data?.data;
 	return (
 		<div className="relative mt-7">
-			<h4 className="font-semibold text-[16px] text-c-blue mb-5">Artikel Terbaru</h4>
+			<h4 className="font-semibold text-[16px] text-c-blue lg:mb-5 mb-2">Artikel Terbaru</h4>
 			<div className="flex flex-wrap -mx-5">
 				{dataContent?.map((item: any, index: number) => {
 					return (

@@ -18,8 +18,8 @@ import { connect } from "http2";
 function ItemInput({ label, sublabel, children }: any) {
 	return (
 		<div className="flex flex-col justify-items-start w-full gap-2 mb-5  [&_input]:bg-gray-100 [&_input]:hover:bg-white [&_textarea]:bg-gray-100 [&_textarea]:hover:bg-white">
-			{label ? <div className="w-[full]">{label}</div> : null}
-			{sublabel ? <div className="text-[#DA7E01] text-[10px] ">{sublabel}</div> : null}
+			{label ? <div className="w-[full] text-[14px] lg:text-[16px]">{label}</div> : null}
+			{sublabel ? <div className="text-[#DA7E01] text-[13px] lg:text-[10px] ">{sublabel}</div> : null}
 			{children}
 		</div>
 	);
@@ -123,7 +123,7 @@ export default function MainContentAddProduct() {
 	return (
 		<div>
 			<form onSubmit={handleSubmit(onSubmit)}>
-				<SubTitle title="Pilih Kategori Produk" />
+				<SubTitle title="Pilih Kategori Produk" className="mb-3"/>
 				<div className="flex flex-wrap gap-2 mb-5">
 					{dataCategory?.map((item: any, i: number) => {
 						const isActive = stateCategory.value === item.id;
@@ -136,7 +136,7 @@ export default function MainContentAddProduct() {
 									});
 								}}
 								key={item.id}
-								className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-5 py-1 ${isActive ? "bg-c-green text-white border-c-green" : "text-c-black"}`}
+								className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-5 py-1 ${isActive ? "bg-c-green text-white border-c-green" : "text-c-black"} text-[14px] lg:text-[16px]`}
 							>
 								{item.title}
 							</div>
@@ -145,7 +145,7 @@ export default function MainContentAddProduct() {
 				</div>
 				<ItemInput>
 					<input
-						className="border border-gray-300 rounded-md py-2 px-5 w-full"
+						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
 						placeholder="Nama Produk"
 						{...register("title", { required: true })}
 					/>
@@ -175,7 +175,7 @@ export default function MainContentAddProduct() {
 				</ItemInput>
 				<ItemInput>
 					<textarea
-						className="border border-gray-300 rounded-md py-2 px-5 w-full"
+						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
 						placeholder="Deskripsi Produk"
 						{...register("description", { required: true })}
 					/>
@@ -183,14 +183,14 @@ export default function MainContentAddProduct() {
 				</ItemInput>
 				<ItemInput label="Minimal Item Pembelian (Optional)">
 					<input
-						className="border border-gray-300 rounded-md py-2 px-5 w-full"
+						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
 						placeholder="Jumlah Pcs Minimal"
 						{...register("minimal_order", { required: false })}
 					/>
 				</ItemInput>
 				<ItemInput label="Maksimal Hari Pemesanan (Optional)">
 					<input
-						className="border border-gray-300 rounded-md py-2 px-5 w-full"
+						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
 						placeholder="(x) Hari Maksimal Pemesanan"
 						{...register("minimal_order_date", { required: false })}
 					/>
@@ -218,7 +218,7 @@ export default function MainContentAddProduct() {
 					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
 				</ItemInput> */}
 				<ItemInput label="Varian">
-					<div className="text-[#DA7E01] text-[12px] cursor-pointer">Tambah Varian</div>
+					<div className="text-[#DA7E01] text-[13px] lg:text-[12px] cursor-pointer">Tambah Varian</div>
 				</ItemInput>
 				<div className="flex justify-center">
 					{
@@ -226,25 +226,25 @@ export default function MainContentAddProduct() {
 					<input
 						type="submit"
 						value="Simpan Produk"
-						className="border border-gray-300 rounded-[30px] py-4 px-7 min-w-[250px] hover:bg-slate-300 cursor-pointer bg-c-green text-white shadow"
+						className="border border-gray-300 rounded-[30px] py-4 px-7 min-w-[250px] hover:bg-slate-300 cursor-pointer bg-c-green text-white shadow text-[14px] lg:text-[16px]"
 					/>
 					: 					
 					<input
 						type="disabled"
 						value="Simpan Produk"
-						className="border-0 outline-none border-gray-300 text-center rounded-[30px] py-4 px-7 min-w-[250px] bg-slate-300 cursor-default  text-white shadow"
+						className="border-0 outline-none border-gray-300 text-center rounded-[30px] py-4 px-7 min-w-[250px] bg-slate-300 cursor-default  text-white shadow text-[14px] lg:text-[16px]"
 					/>
 
 					}
 				</div>
 			</form>
 			{message ? (
-					<div className="mt-1 text-green-500">
+					<div className="lg:mt-1 mt-3 text-green-500 text-[14px] lg:text-[16px] text-center">
 					Add product berhasil, produk akan direview oleh admin
 					</div>
 				) : null}
 				{errorMessage ? (
-					<div className="text-red-500 mt-1">{errorMessage === "Network Error" ? "Pilih gambar lebih kecil": errorMessage}</div>
+					<div className="text-red-500 lg:mt-1 mt-3 text-[14px] lg:text-[16px] text-center">{errorMessage === "Network Error" ? "Pilih gambar lebih kecil": errorMessage}</div>
 				) : null}
 
 		</div>

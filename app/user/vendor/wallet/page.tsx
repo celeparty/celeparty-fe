@@ -37,7 +37,7 @@ export default function Wallet() {
 
 	return (
 		<div>
-			<Box className="mt-0">
+			<Box className="lg:mt-0 mt-2">
 				<div className="flex flex-wrap -mx-2">
 					<div className="relative pl-[50px]  w-full max-w-[500px]">
 						<Image
@@ -47,44 +47,44 @@ export default function Wallet() {
 							alt="wallet"
 							className="absolute left-0 top-0"
 						/>
-						<div className="relatve text-c-gray-text2">
-							<div className="flex items-center justify-between">
+						<div className="relatve text-c-gray-text2 w-[300px] lg:w-auto p-3 lg:p-0">
+							<div className="flex flex-row  lg:items-center justify-between">
 								<div className="relative">
-									<h5 className="text-black">Total Saldo Aktif</h5>
-									<div className="text-black font-bold text-2xl">Rp. 1.000.000</div>
+									<h5 className="text-black text-[14px] lg:text-[16px] lg:font-normal font-bold">Total Saldo Aktif</h5>
+									<div className="lg:text-black font-bold text-[14px] lg:text-2xl text-blue-600">Rp. 1.000.000</div>
 								</div>
-								<div className="bg-c-green text-white shadow-lg py-3 px-10 rounded-3xl cursor-pointer">
+								<div className="bg-c-green text-white shadow-lg lg:py-3 lg:px-10 px-6 py-2 lg:rounded-3xl rounded-xl cursor-pointer text-[14px] lg:text-[16px] max-w-[130px] flex justify-end font-bold lg:font-normal">
 									Tarik Saldo
 								</div>
 							</div>
 							<div className="mt-7">
-								<div className="flex justify-between">
-									<div>Saldo Penghasilan</div>
-									<div>Rp. 1.000.000</div>
+								<div className="flex lg:flex-row flex-col justify-between">
+									<div className="text-[14px] lg:text-[16px] font-bold text-black">Saldo Penghasilan</div>
+									<div className="text-[14px] lg:text-[16px] font-extrabold text-blue-600 lg:text-black">Rp. 1.000.000</div>
 								</div>
-								<div className="flex justify-between">
-									<div>Saldo Refund</div>
-									<div>Rp. 0</div>
+								<div className="flex lg:flex-row flex-col justify-between">
+									<div className="text-[14px] lg:text-[16px] font-bold text-black">Saldo Refund</div>
+									<div className="text-[14px] lg:text-[16px] font-extrabold text-blue-600 lg:text-black">Rp. 0</div>
 								</div>
 							</div>
 							<div className="mt-7 [&_label]:min-w-[220px]">
-								<h4 className="text-black text-[17px]">Informasi Rekening</h4>
+								<h4 className="text-black text-[14px] lg:text-[17px] font-extrabold lg:font-normal">Informasi Rekening</h4>
 								<div className="flex">
-									<label>Nama Bank</label>
-									<div>{dataContent?.bank_name}</div>
+									<label className="text-[14px] lg:text-[16px]">Nama Bank</label>
+									<div className="text-[14px] lg:text-[16px]">{dataContent?.bank_name}</div>
 								</div>
 								<div className="flex">
-									<label>Nomor Rekening</label>
-									<div>{dataContent?.bank_account_number}</div>
+									<label className="text-[14px] lg:text-[16px]">Nomor Rekening</label>
+									<div className="text-[14px] lg:text-[16px]">{dataContent?.bank_account_number}</div>
 								</div>
 								<div className="flex">
-									<label>Nama Pemilik Rekening</label>
-									<div>{dataContent?.bank_account_name}</div>
+									<label className="text-[14px] lg:text-[16px]">Nama Pemilik Rekening</label>
+									<div className="text-[14px] lg:text-[16px]">{dataContent?.bank_account_name}</div>
 								</div>
 							</div>
 							<Link
 								href="/"
-								className="border border-solid border-black py-3 px-10 rounded-xl mt-7 inline-block text-black hover:bg-c-gray hover:text-white"
+								className="border border-solid border-black text-[14px] lg:text-[16px] py-3 px-10 rounded-xl mt-7 inline-block text-black hover:bg-c-gray hover:text-white w-full lg:w-auto text-center lg:text-start font-extrabold lg:font-normal"
 							>
 								Edit Rekening
 							</Link>

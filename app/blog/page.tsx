@@ -6,7 +6,7 @@ import MainBlog from "./features/MainBlog";
 
 export default function BlogPage() {
 	return (
-		<div className="relative wrapper py-7">
+		<div className="relative wrapper lg:py-7 py-0">
 			<Box title="Artikel Terpopuler">
 				<Basecontent>
 					<MainBlog />

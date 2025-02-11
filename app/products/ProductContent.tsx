@@ -184,6 +184,7 @@ export function ProductContent() {
 									handleSort({ sortBy: "updatedAt" });
 									setActiveButton("btn1")
 									setShowOptions(false)
+									setStatusValue("Harga")
 								}}
 								className={`w-full lg:w-auto border-2 border-black border-solid lg:border-none ${ activeButton === "btn1" ? "bg-c-blue text-white" : null}`}
 							>
@@ -195,13 +196,15 @@ export function ProductContent() {
 									handleSort({ sortBy: "sold_count" });
 									setActiveButton("btn2")
 									setShowOptions(false)
+									setStatusValue("Harga")
 								}}
 								className={`w-full lg:w-auto  border-2 border-black border-solid lg:border-none ${ activeButton === "btn2" ? "bg-c-blue text-white" : null}`}
 							>
 								Terlaris
 							</Button>
-							<div className="relative">
-							<Button
+							<div className="relative flex items-center gap-4">
+								<div className="lg:order-1 order-2">
+								<Button
 								variant={`${getSort === "price" ? "default" : "outline"}`}
 								onClick={() => {
 									setActiveButton("btn3")
@@ -213,7 +216,7 @@ export function ProductContent() {
 							</Button>
 							{
 								showOptions && (
-									<div className="absolute mt-2 w-40 bg-white border border-gray-300 rounded shadow-lg z-50">
+									<div className="absolute -right-[2px] top-[70px] lg:top-12 lg:right-[432px] w-40 bg-white border border-gray-300 rounded shadow-lg z-50">
 										<div className="flex flex-col gap-2">
 											<Button 
 											onClick={() => {
@@ -237,22 +240,27 @@ export function ProductContent() {
 									</div>
 								)
 							}
-							</div>
-							<div className="flex items-center gap-2 w-full lg:w-auto">
-								Rp{" "}
-								<Input
-									className="border-2 border-black border-solid lg:border-none"
-									placeholder="Harga Minimum"
-									onChange={(e) => setPrice({ ...price, min: e.target.value })}
-								/>
-							</div>
-							<div className="flex items-center gap-2 w-full lg:w-auto">
-								Rp{" "}
-								<Input
-									className="border-2 border-black border-solid lg:border-none"
-									placeholder="Harga Maximum"
-									onChange={(e) => setPrice({ ...price, max: e.target.value })}
-								/>
+								</div>
+								<div className="flex lg:flex-row flex-col gap-2 lg:order-2 order-1">
+									<div className="flex items-center gap-2 w-full lg:w-auto">
+										Rp{" "}
+										<Input
+											className="border-2 border-black border-solid lg:border-none"
+											placeholder="Harga Minimum"
+											onChange={(e) => setPrice({ ...price, min: e.target.value })}
+											onClick={() => setStatusValue("Harga")}
+										/>
+									</div>
+									<div className="flex items-center gap-2 w-full lg:w-auto">
+										Rp{" "}
+											<Input
+											className="border-2 border-black border-solid lg:border-none"
+											placeholder="Harga Maximum"
+											onChange={(e) => setPrice({ ...price, max: e.target.value })}
+											onClick={() => setStatusValue("Harga")}
+										/>
+									</div>
+								</div>
 							</div>
 						</div>
 					</Box>
