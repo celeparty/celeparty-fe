@@ -47,7 +47,8 @@ export default function Products() {
 		if (status === "authenticated" && userMe?.user?.documentId ) {
 			getData();
 		}
-	}, [status, session, userMe]);	
+	}, [status, session, userMe]);
+
 	const dataContent = myData;
 
 	const deleteProducts = () => {
@@ -58,6 +59,8 @@ export default function Products() {
 		console.log("editProducts")
 	}
 
+	console.log(dataContent)
+	
 	return (
 		<div>
 			<Box className="mt-0">

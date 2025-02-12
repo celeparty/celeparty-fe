@@ -13,52 +13,54 @@ interface iItemProduct {
 	sold?: string;
 	location?: string | boolean;
 	url: string;
-	onEdit?: () => void;
-	onDelete?: () => void;
+	onEdit: () => void;
+	onDelete: () => void;
 	children?: ReactNode;
 }
 
 export default function ItemProduct(props: iItemProduct) {
 	return (
 		<div className="lg:p-2 lg:w-1/5 w-1/2 p-2  lg:shadow-gray-400 lg:shadow-none">
-			<Link href={props.url} className=" rounded-lg shadow-md flex flex-col justify-between h-full p-3">
-				<div>
-					{props.children}
-					<div className="relative fill-current w-full h-[100px] mx-auto text-center my-3">
-						<Image
-							src={props.image_url ? props.image_url : "/images/noimage.png"}
-							fill
-							alt="image"
-							style={{ objectFit: "cover" }}
-						/>
+			<section className=" rounded-lg shadow-md flex flex-col justify-between h-full p-3">
+				<Link href={props.url}>
+					<div>
+						{props.children}
+						<div className="relative fill-current w-full h-[100px] mx-auto text-center my-3">
+							<Image
+								src={props.image_url ? props.image_url : "/images/noimage.png"}
+								fill
+								alt="image"
+								style={{ objectFit: "cover" }}
+							/>
+						</div>
+						<h4 className="text-center text-sm">{props.title}</h4>
+						<div className="text-c-orange  text-center text-[12px] font-bold">{ props.price}</div>
 					</div>
-					<h4 className="text-center text-sm">{props.title}</h4>
-					<div className="text-c-orange  text-center text-[12px] font-bold">{ props.price}</div>
-				</div>
-				<div>
-					<div className="flex items-center gap-1 lg:text-[10px] text-[12px] font-medium mt-2 text-c-gray-text2">
-						{props.rate && props.sold ? (
-							<>
-								<FaStar className="text-[#FDD835]" />
-								{props.rate ? props.rate+" | " : null}  Terjual {props.sold}
-							</>
+					<div>
+						<div className="flex items-center gap-1 lg:text-[10px] text-[12px] font-medium mt-2 text-c-gray-text2">
+							{props.rate && props.sold ? (
+								<>
+									<FaStar className="text-[#FDD835]" />
+									{props.rate ? props.rate+" | " : null}  Terjual {props.sold}
+								</>
+							) : null}
+						</div>
+						{props.location ? (
+							<div className="flex gap-1 items-center text-[12px] lg:text-[10px] mt-2  text-c-gray-text2">
+								<FaLocationDot /> {props.location}
+							</div>
 						) : null}
 					</div>
-					{props.location ? (
-						<div className="flex gap-1 items-center text-[12px] lg:text-[10px] mt-2  text-c-gray-text2">
-							<FaLocationDot /> {props.location}
-						</div>
-					) : null}
+				</Link>
+				<div className="flex gap-1 justify-end py-2">
+					<button onClick={() => props.onEdit()}>
+						<Image src={"/images/edit.svg"} width={25} height={25} alt="Edit SVG..."/>
+					</button>
+					<button onClick={() => props.onDelete()}>
+						<Image src={"/images/trash.svg"} width={25} height={25} alt="Edit SVG..."/>
+					</button>
 				</div>
-			</Link>
-			<div className="flex gap-1 justify-end py-2">
-				<button onClick={() => props.onDelete}>
-					<Image src={"/images/edit.svg"} width={25} height={25} alt="Edit SVG..."/>
-				</button>
-				<button onClick={() => props.onEdit}>
-					<Image src={"/images/trash.svg"} width={25} height={25} alt="Edit SVG..."/>
-				</button>
-			</div>
+			</section>
 		</div>
 	);
 }
