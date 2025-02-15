@@ -8,6 +8,7 @@ import {FaRegTrashAlt} from "react-icons/fa"
 
 interface iItemProduct {
 	id?: number;
+	documentId?: string
 	title: string;
 	image_url: string;
 	price?: number | string;
@@ -15,8 +16,8 @@ interface iItemProduct {
 	sold?: string;
 	location?: string | boolean;
 	url: string;
-	onEdit?: () => void;
-	onDelete?: () => void;
+	onEdit?: (documentId: string) => void;
+	onDelete?: (documentId: string) => void;
 	children?: ReactNode;
 }
 
@@ -55,10 +56,10 @@ export default function ItemProduct(props: iItemProduct) {
 					</div>
 				</Link>
 				<div className="flex gap-1 justify-end py-2">
-					<button onClick={() => console.log("Click button1")}>
+					<button onClick={() => props.documentId && props.onEdit?.(props.documentId)}>
 						<FiEdit className="text-blue-500" size={18}/>
 					</button>
-					<button onClick={() => console.log("Click button2")}>
+					<button onClick={() => props.documentId && props.onDelete?.(props.documentId)}>
 						<FaRegTrashAlt className="text-red-500" size={18}/>
 					</button>
 				</div>

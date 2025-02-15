@@ -12,10 +12,30 @@ import { formatRupiah } from "@/lib/utils";
 import { useUser } from "@/lib/store/user";
 import axios from "axios";
 import { useLocalStorage } from "@/lib/hook/useLocalStorage";
+import ModalEdit from "@/components/product/ModalEdit";
 interface iItemStatus {
 	status: string;
 	value: number | string;
 	color: string;
+}
+
+interface iProducts {
+	id: number,
+        documentId: string,
+        title: string,
+        minimal_order: number,
+        minimal_order_date: string,
+        createdAt: string,
+        updatedAt: string,
+        publishedAt: string,
+        description: string,
+        main_price: number,
+        rate: number,
+        kabupaten: string,
+        region: string,
+        price_min: number,
+        price_max: number,
+        sold_count: number
 }
 
 function ItemStatus({ status, value, color }: iItemStatus): JSX.Element {
@@ -31,7 +51,9 @@ function ItemStatus({ status, value, color }: iItemStatus): JSX.Element {
 }
 export default function Products() {
 	const { data: session, status } = useSession();
-	const [myData, setMyData] = useState<any>([]);
+	const [myData, setMyData] = useState<iProducts[]>([]);
+	const [selectProduct, setSelectProduct] = useState<any>(null)
+	const [showModalEdit, setShowModalEdit] = useState<boolean>(false)
 	const {userMe}:any = useUser()
 	const getData =()=> {
 		axios.get(`${process.env.BASE_API}/api/products?populate=*&filters[users_permissions_user][documentId]=${userMe.user.documentId}`, {
@@ -51,24 +73,61 @@ export default function Products() {
 
 	const dataContent = myData;
 
-	const deleteProducts = () => {
-		console.log("deleteProducts")
+	const handleDeleteProduct = async (documentId: string): Promise<void> => {
+		try {
+			const response = await fetch(`${process.env.BASE_API}/api/products/${documentId}`, {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json"
+				}
+			})
+			if (!response.ok) throw new Error("Failed to delete products")
+			setMyData((prev: iProducts[]) => prev.filter((item) => item.documentId !== documentId))
+		} catch(error: unknown) {
+			console.log(error)
+		}
 	}
 
-	const editProducts = () => {
-		console.log("editProducts")
+	const handleEditProduct = (documentId: string): void => {
+		const product = myData.find((item) => item.documentId === documentId)
+		setSelectProduct(product)
+		setShowModalEdit(true)
 	}
 
-	console.log(dataContent)
-	
+	const handleUpdateProduct = async (updatedProduct: any): Promise<void> => {
+		try {
+		  const response = await fetch(`${process.env.BASE_API}/api/products/${updatedProduct.documentId}`, {
+			method: "PUT",
+			headers: {
+			  "Content-Type": "application/json",
+			},
+			body: JSON.stringify(updatedProduct),
+		  });
+		  if (!response.ok) throw new Error(`Gagal memperbarui produk: ${response.statusText}`);
+	  
+		  setMyData((prev) =>
+			prev.map((item) =>
+			  item.documentId === updatedProduct.documentId ? updatedProduct : item
+			)
+		  );
+		  alert("Produk berhasil diperbarui");
+		  setShowModalEdit(false);
+		} catch (error: unknown) {
+		  console.error("Error saat memperbarui produk:", error);
+		  alert("Terjadi kesalahan saat memperbarui produk.");
+		}
+	  };
+	  
+
 	return (
 		<div>
 			<Box className="mt-0">
 				<div className="flex flex-wrap -mx-2">
-					{dataContent.length >0 ? dataContent?.map((item: any) => {
+					{dataContent.length > 0 ? dataContent?.map((item: any) => {
 						return (
 								<ItemProduct
 									url={`/products/${item.documentId}`}
+									documentId={item.documentId}
 									key={item.id}
 									title={item.title}
 									image_url={item.main_image ? process.env.BASE_API + item.main_image.url : "/images/noimage.png"}
@@ -76,14 +135,22 @@ export default function Products() {
 									rate={item.rate ? `${item.rate}` : "1"}
 									sold={item.sold_count}
 									location={item.region ? item.region : null}
-									onDelete={deleteProducts}
-									onEdit={editProducts}
+									onDelete={handleDeleteProduct}
+									onEdit={handleEditProduct}
 								></ItemProduct>
 
 						);
 					}) : <div>Anda tidak memiliki produk</div>} 
 				</div>
 			</Box>
+
+			{showModalEdit && selectProduct && (
+      			<ModalEdit 
+        			product={selectProduct} 
+        			onClose={() => setShowModalEdit(false)} 
+        			onSave={handleUpdateProduct} 
+      			/>
+    			)}
 		</div>
 	);
 }
