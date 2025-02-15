@@ -12,6 +12,7 @@ import { formatRupiah } from "@/lib/utils";
 import { useUser } from "@/lib/store/user";
 import axios from "axios";
 import { useLocalStorage } from "@/lib/hook/useLocalStorage";
+import ModalEdit from "@/components/product/ModalEdit";
 interface iItemStatus {
 	status: string;
 	value: number | string;
@@ -37,6 +38,8 @@ function ItemStatus({ status, value, color }: iItemStatus): JSX.Element {
 export default function Products() {
 	const { data: session, status } = useSession();
 	const [myData, setMyData] = useState<any>([]);
+	const [selectProduct, setSelectProduct] = useState<any>(null)
+	const [showModalEdit, setShowModalEdit] = useState<boolean>(false)
 	const {userMe}:any = useUser()
 	const getData =()=> {
 		axios.get(`${process.env.BASE_API}/api/products?populate=*&filters[users_permissions_user][documentId]=${userMe.user.documentId}`, {
@@ -75,10 +78,11 @@ export default function Products() {
 		<div>
 			<Box className="mt-0">
 				<div className="flex flex-wrap -mx-2">
-					{dataContent.length >0 ? dataContent?.map((item: any) => {
+					{dataContent.length > 0 ? dataContent?.map((item: any) => {
 						return (
 								<ItemProduct
 									url={`/products/${item.documentId}`}
+									documentId={item.documentId}
 									key={item.id}
 									title={item.title}
 									image_url={item.main_image ? process.env.BASE_API + item.main_image.url : "/images/noimage.png"}
@@ -95,7 +99,7 @@ export default function Products() {
 				</div>
 			</Box>
 			<button onClick={() => handleUpdateProduct("lgr2f6g5lo8k1k8z7wglw406", {
-				title: "Ulang Tahun Riky",
+				title: "BOKIR NATION",
 				minimal_order: 10
 			})}>Edit Products</button>
 		</div>
