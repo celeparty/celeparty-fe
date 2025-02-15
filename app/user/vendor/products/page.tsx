@@ -18,6 +18,11 @@ interface iItemStatus {
 	color: string;
 }
 
+interface staticArgumentUpdateProduk {
+	title: string,
+	minimal_order: number
+}
+
 function ItemStatus({ status, value, color }: iItemStatus): JSX.Element {
 	return (
 		<div
@@ -51,16 +56,21 @@ export default function Products() {
 
 	const dataContent = myData;
 
-	const deleteProducts = () => {
-		console.log("deleteProducts")
-	}
-
-	const editProducts = () => {
-		console.log("editProducts")
-	}
-
-	console.log(dataContent)
-	
+	const handleUpdateProduct = async (productId: string, product: staticArgumentUpdateProduk) => {
+		try {
+		  const res = await axios.put(`${process.env.BASE_API}/api/products/${productId}`, {
+			data: product
+		  }, {
+			headers: {
+				Authorization: `Bearer ${process.env.KEY_API}`,
+				"Content-Type": "application/json"
+			}
+		  });
+		  console.log("Update Success:", res.data);
+		} catch (err) {
+		  console.error("Update Failed:", err);
+		}
+	  };
 	return (
 		<div>
 			<Box className="mt-0">
@@ -76,14 +86,18 @@ export default function Products() {
 									rate={item.rate ? `${item.rate}` : "1"}
 									sold={item.sold_count}
 									location={item.region ? item.region : null}
-									onDelete={deleteProducts}
-									onEdit={editProducts}
+									// onDelete={deleteProducts}
+									// onEdit={editProducts}
 								></ItemProduct>
 
 						);
 					}) : <div>Anda tidak memiliki produk</div>} 
 				</div>
 			</Box>
+			<button onClick={() => handleUpdateProduct("lgr2f6g5lo8k1k8z7wglw406", {
+				title: "Ulang Tahun Riky",
+				minimal_order: 10
+			})}>Edit Products</button>
 		</div>
 	);
 }
