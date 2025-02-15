@@ -3,6 +3,8 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { FaStar } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
+import {FiEdit} from "react-icons/fi"
+import {FaRegTrashAlt} from "react-icons/fa"
 
 interface iItemProduct {
 	id?: number;
@@ -13,8 +15,8 @@ interface iItemProduct {
 	sold?: string;
 	location?: string | boolean;
 	url: string;
-	onEdit: () => void;
-	onDelete: () => void;
+	onEdit?: () => void;
+	onDelete?: () => void;
 	children?: ReactNode;
 }
 
@@ -53,11 +55,11 @@ export default function ItemProduct(props: iItemProduct) {
 					</div>
 				</Link>
 				<div className="flex gap-1 justify-end py-2">
-					<button onClick={() => props.onEdit()}>
-						<Image src={"/images/edit.svg"} width={25} height={25} alt="Edit SVG..."/>
+					<button onClick={() => console.log("Click button1")}>
+						<FiEdit className="text-blue-500" size={18}/>
 					</button>
-					<button onClick={() => props.onDelete()}>
-						<Image src={"/images/trash.svg"} width={25} height={25} alt="Edit SVG..."/>
+					<button onClick={() => console.log("Click button2")}>
+						<FaRegTrashAlt className="text-red-500" size={18}/>
 					</button>
 				</div>
 			</section>
