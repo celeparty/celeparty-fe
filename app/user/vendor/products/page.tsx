@@ -40,7 +40,6 @@ export default function Products() {
 	const { data: session, status } = useSession();
 	const [myData, setMyData] = useState<any>([]);
 	const [selectProduct, setSelectProduct] = useState<any>(null)
-	const [showModalEdit, setShowModalEdit] = useState<boolean>(false)
 	const {userMe}:any = useUser()
 	const getData =()=> {
 		axios.get(`${process.env.BASE_API}/api/products?populate=*&filters[users_permissions_user][documentId]=${userMe.user.documentId}`, {
@@ -60,26 +59,26 @@ export default function Products() {
 
 	const dataContent = myData;
 
-	const handleEdit = (product: any) => {
-		setSelectProduct(product)
-		setShowModalEdit(true)
-	}
+	// const handleEdit = (product: any) => {
+	// 	setSelectProduct(product)
+	// 	setShowModalEdit(true)
+	// }
 
-	// const handleUpdateProduct = async (productId: string, product: staticArgumentUpdateProduk) => {
-	// 	try {
-	// 	  const res = await axios.put(`${process.env.BASE_API}/api/products/${productId}`, {
-	// 		data: product
-	// 	  }, {
-	// 		headers: {
-	// 			Authorization: `Bearer ${process.env.KEY_API}`,
-	// 			"Content-Type": "application/json"
-	// 		}
-	// 	  });
-	// 	  console.log("Update Success:", res.data);
-	// 	} catch (err) {
-	// 	  console.error("Update Failed:", err);
-	// 	}
-	//   };
+	const handleUpdateProduct = async (productId: string, updatedData: {title: string, price: number}) => {
+		try {
+		  const res = await axios.put(`${process.env.BASE_API}/api/products/${productId}`, {
+			data: updatedData
+		  }, {
+			headers: {
+				Authorization: `Bearer ${process.env.KEY_API}`,
+				"Content-Type": "application/json"
+			}
+		  });
+		  console.log("Update Success:", res.data);
+		} catch (err) {
+		  console.error("Update Failed:", err);
+		}
+	  };
 	return (
 		<div>
 			<Box className="mt-0">
@@ -96,7 +95,7 @@ export default function Products() {
 									rate={item.rate ? `${item.rate}` : "1"}
 									sold={item.sold_count}
 									location={item.region ? item.region : null}
-									onEdit={() => handleEdit(item)}
+									onEdit={() => handleUpdateProduct}
 									// onDelete={deleteProducts}
 									// onEdit={editProducts}
 								></ItemProduct>
@@ -108,9 +107,9 @@ export default function Products() {
 				title: "BOKIR NATION",
 				minimal_order: 10
 			})}>Edit Products</button> */}
-			{
+			{/* {
 				showModalEdit && selectProduct && ( <ModalEdit product={selectProduct} onClose={() => setShowModalEdit(false)}/> )
-			}
+			} */}
 		</div>
 	);
 }
