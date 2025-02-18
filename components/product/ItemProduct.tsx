@@ -16,8 +16,8 @@ interface iItemProduct {
 	sold?: string;
 	location?: string | boolean;
 	url: string;
-	onEdit?: (documentId: string) => void;
-	onDelete?: (documentId: string) => void;
+	onEdit: () => void;
+	// onDelete?: (documentId: string) => void;
 	children?: ReactNode;
 }
 
@@ -56,12 +56,12 @@ export default function ItemProduct(props: iItemProduct) {
 					</div>
 				</Link>
 				<div className="flex gap-1 justify-end py-2">
-					<button onClick={() => props.documentId && props.onEdit?.(props.documentId)}>
+					<button onClick={props.onEdit}>
 						<FiEdit className="text-blue-500" size={18}/>
 					</button>
-					<button onClick={() => props.documentId && props.onDelete?.(props.documentId)}>
+					{/* <button onClick={() => props.documentId && props.onDelete?.(props.documentId)}>
 						<FaRegTrashAlt className="text-red-500" size={18}/>
-					</button>
+					</button> */}
 				</div>
 			</section>
 		</div>

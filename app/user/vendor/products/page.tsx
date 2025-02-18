@@ -13,6 +13,7 @@ import { useUser } from "@/lib/store/user";
 import axios from "axios";
 import { useLocalStorage } from "@/lib/hook/useLocalStorage";
 import ModalEdit from "@/components/product/ModalEdit";
+
 interface iItemStatus {
 	status: string;
 	value: number | string;
@@ -59,21 +60,26 @@ export default function Products() {
 
 	const dataContent = myData;
 
-	const handleUpdateProduct = async (productId: string, product: staticArgumentUpdateProduk) => {
-		try {
-		  const res = await axios.put(`${process.env.BASE_API}/api/products/${productId}`, {
-			data: product
-		  }, {
-			headers: {
-				Authorization: `Bearer ${process.env.KEY_API}`,
-				"Content-Type": "application/json"
-			}
-		  });
-		  console.log("Update Success:", res.data);
-		} catch (err) {
-		  console.error("Update Failed:", err);
-		}
-	  };
+	const handleEdit = (product: any) => {
+		setSelectProduct(product)
+		setShowModalEdit(true)
+	}
+
+	// const handleUpdateProduct = async (productId: string, product: staticArgumentUpdateProduk) => {
+	// 	try {
+	// 	  const res = await axios.put(`${process.env.BASE_API}/api/products/${productId}`, {
+	// 		data: product
+	// 	  }, {
+	// 		headers: {
+	// 			Authorization: `Bearer ${process.env.KEY_API}`,
+	// 			"Content-Type": "application/json"
+	// 		}
+	// 	  });
+	// 	  console.log("Update Success:", res.data);
+	// 	} catch (err) {
+	// 	  console.error("Update Failed:", err);
+	// 	}
+	//   };
 	return (
 		<div>
 			<Box className="mt-0">
@@ -90,18 +96,21 @@ export default function Products() {
 									rate={item.rate ? `${item.rate}` : "1"}
 									sold={item.sold_count}
 									location={item.region ? item.region : null}
+									onEdit={() => handleEdit(item)}
 									// onDelete={deleteProducts}
 									// onEdit={editProducts}
 								></ItemProduct>
-
 						);
 					}) : <div>Anda tidak memiliki produk</div>} 
 				</div>
 			</Box>
-			<button onClick={() => handleUpdateProduct("lgr2f6g5lo8k1k8z7wglw406", {
+			{/* <button onClick={() => handleUpdateProduct("lgr2f6g5lo8k1k8z7wglw406", {
 				title: "BOKIR NATION",
 				minimal_order: 10
-			})}>Edit Products</button>
+			})}>Edit Products</button> */}
+			{
+				showModalEdit && selectProduct && ( <ModalEdit product={selectProduct} onClose={() => setShowModalEdit(false)}/> )
+			}
 		</div>
 	);
 }
