@@ -14,6 +14,7 @@ import axios from "axios";
 import { useLocalStorage } from "@/lib/hook/useLocalStorage";
 import {FiEdit} from "react-icons/fi"
 import {FaRegTrashAlt} from "react-icons/fa"
+import { MdCancel } from "react-icons/md";
 
 interface iItemStatus {
 	status: string;
@@ -38,8 +39,8 @@ function ItemStatus({ status, value, color }: iItemStatus): JSX.Element {
 	);
 }
 export default function Products() {
-	const [title, setTitle] = useState(null)
-	const [price, setPrice] = useState(null)
+	const [title, setTitle] = useState<string>("")
+	const [price, setPrice] = useState<number>()
 	const [showModal, setShowModal] = useState(false)
 	const { data: session, status } = useSession();
 	const [myData, setMyData] = useState<any>([]);
@@ -78,6 +79,15 @@ export default function Products() {
 		  console.error("Update Failed:", err);
 		}
 	  };
+
+	// console.log(title)
+
+	const handleEdit = async () => {
+		if(selectProduct) {
+			await handleUpdateProduct(selectProduct.documentId, {title})
+			setShowModal(false)
+		}
+	}
 	return (
 		<div>
 			<Box className="mt-0">
@@ -86,7 +96,6 @@ export default function Products() {
 						return (
 								<ItemProduct
 									url={`/products/${item.documentId}`}
-									documentId={item.documentId}
 									key={item.id}
 									title={item.title}
 									image_url={item.main_image ? process.env.BASE_API + item.main_image.url : "/images/noimage.png"}
@@ -94,16 +103,11 @@ export default function Products() {
 									rate={item.rate ? `${item.rate}` : "1"}
 									sold={item.sold_count}
 									location={item.region ? item.region : null}
-									onEdit={() => handleUpdateProduct}
-									// onDelete={deleteProducts}
-									// onEdit={editProducts}
 								>
 									<div className="flex gap-1 justify-end py-2">
 										<button onClick={() => {
-											handleUpdateProduct( item.documentId , {
-												title: title,
-												minimal_order: price
-											})
+											setSelectProduct(item)
+											setTitle(item.title)
 											setShowModal(true)
 										}}>
 											<FiEdit className="text-blue-500" size={18}/>
@@ -120,12 +124,26 @@ export default function Products() {
 			</Box>
 
 			<div className="flex gap-2">
-				<input type="text" className="border-2 border-black rounded-lg"/>
-				<input type="number" className="border-2 border-black rounded-lg" min={1} max={100000}/>
 			</div>
 
 			{
-				showModal && <div>I AM SHOW</div>
+				showModal && (
+					<div className="w-[330px]">
+						<div className="flex justify-between mb-4">
+							<h1>Edit product</h1>
+							<button onClick={() => setShowModal(false)}>
+								<MdCancel size={20}/>
+							</button>
+						</div>
+						<form onSubmit={(e) => {e.preventDefault(); handleEdit()}}>
+							<div className="flex gap-2 items-center">
+								<label htmlFor="title">Title product</label>
+								<input id="title" type="text" className="border border-black rounded-lg" value={title} onChange={(e) => setTitle(e.target.value)}/>
+							</div>
+							<button>Submit</button>
+						</form>
+					</div>
+				)
 			}
 		</div>
 	);

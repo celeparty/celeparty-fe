@@ -9,7 +9,6 @@ import { FaLocationDot } from "react-icons/fa6";
 
 interface iItemProduct {
 	id?: number;
-	documentId: string
 	title: string;
 	image_url: string;
 	price: number | string;
@@ -17,27 +16,11 @@ interface iItemProduct {
 	sold?: string;
 	location?: string | boolean;
 	url: string;
-	onEdit: (id: string, updatedData: {title: string, price: number}) => void;
-	// onDelete?: (documentId: string) => void;
 	children?: ReactNode;
 }
 
 
 export default function ItemProduct(props: iItemProduct) {
-	const [showModalEdit, setShowModalEdit] = useState<boolean>(false)
-	const [title, setTitle] = useState<string>(props.title)
-	const [price, setPrice] = useState<number>(
-		typeof props.price === "string" 
-		? parseFloat(props.price.replace(/[^0-9.]/g, "")) || 0 
-		: props.price
-	)
-
-
-	const handleSubmit = () => {
-		props.onEdit(props.documentId, {title, price: Number(price)})
-		setShowModalEdit(false)
-	}
-
 	return (
 		<div className="lg:p-2 lg:w-1/5 w-1/2 p-2  lg:shadow-gray-400 lg:shadow-none">
 			<section className=" rounded-lg shadow-md flex flex-col justify-between h-full p-3">
