@@ -42,6 +42,7 @@ export default function Products() {
 	const [price, setPrice] = useState(null)
 	const { data: session, status } = useSession();
 	const [myData, setMyData] = useState<any>([]);
+	const [selectProduct, setSelectProduct] = useState<any>(null)
 	const {userMe}:any = useUser()
 	const getData =()=> {
 		axios.get(`${process.env.BASE_API}/api/products?populate=*&filters[users_permissions_user][documentId]=${userMe.user.documentId}`, {
@@ -80,10 +81,11 @@ export default function Products() {
 		<div>
 			<Box className="mt-0">
 				<div className="flex flex-wrap -mx-2">
-					{dataContent.length >0 ? dataContent?.map((item: any) => {
+					{dataContent.length > 0 ? dataContent?.map((item: any) => {
 						return (
 								<ItemProduct
 									url={`/products/${item.documentId}`}
+									documentId={item.documentId}
 									key={item.id}
 									title={item.title}
 									image_url={item.main_image ? process.env.BASE_API + item.main_image.url : "/images/noimage.png"}
@@ -91,6 +93,7 @@ export default function Products() {
 									rate={item.rate ? `${item.rate}` : "1"}
 									sold={item.sold_count}
 									location={item.region ? item.region : null}
+									onEdit={() => handleUpdateProduct}
 									// onDelete={deleteProducts}
 									// onEdit={editProducts}
 								>
