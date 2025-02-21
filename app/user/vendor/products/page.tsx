@@ -12,6 +12,9 @@ import { formatRupiah } from "@/lib/utils";
 import { useUser } from "@/lib/store/user";
 import axios from "axios";
 import { useLocalStorage } from "@/lib/hook/useLocalStorage";
+import {FiEdit} from "react-icons/fi"
+import {FaRegTrashAlt} from "react-icons/fa"
+
 interface iItemStatus {
 	status: string;
 	value: number | string;
@@ -35,6 +38,8 @@ function ItemStatus({ status, value, color }: iItemStatus): JSX.Element {
 	);
 }
 export default function Products() {
+	const [title, setTitle] = useState(null)
+	const [price, setPrice] = useState(null)
 	const { data: session, status } = useSession();
 	const [myData, setMyData] = useState<any>([]);
 	const {userMe}:any = useUser()
@@ -56,10 +61,10 @@ export default function Products() {
 
 	const dataContent = myData;
 
-	const handleUpdateProduct = async (productId: string, product: staticArgumentUpdateProduk) => {
+	const handleUpdateProduct = async (productId: any, productUpdated: any) => {
 		try {
 		  const res = await axios.put(`${process.env.BASE_API}/api/products/${productId}`, {
-			data: product
+			data: productUpdated
 		  }, {
 			headers: {
 				Authorization: `Bearer ${process.env.KEY_API}`,
@@ -88,16 +93,29 @@ export default function Products() {
 									location={item.region ? item.region : null}
 									// onDelete={deleteProducts}
 									// onEdit={editProducts}
-								></ItemProduct>
+								>
+									<div className="flex gap-1 justify-end py-2">
+										<button onClick={() => handleUpdateProduct( item.documentId , {
+											title: title,
+											minimal_order: price
+										})}>
+											<FiEdit className="text-blue-500" size={18}/>
+										</button>
+										{/* <button onClick={() => console.log("Click button2")}>
+											<FaRegTrashAlt className="text-red-500" size={18}/>
+										</button> */}
+									</div>
+								</ItemProduct>	
 
 						);
 					}) : <div>Anda tidak memiliki produk</div>} 
 				</div>
 			</Box>
-			<button onClick={() => handleUpdateProduct("lgr2f6g5lo8k1k8z7wglw406", {
-				title: "Ulang Tahun Riky",
-				minimal_order: 10
-			})}>Edit Products</button>
+
+			<div className="flex gap-2">
+				<input type="text" className="border-2 border-black rounded-lg"/>
+				<input type="number" className="border-2 border-black rounded-lg" min={1} max={100000}/>
+			</div>
 		</div>
 	);
 }

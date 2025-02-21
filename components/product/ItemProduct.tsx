@@ -3,8 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { FaStar } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
-import {FiEdit} from "react-icons/fi"
-import {FaRegTrashAlt} from "react-icons/fa"
+
 
 interface iItemProduct {
 	id?: number;
@@ -26,7 +25,6 @@ export default function ItemProduct(props: iItemProduct) {
 			<section className=" rounded-lg shadow-md flex flex-col justify-between h-full p-3">
 				<Link href={props.url}>
 					<div>
-						{props.children}
 						<div className="relative fill-current w-full h-[100px] mx-auto text-center my-3">
 							<Image
 								src={props.image_url ? props.image_url : "/images/noimage.png"}
@@ -54,15 +52,8 @@ export default function ItemProduct(props: iItemProduct) {
 						) : null}
 					</div>
 				</Link>
-				<div className="flex gap-1 justify-end py-2">
-					<button onClick={() => console.log("Click button1")}>
-						<FiEdit className="text-blue-500" size={18}/>
-					</button>
-					<button onClick={() => console.log("Click button2")}>
-						<FaRegTrashAlt className="text-red-500" size={18}/>
-					</button>
-				</div>
 			</section>
+			{props.children}
 		</div>
 	);
 }
