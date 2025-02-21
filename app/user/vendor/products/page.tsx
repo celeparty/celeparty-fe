@@ -115,7 +115,6 @@ export default function Products() {
 											setSelectProduct(item)
 											setTitle(item.title)
 											setPrice(item.main_price)
-											console.log(price)
 											setShowModal(true)
 										}}>
 											<FiEdit className="text-blue-500" size={18}/>
