@@ -42,7 +42,7 @@ function ItemStatus({ status, value, color }: iItemStatus): JSX.Element {
 export default function Products() {
 	const router = useRouter()
 	const [title, setTitle] = useState<string>("")
-	const [price, setPrice] = useState<number>(0)
+	const [price, setPrice] = useState<string>()
 	const [showModal, setShowModal] = useState(false)
 	const { data: session, status } = useSession();
 	const [myData, setMyData] = useState<any>([]);
@@ -87,7 +87,10 @@ export default function Products() {
 
 	const handleEdit = async () => {
 		if(selectProduct) {
-			await handleUpdateProduct(selectProduct.documentId, {title})
+			await handleUpdateProduct(selectProduct.documentId, {
+				title: title,
+				main_price: price
+			})
 			setShowModal(false)
 		}
 	}
@@ -144,6 +147,10 @@ export default function Products() {
 							<div className="flex gap-2 items-center">
 								<label htmlFor="title">Title product</label>
 								<input id="title" type="text" className="border border-black rounded-lg" value={title} onChange={(e) => setTitle(e.target.value)}/>
+							</div>
+							<div>
+								<label htmlFor="price">Harga</label>
+								<input type="number" name="price" id="price" value={price} onChange={(e) => setPrice(e.target.value)}/>
 							</div>
 							<button>Submit</button>
 						</form>
