@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import _ from "lodash";
 import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { formatRupiah } from "@/lib/utils";
 import { useUser } from "@/lib/store/user";
 import axios from "axios";
@@ -39,8 +40,9 @@ function ItemStatus({ status, value, color }: iItemStatus): JSX.Element {
 	);
 }
 export default function Products() {
+	const router = useRouter()
 	const [title, setTitle] = useState<string>("")
-	const [price, setPrice] = useState<number>()
+	const [price, setPrice] = useState<number>(0)
 	const [showModal, setShowModal] = useState(false)
 	const { data: session, status } = useSession();
 	const [myData, setMyData] = useState<any>([]);
@@ -75,11 +77,12 @@ export default function Products() {
 			}
 		  });
 		  console.log("Update Success:", res.data);
+		  router.refresh()
 		} catch (err) {
-		  console.error("Update Failed:", err);
+			console.error("Update Failed:", err);
 		}
-	  };
-
+	};
+	
 	// console.log(title)
 
 	const handleEdit = async () => {
@@ -108,6 +111,8 @@ export default function Products() {
 										<button onClick={() => {
 											setSelectProduct(item)
 											setTitle(item.title)
+											setPrice(item.main_price)
+											console.log(price)
 											setShowModal(true)
 										}}>
 											<FiEdit className="text-blue-500" size={18}/>
