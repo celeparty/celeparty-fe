@@ -40,6 +40,7 @@ function ItemStatus({ status, value, color }: iItemStatus): JSX.Element {
 export default function Products() {
 	const [title, setTitle] = useState(null)
 	const [price, setPrice] = useState(null)
+	const [showModal, setShowModal] = useState(false)
 	const { data: session, status } = useSession();
 	const [myData, setMyData] = useState<any>([]);
 	const [selectProduct, setSelectProduct] = useState<any>(null)
@@ -98,10 +99,13 @@ export default function Products() {
 									// onEdit={editProducts}
 								>
 									<div className="flex gap-1 justify-end py-2">
-										<button onClick={() => handleUpdateProduct( item.documentId , {
-											title: title,
-											minimal_order: price
-										})}>
+										<button onClick={() => {
+											handleUpdateProduct( item.documentId , {
+												title: title,
+												minimal_order: price
+											})
+											setShowModal(true)
+										}}>
 											<FiEdit className="text-blue-500" size={18}/>
 										</button>
 										{/* <button onClick={() => console.log("Click button2")}>
@@ -119,6 +123,10 @@ export default function Products() {
 				<input type="text" className="border-2 border-black rounded-lg"/>
 				<input type="number" className="border-2 border-black rounded-lg" min={1} max={100000}/>
 			</div>
+
+			{
+				showModal && <div>I AM SHOW</div>
+			}
 		</div>
 	);
 }
