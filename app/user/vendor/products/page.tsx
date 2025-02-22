@@ -16,7 +16,7 @@ import { useLocalStorage } from "@/lib/hook/useLocalStorage";
 import {FiEdit} from "react-icons/fi"
 import {FaRegTrashAlt} from "react-icons/fa"
 import { MdCancel } from "react-icons/md";
-import toast, {Toaster} from "react-hot-toast";
+import toast from "react-hot-toast";
 
 interface iItemStatus {
 	status: string;
@@ -82,6 +82,23 @@ export default function Products() {
 			console.error("Update Failed:", err);
 		}
 	};
+	
+	const handleDeleteProduct = async (documentId: string) => {
+		const isConfirmed = window.confirm("Apakah Anda yakin ingin menghapus produk ini?");
+		if (!isConfirmed) return;
+		
+		try {
+		  const res = await axios.put(`${process.env.BASE_API}/api/products/${documentId}`, {
+			headers: {
+				Authorization: `Bearer ${process.env.KEY_API}`
+			}
+		  });
+		  setMyData((prevData: any) => prevData.filter((item: any) => item.documentId !== documentId))
+		  toast.success('The product has been successfully deleted')
+		} catch (err) {
+			console.error("Update Failed:", err);
+		}
+	};
 
 	const handleEdit = async () => {
 		if(selectProduct) {
@@ -95,7 +112,6 @@ export default function Products() {
 	}
 	return (
 		<div>
-			<Toaster/>
 			<Box className="mt-0">
 				<div className="flex flex-wrap -mx-2">
 					{dataContent.length > 0 ? dataContent?.map((item: any) => {
@@ -119,9 +135,9 @@ export default function Products() {
 										}}>
 											<FiEdit className="text-blue-500" size={18}/>
 										</button>
-										{/* <button onClick={() => console.log("Click button2")}>
+										<button onClick={() => handleDeleteProduct(item.documentId)}>
 											<FaRegTrashAlt className="text-red-500" size={18}/>
-										</button> */}
+										</button>
 									</div>
 								</ItemProduct>	
 
@@ -155,7 +171,7 @@ export default function Products() {
 									<label htmlFor="price" className="text-white font-medium">Harga</label>
 									<input type="text" name="price" id="price" className="border border-white rounded-lg px-2 py-2 bg-[#151212] text-white" value={mainPrice} onChange={(e) => setMainPrice(Number(e.target.value))}/>
 								</div>
-								<button className="border-2 border-white rounded-lg py-2 w-full mt-8 text-white font-extrabold">Submit</button>
+								<button className="border-2 border-white rounded-lg py-2 w-full mt-8 text-white font-extrabold hover:bg-yellow-300 hover:text-black">Submit</button>
 							</form>
 						</div>
 					</div>
