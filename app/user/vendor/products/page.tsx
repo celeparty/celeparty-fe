@@ -141,7 +141,7 @@ export default function Products() {
 										<MdCancel size={25} className="text-white"/>
 									</button>
 								</div>
-									<p className="text-white font-medium">Make changes to your product here. Click save when you're done.</p>
+									<p className="text-white font-medium leading-[18px]">Make changes to your product here. Click save when you're done.</p>
 							</div>
 							<form onSubmit={(e) => {e.preventDefault(); handleEdit()}}>
 								<div className="flex justify-between items-center mb-2">
