@@ -84,9 +84,9 @@ export default function Products() {
 	};
 	
 	const handleDeleteProduct = async (documentId: string) => {
-		const isConfirmed = window.confirm("Apakah Anda yakin ingin menghapus produk ini?");
+		const isConfirmed = window.confirm("Are you sure you want to remove this product?");
 		if (!isConfirmed) return;
-		
+
 		try {
 		  const res = await axios.put(`${process.env.BASE_API}/api/products/${documentId}`, {
 			headers: {
