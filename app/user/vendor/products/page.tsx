@@ -138,7 +138,7 @@ export default function Products() {
 					<div className="w-full h-full relative">
 						<div className="w-[500px] bg-[#151212] absolute -top-72 left-60 p-4 border rounded-lg">
 							<div className="mb-6">
-								<div className="flex justify-between mb-2">
+								<div className="flex justify-between mb-4">
 									<h1 className="text-white font-semibold">Edit product</h1>
 									<button onClick={() => setShowModal(false)}>
 										<MdCancel size={25} className="text-white"/>
