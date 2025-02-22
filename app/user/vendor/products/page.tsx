@@ -16,6 +16,7 @@ import { useLocalStorage } from "@/lib/hook/useLocalStorage";
 import {FiEdit} from "react-icons/fi"
 import {FaRegTrashAlt} from "react-icons/fa"
 import { MdCancel } from "react-icons/md";
+import toast, {Toaster} from "react-hot-toast";
 
 interface iItemStatus {
 	status: string;
@@ -89,10 +90,12 @@ export default function Products() {
 				main_price: mainPrice
 			})
 			setShowModal(false)
+			toast.success('Product updated successfully!')
 		}
 	}
 	return (
 		<div>
+			<Toaster/>
 			<Box className="mt-0">
 				<div className="flex flex-wrap -mx-2">
 					{dataContent.length > 0 ? dataContent?.map((item: any) => {
@@ -141,7 +144,7 @@ export default function Products() {
 										<MdCancel size={25} className="text-white"/>
 									</button>
 								</div>
-									<p className="text-white font-medium leading-[18px]">Make changes to your product here. Click save when you're done.</p>
+									<p className="text-[#eae4e4] font-medium leading-[18px]">Make changes to your product here. Click save when you're done.</p>
 							</div>
 							<form onSubmit={(e) => {e.preventDefault(); handleEdit()}}>
 								<div className="flex justify-between items-center mb-2">
