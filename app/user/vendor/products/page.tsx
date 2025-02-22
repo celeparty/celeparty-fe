@@ -23,9 +23,9 @@ interface iItemStatus {
 	color: string;
 }
 
-interface staticArgumentUpdateProduk {
+interface iUpdateProduct {
 	title: string,
-	minimal_order: number
+	main_price: number
 }
 
 function ItemStatus({ status, value, color }: iItemStatus): JSX.Element {
@@ -42,8 +42,8 @@ function ItemStatus({ status, value, color }: iItemStatus): JSX.Element {
 export default function Products() {
 	const router = useRouter()
 	const [title, setTitle] = useState<string>("")
-	const [price, setPrice] = useState<string>()
-	const [showModal, setShowModal] = useState(false)
+	const [mainPrice, setMainPrice] = useState<number>(0)
+	const [showModal, setShowModal] = useState<boolean>(false)
 	const { data: session, status } = useSession();
 	const [myData, setMyData] = useState<any>([]);
 	const [selectProduct, setSelectProduct] = useState<any>(null)
@@ -66,9 +66,9 @@ export default function Products() {
 
 	const dataContent = myData;
 
-	const handleUpdateProduct = async (productId: any, productUpdated: any) => {
+	const handleUpdateProduct = async (documentId: string, productUpdated: iUpdateProduct) => {
 		try {
-		  const res = await axios.put(`${process.env.BASE_API}/api/products/${productId}`, {
+		  const res = await axios.put(`${process.env.BASE_API}/api/products/${documentId}`, {
 			data: productUpdated
 		  }, {
 			headers: {
@@ -76,20 +76,17 @@ export default function Products() {
 				"Content-Type": "application/json"
 			}
 		  });
-		  console.log("Update Success:", res.data);
-		  router.refresh()
+		  setMyData((prevData: any) => prevData.map((item: any) => item.documentId === documentId ? {...item, ...productUpdated} : item) )
 		} catch (err) {
 			console.error("Update Failed:", err);
 		}
 	};
-	
-	// console.log(title)
 
 	const handleEdit = async () => {
 		if(selectProduct) {
 			await handleUpdateProduct(selectProduct.documentId, {
 				title: title,
-				main_price: price
+				main_price: mainPrice
 			})
 			setShowModal(false)
 		}
@@ -114,7 +111,7 @@ export default function Products() {
 										<button onClick={() => {
 											setSelectProduct(item)
 											setTitle(item.title)
-											setPrice(item.main_price)
+											setMainPrice(item.main_price)
 											setShowModal(true)
 										}}>
 											<FiEdit className="text-blue-500" size={18}/>
@@ -135,24 +132,29 @@ export default function Products() {
 
 			{
 				showModal && (
-					<div className="w-[330px]">
-						<div className="flex justify-between mb-4">
-							<h1>Edit product</h1>
-							<button onClick={() => setShowModal(false)}>
-								<MdCancel size={20}/>
-							</button>
+					<div className="w-full h-full relative">
+						<div className="w-[500px] bg-[#151212] absolute -top-72 left-60 p-4 border rounded-lg">
+							<div className="mb-6">
+								<div className="flex justify-between mb-2">
+									<h1 className="text-white font-semibold">Edit product</h1>
+									<button onClick={() => setShowModal(false)}>
+										<MdCancel size={25} className="text-white"/>
+									</button>
+								</div>
+									<p className="text-white font-medium">Make changes to your product here. Click save when you're done.</p>
+							</div>
+							<form onSubmit={(e) => {e.preventDefault(); handleEdit()}}>
+								<div className="flex justify-between items-center mb-2">
+									<label htmlFor="title" className="text-white font-medium">Title product</label>
+									<input id="title" type="text" className="border border-white rounded-lg px-2 py-2 bg-[#151212] text-white" value={title} onChange={(e) => setTitle(e.target.value)}/>
+								</div>
+								<div className="flex justify-between items-center mb-2">
+									<label htmlFor="price" className="text-white font-medium">Harga</label>
+									<input type="text" name="price" id="price" className="border border-white rounded-lg px-2 py-2 bg-[#151212] text-white" value={mainPrice} onChange={(e) => setMainPrice(Number(e.target.value))}/>
+								</div>
+								<button className="border-2 border-white rounded-lg py-2 w-full mt-8 text-white font-extrabold">Submit</button>
+							</form>
 						</div>
-						<form onSubmit={(e) => {e.preventDefault(); handleEdit()}}>
-							<div className="flex gap-2 items-center">
-								<label htmlFor="title">Title product</label>
-								<input id="title" type="text" className="border border-black rounded-lg" value={title} onChange={(e) => setTitle(e.target.value)}/>
-							</div>
-							<div>
-								<label htmlFor="price">Harga</label>
-								<input type="number" name="price" id="price" value={price} onChange={(e) => setPrice(e.target.value)}/>
-							</div>
-							<button>Submit</button>
-						</form>
 					</div>
 				)
 			}
