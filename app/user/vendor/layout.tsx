@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import {Toaster} from "react-hot-toast"
 
 interface iItemMenu {
 	title: string;
@@ -46,6 +47,7 @@ export default function DashboardLayout({
 
 	return (
 		<div className="relative wrapper-main py-7">
+			<Toaster/>
 			<Basecontent>
 				<div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7 gap-2 mx-3 lg:mx-0">
 					<Box className="bg-c-blue text-white lg:max-w-[280px] w-full mt-0">
