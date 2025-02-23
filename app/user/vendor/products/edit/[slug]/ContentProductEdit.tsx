@@ -2,12 +2,18 @@
 import { axiosData } from "@/lib/services";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import toast from "react-hot-toast";
 
 export default function ContentProductEdit(props: any) {
     const [title, setTitle] = useState<string>("")
-    const [id, setId] = useState<number>(0)
+    const [rate, setRate] = useState<number>(0)
+    const [main_price, setMainPrice] = useState<number>(0)
+    const [minimal_order, setMinimalOrder] = useState<number>(0)
+    const [price_max, setPriceMax] = useState<number>(0)
+    const [price_min, setPriceMin] = useState<number>(0)
+    const router = useRouter()
 
 
     const getQuery = async () => {
@@ -23,7 +29,11 @@ export default function ContentProductEdit(props: any) {
     useEffect(() => {
         if(dataContent) {
             setTitle(dataContent.title)
-            setId(dataContent.id)
+            setRate(dataContent.rate)
+            setMainPrice(dataContent.main_price)
+            setMinimalOrder(dataContent.minimal_order)
+            setPriceMax(dataContent.price_max)
+            setPriceMin(dataContent.price_min)
         }
     }, [dataContent])
 
@@ -31,7 +41,7 @@ export default function ContentProductEdit(props: any) {
         e.preventDefault()
 
         try {
-            const updatedData = { title }
+            const updatedData = { title, rate, main_price, minimal_order, price_min, price_max }
 
             console.log(updatedData)
 
@@ -41,6 +51,7 @@ export default function ContentProductEdit(props: any) {
 
             console.log("Update Success:", res);
             toast.success("Title updated successfully!");
+            router.push("/user/vendor/products")
         } catch (error) {
             console.error("Update Failed:", error);
             toast.error("Update failed.");
@@ -66,6 +77,76 @@ export default function ContentProductEdit(props: any) {
             type="text"
             className="w-full p-2 border rounded"
             placeholder="Masukkan title produk"
+          />
+        </div>
+        <div>
+          <label htmlFor="title" className="block font-medium mb-2">
+            Rate Product
+          </label>
+          <input
+            value={rate}
+            onChange={(e) => setRate(Number(e.target.value))}
+            id="rate"
+            name="rate"
+            type="text"
+            className="w-full p-2 border rounded"
+            placeholder="Masukkan rate produk"
+          />
+        </div>
+        <div>
+          <label htmlFor="title" className="block font-medium mb-2">
+            Harga Product
+          </label>
+          <input
+            value={main_price}
+            onChange={(e) => setMainPrice(Number(e.target.value))}
+            id="harga utama"
+            name="harga utama"
+            type="text"
+            className="w-full p-2 border rounded"
+            placeholder="Masukkan harga utama produk"
+          />
+        </div>
+        <div>
+          <label htmlFor="title" className="block font-medium mb-2">
+            Minimal Order
+          </label>
+          <input
+            value={minimal_order}
+            onChange={(e) => setMinimalOrder(Number(e.target.value))}
+            id="minimal order"
+            name="minimal order"
+            type="text"
+            className="w-full p-2 border rounded"
+            placeholder="Masukkan minimal order produk"
+          />
+        </div>
+        <div>
+          <label htmlFor="title" className="block font-medium mb-2">
+            Harga Minimal
+          </label>
+          <input
+            value={price_min}
+            onChange={(e) => setPriceMin(Number(e.target.value))}
+            id="minimal order"
+            name="minimal order"
+            type="text"
+            className="w-full p-2 border rounded"
+            placeholder="Masukkan minimal order produk"
+          />
+        </div>
+        <div>
+          <label htmlFor="title" className="block font-medium mb-2">
+            Harga Maksimal
+          </label>
+          <input
+            value={price_max}
+            onChange={(e) => setPriceMax(Number(e.target.value))}
+            id="minimal order"
+            name="minimal order"
+            type="text"
+            className="w-full p-2 border rounded"
+            placeholder="Masukkan minimal order produk"
           />
         </div>
         <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">
