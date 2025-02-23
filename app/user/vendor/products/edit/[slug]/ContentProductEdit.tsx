@@ -13,6 +13,8 @@ export default function ContentProductEdit(props: any) {
     const [minimal_order, setMinimalOrder] = useState<number>(0)
     const [price_max, setPriceMax] = useState<number>(0)
     const [price_min, setPriceMin] = useState<number>(0)
+    const [kabupaten, setKabupaten] = useState<string>("")
+    const [description, setDescription] = useState<string>("")
     const router = useRouter()
 
 
@@ -34,6 +36,8 @@ export default function ContentProductEdit(props: any) {
             setMinimalOrder(dataContent.minimal_order)
             setPriceMax(dataContent.price_max)
             setPriceMin(dataContent.price_min)
+            setKabupaten(dataContent.kabupaten)
+            setDescription(dataContent.description)
         }
     }, [dataContent])
 
@@ -41,7 +45,7 @@ export default function ContentProductEdit(props: any) {
         e.preventDefault()
 
         try {
-            const updatedData = { title, rate, main_price, minimal_order, price_min, price_max }
+            const updatedData = { title, rate, main_price, minimal_order, price_min, price_max, kabupaten, description }
 
             console.log(updatedData)
 
@@ -142,6 +146,34 @@ export default function ContentProductEdit(props: any) {
           <input
             value={price_max}
             onChange={(e) => setPriceMax(Number(e.target.value))}
+            id="minimal order"
+            name="minimal order"
+            type="text"
+            className="w-full p-2 border rounded"
+            placeholder="Masukkan minimal order produk"
+          />
+        </div>
+        <div>
+          <label htmlFor="title" className="block font-medium mb-2">
+            Kabupaten
+          </label>
+          <input
+            value={kabupaten}
+            onChange={(e) => setKabupaten(e.target.value)}
+            id="minimal order"
+            name="minimal order"
+            type="text"
+            className="w-full p-2 border rounded"
+            placeholder="Masukkan minimal order produk"
+          />
+        </div>
+        <div>
+          <label htmlFor="title" className="block font-medium mb-2">
+            Deskripsi
+          </label>
+          <input
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
             id="minimal order"
             name="minimal order"
             type="text"
