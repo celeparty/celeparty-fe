@@ -17,6 +17,7 @@ import {FiEdit} from "react-icons/fi"
 import {FaRegTrashAlt} from "react-icons/fa"
 import { MdCancel } from "react-icons/md";
 import toast from "react-hot-toast";
+import Link from "next/link";
 
 interface iItemStatus {
 	status: string;
@@ -127,14 +128,16 @@ export default function Products() {
 									location={item.region ? item.region : null}
 								>
 									<div className="flex gap-1 justify-end py-2">
-										<button onClick={() => {
-											setSelectProduct(item)
-											setTitle(item.title)
-											setMainPrice(item.main_price)
-											setShowModal(true)
-										}}>
-											<FiEdit className="text-blue-500" size={18}/>
-										</button>
+										<Link href={`products/${item.documentId}`}>
+											<button onClick={() => {
+												// setSelectProduct(item)
+												// setTitle(item.title)
+												// setMainPrice(item.main_price)
+												// setShowModal(true)
+											}}>
+												<FiEdit className="text-blue-500" size={18}/>
+											</button>
+										</Link>
 										<button onClick={() => handleDeleteProduct(item.documentId)}>
 											<FaRegTrashAlt className="text-red-500" size={18}/>
 										</button>
