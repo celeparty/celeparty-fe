@@ -128,7 +128,7 @@ export default function Products() {
 									location={item.region ? item.region : null}
 								>
 									<div className="flex gap-1 justify-end py-2">
-										<Link href={`products/${item.documentId}`}>
+										<Link href={`products/edit/${item.documentId}`}>
 											<button onClick={() => {
 												// setSelectProduct(item)
 												// setTitle(item.title)
