@@ -43,9 +43,6 @@ export default function ContentProduct(props:any) {
 	}
 	const currentRate = dataContent?.rate;
 
-	
-
-
 	return (
 			<Box className="px-4">
 				{dataContent ? (
