@@ -18,7 +18,8 @@ import { formatRupiah } from "@/lib/utils";
 export function ProductContent() {
 	const [sortDesc, setSortDesc] = useState<boolean>(true);
 	const [showOptions, setShowOptions] = useState<boolean>(false)
-	const [statusValue, setStatusValue] = useState<string>("Harga")
+	const [statusValue, setStatusValue] = useState<boolean>(true)
+	const [statusSortBy, setStatusSortBy] = useState<boolean>(true)
 	const [price, setPrice] = useState<{ min: any; max: any }>({ min: 0, max: 0 });
 	const [mainData, setMainData] = useState([]);
 	const router = useRouter();
@@ -184,7 +185,6 @@ export function ProductContent() {
 									handleSort({ sortBy: "updatedAt" });
 									setActiveButton("btn1")
 									setShowOptions(false)
-									setStatusValue("Harga")
 								}}
 								className={`w-full lg:w-auto border-2 border-black border-solid lg:border-none ${ activeButton === "btn1" ? "bg-c-blue text-white" : null}`}
 							>
@@ -196,7 +196,6 @@ export function ProductContent() {
 									handleSort({ sortBy: "sold_count" });
 									setActiveButton("btn2")
 									setShowOptions(false)
-									setStatusValue("Harga")
 								}}
 								className={`w-full lg:w-auto  border-2 border-black border-solid lg:border-none ${ activeButton === "btn2" ? "bg-c-blue text-white" : null}`}
 							>
@@ -209,12 +208,15 @@ export function ProductContent() {
 								onClick={() => {
 									setActiveButton("btn3")
 									toggleDropdown()
+									setStatusValue(!statusValue)
+									setStatusSortBy(!statusSortBy)
+									handleSort({sortBy: statusSortBy ? "price_min" : "price_max"})
 								}}
 								className={`flex gap-1 items-center w-full lg:w-auto border-2 border-black border-solid lg:border-none ${ activeButton === "btn3" ? "bg-c-blue text-white" : null}`}
 							>
-								{statusValue} {sortDesc ? <IoIosArrowDown /> : <IoIosArrowUp />}
+								{statusValue ? "Harga Temurah" : "Harga Termahal"} {sortDesc ? <IoIosArrowUp /> : <IoIosArrowDown /> }
 							</Button>
-							{
+							{/* {
 								showOptions && (
 									<div className="absolute -right-[2px] top-[70px] lg:top-12 lg:right-[432px] w-40 bg-white border border-gray-300 rounded shadow-lg z-50">
 										<div className="flex flex-col gap-2">
@@ -239,7 +241,7 @@ export function ProductContent() {
 										</div>
 									</div>
 								)
-							}
+							} */}
 								</div>
 								<div className="flex lg:flex-row flex-col gap-2 lg:order-2 order-1">
 									<div className="flex items-center gap-2 w-full lg:w-auto">
@@ -248,7 +250,7 @@ export function ProductContent() {
 											className="border-2 border-black border-solid lg:border-none"
 											placeholder="Harga Minimum"
 											onChange={(e) => setPrice({ ...price, min: e.target.value })}
-											onClick={() => setStatusValue("Harga")}
+											// onClick={() => setStatusValue("Harga")}
 										/>
 									</div>
 									<div className="flex items-center gap-2 w-full lg:w-auto">
@@ -257,7 +259,7 @@ export function ProductContent() {
 											className="border-2 border-black border-solid lg:border-none"
 											placeholder="Harga Maximum"
 											onChange={(e) => setPrice({ ...price, max: e.target.value })}
-											onClick={() => setStatusValue("Harga")}
+											// onClick={() => setStatusValue("Harga")}
 										/>
 									</div>
 								</div>
