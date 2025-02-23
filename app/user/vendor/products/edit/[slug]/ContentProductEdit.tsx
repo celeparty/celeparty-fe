@@ -164,7 +164,7 @@ export default function ContentProductEdit(props: any) {
             name="minimal order"
             type="text"
             className="w-full p-2 border rounded"
-            placeholder="Masukkan minimal order produk"
+            placeholder="Masukkan kabupaten anda"
           />
         </div>
         <div>
@@ -178,7 +178,7 @@ export default function ContentProductEdit(props: any) {
             name="minimal order"
             type="text"
             className="w-full p-2 border rounded"
-            placeholder="Masukkan minimal order produk"
+            placeholder="Masukkan deskripsi anda"
           />
         </div>
         <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">
