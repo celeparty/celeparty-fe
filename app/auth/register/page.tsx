@@ -124,7 +124,7 @@ const Registration = () => {
 						</div>						
 						<div className="relative">
 							<textarea
-								placeholder="Address"
+								placeholder="Alamat"
 								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
 								{...register("address")}
 							/>
@@ -162,12 +162,12 @@ const Registration = () => {
 						</div>
 					</form>
 				{message ? (
-					<div className="mt-1 text-green-500">
+					<div className="mt-1 text-green-500 text-center">
 					Registrasi berhasil, silahkan cek email anda untuk konfirmasi
 					</div>
 				) : null}
 				{errorMessage ? (
-					<div className="text-c-red mt-1">{errorMessage}</div>
+					<div className="text-c-red mt-1 text-center">{errorMessage}</div>
 				) : null}
 			</div>
 		</div>
