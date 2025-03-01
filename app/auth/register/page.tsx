@@ -124,7 +124,7 @@ const Registration = () => {
 						</div>						
 						<div className="relative">
 							<textarea
-								placeholder="Address"
+								placeholder="Alamat"
 								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
 								{...register("address")}
 							/>
