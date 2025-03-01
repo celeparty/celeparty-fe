@@ -39,7 +39,7 @@ const signUpSchema = z
 
 
 const Registration = () => {
-	const [message, setMessage] = useState(true);
+	const [message, setMessage] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string | boolean | null>(
 	  false
 	);
