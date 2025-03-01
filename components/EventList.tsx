@@ -43,7 +43,7 @@ export default function EventList() {
 			<div className="flex flex-wrap justify-around gap-5 align-top">
 				<div className="relative flex-1">
 					<h4 className="font-semibold text-[16px] text-c-blue mb-2">Event</h4>
-					<div className="flex justify-between border-solid h-fit lg:min-h-[123px] border-gray-300 border-[1px] p-2 lg:p-5 rounded-lg bg-gray-50">
+					<div className="flex justify-around border-solid h-fit lg:min-h-[123px] border-gray-300 border-[1px] p-2 lg:p-5 rounded-lg bg-gray-50">
 						{dataGroup?.event?.map((item: any, i: number) => {
 							return (
 								<Link href={`/products?type=${item.name}`} className="text-center max-w-[120px]" key={item.id}>
@@ -63,7 +63,7 @@ export default function EventList() {
 				</div>
 				<div className="relative flex-1">
 					<h4 className="font-semibold text-[16px] text-c-blue mb-2">Produk</h4>
-					<div className="flex justify-between border-solid h-fit lg:min-h-[123px] border-gray-300 border-[1px]  p-2 lg:p-5 rounded-lg bg-gray-50">
+					<div className="flex justify-around border-solid h-fit lg:min-h-[123px] border-gray-300 border-[1px]  p-2 lg:px-5 lg:py-5 rounded-lg bg-gray-50">
 						{dataGroup?.product?.map((item: any, i: number) => {
 							return (
 								<Link href={`/products?type=${item.name}`} className="text-center max-w-[120px]" key={item.id}>
