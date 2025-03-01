@@ -39,7 +39,7 @@ const signUpSchema = z
 
 
 const Registration = () => {
-	const [message, setMessage] = useState(false);
+	const [message, setMessage] = useState(true);
 	const [errorMessage, setErrorMessage] = useState<string | boolean | null>(
 	  false
 	);
@@ -162,12 +162,12 @@ const Registration = () => {
 						</div>
 					</form>
 				{message ? (
-					<div className="mt-1 text-green-500">
+					<div className="mt-1 text-green-500 text-center">
 					Registrasi berhasil, silahkan cek email anda untuk konfirmasi
 					</div>
 				) : null}
 				{errorMessage ? (
-					<div className="text-c-red mt-1">{errorMessage}</div>
+					<div className="text-c-red mt-1 text-center">{errorMessage}</div>
 				) : null}
 			</div>
 		</div>
