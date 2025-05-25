@@ -9,18 +9,29 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { axiosUser } from "@/lib/services";
+import { axiosData, axiosUser } from "@/lib/services";
 import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 
 import { DatePickerInput } from "@/components/form-components/DatePicker";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { eAlertType } from "@/lib/enums/eAlert";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format, isValid, parse } from "date-fns";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { eAlertType } from "@/lib/enums/eAlert";
+import { iUserReq } from "@/lib/interfaces/iUser";
+import { eGender } from "@/lib/enums/eUser";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { SelectInput } from "@/components/form-components/SelectInput";
+import { iSelectOption } from "@/lib/interfaces/iCommon";
 
 const formSchema = z.object({
   name: z.string().nonempty({
@@ -183,15 +194,20 @@ const InputUser = () => {
   const { data: session, status } = useSession();
   const [myData, setMyData] = useState<any>();
 
+  const genderOptions: iSelectOption[] = [
+    {
+      label: "Laki-laki",
+      value: eGender.male,
+    },
+    {
+      label: "Perempuan",
+      value: eGender.female,
+    },
+  ];
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      birthdate: "",
-      gender: "",
-      email: "",
-      phone: "",
-    },
+    defaultValues: {} as iUserReq,
   });
 
   useEffect(() => {
@@ -199,7 +215,7 @@ const InputUser = () => {
       form.reset({
         name: myData.name || "",
         birthdate: myData.birthdate || "",
-        gender: "male",
+        gender: eGender.male,
         email: myData.email || "",
         phone: myData.phone || "",
       });
@@ -216,15 +232,41 @@ const InputUser = () => {
     }
   }, [status]);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    form.reset();
-    toast({
-      title: "Sukses",
-      description: "Update profile berhasil!",
-      className: eAlertType.SUCCESS,
-    });
-    console.log(values);
-  }
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      const reqData: iUserReq = {
+        name: values.name,
+        birthdate: values.birthdate,
+        gender: values.gender as eGender,
+        phone: values.phone,
+        email: values.email,
+      };
+
+      const response = await axiosUser(
+        "PUT",
+        "/api/users/me",
+        `${session && session?.jwt}`,
+        reqData
+      );
+
+      console.log(response);
+
+      if (response) {
+        toast({
+          title: "Sukses",
+          description: "Update profile berhasil!",
+          className: eAlertType.SUCCESS,
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Gagal",
+        description: "Update profile gagal!",
+        className: eAlertType.FAILED,
+      });
+    }
+  };
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="-mt-10 lg:mt-0">
@@ -260,10 +302,6 @@ const InputUser = () => {
                   Tanggal Lahir
                 </FormLabel>
                 <FormControl className="lg:w-[320px] w-[300px]">
-                  {/* <Input
-                    className="border border-[#ADADAD] rounded-lg"
-                    {...field}
-                  /> */}
                   <DatePickerInput
                     onChange={(date) => {
                       if (date instanceof Date && isValid(date)) {
@@ -296,10 +334,17 @@ const InputUser = () => {
                   Jenis Kelamin
                 </FormLabel>
                 <FormControl className="lg:w-[320px] w-[300px]">
-                  <Input
-                    className="border border-[#ADADAD] rounded-lg"
-                    {...field}
-                  />
+                  <SelectInput
+                    options={genderOptions}
+                    label="Pilih Jenis Kelamin"
+                    onChange={(value) => {
+                      if (value) {
+                        console.log(value);
+                        field.onChange(value);
+                      }
+                    }}
+                    value={field.value}
+                  ></SelectInput>
                 </FormControl>
               </div>
               <div className="ml-[160px]">
