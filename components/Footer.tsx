@@ -34,7 +34,10 @@ export default function Footer() {
             <div className="[&_h4]:text-center [&_h4]:mb-4 lg:[&_h4]:mb-0 lg:[&_h4]:text-start">
               <h4>Ikuti Kami</h4>
               <div className="flex gap-3">
-                <Link href="/">
+                <Link
+                  href="https://www.instagram.com/celeparty.official/"
+                  target="_blank"
+                >
                   <Image
                     src="/images/icon-ig.svg"
                     alt="image"
@@ -42,7 +45,7 @@ export default function Footer() {
                     height={27}
                   />
                 </Link>
-                <Link href="/">
+                <Link href="https://wa.me/+6285211119011" target="_blank">
                   <Image
                     src="/images/icon-wa.svg"
                     alt="image"
@@ -50,15 +53,18 @@ export default function Footer() {
                     height={27}
                   />
                 </Link>
-                <Link href="/">
+                {/* <Link href="/">
                   <Image
                     src="/images/icon-tk.svg"
                     alt="image"
                     width={24}
                     height={27}
                   />
-                </Link>
-                <Link href="/">
+                </Link> */}
+                <Link
+                  href="https://www.facebook.com/marketplace/profile/100044231503758/?_rdr"
+                  target="_blank"
+                >
                   <Image
                     src="/images/icon-fb.svg"
                     alt="image"
