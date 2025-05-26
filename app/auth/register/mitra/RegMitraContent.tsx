@@ -384,7 +384,7 @@ const Registration = () => {
 						</div>
 					</form>
 				{message ? (
-					<div className="mt-1 text-green-500">
+					<div className="mt-1 text-green-500 text-center">
 					Registrasi berhasil, silahkan cek email anda untuk konfirmasi
 					</div>
 				) : null}

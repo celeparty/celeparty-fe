@@ -25,7 +25,7 @@ const TopContactPage = () => {
 				</div>
 			</div>
 			<div className="flex justify-center pt-2 lg:pt-6">
-				<Link href={"/"}>
+				<Link href={"https://wa.me/+6285211119011"} target="_blank">
 					<Image src={"/images/wa-item.png"} width={307} height={94} alt="Wa Image" />
 				</Link>
 			</div>
@@ -52,7 +52,7 @@ const PhoneContact = () => {
 			<div className="font-quick font-bold [&_p]:font-semibold [&_p]:text-[20px] text-[26px] leading-[32px] text-white flex flex-col gap-4">
 				<div className="text-center lg:text-start">
 					<h1>Mobile Number</h1>
-					<p>+6285721705354</p>
+					<p>+6285211119011</p>
 				</div>
 				<div className="text-center lg:text-start">
 					<h1>Office Address</h1>
