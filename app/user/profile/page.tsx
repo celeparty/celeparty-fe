@@ -9,29 +9,22 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { axiosData, axiosUser } from "@/lib/services";
+import { axiosUser } from "@/lib/services";
 import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 
 import { DatePickerInput } from "@/components/form-components/DatePicker";
+import { SelectInput } from "@/components/form-components/SelectInput";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { eAlertType } from "@/lib/enums/eAlert";
+import { eGender } from "@/lib/enums/eUser";
+import { iSelectOption } from "@/lib/interfaces/iCommon";
+import { iUserReq } from "@/lib/interfaces/iUser";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format, isValid, parse } from "date-fns";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { iUserReq } from "@/lib/interfaces/iUser";
-import { eGender } from "@/lib/enums/eUser";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { SelectInput } from "@/components/form-components/SelectInput";
-import { iSelectOption } from "@/lib/interfaces/iCommon";
 
 const formSchema = z.object({
   name: z.string().nonempty({
@@ -244,12 +237,10 @@ const InputUser = () => {
 
       const response = await axiosUser(
         "PUT",
-        "/api/users/me",
+        `/api/users/${myData.id}`,
         `${session && session?.jwt}`,
         reqData
       );
-
-      console.log(response);
 
       if (response) {
         toast({
@@ -339,7 +330,6 @@ const InputUser = () => {
                     label="Pilih Jenis Kelamin"
                     onChange={(value) => {
                       if (value) {
-                        console.log(value);
                         field.onChange(value);
                       }
                     }}
