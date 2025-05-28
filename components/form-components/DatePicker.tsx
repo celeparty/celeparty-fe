@@ -116,6 +116,8 @@ export const DatePickerInput: React.FC<iDatePickerProps> = ({
                   }
                   onDayClick={handleDayClick}
                   disabled={minDate ? { before: minDate } : undefined}
+                  showOutsideDays
+                  fixedWeeks
                 />
               </>
             )}
