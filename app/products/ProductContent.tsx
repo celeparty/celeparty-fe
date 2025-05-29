@@ -138,10 +138,6 @@ export function ProductContent() {
     setSortDesc(!sortDesc);
     setShowOptions(!showOptions);
   };
-
-  useEffect(() => {
-    console.log(mainData);
-  }, [mainData]);
   return (
     <div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
       <Box className="bg-c-blue text-white w-full lg:max-w-[280px] mt-0 hidden lg:block">
