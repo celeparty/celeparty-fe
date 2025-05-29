@@ -16,6 +16,8 @@ import { ItemCategory, ItemInfo } from "./ItemCategory";
 import { formatRupiah } from "@/lib/utils";
 import { DatePickerInput } from "@/components/form-components/DatePicker";
 import { format, isValid, parse } from "date-fns";
+import { iSelectOption } from "@/lib/interfaces/iCommon";
+import { SelectInput } from "@/components/form-components/SelectInput";
 
 export function ProductContent() {
   const [sortDesc, setSortDesc] = useState<boolean>(true);
@@ -35,7 +37,17 @@ export function ProductContent() {
   const [cat, setCat] = useState(`${getCategory ? getCategory : ""}`);
 
   const [eventDate, setEventDate] = useState<string>("");
-
+  const [eventLocations, setEventLocations] = useState<iSelectOption[]>([
+    {
+      label: "Jakarta",
+      value: "Jakarta",
+    },
+    {
+      label: "Bogor",
+      value: "Bogor",
+    },
+  ]);
+  const [selectedLocation, setSelectedLocation] = useState<string>("");
   // const {activeButton, setActiveButton} = useButtonStore()
   const [activeButton, setActiveButton] = useState<string | null>(null);
 
@@ -144,7 +156,16 @@ export function ProductContent() {
               <Input placeholder="Jumlah Tamu/ Pax" />
             </ItemInfo>
             <ItemInfo image="/images/location.svg">
-              <Input placeholder="Lokasi Acara" />
+              <SelectInput
+                options={eventLocations}
+                label="Pilih Lokasi Acara"
+                onChange={(value) => {
+                  if (value) {
+                    setSelectedLocation(value);
+                  }
+                }}
+                value={selectedLocation}
+              ></SelectInput>
             </ItemInfo>
           </div>
         </div>
