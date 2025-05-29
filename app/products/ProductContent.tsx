@@ -18,6 +18,7 @@ import { DatePickerInput } from "@/components/form-components/DatePicker";
 import { format, isValid, parse } from "date-fns";
 import { iSelectOption } from "@/lib/interfaces/iCommon";
 import { SelectInput } from "@/components/form-components/SelectInput";
+import { productCategories } from "@/lib/static/categories";
 
 export function ProductContent() {
   const [sortDesc, setSortDesc] = useState<boolean>(true);
@@ -39,15 +40,20 @@ export function ProductContent() {
   const [eventDate, setEventDate] = useState<string>("");
   const [eventLocations, setEventLocations] = useState<iSelectOption[]>([
     {
-      label: "Jakarta",
-      value: "Jakarta",
+      label: "DKI Jakarta",
+      value: "jakarta",
     },
     {
       label: "Bogor",
-      value: "Bogor",
+      value: "bogor",
+    },
+    {
+      label: "Bekasi",
+      value: "bekasi",
     },
   ]);
   const [selectedLocation, setSelectedLocation] = useState<string>("");
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   // const {activeButton, setActiveButton} = useButtonStore()
   const [activeButton, setActiveButton] = useState<string | null>(null);
 
@@ -132,6 +138,10 @@ export function ProductContent() {
     setSortDesc(!sortDesc);
     setShowOptions(!showOptions);
   };
+
+  useEffect(() => {
+    console.log(mainData);
+  }, [mainData]);
   return (
     <div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
       <Box className="bg-c-blue text-white w-full lg:max-w-[280px] mt-0 hidden lg:block">
@@ -172,46 +182,23 @@ export function ProductContent() {
         <div className="relative mb-7 [&_h4]:mb-3">
           <h4>Pilih Kategori Produk</h4>
           <div className="flex flex-col gap-3">
-            <ItemInfo image="/images/ticket.svg">
-              <ItemCategory
-                title="Ticket"
-                onClick={() => {
-                  handleFilter("Ticket");
-                }}
-              />
-            </ItemInfo>
-            <ItemInfo image="/images/decoration.svg">
-              <ItemCategory
-                title="Tasyakuran"
-                onClick={() => {
-                  handleFilter("Tasyakuran");
-                }}
-              />
-            </ItemInfo>
-            <ItemInfo image="/images/cake2.svg">
-              <ItemCategory
-                title="Ulang Tahun"
-                onClick={() => {
-                  handleFilter("Ulang Tahun");
-                }}
-              />
-            </ItemInfo>
-            <ItemInfo image="/images/calendar.svg">
-              <ItemCategory
-                title="Acara"
-                onClick={() => {
-                  handleFilter("Acara");
-                }}
-              />
-            </ItemInfo>
-            <ItemInfo image="/images/others.svg">
-              <ItemCategory
-                title="Lainnya"
-                onClick={() => {
-                  handleFilter("");
-                }}
-              />
-            </ItemInfo>
+            {productCategories.map((cat, index) => (
+              <React.Fragment key={index}>
+                <ItemInfo image={cat.icon ?? ""}>
+                  <ItemCategory
+                    title={cat.label}
+                    onClick={() => {
+                      const isActive = activeCategory === cat.value;
+                      setActiveCategory(isActive ? null : cat.value);
+                      handleFilter(isActive ? "" : cat.value);
+                    }}
+                    className={`${
+                      activeCategory === cat.value && "bg-c-green text-c-white"
+                    }`}
+                  />
+                </ItemInfo>
+              </React.Fragment>
+            ))}
           </div>
         </div>
       </Box>
