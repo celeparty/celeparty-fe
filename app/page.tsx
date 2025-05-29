@@ -1,7 +1,7 @@
 import Basecontent from "@/components/Basecontent";
 import EventList from "@/components/EventList";
 import MainBanner from "@/components/MainBanner";
-import ProductList from "@/components/product/ProductList";
+import { ProductList } from "@/components/product/ProductList";
 
 export default function Home() {
   return (
@@ -9,7 +9,12 @@ export default function Home() {
       <Basecontent>
         <MainBanner />
         <EventList />
-        <ProductList />
+        <ProductList
+          title="Untuk Anda"
+          queryKey="qProductHome"
+          showAllBtn={true}
+          boxStyle={true}
+        />
       </Basecontent>
     </div>
   );
