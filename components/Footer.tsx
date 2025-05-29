@@ -1,3 +1,4 @@
+import { whatsAppNumber } from "@/lib/appSettings";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -45,7 +46,7 @@ export default function Footer() {
                     height={27}
                   />
                 </Link>
-                <Link href="https://wa.me/+6285211119011" target="_blank">
+                <Link href={`https://wa.me/${whatsAppNumber}`} target="_blank">
                   <Image
                     src="/images/icon-wa.svg"
                     alt="image"

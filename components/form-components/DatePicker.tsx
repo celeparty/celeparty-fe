@@ -81,7 +81,7 @@ export const DatePickerInput: React.FC<iDatePickerProps> = ({
               className="w-full pr-10 border border-[#ADADAD] rounded-lg"
             />
             <div className="absolute inset-y-0 right-2 flex items-center cursor-pointer">
-              <Calendar width={15} />
+              <Calendar width={15} color="#000000" />
             </div>
           </div>
         </PopoverTrigger>
