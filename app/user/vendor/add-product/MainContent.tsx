@@ -2,14 +2,13 @@
 import Skeleton from "@/components/Skeleton";
 import SubTitle from "@/components/SubTitle";
 import { axiosUser } from "@/lib/services";
+import { formatNumberWithDots } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { SchemaProduct } from "./SchemaProduct";
-import { formatNumberWithDots } from "@/lib/utils";
 
 function ItemInput({ label, sublabel, children }: any) {
   return (
@@ -28,7 +27,6 @@ function ItemInput({ label, sublabel, children }: any) {
 }
 
 export default function MainContentAddProduct() {
-  const router = useRouter();
   const { data: session, status } = useSession();
   const [message, setMessage] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -95,9 +93,10 @@ export default function MainContentAddProduct() {
               data,
             }
           ));
-        console.log(response, data);
-        setErrorMessage(false);
-        setMessage(true);
+        if (response) {
+          setErrorMessage(false);
+          setMessage(true);
+        }
       } catch (error: any) {
         console.error("Error:", error);
         setMessage(false);
@@ -236,6 +235,10 @@ export default function MainContentAddProduct() {
           )}
         </ItemInput>
         <ItemInput label="Minimal Item Pembelian (Optional)">
+          <label className="text-sm block italic">
+            Masukkan jumlah minimum kuantiti pembelian jika produk atau layanan
+            Anda memerlukan batas minimal pesanan tertentu.
+          </label>
           <input
             className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
             placeholder="Jumlah Pcs Minimal"
@@ -243,6 +246,10 @@ export default function MainContentAddProduct() {
           />
         </ItemInput>
         <ItemInput label="Maksimal Hari Pemesanan (Optional)">
+          <label className="text-sm block italic">
+            Masukkan jumlah hari maksimal pemesanan jika produk atau layanan
+            Anda membutuhkan persiapan lebih dari satu hari sebelum acara.
+          </label>
           <input
             className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
             placeholder="(x) Hari Maksimal Pemesanan"
