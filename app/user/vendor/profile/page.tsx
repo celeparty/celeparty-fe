@@ -4,26 +4,28 @@ import React, { useEffect, useState } from "react";
 
 import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
-import { axiosUser, getDataToken, putDataToken } from "@/lib/services";
+import { axiosRegion, axiosUser } from "@/lib/services";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { DatePickerInput } from "@/components/form-components/DatePicker";
+import RegionSubregionSelector from "@/components/profile/vendor/region-subregion-selector";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { eAlertType } from "@/lib/enums/eAlert";
+import { iSelectOption } from "@/lib/interfaces/iCommon";
+import { iMerchantProfile } from "@/lib/interfaces/iMerchant";
+import { isValid, parseISO } from "date-fns";
 import Link from "next/link";
 import {
   Controller,
+  FormProvider,
   type SubmitHandler,
   useFieldArray,
   useForm,
 } from "react-hook-form";
 import { AiFillCustomerService } from "react-icons/ai";
-import { GrEdit, GrFormEdit } from "react-icons/gr";
-import { z } from "zod";
-import { Input } from "@/components/ui/input";
-import { iMerchantProfile, iServiceLocation } from "@/lib/interfaces/iMerchant";
-import { Button } from "@/components/ui/button";
-import { DatePickerInput } from "@/components/form-components/DatePicker";
-import { format, isValid, parse, parseISO } from "date-fns";
+import { IoMdAddCircleOutline, IoMdRemoveCircleOutline } from "react-icons/io";
 
 type UserData = {
   name?: string;
@@ -64,10 +66,25 @@ function ItemInput({
   );
 }
 
+const getProvinces = async (): Promise<iSelectOption[]> => {
+  const response = await axiosRegion("GET", "provinsi");
+  return (
+    response?.value?.map((item: any) => ({
+      value: item.id,
+      label: item.name,
+    })) || []
+  );
+};
+
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const [formData, setFormData] = useState<iMerchantProfile>();
   const [notif, setNotif] = React.useState(false);
+
+  const { toast } = useToast();
+
+  const formMethods = useForm<iMerchantProfile>();
+
   const {
     register,
     handleSubmit,
@@ -75,8 +92,7 @@ export default function ProfilePage() {
     formState: { errors },
     control,
     reset,
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  } = useForm<iMerchantProfile>();
+  } = formMethods;
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -84,25 +100,33 @@ export default function ProfilePage() {
   });
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  const onSubmit: SubmitHandler<UserData> = async (data) => {
-    console.log(data);
-    // if (!dataSession?.user?.accessToken) {
-    // 	throw new Error("Access token is undefined");
-    // }
-    // await putDataToken("/users", dataSession?.user?.accessToken, {
-    // 	name: data?.name,
-    // 	birthdate: data?.birthdate,
-    // 	gender: data?.gender,
-    // 	address: data?.address,
-    // 	province: data?.province,
-    // 	city: data?.city,
-    // 	region: data?.region,
-    // 	area: data?.area,
-    // });
-    // setNotif(true);
-    // setTimeout(() => {
-    // 	setNotif(false);
-    // }, 5000);
+  const onSubmit: SubmitHandler<iMerchantProfile> = async (
+    formData: iMerchantProfile
+  ) => {
+    console.log(formData);
+    try {
+      const response = await axiosUser(
+        "POST",
+        `/api/users/${formData.id}`,
+        `${session && session?.jwt}`,
+        formData
+      );
+
+      if (response) {
+        toast({
+          title: "Sukses",
+          description: "Update profile berhasil!",
+          className: eAlertType.SUCCESS,
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Gagal",
+        description: "Update profile gagal!",
+        className: eAlertType.FAILED,
+      });
+    }
   };
 
   const getQuery = async () => {
@@ -126,9 +150,15 @@ export default function ProfilePage() {
 
   const dataContent: iMerchantProfile = query?.data;
 
+  const { data: provinceOptions = [], isLoading } = useQuery({
+    queryKey: ["provinces"],
+    queryFn: getProvinces,
+    staleTime: 5 * 60 * 1000,
+  });
+
   useEffect(() => {
-    if (query.data) {
-      reset(query.data);
+    if (query.data && dataContent) {
+      formMethods.reset(dataContent);
       setFormData(query.data);
     }
   }, [query.data, reset]);
@@ -167,35 +197,54 @@ export default function ProfilePage() {
                   {...register("companyName", { required: true })}
                 />
               </ItemInput>
-              <div className="flex items-start align-top">
-                <ItemInput label="Lokasi Pelayanan">
-                  <div className="flex flex-col">
-                    {fields.map((item: iServiceLocation, i: number) => {
-                      return (
-                        <div
-                          key={i}
-                          className="flex lg:flex-row flex-col gap-1 w-full"
-                        >
-                          <input
-                            className="border flex-1 mb-2 border-[#ADADAD] rounded-md p-2 text-[14px] lg:text-[16px]"
-                            defaultValue={item?.region}
-                            {...register(`serviceLocation.${i}.region`, {
-                              required: true,
-                            })}
+              <FormProvider {...formMethods}>
+                <div className="flex items-start align-top">
+                  <ItemInput label="Lokasi Pelayanan">
+                    <div>
+                      {fields.map((field, index) => (
+                        <div key={field.id} className="mb-2 flex gap-1">
+                          <RegionSubregionSelector
+                            index={index}
+                            provinceOptions={provinceOptions}
                           />
-                          <input
-                            className="border flex-1 mb-2 border-[#ADADAD] rounded-md p-2 text-[14px] lg:text-[16px]"
-                            defaultValue={item?.subregion}
-                            {...register(`serviceLocation.${i}.subregion`, {
-                              required: true,
-                            })}
-                          />
+
+                          {fields.length > 1 && (
+                            <button
+                              type="button"
+                              className="text-red-500 text-2xl"
+                              onClick={() => remove(index)}
+                            >
+                              <IoMdRemoveCircleOutline />
+                            </button>
+                          )}
                         </div>
-                      );
-                    })}
-                  </div>
-                </ItemInput>
-              </div>
+                      ))}
+
+                      {fields.length >= 5 && (
+                        <p className="text-red-500 text-sm mt-2">
+                          Maximum Province Allowed is 5
+                        </p>
+                      )}
+
+                      {fields.length < 5 && (
+                        <button
+                          type="button"
+                          className="flex gap-1 items-center bg-c-blue py-2 px-5 text-white"
+                          onClick={() =>
+                            append({
+                              region: "",
+                              subregion: "",
+                            })
+                          }
+                        >
+                          <IoMdAddCircleOutline /> Tambah Lokasi
+                        </button>
+                      )}
+                    </div>
+                  </ItemInput>
+                </div>
+              </FormProvider>
+
               <ItemInput label="User ID">{dataContent?.id}</ItemInput>
               <ItemInput label="Email">{dataContent?.email}</ItemInput>
               <ItemInput label="No Telepon">

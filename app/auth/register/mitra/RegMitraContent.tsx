@@ -211,10 +211,6 @@ const Registration = () => {
     }
   }, [regionCode]);
 
-  useEffect(() => {
-    console.log("Data Region Terbaru:", dataRegion);
-  }, [dataRegion]);
-
   return (
     <div>
       <h1 className="mb-4 lg:text-start text-center text-2xl font-bold">
