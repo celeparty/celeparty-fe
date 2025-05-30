@@ -13,7 +13,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { ItemCategory, ItemInfo } from "./ItemCategory";
-import { formatRupiah } from "@/lib/utils";
+import { formatNumberWithDots, formatRupiah } from "@/lib/utils";
 import { DatePickerInput } from "@/components/form-components/DatePicker";
 import { format, isValid, parse } from "date-fns";
 import { iSelectOption } from "@/lib/interfaces/iCommon";
@@ -29,7 +29,7 @@ export function ProductContent() {
     min: 0,
     max: 0,
   });
-  const [mainData, setMainData] = useState([]);
+  const [mainData, setMainData] = useState<any>([]);
   const router = useRouter();
   const params = useSearchParams();
   const getType = params.get("type");
@@ -77,23 +77,52 @@ export function ProductContent() {
     }
   }, [query.isSuccess, query.data]);
 
+  // useEffect(() => {
+  //   if (price?.min && price?.max) {
+  //     const dataSort: any = _.filter(dataContent, (item: any) => {
+  //       return item.main_price >= price.min && item.main_price <= price.max;
+  //     });
+  //     setMainData(dataSort);
+  //   } else if (price?.min && !price?.max) {
+  //     const dataSort: any = _.filter(dataContent, (item: any) => {
+  //       return item.main_price >= price.min;
+  //     });
+  //     setMainData(dataSort);
+  //   } else if (!price?.min && price?.max) {
+  //     const dataSort: any = _.filter(dataContent, (item: any) => {
+  //       return item.main_price <= price.max;
+  //     });
+  //     setMainData(dataSort);
+  //   } else null;
+  // }, [price]);
+
   useEffect(() => {
-    if (price?.min && price?.max) {
-      const dataSort: any = _.filter(dataContent, (item: any) => {
-        return item.main_price >= price.min && item.main_price <= price.max;
+    const cleanMin = price?.min
+      ? parseInt(price.min.replace(/\./g, ""), 10)
+      : null;
+    const cleanMax = price?.max
+      ? parseInt(price.max.replace(/\./g, ""), 10)
+      : null;
+
+    let dataSort: any[] = [];
+
+    if (cleanMin !== null && cleanMax !== null) {
+      dataSort = _.filter(dataContent, (item: any) => {
+        return item.main_price >= cleanMin && item.main_price <= cleanMax;
       });
-      setMainData(dataSort);
-    } else if (price?.min && !price?.max) {
-      const dataSort: any = _.filter(dataContent, (item: any) => {
-        return item.main_price >= price.min;
+    } else if (cleanMin !== null) {
+      dataSort = _.filter(dataContent, (item: any) => {
+        return item.main_price >= cleanMin;
       });
-      setMainData(dataSort);
-    } else if (!price?.min && price?.max) {
-      const dataSort: any = _.filter(dataContent, (item: any) => {
-        return item.main_price <= price.max;
+    } else if (cleanMax !== null) {
+      dataSort = _.filter(dataContent, (item: any) => {
+        return item.main_price <= cleanMax;
       });
+    }
+
+    if (dataSort.length || cleanMin !== null || cleanMax !== null) {
       setMainData(dataSort);
-    } else null;
+    }
   }, [price]);
 
   if (query.isLoading) {
@@ -284,10 +313,12 @@ export function ProductContent() {
                     <Input
                       className="border-2 border-black border-solid lg:border-none"
                       placeholder="Harga Minimum"
-                      onChange={(e) =>
-                        setPrice({ ...price, min: e.target.value })
-                      }
-                      // onClick={() => setStatusValue("Harga")}
+                      onChange={(e) => {
+                        const rawValue = e.target.value.replace(/\D/g, ""); // Only digits
+                        const formatted = formatNumberWithDots(rawValue);
+                        setPrice((prev) => ({ ...prev, min: formatted }));
+                      }}
+                      value={price.min > 0 ? price.min : ""}
                     />
                   </div>
                   <div className="flex items-center gap-2 w-full lg:w-auto">
@@ -295,10 +326,12 @@ export function ProductContent() {
                     <Input
                       className="border-2 border-black border-solid lg:border-none"
                       placeholder="Harga Maximum"
-                      onChange={(e) =>
-                        setPrice({ ...price, max: e.target.value })
-                      }
-                      // onClick={() => setStatusValue("Harga")}
+                      onChange={(e) => {
+                        const rawValue = e.target.value.replace(/\D/g, ""); // Only digits
+                        const formatted = formatNumberWithDots(rawValue);
+                        setPrice((prev) => ({ ...prev, max: formatted }));
+                      }}
+                      value={price.max > 0 ? price.max : ""}
                     />
                   </div>
                 </div>

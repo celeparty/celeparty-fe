@@ -70,7 +70,7 @@ export const DatePickerInput: React.FC<iDatePickerProps> = ({
   }, [value]);
 
   return (
-    <div className={`relative max-w-xl ${className}`}>
+    <div className={`relative ${className}`}>
       <Popover open={showCalendar} onOpenChange={toggleCalendar} modal={true}>
         <PopoverTrigger asChild>
           <div className="relative">
