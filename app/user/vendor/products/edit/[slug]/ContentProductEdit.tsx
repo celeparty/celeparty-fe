@@ -1,14 +1,12 @@
 "use client";
-import { axiosData } from "@/lib/services";
-import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import axios from "axios";
-import toast from "react-hot-toast";
-import { formatNumberWithDots } from "@/lib/utils";
-import { iUpdateProduct } from "@/lib/interfaces/iProduct";
 import { useToast } from "@/hooks/use-toast";
 import { eAlertType } from "@/lib/enums/eAlert";
+import { iUpdateProduct } from "@/lib/interfaces/iProduct";
+import { axiosData } from "@/lib/services";
+import { formatNumberWithDots } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function ContentProductEdit(props: any) {
   const [title, setTitle] = useState<string>("");
@@ -144,6 +142,10 @@ export default function ContentProductEdit(props: any) {
           <div>
             <label htmlFor="title" className="block font-medium mb-2">
               Minimal Order
+              <span className="text-sm block italic">
+                Masukkan jumlah minimum kuantiti pembelian jika produk atau
+                layanan Anda memerlukan batas minimal pesanan tertentu.
+              </span>
             </label>
             <input
               value={minimal_order}
