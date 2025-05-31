@@ -1,6 +1,8 @@
 export interface iServiceLocation {
   region: string;
   subregion: string;
+  id: string;
+  idSubRegion: string;
 }
 
 export interface iRole {
@@ -42,4 +44,10 @@ export interface iMerchantProfile {
   accountNumber: string;
   accountName: string;
   role: iRole;
+}
+
+export interface iSubregionRes {
+  id: string;
+  id_provinsi: string;
+  name: string;
 }

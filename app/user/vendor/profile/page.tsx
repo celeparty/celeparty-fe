@@ -106,7 +106,7 @@ export default function ProfilePage() {
     console.log(formData);
     try {
       const response = await axiosUser(
-        "POST",
+        "PUT",
         `/api/users/${formData.id}`,
         `${session && session?.jwt}`,
         formData
@@ -202,22 +202,24 @@ export default function ProfilePage() {
                   <ItemInput label="Lokasi Pelayanan">
                     <div>
                       {fields.map((field, index) => (
-                        <div key={field.id} className="mb-2 flex gap-1">
-                          <RegionSubregionSelector
-                            index={index}
-                            provinceOptions={provinceOptions}
-                          />
+                        <React.Fragment key={index}>
+                          <div className="mb-2 flex gap-1">
+                            <RegionSubregionSelector
+                              index={index}
+                              provinceOptions={provinceOptions}
+                            />
 
-                          {fields.length > 1 && (
-                            <button
-                              type="button"
-                              className="text-red-500 text-2xl"
-                              onClick={() => remove(index)}
-                            >
-                              <IoMdRemoveCircleOutline />
-                            </button>
-                          )}
-                        </div>
+                            {fields.length > 1 && (
+                              <button
+                                type="button"
+                                className="text-red-500 text-2xl"
+                                onClick={() => remove(index)}
+                              >
+                                <IoMdRemoveCircleOutline />
+                              </button>
+                            )}
+                          </div>
+                        </React.Fragment>
                       ))}
 
                       {fields.length >= 5 && (
@@ -234,6 +236,8 @@ export default function ProfilePage() {
                             append({
                               region: "",
                               subregion: "",
+                              id: "",
+                              idSubRegion: "",
                             })
                           }
                         >
