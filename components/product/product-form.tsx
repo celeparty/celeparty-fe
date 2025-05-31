@@ -1,20 +1,43 @@
 "use client";
-import Skeleton from "@/components/Skeleton";
-import SubTitle from "@/components/SubTitle";
+
+import { useToast } from "@/hooks/use-toast";
+import { iProductReq } from "@/lib/interfaces/iProduct";
 import { axiosUser } from "@/lib/services";
 import { formatNumberWithDots } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
-import { type SubmitHandler, useForm } from "react-hook-form";
+import { ReactNode, useState } from "react";
+import { useForm } from "react-hook-form";
+import Skeleton from "../Skeleton";
+import SubTitle from "../SubTitle";
 import { SchemaProduct } from "./SchemaProduct";
+import { eAlertType } from "@/lib/enums/eAlert";
 
-function ItemInput({ label, sublabel, children }: any) {
+interface iItemInputProps {
+  label: string;
+  sublabel?: string;
+  children: ReactNode;
+  required: boolean;
+}
+
+const ItemInput: React.FC<iItemInputProps> = ({
+  label,
+  sublabel,
+  children,
+  required,
+}) => {
   return (
     <div className="flex flex-col justify-items-start w-full gap-2 mb-5  [&_input]:bg-gray-100 [&_input]:hover:bg-white [&_textarea]:bg-gray-100 [&_textarea]:hover:bg-white">
       {label ? (
-        <div className="w-[full] text-[14px] lg:text-[16px]">{label}</div>
+        <div className="w-[full] text-[14px] lg:text-[16px]">
+          {label}{" "}
+          {required && (
+            <>
+              <span className="text-c-red">*</span>
+            </>
+          )}
+        </div>
       ) : null}
       {sublabel ? (
         <div className="text-[#DA7E01] text-[13px] lg:text-[10px] ">
@@ -24,19 +47,22 @@ function ItemInput({ label, sublabel, children }: any) {
       {children}
     </div>
   );
+};
+
+interface iProductFormProps {
+  isEdit: boolean;
 }
 
-export default function MainContentAddProduct() {
+export const ProductForm: React.FC<iProductFormProps> = ({ isEdit }) => {
   const { data: session, status } = useSession();
-  const [message, setMessage] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [errorMessage, setErrorMessage] = useState<string | boolean | null>(
-    false
-  );
   const [stateCategory, setStateCategory] = useState<any>({
     status: false,
     value: null,
   });
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const { toast } = useToast();
+
   const {
     register,
     handleSubmit,
@@ -44,35 +70,41 @@ export default function MainContentAddProduct() {
     reset,
     setValue,
     formState: { errors },
-  } = useForm<any>({
+  } = useForm<iProductReq>({
     resolver: zodResolver(SchemaProduct),
     defaultValues: {
-      main_price: 0,
+      title: "",
+      description: "",
+      main_price: "0",
+      minimal_order: 0,
+      main_image: "",
+      price_min: "0",
+      price_max: "0",
     },
   });
 
-  const onSubmit: SubmitHandler<any> = async (values) => {
+  const formatPriceReq = (price: string | number) => {
+    const formattedPrice = parseInt(String(price).replace(/\./g, ""));
+    return formattedPrice;
+  };
+
+  const onSubmit = async (data: iProductReq) => {
     const formData: any = new FormData();
     formData.append("files", selectedFile);
 
-    const sendNow = async () => {
-      try {
-        const uploadRes = await axiosUser(
-          "POST",
-          "/api/upload",
-          `${session && session?.jwt}`,
-          formData
-        );
-        const idImage = uploadRes[0].id;
-        const data: any = {
-          title: values.title,
-          minimal_order: values.minimal_order ? values.minimal_order : 0,
-          minimal_order_date: values.minimal_order_date
-            ? values.minimal_order_date
-            : "2026-12-31",
-          main_price: values.main_price ? parseInt(values.main_price) : 0,
+    try {
+      const uploadRes = await axiosUser(
+        "POST",
+        "/api/upload",
+        `${session && session?.jwt}`,
+        formData
+      );
+      const idImage = uploadRes[0].id;
+
+      if (idImage) {
+        let updatedData: iProductReq = {
+          ...data,
           main_image: idImage,
-          description: values.description,
           category: stateCategory.value
             ? { connect: parseInt(`${stateCategory.value}`) - 1 }
             : null,
@@ -81,8 +113,10 @@ export default function MainContentAddProduct() {
               id: session?.user.id,
             },
           },
+          main_price: formatPriceReq(data.main_price),
+          price_min: formatPriceReq(data.price_min),
+          price_max: formatPriceReq(data.price_max),
         };
-
         const response =
           stateCategory.value !== null &&
           (await axiosUser(
@@ -90,23 +124,25 @@ export default function MainContentAddProduct() {
             "/api/products?status=draft'",
             `${session && session?.jwt}`,
             {
-              data,
+              data: updatedData,
             }
           ));
         if (response) {
-          setErrorMessage(false);
-          setMessage(true);
+          toast({
+            title: "Sukses",
+            description: `Sukses ${isEdit ? "edit" : "menambahkan"} produk!"`,
+            className: eAlertType.SUCCESS,
+          });
         }
-      } catch (error: any) {
-        console.error("Error:", error);
-        setMessage(false);
-        setErrorMessage(
-          error.message ? error.message : error?.response?.data.error.message
-        );
       }
-    };
-    sendNow();
-    //reset()
+    } catch (error: any) {
+      console.error(error);
+      toast({
+        title: "Gagal",
+        description: `Gagal ${isEdit ? "edit" : "menambahkan"} produk!"`,
+        className: eAlertType.FAILED,
+      });
+    }
   };
 
   const getQuery = async () => {
@@ -120,6 +156,7 @@ export default function MainContentAddProduct() {
       );
     }
   };
+
   const query = useQuery({
     queryKey: ["qCategories"],
     queryFn: getQuery,
@@ -138,7 +175,7 @@ export default function MainContentAddProduct() {
   const dataCategory = query?.data?.data;
 
   return (
-    <div>
+    <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <SubTitle title="Pilih Kategori Produk" className="mb-3" />
         <div className="flex flex-wrap gap-2 mb-5">
@@ -164,17 +201,23 @@ export default function MainContentAddProduct() {
             );
           })}
         </div>
-        <ItemInput>
+        <ItemInput label="Nama Produk" required>
           <input
             className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
             placeholder="Nama Produk"
-            {...register("title", { required: true })}
+            {...register("title", {
+              required: true,
+              onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                const value = e.target.value;
+                setValue("title", value);
+              },
+            })}
           />
           {errors.title && (
             <p className="text-red-500 text-[10px]">{`${errors.title.message}`}</p>
           )}
         </ItemInput>
-        <ItemInput sublabel="Tambah Foto">
+        <ItemInput label="Tambah Foto" required>
           <div className="w-full">
             <input
               type="file"
@@ -189,34 +232,18 @@ export default function MainContentAddProduct() {
             )}
           </div>
         </ItemInput>
-        <ItemInput sublabel="Tambah Foto">
-          <div className="w-full">
-            <input
-              type="file"
-              className="border border-gray-300 rounded-md py-2 px-5 w-full"
-              {...register("main_image", { required: false })}
-              onChange={(e: any) => setSelectedFile(e.target.files[0])}
-            />
-            {errors.main_image && (
-              <p className="text-red-500 text-[10px]">
-                Gambar produk harus diisi
-              </p>
-            )}
-          </div>
-        </ItemInput>
-        <ItemInput label="Harga Produk (Rp)">
+        <ItemInput label="Harga Produk (Rp)" required>
           <input
             className="border border-gray-300 rounded-md py-2 px-5 w-full"
             placeholder="Harga Produk (Rp)"
-            inputMode="numeric"
-            pattern="[0-9]*"
             {...register("main_price", {
               required: true,
-              valueAsNumber: true,
               onChange: (e) => {
                 const rawValue = e.target.value.replace(/\D/g, ""); // Only digits
                 const formatted = formatNumberWithDots(rawValue);
-                setValue("main_price", formatted);
+                if (formatted) {
+                  setValue("main_price", formatted);
+                }
               },
             })}
           />
@@ -224,17 +251,62 @@ export default function MainContentAddProduct() {
             <p className="text-red-500 text-[10px]">{`${errors.main_price.message}`}</p>
           )}
         </ItemInput>
-        <ItemInput>
+
+        <ItemInput label="Deskripsi Produk" required>
           <textarea
             className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
             placeholder="Deskripsi Produk"
-            {...register("description", { required: true })}
+            {...register("description", {
+              required: true,
+              onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                const value = e.target.value;
+                setValue("description", value);
+              },
+            })}
           />
           {errors.description && (
             <p className="text-red-500 text-[10px]">{`${errors.description.message}`}</p>
           )}
         </ItemInput>
-        <ItemInput label="Minimal Item Pembelian (Optional)">
+        <ItemInput label="Harga Minimal Produk (Rp)" required>
+          <input
+            className="border border-gray-300 rounded-md py-2 px-5 w-full"
+            placeholder="Harga Produk (Rp)"
+            {...register("price_min", {
+              required: true,
+              onChange: (e) => {
+                const rawValue = e.target.value.replace(/\D/g, "");
+                const formatted = formatNumberWithDots(rawValue);
+                if (formatted) {
+                  setValue("price_min", formatted);
+                }
+              },
+            })}
+          />
+          {errors.price_min && (
+            <p className="text-red-500 text-[10px]">{`${errors.price_min.message}`}</p>
+          )}
+        </ItemInput>
+        <ItemInput label="Harga Maximal Produk (Rp)" required>
+          <input
+            className="border border-gray-300 rounded-md py-2 px-5 w-full"
+            placeholder="Harga Produk (Rp)"
+            {...register("price_max", {
+              required: true,
+              onChange: (e) => {
+                const rawValue = e.target.value.replace(/\D/g, "");
+                const formatted = formatNumberWithDots(rawValue);
+                if (formatted) {
+                  setValue("price_max", formatted);
+                }
+              },
+            })}
+          />
+          {errors.price_max && (
+            <p className="text-red-500 text-[10px]">{`${errors.price_max.message}`}</p>
+          )}
+        </ItemInput>
+        <ItemInput label="Minimal Item Pembelian (Optional)" required={false}>
           <label className="text-sm block italic">
             Masukkan jumlah minimum kuantiti pembelian jika produk atau layanan
             Anda memerlukan batas minimal pesanan tertentu.
@@ -242,10 +314,16 @@ export default function MainContentAddProduct() {
           <input
             className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
             placeholder="Jumlah Pcs Minimal"
-            {...register("minimal_order", { required: false })}
+            {...register("minimal_order", {
+              required: false,
+              onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                const value = e.target.value;
+                setValue("minimal_order", parseInt(value));
+              },
+            })}
           />
         </ItemInput>
-        <ItemInput label="Maksimal Hari Pemesanan (Optional)">
+        <ItemInput label="Maksimal Hari Pemesanan (Optional)" required={false}>
           <label className="text-sm block italic">
             Masukkan jumlah hari maksimal pemesanan jika produk atau layanan
             Anda membutuhkan persiapan lebih dari satu hari sebelum acara.
@@ -253,36 +331,42 @@ export default function MainContentAddProduct() {
           <input
             className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
             placeholder="(x) Hari Maksimal Pemesanan"
-            {...register("minimal_order_date", { required: false })}
+            {...register("minimal_order_date", {
+              required: false,
+              onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                const value = e.target.value;
+                setValue("minimal_order_date", value);
+              },
+            })}
           />
         </ItemInput>
         {/* <ItemInput label="Tema">
-					<div className="flex flex-wrap gap-2 mb-5">
-						{dataThemes?.map((item: any, i: number) => {
-							const isActive = stateTheme.value === item.id;
-							return (
-								<div
-									onClick={() => {
-										setStateTheme({
-											status: true,
-											value: item.id,
-										});
-									}}
-									key={item.id}
-									className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-5 py-1 `}
-								>
-									{item.name}
-								</div>
-							);
-						})}
-					</div>
-					{errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
-				</ItemInput> */}
-        <ItemInput label="Varian">
+            <div className="flex flex-wrap gap-2 mb-5">
+              {dataThemes?.map((item: any, i: number) => {
+                const isActive = stateTheme.value === item.id;
+                return (
+                  <div
+                    onClick={() => {
+                      setStateTheme({
+                        status: true,
+                        value: item.id,
+                      });
+                    }}
+                    key={item.id}
+                    className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-5 py-1 `}
+                  >
+                    {item.name}
+                  </div>
+                );
+              })}
+            </div>
+            {errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
+          </ItemInput> */}
+        {/* <ItemInput label="Varian" required={false}>
           <div className="text-[#DA7E01] text-[13px] lg:text-[12px] cursor-pointer">
             Tambah Varian
           </div>
-        </ItemInput>
+        </ItemInput> */}
         <div className="flex justify-center">
           {stateCategory.status ? (
             <input
@@ -299,7 +383,7 @@ export default function MainContentAddProduct() {
           )}
         </div>
       </form>
-      {message ? (
+      {/* {message ? (
         <div className="lg:mt-1 mt-3 text-green-500 text-[14px] lg:text-[16px] text-center">
           Add product berhasil, produk akan direview oleh admin
         </div>
@@ -310,7 +394,7 @@ export default function MainContentAddProduct() {
             ? "Pilih gambar lebih kecil"
             : errorMessage}
         </div>
-      ) : null}
-    </div>
+      ) : null} */}
+    </>
   );
-}
+};
