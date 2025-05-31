@@ -3,11 +3,11 @@
 import { useToast } from "@/hooks/use-toast";
 import { iProductReq } from "@/lib/interfaces/iProduct";
 import { axiosUser } from "@/lib/services";
-import { formatNumberWithDots } from "@/lib/utils";
+import { fetchAndConvertToFile, formatNumberWithDots } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import Skeleton from "../Skeleton";
 import SubTitle from "../SubTitle";
@@ -50,16 +50,20 @@ const ItemInput: React.FC<iItemInputProps> = ({
 };
 
 interface iProductFormProps {
+  formDefaultData: iProductReq;
   isEdit: boolean;
 }
 
-export const ProductForm: React.FC<iProductFormProps> = ({ isEdit }) => {
+export const ProductForm: React.FC<iProductFormProps> = ({
+  formDefaultData,
+  isEdit,
+}) => {
   const { data: session, status } = useSession();
   const [stateCategory, setStateCategory] = useState<any>({
     status: false,
     value: null,
   });
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const { toast } = useToast();
 
@@ -72,16 +76,29 @@ export const ProductForm: React.FC<iProductFormProps> = ({ isEdit }) => {
     formState: { errors },
   } = useForm<iProductReq>({
     resolver: zodResolver(SchemaProduct),
-    defaultValues: {
-      title: "",
-      description: "",
-      main_price: "0",
-      minimal_order: 0,
-      main_image: "",
-      price_min: "0",
-      price_max: "0",
-    },
+    defaultValues: formDefaultData,
   });
+
+  useEffect(() => {
+    if (formDefaultData) {
+      reset(formDefaultData);
+      const convertFile = async () => {
+        const { id, url, mime } = formDefaultData.main_image;
+        const file = await fetchAndConvertToFile(formDefaultData.main_image);
+
+        setValue("main_image", {
+          id: id,
+          url: url,
+          mime: mime,
+        });
+        setSelectedFile(file);
+      };
+
+      if (formDefaultData) {
+        convertFile();
+      }
+    }
+  }, [formDefaultData]);
 
   const formatPriceReq = (price: string | number) => {
     const formattedPrice = parseInt(String(price).replace(/\./g, ""));
@@ -117,20 +134,27 @@ export const ProductForm: React.FC<iProductFormProps> = ({ isEdit }) => {
           price_min: formatPriceReq(data.price_min),
           price_max: formatPriceReq(data.price_max),
         };
-        const response =
-          stateCategory.value !== null &&
-          (await axiosUser(
-            "POST",
-            "/api/products?status=draft'",
-            `${session && session?.jwt}`,
-            {
-              data: updatedData,
-            }
-          ));
+
+        let response: any;
+        if (isEdit) {
+          console.log(updatedData);
+        } else {
+          response =
+            stateCategory.value !== null &&
+            (await axiosUser(
+              "POST",
+              "/api/products?status=draft'",
+              `${session && session?.jwt}`,
+              {
+                data: updatedData,
+              }
+            ));
+        }
+
         if (response) {
           toast({
             title: "Sukses",
-            description: `Sukses ${isEdit ? "edit" : "menambahkan"} produk!"`,
+            description: `Sukses ${isEdit ? "edit" : "menambahkan"} produk!`,
             className: eAlertType.SUCCESS,
           });
         }
@@ -139,7 +163,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({ isEdit }) => {
       console.error(error);
       toast({
         title: "Gagal",
-        description: `Gagal ${isEdit ? "edit" : "menambahkan"} produk!"`,
+        description: `Gagal ${isEdit ? "edit" : "menambahkan"} produk!`,
         className: eAlertType.FAILED,
       });
     }
@@ -339,6 +363,22 @@ export const ProductForm: React.FC<iProductFormProps> = ({ isEdit }) => {
               },
             })}
           />
+        </ItemInput>
+        <ItemInput label="Rate Produk" required={false}>
+          <input
+            className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
+            placeholder="Rate Produk"
+            {...register("rate", {
+              required: false,
+              onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                const value = e.target.value;
+                setValue("rate", parseInt(value));
+              },
+            })}
+          />
+          {errors.title && (
+            <p className="text-red-500 text-[10px]">{`${errors.title.message}`}</p>
+          )}
         </ItemInput>
         {/* <ItemInput label="Tema">
             <div className="flex flex-wrap gap-2 mb-5">

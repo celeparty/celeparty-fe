@@ -1,14 +1,47 @@
 "use client";
+import Box from "@/components/Box";
+import { ProductForm } from "@/components/product/product-form";
 import { useToast } from "@/hooks/use-toast";
 import { eAlertType } from "@/lib/enums/eAlert";
-import { iUpdateProduct } from "@/lib/interfaces/iProduct";
+import {
+  iProductReq,
+  iProductRes,
+  iUpdateProduct,
+} from "@/lib/interfaces/iProduct";
 import { axiosData } from "@/lib/services";
-import { formatNumberWithDots } from "@/lib/utils";
+import { fetchAndConvertToFile, formatNumberWithDots } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+import { data } from "autoprefixer";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { AiFillCustomerService } from "react-icons/ai";
 
 export default function ContentProductEdit(props: any) {
+  const [defaultFormData, setDefaultFormData] = useState<iProductReq>({
+    title: "",
+    description: "",
+    main_price: "0",
+    minimal_order: 0,
+    main_image: {
+      id: "",
+      url: "",
+      mime: "",
+    },
+    price_min: "0",
+    price_max: "0",
+    category: {
+      connect: 0,
+    },
+    kabupaten: "",
+    rate: 0,
+    minimal_order_date: "",
+    users_permissions_user: {
+      connect: {
+        id: "",
+      },
+    },
+  });
   const [title, setTitle] = useState<string>("");
   const [rate, setRate] = useState<number>(0);
   const [main_price, setMainPrice] = useState<string>("0");
@@ -28,18 +61,29 @@ export default function ContentProductEdit(props: any) {
     queryFn: getQuery,
   });
 
-  const dataContent = query?.data?.data;
+  const dataContent: iProductRes = query?.data?.data;
 
   useEffect(() => {
     if (dataContent) {
-      setTitle(dataContent.title);
-      setRate(dataContent.rate);
-      setMainPrice(dataContent.main_price);
-      setMinimalOrder(dataContent.minimal_order);
-      setPriceMax(dataContent.price_max);
-      setPriceMin(dataContent.price_min);
-      setKabupaten(dataContent.kabupaten);
-      setDescription(dataContent.description);
+      const formData: iProductReq = {
+        title: dataContent.title,
+        description: dataContent.description,
+        main_price: formatPriceValue(dataContent.main_price),
+        minimal_order: dataContent.minimal_order,
+        main_image: dataContent.main_image,
+        price_min: formatPriceValue(dataContent.price_min),
+        price_max: formatPriceValue(dataContent.price_max),
+        kabupaten: dataContent.kabupaten,
+        category: dataContent.category,
+        rate: dataContent.rate,
+        minimal_order_date: dataContent.minimal_order_date,
+        users_permissions_user: {
+          connect: {
+            id: dataContent.users_permissions_user.id,
+          },
+        },
+      };
+      setDefaultFormData(formData);
     }
   }, [dataContent]);
 
@@ -84,149 +128,33 @@ export default function ContentProductEdit(props: any) {
     }
   };
 
-  const formatPriceValue = (value: string) => {
+  const formatPriceValue = (value: string | number) => {
     const rawValue = value;
     const formatted = formatNumberWithDots(rawValue);
     return formatted;
   };
+
   return (
-    <div>
-      <div className="container mx-auto p-6">
-        <h1 className="text-2xl font-bold mb-4">Edit Produk</h1>
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="title" className="block font-medium mb-2">
-              Title Product
-            </label>
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              id="title"
-              name="title"
-              type="text"
-              className="w-full p-2 border rounded"
-              placeholder="Masukkan title produk"
-            />
-          </div>
-          <div>
-            <label htmlFor="title" className="block font-medium mb-2">
-              Rate Product
-            </label>
-            <input
-              value={rate}
-              onChange={(e) => setRate(Number(e.target.value))}
-              id="rate"
-              name="rate"
-              type="text"
-              className="w-full p-2 border rounded"
-              placeholder="Masukkan rate produk"
-            />
-          </div>
-          <div>
-            <label htmlFor="title" className="block font-medium mb-2">
-              Harga Product
-            </label>
-            <input
-              value={formatPriceValue(main_price)}
-              onChange={(e) => {
-                let val = formatPriceValue(e.target.value.replace(/\D/g, ""));
-                setMainPrice(val);
-              }}
-              id="harga utama"
-              name="harga utama"
-              type="text"
-              className="w-full p-2 border rounded"
-              placeholder="Masukkan harga utama produk"
-            />
-          </div>
-          <div>
-            <label htmlFor="title" className="block font-medium mb-2">
-              Minimal Order
-              <span className="text-sm block italic">
-                Masukkan jumlah minimum kuantiti pembelian jika produk atau
-                layanan Anda memerlukan batas minimal pesanan tertentu.
-              </span>
-            </label>
-            <input
-              value={minimal_order}
-              onChange={(e) => setMinimalOrder(Number(e.target.value))}
-              id="minimal order"
-              name="minimal order"
-              type="text"
-              className="w-full p-2 border rounded"
-              placeholder="Masukkan minimal order produk"
-            />
-          </div>
-          <div>
-            <label htmlFor="title" className="block font-medium mb-2">
-              Harga Minimal
-            </label>
-            <input
-              value={formatPriceValue(price_min)}
-              onChange={(e) => {
-                let val = formatPriceValue(e.target.value.replace(/\D/g, ""));
-                setPriceMin(val);
-              }}
-              id="price_min"
-              name="price_min"
-              type="text"
-              className="w-full p-2 border rounded"
-              placeholder="Masukkan harga minimal produk"
-            />
-          </div>
-          <div>
-            <label htmlFor="title" className="block font-medium mb-2">
-              Harga Maksimal
-            </label>
-            <input
-              value={formatPriceValue(price_max)}
-              onChange={(e) => {
-                let val = formatPriceValue(e.target.value.replace(/\D/g, ""));
-                setPriceMax(val);
-              }}
-              id="price_max"
-              name="price_max"
-              type="text"
-              className="w-full p-2 border rounded"
-              placeholder="Masukkan harga maksimal produk"
-            />
-          </div>
-          <div>
-            <label htmlFor="title" className="block font-medium mb-2">
-              Kabupaten
-            </label>
-            <input
-              value={kabupaten}
-              onChange={(e) => setKabupaten(e.target.value)}
-              id="minimal order"
-              name="minimal order"
-              type="text"
-              className="w-full p-2 border rounded"
-              placeholder="Masukkan kabupaten anda"
-            />
-          </div>
-          <div>
-            <label htmlFor="title" className="block font-medium mb-2">
-              Deskripsi
-            </label>
-            <input
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              id="minimal order"
-              name="minimal order"
-              type="text"
-              className="w-full p-2 border rounded"
-              placeholder="Masukkan deskripsi anda"
-            />
-          </div>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded"
-          >
-            Simpan Perubahan
-          </button>
-        </form>
-      </div>
-    </div>
+    <>
+      <h1 className="text-2xl font-bold mb-4">Edit Produk</h1>
+      <Box className="mt-0">
+        <div className="lg:mt-7">
+          <ProductForm
+            isEdit={true}
+            formDefaultData={defaultFormData}
+          ></ProductForm>
+        </div>
+      </Box>
+      <Box>
+        <div className="flex justify-center items-center">
+          <Link href="/" className="flex gap-2 items-center">
+            <AiFillCustomerService className="lg:text-3xl text-2xl" />
+            <strong className="text-[14px] lg:text-[16px]">
+              Bantuan Celeparty Care
+            </strong>
+          </Link>
+        </div>
+      </Box>
+    </>
   );
 }

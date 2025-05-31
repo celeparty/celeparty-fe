@@ -14,7 +14,7 @@ export interface iProductReq {
   minimal_order: number;
   minimal_order_date: string;
   main_price: string | number;
-  main_image: string;
+  main_image: iProductImage;
   description: string;
   rate: number;
   kabupaten: string;
@@ -28,4 +28,20 @@ export interface iProductReq {
       id: string;
     };
   };
+}
+
+export interface iUserPermissions {
+  id: string;
+}
+
+export interface iProductImage {
+  id: string;
+  url: string;
+  mime: string;
+}
+
+export interface iProductRes
+  extends Omit<iProductReq, "users_permissions_user" | "main_image"> {
+  users_permissions_user: iUserPermissions;
+  main_image: iProductImage;
 }
