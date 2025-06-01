@@ -83,7 +83,7 @@ export default function Wallet() {
 								</div>
 							</div>
 							<Link
-								href="/"
+								href="/user/vendor/profile"
 								className="border border-solid border-black text-[14px] lg:text-[16px] py-3 px-10 rounded-xl mt-7 inline-block text-black hover:bg-c-gray hover:text-white w-full lg:w-auto text-center lg:text-start font-extrabold lg:font-normal"
 							>
 								Edit Rekening
