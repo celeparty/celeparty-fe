@@ -79,7 +79,9 @@ export default function ContentProductEdit(props: any) {
             id: dataContent.users_permissions_user.id,
           },
         },
+        documentId: dataContent.documentId,
       };
+
       setDefaultFormData(formData);
     }
   }, [dataContent]);

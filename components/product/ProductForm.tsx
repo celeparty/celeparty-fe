@@ -144,7 +144,16 @@ export const ProductForm: React.FC<iProductFormProps> = ({
 
         let response: any;
         if (isEdit) {
-          console.log(updatedData);
+          response =
+            stateCategory.value !== null &&
+            (await axiosUser(
+              "PUT",
+              `/api/products/${formDefaultData.documentId}`,
+              `${session && session?.jwt}`,
+              {
+                data: updatedData,
+              }
+            ));
         } else {
           response =
             stateCategory.value !== null &&

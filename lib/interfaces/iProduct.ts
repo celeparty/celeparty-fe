@@ -28,6 +28,7 @@ export interface iProductReq {
       id: string;
     };
   };
+  documentId?: string; // For Edit Product
 }
 
 export interface iUserPermissions {
@@ -54,4 +55,5 @@ export interface iProductRes
   users_permissions_user: iUserPermissions;
   main_image: iProductImage;
   category: iProdCatRes;
+  documentId: string;
 }
