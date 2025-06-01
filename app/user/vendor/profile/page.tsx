@@ -78,7 +78,6 @@ const getProvinces = async (): Promise<iSelectOption[]> => {
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
-  const [formData, setFormData] = useState<iMerchantProfile>();
   const [notif, setNotif] = React.useState(false);
 
   const { toast } = useToast();
@@ -99,11 +98,9 @@ export default function ProfilePage() {
     name: "serviceLocation",
   });
 
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const onSubmit: SubmitHandler<iMerchantProfile> = async (
     formData: iMerchantProfile
   ) => {
-    console.log(formData);
     try {
       const response = await axiosUser(
         "PUT",
@@ -159,7 +156,6 @@ export default function ProfilePage() {
   useEffect(() => {
     if (query.data && dataContent) {
       formMethods.reset(dataContent);
-      setFormData(query.data);
     }
   }, [query.data, reset]);
 
