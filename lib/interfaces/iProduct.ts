@@ -40,8 +40,18 @@ export interface iProductImage {
   mime: string;
 }
 
+export interface iProdCatRes {
+  id: number;
+  documentId: string;
+  title: string;
+}
+
 export interface iProductRes
-  extends Omit<iProductReq, "users_permissions_user" | "main_image"> {
+  extends Omit<
+    iProductReq,
+    "users_permissions_user" | "main_image" | "category"
+  > {
   users_permissions_user: iUserPermissions;
   main_image: iProductImage;
+  category: iProdCatRes;
 }
