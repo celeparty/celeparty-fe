@@ -59,7 +59,10 @@ export const ProductForm: React.FC<iProductFormProps> = ({
   isEdit,
 }) => {
   const { data: session, status } = useSession();
-  const [stateCategory, setStateCategory] = useState<any>({
+  const [stateCategory, setStateCategory] = useState<{
+    status: boolean;
+    value: number | null;
+  }>({
     status: false,
     value: null,
   });
@@ -82,6 +85,10 @@ export const ProductForm: React.FC<iProductFormProps> = ({
   useEffect(() => {
     if (formDefaultData) {
       reset(formDefaultData);
+      setStateCategory({
+        status: true,
+        value: formDefaultData.category?.connect ?? null,
+      });
       const convertFile = async () => {
         const { id, url, mime } = formDefaultData.main_image;
         const file = await fetchAndConvertToFile(formDefaultData.main_image);
@@ -94,7 +101,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
         setSelectedFile(file);
       };
 
-      if (formDefaultData) {
+      if (formDefaultData && formDefaultData.main_image) {
         convertFile();
       }
     }
@@ -137,7 +144,16 @@ export const ProductForm: React.FC<iProductFormProps> = ({
 
         let response: any;
         if (isEdit) {
-          console.log(updatedData);
+          response =
+            stateCategory.value !== null &&
+            (await axiosUser(
+              "PUT",
+              `/api/products/${formDefaultData.documentId}`,
+              `${session && session?.jwt}`,
+              {
+                data: updatedData,
+              }
+            ));
         } else {
           response =
             stateCategory.value !== null &&
@@ -197,7 +213,6 @@ export const ProductForm: React.FC<iProductFormProps> = ({
     );
   }
   const dataCategory = query?.data?.data;
-
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -210,7 +225,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
                 onClick={() => {
                   setStateCategory({
                     status: true,
-                    value: parseInt(`${item.id}`),
+                    value: item.id,
                   });
                 }}
                 key={item.id}

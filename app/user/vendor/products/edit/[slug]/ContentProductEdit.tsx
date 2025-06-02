@@ -1,6 +1,6 @@
 "use client";
 import Box from "@/components/Box";
-import { ProductForm } from "@/components/product/product-form";
+import { ProductForm } from "@/components/product/ProductForm";
 import { useToast } from "@/hooks/use-toast";
 import { eAlertType } from "@/lib/enums/eAlert";
 import {
@@ -9,9 +9,8 @@ import {
   iUpdateProduct,
 } from "@/lib/interfaces/iProduct";
 import { axiosData } from "@/lib/services";
-import { fetchAndConvertToFile, formatNumberWithDots } from "@/lib/utils";
+import { formatNumberWithDots } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { data } from "autoprefixer";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -30,9 +29,7 @@ export default function ContentProductEdit(props: any) {
     },
     price_min: "0",
     price_max: "0",
-    category: {
-      connect: 0,
-    },
+    category: null,
     kabupaten: "",
     rate: 0,
     minimal_order_date: "",
@@ -74,7 +71,7 @@ export default function ContentProductEdit(props: any) {
         price_min: formatPriceValue(dataContent.price_min),
         price_max: formatPriceValue(dataContent.price_max),
         kabupaten: dataContent.kabupaten,
-        category: dataContent.category,
+        category: { connect: dataContent.category.id },
         rate: dataContent.rate,
         minimal_order_date: dataContent.minimal_order_date,
         users_permissions_user: {
@@ -82,7 +79,9 @@ export default function ContentProductEdit(props: any) {
             id: dataContent.users_permissions_user.id,
           },
         },
+        documentId: dataContent.documentId,
       };
+
       setDefaultFormData(formData);
     }
   }, [dataContent]);

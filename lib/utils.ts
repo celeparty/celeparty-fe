@@ -19,11 +19,9 @@ export const formatNumberWithDots = (value: string | number): string => {
 };
 
 export async function fetchAndConvertToFile(imageData: any): Promise<File> {
-  // Ensure URL is complete (prepend domain if needed)
   const fullUrl = imageData.url.startsWith("/uploads")
-    ? imageData.url
-    : `${process.env.BASE_API}${imageData.url}`;
-
+    ? `${process.env.BASE_API}${imageData.url}`
+    : imageData.url;
   const response = await fetch(fullUrl);
   const blob = await response.blob();
 

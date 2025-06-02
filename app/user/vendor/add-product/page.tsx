@@ -1,7 +1,7 @@
 "use client";
 import Box from "@/components/Box";
 
-import { ProductForm } from "@/components/product/product-form";
+import { ProductForm } from "@/components/product/ProductForm";
 import { iProductReq } from "@/lib/interfaces/iProduct";
 import Link from "next/link";
 import { AiFillCustomerService } from "react-icons/ai";
