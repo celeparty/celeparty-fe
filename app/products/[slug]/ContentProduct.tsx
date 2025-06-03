@@ -13,11 +13,13 @@ import { useEffect, useState } from "react";
 import { FaStar } from "react-icons/fa";
 import { FcHighPriority } from "react-icons/fc";
 import SideBar from "./SideBar";
+import { ProductImageSlider } from "@/components/product/ProductImageSlider";
 
 export default function ContentProduct(props: any) {
   const [selectedVariantId, setSelectedVariantId] = useState<number | null>(
     null
   );
+  const [imgUrls, setImgUrls] = useState<string[]>([]);
 
   const getQuery = async () => {
     return await axiosData("GET", `/api/products/${props.slug}?populate=*`);
@@ -33,6 +35,25 @@ export default function ContentProduct(props: any) {
   useEffect(() => {
     setCurrentPrice(dataContent?.main_price);
   }, []);
+
+  const populateImageUrls = () => {
+    let urls: string[] = [];
+    if (dataContent) {
+      const { main_image } = dataContent;
+      main_image.forEach((element: any) => {
+        if (element.url) {
+          urls.push(element.url);
+        }
+      });
+    }
+
+    setImgUrls(urls);
+  };
+
+  useEffect(() => {
+    populateImageUrls();
+  }, [dataContent]);
+
   if (query.isLoading) {
     return (
       <div className="mt-[80px]">
@@ -52,19 +73,8 @@ export default function ContentProduct(props: any) {
       {dataContent ? (
         <div className="relative flex lg:flex-row flex-col justify-between gap-11 [&_h4]:mb-2 [&_h4]:text-[18px] [&_h4]:font-medium">
           <div className="flex lg:flex-row flex-col gap-9 justify-between items-start">
-            <div className="relative imageproduct min-w-[350px] w-[350px] h-[350px] flex justify-center lg:block">
-              <div className="relative lg:min-w-[350px] lg:w-[350px] lg:h-[350px] w-[320px] h-[320px]">
-                <Image
-                  src={
-                    dataContent.main_image
-                      ? process.env.BASE_API + dataContent.main_image.url
-                      : "/images/no-image.png"
-                  }
-                  alt=""
-                  fill
-                  style={{ objectFit: "cover" }}
-                />
-              </div>
+            <div className="relative imageProduct lg:min-w-[350px] lg:w-[350px] lg:h-[350px] w-[320px] h-[320px]">
+              <ProductImageSlider urls={imgUrls}></ProductImageSlider>
             </div>
             <div className="relative gap-1">
               <h5 className="font-hint text-[20px] lg:text-sm mb-2 font-medium text-black lg:text-c-gray-text2">
