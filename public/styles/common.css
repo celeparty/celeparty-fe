@@ -11,3 +11,11 @@
 .toast-warning {
   background-color: var(--yellow);
 }
+
+.imageProduct button.-left-12 {
+  left: 0
+}
+
+.imageProduct button.-right-12 {
+  right: 0
+}
