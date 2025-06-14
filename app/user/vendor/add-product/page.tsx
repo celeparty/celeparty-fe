@@ -2,7 +2,11 @@
 import Box from "@/components/Box";
 
 import { ProductForm } from "@/components/product/ProductForm";
-import { iProductReq } from "@/lib/interfaces/iProduct";
+import {
+  iProductImage,
+  iProductReq,
+  iProductVariant,
+} from "@/lib/interfaces/iProduct";
 import Link from "next/link";
 import { AiFillCustomerService } from "react-icons/ai";
 
@@ -12,11 +16,7 @@ export default function ProfilePage() {
     description: "",
     main_price: "0",
     minimal_order: 0,
-    main_image: {
-      id: "",
-      url: "",
-      mime: "",
-    },
+    main_image: [{} as iProductImage],
     price_min: "0",
     price_max: "0",
     category: {
@@ -30,6 +30,7 @@ export default function ProfilePage() {
         id: "",
       },
     },
+    variant: [{} as iProductVariant],
   };
   return (
     <>

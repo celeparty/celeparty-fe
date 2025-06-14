@@ -1,18 +1,20 @@
 "use client";
 
 import { useToast } from "@/hooks/use-toast";
-import { iProductReq } from "@/lib/interfaces/iProduct";
+import { iProductImage, iProductReq } from "@/lib/interfaces/iProduct";
 import { axiosUser } from "@/lib/services";
 import { fetchAndConvertToFile, formatNumberWithDots } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { ReactNode, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import Skeleton from "../Skeleton";
 import SubTitle from "../SubTitle";
 import { SchemaProduct } from "./SchemaProduct";
 import { eAlertType } from "@/lib/enums/eAlert";
+import { FileUploader } from "./FileUploader";
+import { Button } from "../ui/button";
 
 interface iItemInputProps {
   label: string;
@@ -20,6 +22,8 @@ interface iItemInputProps {
   children: ReactNode;
   required: boolean;
 }
+
+const MAX_IMAGES = 5;
 
 const ItemInput: React.FC<iItemInputProps> = ({
   label,
@@ -76,11 +80,76 @@ export const ProductForm: React.FC<iProductFormProps> = ({
     watch,
     reset,
     setValue,
+    getValues,
+    control,
     formState: { errors },
   } = useForm<iProductReq>({
     resolver: zodResolver(SchemaProduct),
-    defaultValues: formDefaultData,
+    defaultValues: {
+      ...formDefaultData,
+      main_image: formDefaultData?.main_image || [],
+    },
   });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "main_image",
+  });
+
+  const convertAndSetEditImages = async () => {
+    if (!formDefaultData?.main_image) return;
+
+    // Convert all images to File objects (for preview) while keeping original data
+    const processedImages = await Promise.all(
+      formDefaultData.main_image.map(async (img) => {
+        if (img.url && !img.url.startsWith("blob:")) {
+          try {
+            const file = await fetchAndConvertToFile(img);
+            return {
+              ...img,
+              file, // Temporary file reference
+              url: URL.createObjectURL(file), // Create preview URL
+            };
+          } catch (error) {
+            console.error("Failed to convert image:", error);
+            return img; // Fallback to original
+          }
+        }
+        return img; // Already processed or invalid
+      })
+    );
+
+    // Set form values
+    setValue("main_image", processedImages);
+  };
+
+  const handleFileChange = async (index: number, file: File | null) => {
+    if (file) {
+      const imageObj: iProductImage = {
+        id: `temp-${Date.now()}`,
+        url: URL.createObjectURL(file),
+        mime: file.type,
+      };
+
+      // Update the specific image in the form state
+      setValue(`main_image.${index}`, imageObj);
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    // Clean up object URL
+    const currentImage = getValues(`main_image.${index}`);
+    if (currentImage?.url?.startsWith("blob:")) {
+      URL.revokeObjectURL(currentImage.url);
+    }
+    remove(index);
+  };
+
+  const handleAddImage = () => {
+    if (fields.length < MAX_IMAGES) {
+      append({ id: "", url: "", mime: "" });
+    }
+  };
 
   useEffect(() => {
     if (formDefaultData) {
@@ -89,22 +158,15 @@ export const ProductForm: React.FC<iProductFormProps> = ({
         status: true,
         value: formDefaultData.category?.connect ?? null,
       });
-      const convertFile = async () => {
-        const { id, url, mime } = formDefaultData.main_image;
-        const file = await fetchAndConvertToFile(formDefaultData.main_image);
-
-        setValue("main_image", {
-          id: id,
-          url: url,
-          mime: mime,
-        });
-        setSelectedFile(file);
-      };
 
       if (formDefaultData && formDefaultData.main_image) {
-        convertFile();
+        convertAndSetEditImages();
       }
     }
+  }, [formDefaultData]);
+
+  useEffect(() => {
+    console.log(formDefaultData.main_image);
   }, [formDefaultData]);
 
   const formatPriceReq = (price: string | number) => {
@@ -117,13 +179,19 @@ export const ProductForm: React.FC<iProductFormProps> = ({
     formData.append("files", selectedFile);
 
     try {
-      const uploadRes = await axiosUser(
-        "POST",
-        "/api/upload",
-        `${session && session?.jwt}`,
-        formData
-      );
-      const idImage = uploadRes[0].id;
+      let uploadRes: any = {};
+      if (formDefaultData.main_image[0].id === null) {
+        uploadRes = await axiosUser(
+          "POST",
+          "/api/upload",
+          `${session && session?.jwt}`,
+          formData
+        );
+      }
+      const idImage =
+        formDefaultData.main_image[0].id !== null
+          ? formDefaultData.main_image[0].id
+          : uploadRes[0].id;
 
       if (idImage) {
         let updatedData: iProductReq = {
@@ -216,6 +284,27 @@ export const ProductForm: React.FC<iProductFormProps> = ({
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
+        <SubTitle title="Pilih Foto Produk" className="mb-3" />
+        <div className="image-upload-container flex flex-wrap gap-2 mb-5">
+          {fields.map((field, index) => (
+            <div className="image-item  w-[20%]">
+              <FileUploader
+                key={field.id}
+                image={field}
+                onFileChange={(file) => handleFileChange(index, file)}
+                onRemove={() => handleRemoveImage(index)}
+              />
+            </div>
+          ))}
+          <div className="w-full">
+            {fields.length < MAX_IMAGES && (
+              <Button variant={"default"} onClick={handleAddImage}>
+                Add Image ({fields.length}/{MAX_IMAGES})
+              </Button>
+            )}
+          </div>
+        </div>
+
         <SubTitle title="Pilih Kategori Produk" className="mb-3" />
         <div className="flex flex-wrap gap-2 mb-5">
           {dataCategory?.map((item: any, i: number) => {
@@ -256,21 +345,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
             <p className="text-red-500 text-[10px]">{`${errors.title.message}`}</p>
           )}
         </ItemInput>
-        <ItemInput label="Tambah Foto" required>
-          <div className="w-full">
-            <input
-              type="file"
-              className="border border-gray-300 rounded-md py-2 px-5 w-full"
-              {...register("main_image", { required: false })}
-              onChange={(e: any) => setSelectedFile(e.target.files[0])}
-            />
-            {errors.main_image && (
-              <p className="text-red-500 text-[10px]">
-                Gambar produk harus diisi
-              </p>
-            )}
-          </div>
-        </ItemInput>
+
         <ItemInput label="Harga Produk (Rp)" required>
           <input
             className="border border-gray-300 rounded-md py-2 px-5 w-full"
