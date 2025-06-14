@@ -1,6 +1,7 @@
 "use client";
 
 import { useToast } from "@/hooks/use-toast";
+import { eAlertType } from "@/lib/enums/eAlert";
 import { iProductImage, iProductReq } from "@/lib/interfaces/iProduct";
 import { axiosUser } from "@/lib/services";
 import { fetchAndConvertToFile, formatNumberWithDots } from "@/lib/utils";
@@ -11,10 +12,9 @@ import { ReactNode, useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import Skeleton from "../Skeleton";
 import SubTitle from "../SubTitle";
-import { SchemaProduct } from "./SchemaProduct";
-import { eAlertType } from "@/lib/enums/eAlert";
-import { FileUploader } from "./FileUploader";
 import { Button } from "../ui/button";
+import { FileUploader } from "./FileUploader";
+import { SchemaProduct } from "./SchemaProduct";
 
 interface iItemInputProps {
   label: string;
@@ -91,7 +91,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: "main_image",
   });
@@ -112,16 +112,23 @@ export const ProductForm: React.FC<iProductFormProps> = ({
             };
           } catch (error) {
             console.error("Failed to convert image:", error);
-            return img; // Fallback to original
+            return img;
           }
         }
-        return img; // Already processed or invalid
+        return img;
       })
     );
 
     // Set form values
     setValue("main_image", processedImages);
   };
+
+  // Initialize empty slots for images
+  useEffect(() => {
+    if (fields.length === 0) {
+      handleAddImage();
+    }
+  }, []);
 
   const handleFileChange = async (index: number, file: File | null) => {
     if (file) {
@@ -131,8 +138,9 @@ export const ProductForm: React.FC<iProductFormProps> = ({
         mime: file.type,
       };
 
-      // Update the specific image in the form state
-      setValue(`main_image.${index}`, imageObj);
+      const currentImages = getValues("main_image");
+      currentImages[index] = imageObj;
+      setValue("main_image", currentImages, { shouldDirty: true });
     }
   };
 

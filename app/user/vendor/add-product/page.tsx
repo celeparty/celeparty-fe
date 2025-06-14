@@ -36,12 +36,10 @@ export default function ProfilePage() {
     <>
       <h1 className="text-2xl font-bold mb-4">Tambah Produk</h1>
       <Box className="mt-0">
-        <div className="lg:mt-7">
-          <ProductForm
-            isEdit={false}
-            formDefaultData={defaultFormData}
-          ></ProductForm>
-        </div>
+        <ProductForm
+          isEdit={false}
+          formDefaultData={defaultFormData}
+        ></ProductForm>
       </Box>
       <Box>
         <div className="flex justify-center items-center">

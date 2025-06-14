@@ -141,12 +141,10 @@ export default function ContentProductEdit(props: any) {
     <>
       <h1 className="text-2xl font-bold mb-4">Edit Produk</h1>
       <Box className="mt-0">
-        <div className="lg:mt-7">
-          <ProductForm
-            isEdit={true}
-            formDefaultData={defaultFormData}
-          ></ProductForm>
-        </div>
+        <ProductForm
+          isEdit={true}
+          formDefaultData={defaultFormData}
+        ></ProductForm>
       </Box>
       <Box>
         <div className="flex justify-center items-center">

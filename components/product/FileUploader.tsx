@@ -37,7 +37,7 @@ export const FileUploader = ({
             onClick={onRemove}
             className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6"
           >
-            ×
+            &times;
           </button>
         </div>
       ) : (
