@@ -8,7 +8,7 @@ import { fetchAndConvertToFile, formatNumberWithDots } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import Skeleton from "../Skeleton";
 import SubTitle from "../SubTitle";
@@ -183,28 +183,45 @@ export const ProductForm: React.FC<iProductFormProps> = ({
   };
 
   const onSubmit = async (data: iProductReq) => {
-    const formData: any = new FormData();
-    formData.append("files", selectedFile);
-
     try {
-      let uploadRes: any = {};
-      if (formDefaultData.main_image[0].id === null) {
-        uploadRes = await axiosUser(
-          "POST",
-          "/api/upload",
-          `${session && session?.jwt}`,
-          formData
-        );
-      }
-      const idImage =
-        formDefaultData.main_image[0].id !== null
-          ? formDefaultData.main_image[0].id
-          : uploadRes[0].id;
+      // 1. Get current field values (including unregistered fields)
+      const formValues = getValues();
 
-      if (idImage) {
+      // 2. Handle image uploads from fields
+      const uploadedImages = await Promise.all(
+        fields.map(async (field, index) => {
+          const fieldData = formValues.main_image[index];
+
+          // Skip upload if already has ID (existing image)
+          if (fieldData?.id) return fieldData;
+
+          // Upload new image if file exists
+          if (fieldData?.file) {
+            const formData = new FormData();
+            formData.append("files", fieldData.file);
+
+            const uploadRes = await axiosUser(
+              "POST",
+              "/api/upload",
+              session?.jwt || "",
+              formData
+            );
+
+            return {
+              id: uploadRes[0].id,
+              url: uploadRes[0].url,
+              mime: fieldData.file.type,
+            };
+          }
+
+          return fieldData || { id: "", url: "", mime: "" };
+        })
+      );
+
+      if (uploadedImages?.length > 0) {
         let updatedData: iProductReq = {
           ...data,
-          main_image: idImage,
+          main_image: uploadedImages.filter((img) => img?.id), // Filter out empty images
           category: stateCategory.value
             ? { connect: parseInt(`${stateCategory.value}`) - 1 }
             : null,
@@ -242,7 +259,6 @@ export const ProductForm: React.FC<iProductFormProps> = ({
               }
             ));
         }
-
         if (response) {
           toast({
             title: "Sukses",
@@ -295,14 +311,16 @@ export const ProductForm: React.FC<iProductFormProps> = ({
         <SubTitle title="Pilih Foto Produk" className="mb-3" />
         <div className="image-upload-container flex flex-wrap gap-2 mb-5">
           {fields.map((field, index) => (
-            <div className="image-item  w-[20%]">
-              <FileUploader
-                key={field.id}
-                image={field}
-                onFileChange={(file) => handleFileChange(index, file)}
-                onRemove={() => handleRemoveImage(index)}
-              />
-            </div>
+            <React.Fragment key={index}>
+              <div className="image-item  w-[20%]">
+                <FileUploader
+                  key={field.id}
+                  image={field}
+                  onFileChange={(file) => handleFileChange(index, file)}
+                  onRemove={() => handleRemoveImage(index)}
+                />
+              </div>
+            </React.Fragment>
           ))}
           <div className="w-full">
             {fields.length < MAX_IMAGES && (
