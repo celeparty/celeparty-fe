@@ -184,10 +184,10 @@ export const ProductForm: React.FC<iProductFormProps> = ({
 
   const onSubmit = async (data: iProductReq) => {
     try {
-      // 1. Get current field values (including unregistered fields)
+      // Get current field values (including unregistered fields)
       const formValues = getValues();
 
-      // 2. Handle image uploads from fields
+      // Handle image uploads from fields
       const uploadedImages = await Promise.all(
         fields.map(async (field, index) => {
           const fieldData = formValues.main_image[index];
@@ -324,7 +324,11 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           ))}
           <div className="w-full">
             {fields.length < MAX_IMAGES && (
-              <Button variant={"default"} onClick={handleAddImage}>
+              <Button
+                type="button"
+                variant={"default"}
+                onClick={handleAddImage}
+              >
                 Add Image ({fields.length}/{MAX_IMAGES})
               </Button>
             )}

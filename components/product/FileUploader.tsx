@@ -24,22 +24,15 @@ export const FileUploader = ({
   };
 
   return (
-    <div className="border rounded-lg p-4">
+    <div className="border rounded-lg p-4 relative">
       {image.url ? (
-        <div className="relative">
+        <>
           <img
             src={image.url}
             alt="Product preview"
             className="w-full h-32 object-contain"
           />
-          <button
-            type="button"
-            onClick={onRemove}
-            className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6"
-          >
-            &times;
-          </button>
-        </div>
+        </>
       ) : (
         <div
           onClick={triggerFileInput}
@@ -55,6 +48,13 @@ export const FileUploader = ({
           />
         </div>
       )}
+      <button
+        type="button"
+        onClick={onRemove}
+        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6"
+      >
+        &times;
+      </button>
     </div>
   );
 };
