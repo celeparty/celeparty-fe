@@ -146,7 +146,7 @@ export default function Products() {
                   title={item.title}
                   image_url={
                     item.main_image
-                      ? process.env.BASE_API + item.main_image.url
+                      ? process.env.BASE_API + item.main_image[0].url
                       : "/images/noimage.png"
                   }
                   price={

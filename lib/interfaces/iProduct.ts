@@ -14,7 +14,7 @@ export interface iProductReq {
   minimal_order: number;
   minimal_order_date: string;
   main_price: string | number;
-  main_image: iProductImage;
+  main_image: iProductImage[];
   description: string;
   rate: number;
   kabupaten: string;
@@ -29,6 +29,7 @@ export interface iProductReq {
     };
   };
   documentId?: string; // For Edit Product
+  variant: iProductVariant[];
 }
 
 export interface iUserPermissions {
@@ -39,6 +40,7 @@ export interface iProductImage {
   id: string;
   url: string;
   mime: string;
+  file?: File | null;
 }
 
 export interface iProdCatRes {
@@ -53,7 +55,14 @@ export interface iProductRes
     "users_permissions_user" | "main_image" | "category"
   > {
   users_permissions_user: iUserPermissions;
-  main_image: iProductImage;
+  main_image: iProductImage[];
   category: iProdCatRes;
   documentId: string;
+}
+
+export interface iProductVariant {
+  id: number;
+  name: string;
+  type: string;
+  price: number;
 }

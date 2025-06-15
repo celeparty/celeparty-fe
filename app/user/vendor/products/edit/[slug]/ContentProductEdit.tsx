@@ -22,11 +22,13 @@ export default function ContentProductEdit(props: any) {
     description: "",
     main_price: "0",
     minimal_order: 0,
-    main_image: {
-      id: "",
-      url: "",
-      mime: "",
-    },
+    main_image: [
+      {
+        id: "",
+        url: "",
+        mime: "",
+      },
+    ],
     price_min: "0",
     price_max: "0",
     category: null,
@@ -38,6 +40,7 @@ export default function ContentProductEdit(props: any) {
         id: "",
       },
     },
+    variant: [],
   });
   const [title, setTitle] = useState<string>("");
   const [rate, setRate] = useState<number>(0);
@@ -71,7 +74,7 @@ export default function ContentProductEdit(props: any) {
         price_min: formatPriceValue(dataContent.price_min),
         price_max: formatPriceValue(dataContent.price_max),
         kabupaten: dataContent.kabupaten,
-        category: { connect: dataContent.category.id },
+        category: { connect: dataContent.category?.id },
         rate: dataContent.rate,
         minimal_order_date: dataContent.minimal_order_date,
         users_permissions_user: {
@@ -80,6 +83,7 @@ export default function ContentProductEdit(props: any) {
           },
         },
         documentId: dataContent.documentId,
+        variant: dataContent.variant,
       };
 
       setDefaultFormData(formData);
@@ -137,12 +141,10 @@ export default function ContentProductEdit(props: any) {
     <>
       <h1 className="text-2xl font-bold mb-4">Edit Produk</h1>
       <Box className="mt-0">
-        <div className="lg:mt-7">
-          <ProductForm
-            isEdit={true}
-            formDefaultData={defaultFormData}
-          ></ProductForm>
-        </div>
+        <ProductForm
+          isEdit={true}
+          formDefaultData={defaultFormData}
+        ></ProductForm>
       </Box>
       <Box>
         <div className="flex justify-center items-center">
