@@ -29,14 +29,15 @@ export default function EventList() {
 	}
 	const dataContent = query?.data.data;
 	const dataGroup = _.groupBy(dataContent, (item) => {
-		const categoryRecs = item?.categories?.map((categories: any) => categories.title);
-		if (categoryRecs?.includes("Event")) {
+		const categoryRecs = item?.categories?.length > 0
+		if (categoryRecs) {
 			return "event";
 		} else {
 			return "product";
 		}
 	});
 
+	console.log(dataContent)
 	return (
 		<Box className="lg:px-9 px-2 lg:py-7 py-2">
 
