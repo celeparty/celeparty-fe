@@ -167,6 +167,7 @@ export function ProductContent() {
     setSortDesc(!sortDesc);
     setShowOptions(!showOptions);
   };
+
   return (
     <div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
       <Box className="bg-c-blue text-white w-full lg:max-w-[280px] mt-0 hidden lg:block">
@@ -204,28 +205,32 @@ export function ProductContent() {
             </ItemInfo>
           </div>
         </div>
-        <div className="relative mb-7 [&_h4]:mb-3">
-          <h4>Pilih Kategori Produk</h4>
-          <div className="flex flex-col gap-3">
-            {productCategories.map((cat, index) => (
-              <React.Fragment key={index}>
-                <ItemInfo image={cat.icon ?? ""}>
-                  <ItemCategory
-                    title={cat.label}
-                    onClick={() => {
-                      const isActive = activeCategory === cat.value;
-                      setActiveCategory(isActive ? null : cat.value);
-                      handleFilter(isActive ? "" : cat.value);
-                    }}
-                    className={`${
-                      activeCategory === cat.value && "bg-c-green text-c-white"
-                    }`}
-                  />
-                </ItemInfo>
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
+
+        {
+          getType === "Peralatan Event" || getType === "Ulang Tahun" || getType === "Tasyakuran" || getType === "Acara Korporasi" &&
+            <div className="relative mb-7 [&_h4]:mb-3">
+              <h4>Pilih Kategori Produk</h4>
+              <div className="flex flex-col gap-3">
+                {productCategories.map((cat, index) => (
+                  <React.Fragment key={index}>
+                    <ItemInfo image={cat.icon ?? ""}>
+                      <ItemCategory
+                        title={cat.label}
+                        onClick={() => {
+                          const isActive = activeCategory === cat.value;
+                          setActiveCategory(isActive ? null : cat.value);
+                          handleFilter(isActive ? "" : cat.value);
+                        }}
+                        className={`${
+                          activeCategory === cat.value && "bg-c-green text-c-white"
+                        }`}
+                      />
+                    </ItemInfo>
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+        }
       </Box>
       <div className="lg:flex-1 w-full">
         <div className="w-auto lg:inline-block">
@@ -341,7 +346,7 @@ export function ProductContent() {
         </div>
         <Box className="mt-3 px-[10px] lg:px-9">
           <div className="flex flex-wrap -mx-2">
-            {mainData.length > 0 ? (
+            {mainData?.length > 0 ? (
               mainData?.map((item: any) => {
                 return (
                   <ItemProduct
@@ -350,9 +355,10 @@ export function ProductContent() {
                     title={item.title}
                     image_url={
                       item.main_image
-                        ? process.env.BASE_API + item.main_image.url
+                        ? process.env.BASE_API + item.main_image[0].url
                         : "/images/noimage.png"
                     }
+                    // image_url="/images/noimage.png"
                     price={
                       item.main_price
                         ? formatRupiah(item.main_price)

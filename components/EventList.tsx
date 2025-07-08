@@ -37,7 +37,6 @@ export default function EventList() {
 		}
 	});
 
-	console.log(dataContent)
 	return (
 		<Box className="lg:px-9 px-2 lg:py-7 py-2">
 
