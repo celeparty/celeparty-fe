@@ -2,7 +2,11 @@
 
 import { useToast } from "@/hooks/use-toast";
 import { eAlertType } from "@/lib/enums/eAlert";
-import { iProductImage, iProductReq } from "@/lib/interfaces/iProduct";
+import {
+  iProductImage,
+  iProductReq,
+  iProductVariant,
+} from "@/lib/interfaces/iProduct";
 import { axiosUser } from "@/lib/services";
 import { fetchAndConvertToFile, formatNumberWithDots } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +19,7 @@ import SubTitle from "../SubTitle";
 import { Button } from "../ui/button";
 import { FileUploader } from "./FileUploader";
 import { SchemaProduct } from "./SchemaProduct";
+import { ProductVariantItem } from "./ProductVariant";
 
 interface iItemInputProps {
   label: string;
@@ -70,7 +75,6 @@ export const ProductForm: React.FC<iProductFormProps> = ({
     status: false,
     value: null,
   });
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const { toast } = useToast();
 
@@ -91,9 +95,22 @@ export const ProductForm: React.FC<iProductFormProps> = ({
     },
   });
 
-  const { fields, append, remove, replace } = useFieldArray({
+  const {
+    fields: mainImageFields,
+    append: appendMainImage,
+    remove: removeMainImage,
+  } = useFieldArray({
     control,
     name: "main_image",
+  });
+
+  const {
+    fields: variantFields,
+    append: appendVariant,
+    remove: removeVariant,
+  } = useFieldArray({
+    control,
+    name: "variant",
   });
 
   const convertAndSetEditImages = async () => {
@@ -125,7 +142,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
 
   // Initialize empty slots for images
   useEffect(() => {
-    if (fields.length === 0) {
+    if (mainImageFields.length === 0) {
       handleAddImage();
     }
   }, []);
@@ -150,13 +167,22 @@ export const ProductForm: React.FC<iProductFormProps> = ({
     if (currentImage?.url?.startsWith("blob:")) {
       URL.revokeObjectURL(currentImage.url);
     }
-    remove(index);
+    removeMainImage(index);
   };
 
   const handleAddImage = () => {
-    if (fields.length < MAX_IMAGES) {
-      append({ id: "", url: "", mime: "" });
+    if (mainImageFields.length < MAX_IMAGES) {
+      appendMainImage({ id: "", url: "", mime: "" });
     }
+  };
+
+  const addVariant = () => {
+    appendVariant({
+      name: "",
+      price: 0,
+      quota: "",
+      purchase_deadline: "",
+    });
   };
 
   useEffect(() => {
@@ -173,10 +199,6 @@ export const ProductForm: React.FC<iProductFormProps> = ({
     }
   }, [formDefaultData]);
 
-  useEffect(() => {
-    console.log(formDefaultData.main_image);
-  }, [formDefaultData]);
-
   const formatPriceReq = (price: string | number) => {
     const formattedPrice = parseInt(String(price).replace(/\./g, ""));
     return formattedPrice;
@@ -189,7 +211,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
 
       // Handle image uploads from fields
       const uploadedImages = await Promise.all(
-        fields.map(async (field, index) => {
+        mainImageFields.map(async (field, index) => {
           const fieldData = formValues.main_image[index];
 
           // Skip upload if already has ID (existing image)
@@ -219,6 +241,15 @@ export const ProductForm: React.FC<iProductFormProps> = ({
       );
 
       if (uploadedImages?.length > 0) {
+        const variants: iProductVariant[] = variantFields
+          ? variantFields.map((v) => ({
+              name: v.name ?? "",
+              price: Number(v.price) || 0,
+              quota: v.quota?.toString() || "0",
+              purchase_deadline:
+                v.purchase_deadline || new Date().toISOString(),
+            }))
+          : [];
         let updatedData: iProductReq = {
           ...data,
           main_image: uploadedImages.filter((img) => img?.id), // Filter out empty images
@@ -233,7 +264,10 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           main_price: formatPriceReq(data.main_price),
           price_min: formatPriceReq(data.price_min),
           price_max: formatPriceReq(data.price_max),
+          variant: variants,
         };
+
+        console.log(variantFields, variants);
 
         let response: any;
         if (isEdit) {
@@ -310,7 +344,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
       <form onSubmit={handleSubmit(onSubmit)}>
         <SubTitle title="Pilih Foto Produk" className="mb-3" />
         <div className="image-upload-container flex flex-wrap gap-2 mb-5">
-          {fields.map((field, index) => (
+          {mainImageFields.map((field, index) => (
             <React.Fragment key={index}>
               <div className="image-item  w-[20%]">
                 <FileUploader
@@ -323,13 +357,13 @@ export const ProductForm: React.FC<iProductFormProps> = ({
             </React.Fragment>
           ))}
           <div className="w-full">
-            {fields.length < MAX_IMAGES && (
+            {mainImageFields.length < MAX_IMAGES && (
               <Button
                 type="button"
                 variant={"default"}
                 onClick={handleAddImage}
               >
-                Add Image ({fields.length}/{MAX_IMAGES})
+                Add Image ({mainImageFields.length}/{MAX_IMAGES})
               </Button>
             )}
           </div>
@@ -500,33 +534,24 @@ export const ProductForm: React.FC<iProductFormProps> = ({
             <p className="text-red-500 text-[10px]">{`${errors.title.message}`}</p>
           )}
         </ItemInput>
-        {/* <ItemInput label="Tema">
-            <div className="flex flex-wrap gap-2 mb-5">
-              {dataThemes?.map((item: any, i: number) => {
-                const isActive = stateTheme.value === item.id;
-                return (
-                  <div
-                    onClick={() => {
-                      setStateTheme({
-                        status: true,
-                        value: item.id,
-                      });
-                    }}
-                    key={item.id}
-                    className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-5 py-1 `}
-                  >
-                    {item.name}
-                  </div>
-                );
-              })}
-            </div>
-            {errors.name && <p className="text-red-500 text-[10px]">Tidak Boleh Kosong</p>}
-          </ItemInput> */}
-        {/* <ItemInput label="Varian" required={false}>
-          <div className="text-[#DA7E01] text-[13px] lg:text-[12px] cursor-pointer">
-            Tambah Varian
-          </div>
-        </ItemInput> */}
+        <SubTitle title="Tambah Variant Produk" className="mb-3" />
+        <div className="w-full mb-3">
+          {mainImageFields.length < MAX_IMAGES && (
+            <Button type="button" variant={"default"} onClick={addVariant}>
+              Add Variant
+            </Button>
+          )}
+        </div>
+        {variantFields.map((field, index) => (
+          <ProductVariantItem
+            key={field.id}
+            index={index}
+            register={register}
+            control={control}
+            onRemove={() => removeVariant(index)}
+          />
+        ))}
+
         <div className="flex justify-center">
           {stateCategory.status ? (
             <input
