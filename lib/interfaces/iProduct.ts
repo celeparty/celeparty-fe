@@ -61,8 +61,12 @@ export interface iProductRes
 }
 
 export interface iProductVariant {
-  id: number;
   name: string;
-  type: string;
-  price: number;
+  quota: string;
+  price: string | number;
+  purchase_deadline: string;
+}
+
+export interface iProductVariantFormValues {
+  variant: iProductVariant[];
 }
