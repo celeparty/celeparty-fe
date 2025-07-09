@@ -27,7 +27,7 @@ export default function ItemFeature({
       <div className="flex gap-3">
         <div
           onClick={seeDetail}
-          className={`relative fill-current cursor-pointer${
+          className={`relative aspect-square bg-slate-100 rounded-sm cursor-pointer${
             small ? "w-[100px] h-[100px]" : "w-[150px] h-[150px]"
           } overflow-hidden`}
         >
@@ -38,7 +38,7 @@ export default function ItemFeature({
             style={{ objectFit: "cover" }}
           />
         </div>
-        <div className="flex flex-col gap-3 flex-1">
+        <div className="flex flex-col gap-1 flex-1">
           <Link href={slug ? slug : "/"} className="text-black">
             {title ? title : "no title"}
           </Link>
