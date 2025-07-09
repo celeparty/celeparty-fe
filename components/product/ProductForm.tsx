@@ -13,7 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import React, { ReactNode, useEffect, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import Skeleton from "../Skeleton";
 import SubTitle from "../SubTitle";
 import { Button } from "../ui/button";
@@ -92,6 +92,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
     defaultValues: {
       ...formDefaultData,
       main_image: formDefaultData?.main_image || [],
+      escrow: formDefaultData?.escrow || false,
     },
   });
 
@@ -112,6 +113,8 @@ export const ProductForm: React.FC<iProductFormProps> = ({
     control,
     name: "variant",
   });
+
+  const escrowChecked = watch("escrow");
 
   const convertAndSetEditImages = async () => {
     if (!formDefaultData?.main_image) return;
@@ -265,9 +268,8 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           price_min: formatPriceReq(data.price_min),
           price_max: formatPriceReq(data.price_max),
           variant: variants,
+          escrow: escrowChecked,
         };
-
-        console.log(variantFields, variants);
 
         let response: any;
         if (isEdit) {
@@ -551,6 +553,47 @@ export const ProductForm: React.FC<iProductFormProps> = ({
             onRemove={() => removeVariant(index)}
           />
         ))}
+
+        <SubTitle title="Escrow" className="mb-3" />
+        <ItemInput label="Enable Escrow" required={false}>
+          <Controller
+            name="escrow"
+            control={control}
+            render={({ field }) => (
+              <input
+                type="checkbox"
+                checked={field.value ?? false}
+                onChange={(e) => {
+                  field.onChange(e.target.checked);
+                  if (!e.target.checked) {
+                    setValue("escrow", false);
+                  } else {
+                    setValue("escrow", true);
+                  }
+                }}
+                className="w-fit"
+              />
+            )}
+          />
+          {errors.escrow && (
+            <p className="text-red-500 text-[10px]">{`${errors.escrow.message}`}</p>
+          )}
+        </ItemInput>
+
+        {escrowChecked && (
+          <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+            <p className="text-bold mb-2">Catatan:</p>
+            <ol className="list-decimal list-inside">
+              <li>30% Down Payment, untuk book tanggal acara</li>
+              <li>100%, maximum H-1 tanggal loading</li>
+              <li>
+                Jika sampai H-1 tanggal loading pembayaran belum mencapai 100%,
+                sisa dana akan dikembalikan ke User, kecuali dana yang sudah
+                masuk Down Payment.
+              </li>
+            </ol>
+          </div>
+        )}
 
         <div className="flex justify-center">
           {stateCategory.status ? (
