@@ -30,6 +30,7 @@ export interface iProductReq {
   };
   documentId?: string; // For Edit Product
   variant: iProductVariant[];
+  escrow: boolean;
 }
 
 export interface iUserPermissions {
