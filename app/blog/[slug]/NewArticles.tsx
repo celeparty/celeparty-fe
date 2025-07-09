@@ -33,6 +33,7 @@ export default function NewArticles() {
 	return (
 		<div>
 			{dataContent?.map((item: any, index: number) => {
+				console.log(process.env.BASE_API+item.image?.url);
 				return (
 					<ItemFeature
 						small={true}
@@ -40,7 +41,7 @@ export default function NewArticles() {
 						key={index}
 						title={item?.title}
 						date={moment(item?.publish_at).format("DD MMM YYYY")}
-						image={item?.image?.url ? `https://sub.typestaging.my.id${item.image.url}` : "/images/noimage.png"}
+						image={item.image?.url ? `${process.env.BASE_API+item.image?.url}` : "/images/noimage.png"}
 					/>
 				);
 			})}

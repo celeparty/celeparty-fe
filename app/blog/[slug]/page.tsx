@@ -6,6 +6,8 @@ import parse from "html-react-parser";
 import moment from "moment";
 import Image from "next/image";
 import NewArticles from "./NewArticles";
+import ItemProduct from "@/components/product/ItemProduct";
+import { formatNumberWithDots, formatRupiah } from "@/lib/utils";
 
 export default async function BlogDetail({
   params,
@@ -13,7 +15,8 @@ export default async function BlogDetail({
   params: { slug: string };
 }) {
   const slug = params.slug;
-  const dataBlog = await axiosData("GET", `/api/blogs/${slug}?populate=*`);
+  const dataBlog = await axiosData("GET", `/api/blogs/${slug}?populate[image]=true&populate[category]=true&populate[products][populate][0]=main_image`);
+
   const dataContent = dataBlog ? dataBlog?.data : null;
   return (
     <Basecontent>
@@ -33,6 +36,7 @@ export default async function BlogDetail({
                 </div>
               </div>
               <div className="w-4/12 px-5"></div>
+
               <div className="w-full lg:w-9/12 px-5">
                 <div className="relative">
                   <div className="relative">
@@ -58,17 +62,45 @@ export default async function BlogDetail({
                   </div>
                 </div>
                 <div className="products-wrapper mt-4">
+                  {
+                    dataContent?.products.length>0 &&
                   <h4 className="font-semibold text-[16px] text-black">
-                    Produk Untuk Anda
+                    Produk Terkait
                   </h4>
-                  <ProductList
-                    title="Untuk Anda"
-                    queryKey="qProductArticle"
-                    showAllBtn={false}
-                    boxStyle={false}
-                  />
+
+                  }
+                  <div className="flex flex-wrap -mx-2">
+                    {
+                      dataContent?.products && 
+                      dataContent?.products.map((item: any, index: number) => {
+                        return (
+                          <ItemProduct
+                            url={`/products/${item.documentId}`}
+                            key={item.id}
+                            title={item.title}
+                            image_url={
+                              item.main_image
+                                ? process.env.BASE_API + item.main_image[0].url
+                                : "/images/noimage.png"
+                            }
+                            // image_url="/images/noimage.png"
+                            price={
+                              item.main_price
+                                ? formatRupiah(item.main_price)
+                                : formatRupiah(0)
+                            }
+                            rate={item.rate ? `${item.rate}` : "1"}
+                            sold={item.sold_count}
+                            location={item.region ? item.region : null}
+                          />
+                        );
+                      }
+                      )
+                    }
+                  </div>
                 </div>
               </div>
+
               <div className="w-full lg:w-3/12 px-5">
                 <div className="relative">
                   <h4 className="font-semibold text-[16px] text-black">
