@@ -271,8 +271,6 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           escrow: escrowChecked,
         };
 
-        console.log(variantFields, variants);
-
         let response: any;
         if (isEdit) {
           response =
