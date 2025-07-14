@@ -43,7 +43,6 @@ export default function Wallet() {
     return <ErrorNetwork style="mt-0" />;
   }
   const dataContent: iMerchantProfile = query?.data;
-  console.log(dataContent);
 
   return (
     <div>

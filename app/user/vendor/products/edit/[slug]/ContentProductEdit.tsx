@@ -41,6 +41,7 @@ export default function ContentProductEdit(props: any) {
       },
     },
     variant: [],
+    escrow: false,
   });
   const [title, setTitle] = useState<string>("");
   const [rate, setRate] = useState<number>(0);
@@ -84,6 +85,7 @@ export default function ContentProductEdit(props: any) {
         },
         documentId: dataContent.documentId,
         variant: dataContent.variant,
+        escrow: dataContent.escrow,
       };
 
       setDefaultFormData(formData);

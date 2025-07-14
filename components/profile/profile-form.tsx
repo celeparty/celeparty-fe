@@ -92,6 +92,9 @@ export const ProfileForm = () => {
         gender: eGender.male,
         email: myData.email || "",
         phone: myData.phone || "",
+        accountName: myData.accountName || "",
+        bankName: myData.bankName || "",
+        accountNumber: myData.accountNumber || "",
       });
     }
   }, [myData, form]);
@@ -114,6 +117,9 @@ export const ProfileForm = () => {
         gender: values.gender as eGender,
         phone: values.phone,
         email: values.email,
+        accountName: values.accountName || "",
+        bankName: values.bankName || "",
+        accountNumber: values.accountNumber || "",
       };
 
       const response = await axiosUser(
