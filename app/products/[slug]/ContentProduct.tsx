@@ -68,6 +68,15 @@ export default function ContentProduct(props: any) {
   }
   const currentRate = dataContent?.rate;
 
+  const askProduct = () => {
+    const phone = whatsAppNumber;
+    const message = encodeURIComponent(
+      `Saya ingin bertanya mengenai produk ini ${dataContent?.title} ${window.location.href}`
+    );
+    const url = `https://wa.me/${phone}?text=${message}`;
+    window.open(url, "_blank");
+  };
+
   return (
     <Box className="px-4">
       {dataContent ? (
@@ -147,12 +156,7 @@ export default function ContentProduct(props: any) {
                 <div className="wa-button mt-4 mb-4">
                   <Button
                     onClick={() => {
-                      const phone = whatsAppNumber;
-                      const message = encodeURIComponent(
-                        `Saya ingin bertanya mengenai produk ini ${dataContent?.title}`
-                      );
-                      const url = `https://wa.me/${phone}?text=${message}`;
-                      window.open(url, "_blank");
+                      askProduct();
                     }}
                     variant={"green"}
                   >
