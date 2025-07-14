@@ -78,7 +78,7 @@ export const DatePickerInput: React.FC<iDatePickerProps> = ({
               readOnly
               placeholder={textLabel}
               value={inputValue}
-              className="w-full pr-10 border border-[#ADADAD] rounded-lg"
+              className="w-full pr-10 border border-[#ADADAD] rounded-lg text-c-black"
             />
             <div className="absolute inset-y-0 right-2 flex items-center cursor-pointer">
               <Calendar width={15} color="#000000" />

@@ -31,6 +31,7 @@ module.exports = {
         "accordion-up": "accordion-up 0.2s ease-out",
       },
       colors: {
+        "c-black": "#000000",
         "c-gray": "#929292",
         "c-gray-text": "#787878",
         "c-gray-text2": "#ADADAD",

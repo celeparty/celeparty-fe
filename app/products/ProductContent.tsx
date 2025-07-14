@@ -1,24 +1,23 @@
 "use client";
-import useButtonStore from "@/lib/store/useButtonStore";
 import Box from "@/components/Box";
 import ErrorNetwork from "@/components/ErrorNetwork";
-import Skeleton from "@/components/Skeleton";
-import { useQuery } from "@tanstack/react-query";
+import { DatePickerInput } from "@/components/form-components/DatePicker";
+import { SelectInput } from "@/components/form-components/SelectInput";
 import ItemProduct from "@/components/product/ItemProduct";
+import Skeleton from "@/components/Skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { axiosData, getData } from "@/lib/services";
+import { iSelectOption } from "@/lib/interfaces/iCommon";
+import { axiosData } from "@/lib/services";
+import { productCategories } from "@/lib/static/categories";
+import { formatNumberWithDots, formatRupiah } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { format, isValid, parse } from "date-fns";
 import _ from "lodash";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { ItemCategory, ItemInfo } from "./ItemCategory";
-import { formatNumberWithDots, formatRupiah } from "@/lib/utils";
-import { DatePickerInput } from "@/components/form-components/DatePicker";
-import { format, isValid, parse } from "date-fns";
-import { iSelectOption } from "@/lib/interfaces/iCommon";
-import { SelectInput } from "@/components/form-components/SelectInput";
-import { productCategories } from "@/lib/static/categories";
 
 export function ProductContent() {
   const [sortDesc, setSortDesc] = useState<boolean>(true);
@@ -38,20 +37,7 @@ export function ProductContent() {
   const [cat, setCat] = useState(`${getCategory ? getCategory : ""}`);
 
   const [eventDate, setEventDate] = useState<string>("");
-  const [eventLocations, setEventLocations] = useState<iSelectOption[]>([
-    {
-      label: "DKI Jakarta",
-      value: "jakarta",
-    },
-    {
-      label: "Bogor",
-      value: "bogor",
-    },
-    {
-      label: "Bekasi",
-      value: "bekasi",
-    },
-  ]);
+  const [eventLocations, setEventLocations] = useState<iSelectOption[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   // const {activeButton, setActiveButton} = useButtonStore()
@@ -168,6 +154,34 @@ export function ProductContent() {
     setShowOptions(!showOptions);
   };
 
+  useEffect(() => {
+    if (dataContent) {
+      const uniqueRegions = new Set<string>();
+      dataContent.forEach((data: any) => {
+        if (data.region) {
+          uniqueRegions.add(data.region);
+        }
+      });
+
+      const capitalizeFirstLetter = (str: string) => {
+        return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+      };
+
+      const newLocations = Array.from(uniqueRegions).map((region) => ({
+        label: capitalizeFirstLetter(region),
+        value: region.toLowerCase().replace(/\s+/g, "-"),
+      }));
+
+      setEventLocations((prevLocations) => {
+        const combined = [...prevLocations, ...newLocations];
+        return combined.filter(
+          (location, index, self) =>
+            index === self.findIndex((t) => t.value === location.value)
+        );
+      });
+    }
+  }, []);
+
   return (
     <div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
       <Box className="bg-c-blue text-white w-full lg:max-w-[280px] mt-0 hidden lg:block">
@@ -206,8 +220,10 @@ export function ProductContent() {
           </div>
         </div>
 
-        {
-          getType === "Peralatan Event" || getType === "Ulang Tahun" || getType === "Tasyakuran" || getType === "Acara Korporasi" &&
+        {getType === "Peralatan Event" ||
+          getType === "Ulang Tahun" ||
+          getType === "Tasyakuran" ||
+          (getType === "Acara Korporasi" && (
             <div className="relative mb-7 [&_h4]:mb-3">
               <h4>Pilih Kategori Produk</h4>
               <div className="flex flex-col gap-3">
@@ -222,7 +238,8 @@ export function ProductContent() {
                           handleFilter(isActive ? "" : cat.value);
                         }}
                         className={`${
-                          activeCategory === cat.value && "bg-c-green text-c-white"
+                          activeCategory === cat.value &&
+                          "bg-c-green text-c-white"
                         }`}
                       />
                     </ItemInfo>
@@ -230,7 +247,7 @@ export function ProductContent() {
                 ))}
               </div>
             </div>
-        }
+          ))}
       </Box>
       <div className="lg:flex-1 w-full">
         <div className="w-auto lg:inline-block">

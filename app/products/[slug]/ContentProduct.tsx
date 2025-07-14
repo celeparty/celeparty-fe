@@ -68,6 +68,15 @@ export default function ContentProduct(props: any) {
   }
   const currentRate = dataContent?.rate;
 
+  const askProduct = () => {
+    const phone = whatsAppNumber;
+    const message = encodeURIComponent(
+      `Saya ingin bertanya mengenai produk ini ${dataContent?.title} ${window.location.href}`
+    );
+    const url = `https://wa.me/${phone}?text=${message}`;
+    window.open(url, "_blank");
+  };
+
   return (
     <Box className="px-4">
       {dataContent ? (
@@ -147,12 +156,7 @@ export default function ContentProduct(props: any) {
                 <div className="wa-button mt-4 mb-4">
                   <Button
                     onClick={() => {
-                      const phone = whatsAppNumber;
-                      const message = encodeURIComponent(
-                        `Saya ingin bertanya mengenai produk ini ${dataContent?.title}`
-                      );
-                      const url = `https://wa.me/${phone}?text=${message}`;
-                      window.open(url, "_blank");
+                      askProduct();
                     }}
                     variant={"green"}
                   >
@@ -165,18 +169,22 @@ export default function ContentProduct(props: any) {
                     &nbsp;Tanyakan Produk
                   </Button>
                 </div>
-                <div className="payment-rule border-c-gray border rounded-md p-4">
-                  <p className="font-bold text-md">Aturan Pembayaran:</p>
-                  <ol className="py-2">
-                    <li>1. 30% Down Payment, untuk book tanggal acara</li>
-                    <li>2. 100%, maximum H-1 tanggal loading</li>
-                  </ol>
-                  <p className="italic">
-                    Jika sampai H-1 tanggal loading pembayaran belum mencapai
-                    100%, sisa dana akan dikembalikan ke User, kecuali dana yang
-                    sudah masuk Down Payment.
-                  </p>
-                </div>
+                {dataContent.escrow && (
+                  <>
+                    <div className="payment-rule border-c-gray border rounded-md p-4">
+                      <p className="font-bold text-md">Aturan Pembayaran:</p>
+                      <ol className="py-2">
+                        <li>1. 30% Down Payment, untuk book tanggal acara</li>
+                        <li>2. 100%, maximum H-1 tanggal loading</li>
+                      </ol>
+                      <p className="italic">
+                        Jika sampai H-1 tanggal loading pembayaran belum
+                        mencapai 100%, sisa dana akan dikembalikan ke User,
+                        kecuali dana yang sudah masuk Down Payment.
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
