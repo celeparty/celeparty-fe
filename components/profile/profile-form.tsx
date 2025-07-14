@@ -49,6 +49,18 @@ const formSchema = z.object({
     .regex(/^\d+$/, { message: "Nomor telepon harus berisi angka!" })
     .min(10, { message: "Nomor telepon minimal 10 angka!" })
     .max(15, { message: "Nomor telepon maksimal 15 angka!" }),
+
+  bankName: z.string().nonempty({
+    message: "Nama Bank Tidak Boleh Kosong",
+  }),
+
+  accountName: z.string().nonempty({
+    message: "Nama Pemilik Akun Bank Tidak Boleh Kosong",
+  }),
+
+  accountNumber: z.string().nonempty({
+    message: "Nomor Rekening Tidak Boleh Kosong",
+  }),
 });
 
 export const ProfileForm = () => {
@@ -250,6 +262,80 @@ export const ProfileForm = () => {
               <div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
                 <FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
                   No HP
+                </FormLabel>
+                <div className="lg:w-[320px] w-[300px]">
+                  <FormControl>
+                    <Input
+                      className="border border-[#ADADAD] rounded-lg"
+                      {...field}
+                    />
+                  </FormControl>
+                </div>
+              </div>
+              <div className="ml-[160px]">
+                <FormMessage className="text-[9px]" />
+              </div>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="bankName"
+          render={({ field }) => (
+            <FormItem className="mb-4">
+              <div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
+                <FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
+                  Nama Bank
+                </FormLabel>
+                <div className="lg:w-[320px] w-[300px]">
+                  <FormControl>
+                    <Input
+                      className="border border-[#ADADAD] rounded-lg"
+                      {...field}
+                    />
+                  </FormControl>
+                </div>
+              </div>
+              <div className="ml-[160px]">
+                <FormMessage className="text-[9px]" />
+              </div>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="accountName"
+          render={({ field }) => (
+            <FormItem className="mb-4">
+              <div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
+                <FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
+                  Nama Pemilik Rekening
+                </FormLabel>
+                <div className="lg:w-[320px] w-[300px]">
+                  <FormControl>
+                    <Input
+                      className="border border-[#ADADAD] rounded-lg"
+                      {...field}
+                    />
+                  </FormControl>
+                </div>
+              </div>
+              <div className="ml-[160px]">
+                <FormMessage className="text-[9px]" />
+              </div>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="accountNumber"
+          render={({ field }) => (
+            <FormItem className="mb-4">
+              <div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
+                <FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
+                  Nomor Rekening
                 </FormLabel>
                 <div className="lg:w-[320px] w-[300px]">
                   <FormControl>
