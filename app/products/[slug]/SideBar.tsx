@@ -39,7 +39,7 @@ export default function SideBar({ dataProducts, currentPrice }: any) {
         product_id: dataProducts.id,
         product_name: dataProducts.title,
         price: currentPrice,
-        image: dataProducts.main_image.url,
+        image: dataProducts.main_image[0].url,
         quantity: value,
         transaction_id: transaction.id,
         note: note,
