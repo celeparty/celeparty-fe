@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -19,7 +18,6 @@ export const useCart = create(
 				}));
 			},
 			setCart: (data: { product_id: string; quantity: number }[]) => {
-				console.log(data);
 			  
 				set((state: { cart: { product_id: string; quantity: number }[] }) => {
 				  // Untuk setiap item dalam `data`, tambahkan atau perbarui item di keranjang

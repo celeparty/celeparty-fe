@@ -67,8 +67,8 @@ export default function CartContent() {
                     <div className="w-[100px] h-[100px] relative">
                       <Image
                         src={
-                          item.main_image
-                            ? process.env.BASE_API + item.main_image[0].url
+                          item.image
+                            ? process.env.BASE_API + item.image
                             : "/images/noimage.png"
                         }
                         alt="image"
@@ -89,9 +89,7 @@ export default function CartContent() {
                   </div>
                   <div className="flex lg:gap-7 gap-3 mt-2 lg:mt-0">
                     <div className="flex-1">
-                      <h5 className="mb-2 lg:mb-0 font-extrabold lg:font-normal">
-                        Catatan
-                      </h5>
+                      <h5 className="mb-2 lg:mb-0 font-bold py-2">Catatan</h5>
                       <textarea
                         className="w-full border-[1px] border-c-gray rounded-lg p-2"
                         value={item.note}

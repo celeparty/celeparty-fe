@@ -1,10 +1,12 @@
 "use client";
+import { DatePickerInput } from "@/components/form-components/DatePicker";
 import { useCart, useNotif } from "@/lib/store/cart";
 import { useTransaction } from "@/lib/store/transaction";
+import { format, isValid, parse } from "date-fns";
 import Cookies from "js-cookie";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useState } from "react";
+import { ChangeEventHandler, useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
 
 export const Notification = () => {
@@ -26,6 +28,10 @@ export const Notification = () => {
 export default function SideBar({ dataProducts, currentPrice }: any) {
   const [value, setValue] = useState(0);
   const [note, setNote] = useState("");
+  const [shippingAddress, setShippingAddress] = useState("");
+  const [eventDate, setEventDate] = useState("");
+  const [loadingDate, setLoadingDate] = useState("");
+  const [loadingTime, setLoadingTime] = useState("");
   const { data: session, status } = useSession();
   const { cart, setCart }: any = useCart();
   const { transaction }: any = useTransaction();
@@ -33,18 +39,22 @@ export default function SideBar({ dataProducts, currentPrice }: any) {
 
   const addCart = () => {
     notifCart(`${dataProducts.title} berhasil dimasukan ke keranjang`);
-    setCart([
-      {
-        ...cart,
-        product_id: dataProducts.id,
-        product_name: dataProducts.title,
-        price: currentPrice,
-        image: dataProducts.main_image[0].url,
-        quantity: value,
-        transaction_id: transaction.id,
-        note: note,
-      },
-    ]);
+    const cartData = {
+      ...cart,
+      product_id: dataProducts.id,
+      product_name: dataProducts.title,
+      price: currentPrice,
+      image: dataProducts.main_image[0].url,
+      quantity: value,
+      transaction_id: transaction.id,
+      note: note,
+      loading_date: loadingDate,
+      loading_time: loadingTime,
+      event_date: eventDate,
+      shipping_location: shippingAddress,
+    };
+
+    setCart([cartData]);
   };
 
   return (
@@ -81,11 +91,76 @@ export default function SideBar({ dataProducts, currentPrice }: any) {
           <div className="relative lg:mt-5 mt-[10px]">
             <div>Minimal Order : 1 </div>
             <div>Waktu Pemesanan : 2 Hari </div>
-            <label className="mb-1 block text-black mt-3">Tambah Catatan</label>
-            <textarea
-              className="w-full h-[100px] border-solid border-[1px] rounded-lg border-c-gray p-3"
-              onChange={(e) => setNote(e.target.value)}
-            />
+            <div className="input-group">
+              <label className="mb-1 block text-black mt-3 font-bold">
+                Detail Alamat
+              </label>
+              <textarea
+                className="w-full h-[100px] border-solid border-[1px] rounded-lg border-c-gray p-3"
+                onChange={(e) => setShippingAddress(e.target.value)}
+              />
+            </div>
+            <div className="input-group">
+              <label className="mb-1 block text-black mt-3 font-bold">
+                Tanggal Acara
+              </label>
+              <DatePickerInput
+                onChange={(date) => {
+                  if (date instanceof Date && isValid(date)) {
+                    const formatted = format(date, "dd-MM-yyyy");
+                    setEventDate(formatted);
+                  }
+                }}
+                textLabel="Pilih Tanggal Acara"
+                value={
+                  eventDate ? parse(eventDate, "dd-MM-yyyy", new Date()) : null
+                }
+              />
+            </div>
+            <div className="input-group">
+              <label className="mb-1 block text-black mt-3 font-bold">
+                Tanggal Loading
+              </label>
+              <DatePickerInput
+                onChange={(date) => {
+                  if (date instanceof Date && isValid(date)) {
+                    const formatted = format(date, "dd-MM-yyyy");
+                    setLoadingDate(formatted);
+                  }
+                }}
+                textLabel="Pilih Tanggal Loading"
+                value={
+                  loadingDate
+                    ? parse(loadingDate, "dd-MM-yyyy", new Date())
+                    : null
+                }
+              />
+            </div>
+            <div className="input-group">
+              <label className="mb-1 block text-black mt-3 font-bold">
+                Jam Loading
+              </label>
+              <div className="time-input w-full border-solid border-[1px] rounded-lg border-c-gray p-3">
+                <input
+                  type="time"
+                  className="w-full"
+                  onChange={(e) => {
+                    const time = e.target.value;
+                    setLoadingTime(time);
+                  }}
+                  value={loadingTime}
+                />
+              </div>
+            </div>
+            <div className="input-group">
+              <label className="mb-1 block text-black mt-3 font-bold">
+                Tambah Catatan
+              </label>
+              <textarea
+                className="w-full h-[100px] border-solid border-[1px] rounded-lg border-c-gray p-3"
+                onChange={(e) => setNote(e.target.value)}
+              />
+            </div>
           </div>
           <div className="text-center mx-auto w-full lg:max-w-[150px]">
             <input
