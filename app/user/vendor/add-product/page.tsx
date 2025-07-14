@@ -10,7 +10,7 @@ import {
 import Link from "next/link";
 import { AiFillCustomerService } from "react-icons/ai";
 
-export default function ProfilePage() {
+export default function AddProductPage() {
   const defaultFormData: iProductReq = {
     title: "",
     description: "",
@@ -31,6 +31,7 @@ export default function ProfilePage() {
       },
     },
     variant: [{} as iProductVariant],
+    escrow: false,
   };
   return (
     <>

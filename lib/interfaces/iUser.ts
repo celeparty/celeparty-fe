@@ -6,6 +6,9 @@ export interface iUserReq {
   gender: eGender;
   email: string;
   phone: string;
+  accountName: string;
+  bankName: string;
+  accountNumber: string;
 }
 
 export interface iUserRole {
