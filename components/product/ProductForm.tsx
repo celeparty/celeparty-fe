@@ -540,9 +540,18 @@ export const ProductForm: React.FC<iProductFormProps> = ({
         <div className="w-full mb-3">
           {mainImageFields.length < MAX_IMAGES && (
             <Button type="button" variant={"default"} onClick={addVariant}>
-              Add Variant
+              Tambah Varian
             </Button>
           )}
+          <div className="text-xs py-2">
+            Gunakan varian untuk menyesuaikan harga berdasarkan varian, jumlah,
+            durasi, atau kategori layanan. <br /> Contoh: Untuk membedakan jenis
+            jika produk adalah tiket, contoh : Presale, Reguler, VVIP, dsb.
+            Untuk membedakan harga berdasarkan kuantiti, contoh varian A : 1 pcs
+            harga 100.000, varian B : &rsaquo; 10 pcs harga 70.000. <br /> Untuk
+            membedakan harga berdasarkan durasi sewa, contoh : varian A : sewa 1
+            hari harga 100.000, varian B : sewa &rsaquo;5 hari 70.000.
+          </div>
         </div>
         {variantFields.map((field, index) => (
           <ProductVariantItem

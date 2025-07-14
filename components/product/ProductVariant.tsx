@@ -28,8 +28,8 @@ export const ProductVariantItem = ({
 
   return (
     <div className="border p-4 mb-4 rounded-lg shadow-sm">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
+      <div className="grid grid-cols-12 gap-4">
+        <div className="input-group md:col-span-4">
           <label className="block text-sm font-medium mb-1">Nama Variant</label>
           <input
             {...register(getFieldName("name"))}
@@ -43,7 +43,7 @@ export const ProductVariantItem = ({
           )}
         </div>
 
-        <div>
+        <div className="input-group md:col-span-4">
           <label className="block text-sm font-medium mb-1">Harga</label>
           <Controller
             name={`variant.${index}.price`}
@@ -66,7 +66,6 @@ export const ProductVariantItem = ({
               />
             )}
           />
-
           {errors?.variant?.[index]?.price && (
             <p className="text-red-500 text-xs mt-1">
               {errors.variant[index].price.message}
@@ -74,8 +73,10 @@ export const ProductVariantItem = ({
           )}
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Quota</label>
+        <div className="input-group md:col-span-4">
+          <label className="block text-sm font-medium mb-1">
+            Jumlah Stock (Opsional)
+          </label>
           <input
             {...register(getFieldName("quota"))}
             className="w-full p-2 border rounded"
@@ -88,8 +89,14 @@ export const ProductVariantItem = ({
           )}
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Deadline</label>
+        <div className="input-group md:col-span-6">
+          <label className="block text-sm font-medium mb-1">
+            Deadline{" "}
+            <span className="text-xs">
+              (Opsional - jika melewati tanggal yang ditetapkan produk akan
+              terhapus otomatis)
+            </span>
+          </label>
           <input
             type="date"
             {...register(getFieldName("purchase_deadline"))}
@@ -108,7 +115,7 @@ export const ProductVariantItem = ({
         onClick={onRemove}
         className="mt-2 text-red-600 text-sm hover:text-red-800"
       >
-        Remove Variant
+        Hapus Variant
       </button>
     </div>
   );
