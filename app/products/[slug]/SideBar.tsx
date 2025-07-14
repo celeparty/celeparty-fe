@@ -51,7 +51,9 @@ export default function SideBar({ dataProducts, currentPrice }: any) {
     <div className="p-5 shadow-lg rounded-lg border-solid border-[1px] border-gray-100 -mt-6 lg:-mt-0">
       {status === "authenticated" ? (
         <>
-          <h4 className="font-bold lg:font-normal">Atur Jumlah dan Catatan</h4>
+          <h4 className="font-bold lg:font-normal">
+            Atur Jumlah dan Detail Pengiriman
+          </h4>
           <div className="relative lg:mt-5 mt-[10px]">
             <label className="mb-1 block">Jumlah</label>
             <div className=" border-solid w-auto inline-block border-[1px] rounded-lg border-c-gray">
