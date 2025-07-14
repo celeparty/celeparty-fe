@@ -563,8 +563,8 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           />
         ))}
 
-        <SubTitle title="Escrow" className="mb-3" />
-        <ItemInput label="Enable Escrow" required={false}>
+        <SubTitle title="Pembayaran Lunas / Escrow" className="mb-3" />
+        <ItemInput label="Set Escrow" required={false}>
           <Controller
             name="escrow"
             control={control}
