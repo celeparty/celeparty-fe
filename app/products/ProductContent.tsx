@@ -63,24 +63,24 @@ export function ProductContent() {
     }
   }, [query.isSuccess, query.data]);
 
-  // useEffect(() => {
-  //   if (price?.min && price?.max) {
-  //     const dataSort: any = _.filter(dataContent, (item: any) => {
-  //       return item.main_price >= price.min && item.main_price <= price.max;
-  //     });
-  //     setMainData(dataSort);
-  //   } else if (price?.min && !price?.max) {
-  //     const dataSort: any = _.filter(dataContent, (item: any) => {
-  //       return item.main_price >= price.min;
-  //     });
-  //     setMainData(dataSort);
-  //   } else if (!price?.min && price?.max) {
-  //     const dataSort: any = _.filter(dataContent, (item: any) => {
-  //       return item.main_price <= price.max;
-  //     });
-  //     setMainData(dataSort);
-  //   } else null;
-  // }, [price]);
+  useEffect(() => {
+    if (price?.min && price?.max) {
+      const dataSort: any = _.filter(dataContent, (item: any) => {
+        return item.main_price >= price.min && item.main_price <= price.max;
+      });
+      setMainData(dataSort);
+    } else if (price?.min && !price?.max) {
+      const dataSort: any = _.filter(dataContent, (item: any) => {
+        return item.main_price >= price.min;
+      });
+      setMainData(dataSort);
+    } else if (!price?.min && price?.max) {
+      const dataSort: any = _.filter(dataContent, (item: any) => {
+        return item.main_price <= price.max;
+      });
+      setMainData(dataSort);
+    } else null;
+  }, [price]);
 
   useEffect(() => {
     const cleanMin = price?.min
@@ -154,33 +154,34 @@ export function ProductContent() {
     setShowOptions(!showOptions);
   };
 
-  useEffect(() => {
-    if (dataContent) {
-      const uniqueRegions = new Set<string>();
-      dataContent.forEach((data: any) => {
-        if (data.region) {
-          uniqueRegions.add(data.region);
-        }
-      });
+  // sementara disabled dulu
+  // useEffect(() => {
+  //   if (dataContent) {
+  //     const uniqueRegions = new Set<string>();
+  //     dataContent.forEach((data: any) => {
+  //       if (data.region) {
+  //         uniqueRegions.add(data.region);
+  //       }
+  //     });
 
-      const capitalizeFirstLetter = (str: string) => {
-        return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-      };
+  //     const capitalizeFirstLetter = (str: string) => {
+  //       return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  //     };
 
-      const newLocations = Array.from(uniqueRegions).map((region) => ({
-        label: capitalizeFirstLetter(region),
-        value: region.toLowerCase().replace(/\s+/g, "-"),
-      }));
+  //     const newLocations = Array.from(uniqueRegions).map((region) => ({
+  //       label: capitalizeFirstLetter(region),
+  //       value: region.toLowerCase().replace(/\s+/g, "-"),
+  //     }));
 
-      setEventLocations((prevLocations) => {
-        const combined = [...prevLocations, ...newLocations];
-        return combined.filter(
-          (location, index, self) =>
-            index === self.findIndex((t) => t.value === location.value)
-        );
-      });
-    }
-  }, []);
+  //     setEventLocations((prevLocations) => {
+  //       const combined = [...prevLocations, ...newLocations];
+  //       return combined.filter(
+  //         (location, index, self) =>
+  //           index === self.findIndex((t) => t.value === location.value)
+  //       );
+  //     });
+  //   }
+  // }, []);
 
   return (
     <div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
@@ -219,35 +220,35 @@ export function ProductContent() {
             </ItemInfo>
           </div>
         </div>
+        {
+          ["Peralatan Event", "Ulang Tahun", "Tasyakuran", "Acara Korporasi"].includes(getType ?? "") && (
+                    <div className="relative mb-7 [&_h4]:mb-3">
+                      <h4>Pilih Kategori Produk</h4>
+                      <div className="flex flex-col gap-3">
+                        {productCategories.map((cat, index) => (
+                          <React.Fragment key={index}>
+                            <ItemInfo image={cat.icon ?? ""}>
+                              <ItemCategory
+                                title={cat.label}
+                                onClick={() => {
+                                  const isActive = activeCategory === cat.value;
+                                  setActiveCategory(isActive ? null : cat.value);
+                                  handleFilter(isActive ? "" : cat.value);
+                                }}
+                                className={`${
+                                  activeCategory === cat.value &&
+                                  "bg-c-green text-c-white"
+                                }`}
+                              />
+                            </ItemInfo>
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    </div>
+                  )
+          
+        }
 
-        {getType === "Peralatan Event" ||
-          getType === "Ulang Tahun" ||
-          getType === "Tasyakuran" ||
-          (getType === "Acara Korporasi" && (
-            <div className="relative mb-7 [&_h4]:mb-3">
-              <h4>Pilih Kategori Produk</h4>
-              <div className="flex flex-col gap-3">
-                {productCategories.map((cat, index) => (
-                  <React.Fragment key={index}>
-                    <ItemInfo image={cat.icon ?? ""}>
-                      <ItemCategory
-                        title={cat.label}
-                        onClick={() => {
-                          const isActive = activeCategory === cat.value;
-                          setActiveCategory(isActive ? null : cat.value);
-                          handleFilter(isActive ? "" : cat.value);
-                        }}
-                        className={`${
-                          activeCategory === cat.value &&
-                          "bg-c-green text-c-white"
-                        }`}
-                      />
-                    </ItemInfo>
-                  </React.Fragment>
-                ))}
-              </div>
-            </div>
-          ))}
       </Box>
       <div className="lg:flex-1 w-full">
         <div className="w-auto lg:inline-block">
