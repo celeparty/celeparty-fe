@@ -63,24 +63,24 @@ export function ProductContent() {
     }
   }, [query.isSuccess, query.data]);
 
-  // useEffect(() => {
-  //   if (price?.min && price?.max) {
-  //     const dataSort: any = _.filter(dataContent, (item: any) => {
-  //       return item.main_price >= price.min && item.main_price <= price.max;
-  //     });
-  //     setMainData(dataSort);
-  //   } else if (price?.min && !price?.max) {
-  //     const dataSort: any = _.filter(dataContent, (item: any) => {
-  //       return item.main_price >= price.min;
-  //     });
-  //     setMainData(dataSort);
-  //   } else if (!price?.min && price?.max) {
-  //     const dataSort: any = _.filter(dataContent, (item: any) => {
-  //       return item.main_price <= price.max;
-  //     });
-  //     setMainData(dataSort);
-  //   } else null;
-  // }, [price]);
+  useEffect(() => {
+    if (price?.min && price?.max) {
+      const dataSort: any = _.filter(dataContent, (item: any) => {
+        return item.main_price >= price.min && item.main_price <= price.max;
+      });
+      setMainData(dataSort);
+    } else if (price?.min && !price?.max) {
+      const dataSort: any = _.filter(dataContent, (item: any) => {
+        return item.main_price >= price.min;
+      });
+      setMainData(dataSort);
+    } else if (!price?.min && price?.max) {
+      const dataSort: any = _.filter(dataContent, (item: any) => {
+        return item.main_price <= price.max;
+      });
+      setMainData(dataSort);
+    } else null;
+  }, [price]);
 
   useEffect(() => {
     const cleanMin = price?.min
