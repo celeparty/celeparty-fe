@@ -17,29 +17,16 @@ export const useCart = create(
 					cartLength: state.cartLength + 1,
 				}));
 			},
-			setCart: (data: { product_id: string; quantity: number }[]) => {
+			setCart: (data: any) => {
 			  
-				set((state: { cart: { product_id: string; quantity: number }[] }) => {
-				  // Untuk setiap item dalam `data`, tambahkan atau perbarui item di keranjang
-				  const updatedCart = [...state.cart];
-			  
-				  data.forEach((newItem) => {
-					const itemIndex = updatedCart.findIndex(
-					  (item) => item.product_id === newItem.product_id
-					);
-			  
-					if (itemIndex !== -1) {
-					  // Perbarui jumlah jika produk sudah ada
-					  updatedCart[itemIndex].quantity += newItem.quantity;
-					} else {
-					  // Tambahkan produk baru jika tidak ada
-					  updatedCart.push(newItem);
-					}
-				  });
-			  
-				  return {
-					cart: updatedCart,
-				  };
+				set((state: { cart: any[] }) => {
+				  let newCart;
+				  if (typeof data === 'function') {
+					newCart = data(state.cart);
+				  } else {
+					newCart = data;
+				  }
+				  return { cart: newCart };
 				});
 			  },
 			  

@@ -1,6 +1,6 @@
 "use client";
 import Box from "@/components/Box";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useCart } from "@/lib/store/cart";
 import Image from "next/image";
 import { formatRupiah } from "@/lib/utils";
@@ -8,6 +8,7 @@ import { RiDeleteBin6Fill } from "react-icons/ri";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import { PiSmileySadDuotone } from "react-icons/pi";
 import axios from "axios";
+import { useSession } from "next-auth/react";
 
 declare global {
   interface Window {
@@ -39,17 +40,205 @@ export default function CartContent() {
     };
   });
 
-  const handleCheckout = async () => {
-    const response = await axios
-      .post(`/api/payment`, data)
-      .then((res) => {
-        return res.data.token;
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-    window.snap.pay(response);
+  // State untuk form checkout
+  const [form, setForm] = useState({
+    event_date: "",
+    shipping_location: "",
+    loading_date: "",
+    loading_time: "",
+    customer_name: "",
+    telp: "",
+    variant: "",
+  });
+  const [formError, setFormError] = useState("");
+
+  // State untuk edit quantity dan catatan
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [editQuantity, setEditQuantity] = useState(1);
+  const [editNote, setEditNote] = useState("");
+
+  const { data: session } = useSession();
+  const userTelp = session?.user?.phone || "-";
+
+  // Sinkronkan telp di cart dengan session.user.phone
+  useEffect(() => {
+    if (userTelp && userTelp !== "-") {
+      const updatedCart = cart.map((item: any) => ({ ...item, telp: userTelp }));
+      setCart(updatedCart);
+    }
+    // eslint-disable-next-line
+  }, [userTelp]);
+
+  // Validasi cart, cek userTelp bukan item.telp
+  const isCartValid = cart.length > 0 && cart.every((item: any) =>
+    item.event_date &&
+    item.shipping_location &&
+    item.loading_date &&
+    item.loading_time &&
+    item.customer_name &&
+    userTelp &&
+    item.variant
+  );
+
+  console.log('cart di halaman /cart:', cart);
+
+  // Hapus form input checkout, ganti dengan tampilan readonly hasil inputan user
+  // Di bagian Ringkasan Belanja, tampilkan data dari cart[0] (asumsi semua produk di cart punya data yang sama)
+  {cart.length > 0 && (
+    <div className="mb-4 p-3 border rounded bg-gray-50">
+      <div className="mb-1"><b>Nama Pemesan:</b> {cart[0]?.customer_name || '-'}</div>
+      <div className="mb-1"><b>No. Telepon:</b> {cart[0]?.telp || '-1'}</div>
+      <div className="mb-1"><b>Alamat Pengiriman:</b> {cart[0]?.shipping_location || '-'}</div>
+      <div className="mb-1"><b>Tanggal Acara:</b> {cart[0]?.event_date || '-'}</div>
+      <div className="mb-1"><b>Tanggal Loading:</b> {cart[0]?.loading_date || '-'}</div>
+      <div className="mb-1"><b>Jam Loading:</b> {cart[0]?.loading_time || '-'}</div>
+      <div className="mb-1"><b>Varian Produk:</b> {cart[0]?.variant || '-'}</div>
+    </div>
+  )}
+
+  // Ringkasan data inputan user di cart (readonly, untuk semua produk)
+  {cart.length > 0 && (
+    <>
+      {cart.map((item: any, idx: number) => (
+        <div key={item.product_id || idx} className="mb-6 border-b pb-4 last:border-b-0 last:pb-0 flex gap-4">
+          <div className="w-[100px] h-[100px] relative">
+            <Image
+              src={item.image ? item.image : "/images/noimage.png"}
+              alt="image"
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div className="flex-1">
+            <div className="mb-1"><b>Produk:</b> {item.product_name}</div>
+            <div className="mb-1"><b>Nama Pemesan:</b> {item.customer_name || '-'}</div>
+            <div className="mb-1"><b>No. Telepon:</b> {userTelp}</div>
+            <div className="mb-1"><b>Varian Produk:</b> {item.variant || '-'}</div>
+            <div className="mb-1"><b>Detail Alamat:</b> {item.shipping_location || '-'}</div>
+            <div className="mb-1"><b>Tanggal Acara:</b> {item.event_date || '-'}</div>
+            <div className="mb-1"><b>Tanggal Loading:</b> {item.loading_date || '-'}</div>
+            <div className="mb-1"><b>Jam Loading:</b> {item.loading_time || '-'}</div>
+            <div className="mb-1 flex items-center gap-2">
+              <b>Jumlah:</b>
+              <input
+                type="number"
+                min={1}
+                className="border rounded p-1 w-16"
+                value={item.quantity}
+                onChange={e => {
+                  const updatedCart = cart.map((it: any, i: number) => i === idx ? { ...it, quantity: Number(e.target.value) } : it);
+                  setCart(updatedCart);
+                }}
+              />
+            </div>
+            <div className="mb-1">
+              <b>Catatan:</b>
+              <textarea
+                className="border rounded p-1 w-full"
+                value={item.note || ''}
+                onChange={e => {
+                  const updatedCart = cart.map((it: any, i: number) => i === idx ? { ...it, note: e.target.value } : it);
+                  setCart(updatedCart);
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      ))}
+    </>
+  )}
+
+  // Fungsi update cart item
+  const handleSaveEdit = (idx: number) => {
+    const updatedCart = cart.map((item: any, i: number) => {
+      if (i === idx) {
+        return { ...item, quantity: editQuantity, note: editNote };
+      }
+      return item;
+    });
+    setCart(updatedCart);
+    setEditIndex(null);
   };
+
+  const handleCheckout = async () => {
+    if (!isCartValid) {
+      alert("Data transaksi belum lengkap. Silakan lengkapi di halaman produk.");
+      return;
+    }
+    // Gabungkan field yang bisa berbeda antar produk
+    const variants = cart.map((item: any) => item.variant).join(",");
+    const quantities = cart.map((item: any) => item.quantity).join(",");
+    const notes = cart.map((item: any) => item.note).join("; ");
+    // Ambil field yang sama dari produk pertama
+    const c = cart[0] || {};
+    try {
+      // Proses ke payment gateway (Midtrans)
+      console.log('Kirim ke /api/payment:', data);
+      const response = await axios.post(`/api/payment`, data);
+      const token = response.data.token;
+      window.snap.pay(token, {
+        onSuccess: async function(result: any) {
+          try {
+            // Log pembayaran sukses
+            console.log('Pembayaran Midtrans sukses:', result);
+            // Siapkan payload transaksi ke Strapi
+            const transactionPayload = {
+              products: cart.map((item: any) => ({ id: item.product_id, title: item.product_name })),
+              payment_status: "paid",
+              variant: variants,
+              quantity: quantities,
+              shipping_location: c.shipping_location,
+              event_date: c.event_date,
+              loading_date: c.loading_date,
+              loading_time: c.loading_time,
+              customer_name: c.customer_name,
+              telp: userTelp,
+              note: notes,
+            };
+            console.log('Kirim ke Strapi:', transactionPayload);
+            const strapiRes = await axios.post(
+              "/api/transaction-proxy",
+              { data: transactionPayload }
+            );
+            console.log('Response Strapi:', strapiRes.data);
+            sessionStorage.setItem(
+              "transaction_summary",
+              JSON.stringify({
+                orderId: strapiRes.data.data.id,
+                products: cart,
+                total: calculateTotal(),
+                ...c,
+              })
+            );
+            setCart([]);
+            window.location.href = "/cart/success";
+          } catch (err: any) {
+            let msg = "Transaksi berhasil di Midtrans, tapi gagal mencatat ke sistem (Strapi). Silakan hubungi admin.";
+            if (err.response && err.response.data && err.response.data.error) {
+              msg += "\n" + JSON.stringify(err.response.data.error, null, 2);
+            }
+            console.error('Error POST ke Strapi:', err);
+            alert(msg);
+          }
+        },
+        onError: function(error: any) {
+          console.error('Error pembayaran Midtrans:', error);
+          alert("Pembayaran gagal di Midtrans. Silakan coba lagi.");
+        },
+        onClose: function() {
+          // User menutup popup pembayaran
+          console.log('Popup Midtrans ditutup user');
+        },
+      });
+    } catch (error) {
+      console.error('Error request ke /api/payment:', error);
+      alert("Gagal memproses pembayaran. Silakan coba lagi.");
+    }
+  };
+
+  console.log('cart:', cart);
+  console.log('isCartValid:', isCartValid);
+
 
   return (
     <div className="wrapper">
@@ -86,6 +275,22 @@ export default function CartContent() {
                         {item.quantity}
                       </div>
                     </div>
+                  </div>
+
+                  <div className="mt-2">
+                  {cart.map((item: any, idx: number) => (
+                    <div key={item.product_id || idx} className="mb-3 border-b pb-2 last:border-b-0 last:pb-0">
+                      <div className="mb-1"><b>Produk:</b> {item.product_name}</div>
+                      <div className="mb-1"><b>Nama Pemesan:</b> {item.customer_name || '-'}</div>
+                      <div className="mb-1"><b>No. Telepon:</b> {userTelp}</div>
+                      <div className="mb-1"><b>Varian Produk:</b> {item.variant || '-'}</div>
+                      <div className="mb-1"><b>Detail Alamat:</b> {item.shipping_location || '-'}</div>
+                      <div className="mb-1"><b>Tanggal Acara:</b> {item.event_date || '-'}</div>
+                      <div className="mb-1"><b>Tanggal Loading:</b> {item.loading_date || '-'}</div>
+                      <div className="mb-1"><b>Jam Loading:</b> {item.loading_time || '-'}</div>
+                    </div>
+                  ))}
+
                   </div>
                   <div className="flex lg:gap-7 gap-3 mt-2 lg:mt-0">
                     <div className="flex-1">
@@ -148,34 +353,21 @@ export default function CartContent() {
             <Box className="mb-7">
               <div className="w-full">
                 <h4 className="text-lg text-black mb-2">Ringkasan Belanja</h4>
-                {cart.map((item: any, index: number) => {
-                  return (
-                    <div
-                      className="flex justify-between text-[14px] w-full"
-                      key={index}
-                    >
-                      <div>
-                        {item.product_name}{" "}
-                        <span className="text-[12px] opacity-70">
-                          @{item.quantity}
-                        </span>
-                      </div>
-                      <div>{formatRupiah(item.price)}</div>
-                    </div>
-                  );
-                })}
-                <div className="flex font-bold justify-between text-[16px] mt-2 w-full">
-                  <div className="">Total Harga</div>
-                  <div className="text-c-orange">
-                    {formatRupiah(calculateTotal())}
+                {/* Ringkasan data inputan user di cart (readonly, untuk semua produk) */}
+                <div className="mb-4 p-3 border rounded bg-gray-50">
+                  {/* Total Belanja */}
+                  <div className="flex font-bold justify-between text-[16px] mt-2 w-full  pt-2">
+                    <div className="">Total Harga</div>
+                    <div className="text-c-orange">{formatRupiah(calculateTotal())}</div>
                   </div>
                 </div>
-              </div>
-              <div
-                className="bg-c-green text-white text-center py-3 mt-5 rounded-lg cursor-pointer"
-                onClick={handleCheckout}
-              >
-                Pembayaran
+                {/* Tombol pembayaran aktif jika semua produk di cart sudah lengkap */}
+                <div
+                  className={`bg-c-green text-white text-center py-3 mt-5 rounded-lg cursor-pointer ${!isCartValid ? 'opacity-50 pointer-events-none' : ''}`}
+                  onClick={!isCartValid ? undefined : handleCheckout}
+                >
+                  Pembayaran
+                </div>
               </div>
             </Box>
           </div>
