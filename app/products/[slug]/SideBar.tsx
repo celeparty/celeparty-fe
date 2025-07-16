@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { ChangeEventHandler, useState, useEffect } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
+import { CartItem } from "@/lib/interfaces/iCart";
 
 export const Notification = () => {
   const { statusNotif, message } = useNotif();
@@ -81,9 +82,10 @@ export default function SideBar({ dataProducts, currentPrice, selectedVariantId 
     // Debug: log cartData
     console.log('cartData:', cartData);
     // Ambil cart lama dari zustand, update array, lalu setCart dengan array baru
-    const prevCart = useCart.getState().cart || [];
-    const idx = prevCart.findIndex(item => item.product_id === cartData.product_id);
-    let newCart;
+    const cartRaw = useCart.getState().cart;
+    const prevCart: CartItem[] = Array.isArray(cartRaw) ? cartRaw : [];
+    const idx = prevCart.findIndex((item: CartItem) => item.product_id === cartData.product_id);
+    let newCart: CartItem[];
     if (idx !== -1) {
       // Update data jika produk sudah ada
       newCart = [...prevCart];
