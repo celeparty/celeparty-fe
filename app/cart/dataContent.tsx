@@ -80,7 +80,6 @@ export default function CartContent() {
     item.variant
   );
 
-  console.log('cart di halaman /cart:', cart);
 
   // Hapus form input checkout, ganti dengan tampilan readonly hasil inputan user
   // Di bagian Ringkasan Belanja, tampilkan data dari cart[0] (asumsi semua produk di cart punya data yang sama)
@@ -173,14 +172,11 @@ export default function CartContent() {
     const c = cart[0] || {};
     try {
       // Proses ke payment gateway (Midtrans)
-      console.log('Kirim ke /api/payment:', data);
       const response = await axios.post(`/api/payment`, data);
       const token = response.data.token;
       window.snap.pay(token, {
         onSuccess: async function(result: any) {
           try {
-            // Log pembayaran sukses
-            console.log('Pembayaran Midtrans sukses:', result);
             // Siapkan payload transaksi ke Strapi
             const transactionPayload = {
               products: cart.map((item: any) => ({ id: item.product_id, title: item.product_name })),
@@ -195,12 +191,10 @@ export default function CartContent() {
               telp: userTelp,
               note: notes,
             };
-            console.log('Kirim ke Strapi:', transactionPayload);
             const strapiRes = await axios.post(
               "/api/transaction-proxy",
               { data: transactionPayload }
             );
-            console.log('Response Strapi:', strapiRes.data);
             sessionStorage.setItem(
               "transaction_summary",
               JSON.stringify({
@@ -236,8 +230,6 @@ export default function CartContent() {
     }
   };
 
-  console.log('cart:', cart);
-  console.log('isCartValid:', isCartValid);
 
 
   return (

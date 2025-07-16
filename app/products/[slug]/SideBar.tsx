@@ -55,15 +55,6 @@ export default function SideBar({ dataProducts, currentPrice, selectedVariantId 
       const selected = dataProducts.variant.find((v:any) => v.id === selectedVariantId);
       if (selected) variantName = selected.name;
     }
-    // Debug: log semua state
-    console.log('shippingAddress:', shippingAddress);
-    console.log('eventDate:', eventDate);
-    console.log('loadingDate:', loadingDate);
-    console.log('loadingTime:', loadingTime);
-    console.log('customerName:', customerName);
-    console.log('telp:', telp);
-    console.log('note:', note);
-    console.log('variantName:', variantName);
     const cartData = {
       product_id: dataProducts.id,
       product_name: dataProducts.title,
@@ -79,8 +70,6 @@ export default function SideBar({ dataProducts, currentPrice, selectedVariantId 
       telp: telp,
       variant: variantName,
     };
-    // Debug: log cartData
-    console.log('cartData:', cartData);
     // Ambil cart lama dari zustand, update array, lalu setCart dengan array baru
     const cartRaw = useCart.getState().cart;
     const prevCart: CartItem[] = Array.isArray(cartRaw) ? cartRaw : [];

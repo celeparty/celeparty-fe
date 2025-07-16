@@ -33,7 +33,6 @@ export default function NewArticles() {
 	return (
 		<div>
 			{dataContent?.map((item: any, index: number) => {
-				console.log(process.env.BASE_API+item.image?.url);
 				return (
 					<ItemFeature
 						small={true}
