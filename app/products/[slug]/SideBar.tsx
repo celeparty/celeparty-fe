@@ -69,8 +69,8 @@ export default function SideBar({ dataProducts, currentPrice, selectedVariantId 
       customer_name: customerName,
       telp: telp,
       variant: variantName,
+      user_event_type: dataProducts.user_event_type?.name || dataProducts.user_event_type?.id || "",
     };
-    // Ambil cart lama dari zustand, update array, lalu setCart dengan array baru
     const cartRaw = useCart.getState().cart;
     const prevCart: CartItem[] = Array.isArray(cartRaw) ? cartRaw : [];
     const idx = prevCart.findIndex((item: CartItem) => item.product_id === cartData.product_id);

@@ -59,6 +59,7 @@ export default function CartContent() {
 
   const { data: session } = useSession();
   const userTelp = session?.user?.phone || "-";
+  const userEmail = session?.user?.email || "";
 
   // Sinkronkan telp di cart dengan session.user.phone
   useEffect(() => {
@@ -171,9 +172,13 @@ export default function CartContent() {
     // Ambil field yang sama dari produk pertama
     const c = cart[0] || {};
     try {
-      // Proses ke payment gateway (Midtrans)
-      const response = await axios.post(`/api/payment`, data);
+      // Kirim email customer ke backend payment
+      const response = await axios.post(`/api/payment`, {
+        email: userEmail,
+        items: data
+      });
       const token = response.data.token;
+      const order_id = response.data.order_id;
       window.snap.pay(token, {
         onSuccess: async function(result: any) {
           try {
@@ -190,6 +195,9 @@ export default function CartContent() {
               customer_name: c.customer_name,
               telp: userTelp,
               note: notes,
+              email: userEmail,
+              order_id: order_id,
+              event_type: c.user_event_type, // Tambahan field event_type
             };
             const strapiRes = await axios.post(
               "/api/transaction-proxy",
@@ -202,6 +210,8 @@ export default function CartContent() {
                 products: cart,
                 total: calculateTotal(),
                 ...c,
+                order_id: order_id,
+                email: userEmail,
               })
             );
             setCart([]);
