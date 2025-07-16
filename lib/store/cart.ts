@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { CartItem } from "@/lib/interfaces/iCart";
 
 interface NotifState {
 	statusNotif: boolean;
@@ -7,81 +8,71 @@ interface NotifState {
 	notifCart: (message: string) => void;
   }
 
-export const useCart = create(	
-	persist(
-		(set, get) => ({
-			cart: [],
-			cartLength: 0,
-			setCartLength: () => {
-				set((state: { cartLength: number }) => ({
-					cartLength: state.cartLength + 1,
-				}));
-			},
-			setCart: (data: { product_id: string; quantity: number }[]) => {
-			  
-				set((state: { cart: { product_id: string; quantity: number }[] }) => {
-				  // Untuk setiap item dalam `data`, tambahkan atau perbarui item di keranjang
-				  const updatedCart = [...state.cart];
-			  
-				  data.forEach((newItem) => {
-					const itemIndex = updatedCart.findIndex(
-					  (item) => item.product_id === newItem.product_id
-					);
-			  
-					if (itemIndex !== -1) {
-					  // Perbarui jumlah jika produk sudah ada
-					  updatedCart[itemIndex].quantity += newItem.quantity;
-					} else {
-					  // Tambahkan produk baru jika tidak ada
-					  updatedCart.push(newItem);
-					}
-				  });
-			  
-				  return {
-					cart: updatedCart,
-				  };
-				});
-			  },
-			  
-			updateNote: (productId:any, newNote:any) => {
-				set((state:any) => ({
-					cart: state.cart.map((item:any) =>
-					item.product_id === productId
-						? { ...item, note: newNote }
-						: item
-					),
-				}));
-			},
+export interface CartStore {
+  cart: CartItem[];
+  cartLength: number;
+  setCartLength: () => void;
+  setCart: (data: CartItem[] | ((prev: CartItem[]) => CartItem[])) => void;
+  updateNote: (productId: string | number, newNote: string) => void;
+  updateQuantity: (productId: string | number, newQuantity: number) => void;
+  deleteItem: (productId: string | number) => void;
+  calculateTotal: () => number;
+  test: () => void;
+}
 
-			updateQuantity: (productId:any, newQuantity:any) => {
-				set((state:any) => ({
-					cart: state.cart.map((item:any) =>
-					item.product_id === productId
-						? { ...item, quantity: newQuantity }
-						: item
-					),
-				}));
-				},				
-				deleteItem: (productId:any) => {
-					set((state:any) => ({
-					  cart: state.cart.filter((item:any) => item.product_id !== productId),
-					}));
-				  },				
-				  calculateTotal: () => {
-					const cart = get() as any; // Type assertion agar get() diperlakukan sebagai `any`
-					return cart.cart.reduce((total: number, item: any) => {
-					  // Pastikan untuk memeriksa nested struktur
-					  const product = item?.product_id ? item : item[0];
-					  return total + (product.price * product.quantity || 0);
-					}, 0);
-				  },	
-			test: () => console.log("test"),
-		}),
-		{
-			name: "cart",
-			storage: createJSONStorage(() => sessionStorage),
-		},
-	),
+export const useCart = create<CartStore>()(
+  persist<CartStore>(
+    (set, get) => ({
+      cart: [] as CartItem[],
+      cartLength: 0,
+      setCartLength: () => {
+        set((state) => ({
+          cartLength: state.cartLength + 1,
+        }));
+      },
+      setCart: (data) => {
+        set((state) => {
+          let newCart: CartItem[];
+          if (typeof data === 'function') {
+            newCart = data(state.cart);
+          } else {
+            newCart = data;
+          }
+          return { cart: newCart };
+        });
+      },
+      updateNote: (productId, newNote) => {
+        set((state) => ({
+          cart: state.cart.map((item) =>
+            item.product_id === productId ? { ...item, note: newNote } : item
+          ),
+        }));
+      },
+      updateQuantity: (productId, newQuantity) => {
+        set((state) => ({
+          cart: state.cart.map((item) =>
+            item.product_id === productId ? { ...item, quantity: newQuantity } : item
+          ),
+        }));
+      },
+      deleteItem: (productId) => {
+        set((state) => ({
+          cart: state.cart.filter((item) => item.product_id !== productId),
+        }));
+      },
+      calculateTotal: () => {
+        const cart = get().cart;
+        return cart.reduce((total, item) => {
+          return total + (item.price * item.quantity || 0);
+        }, 0);
+      },
+      test: () => console.log("test"),
+    }),
+    {
+      name: "cart",
+      storage: createJSONStorage(() => sessionStorage),
+    }
+  )
 );
 
 export const useNotif = create<NotifState>((set) => ({

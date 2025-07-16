@@ -191,9 +191,8 @@ export default function ContentProduct(props: any) {
           <div className="right min-w-[275px] sticky top-0 ">
             <SideBar
               dataProducts={dataContent}
-              currentPrice={
-                currentPrice > 0 ? currentPrice : dataContent?.main_price
-              }
+              currentPrice={currentPrice > 0 ? currentPrice : dataContent?.main_price}
+              selectedVariantId={selectedVariantId}
             />
           </div>
         </div>

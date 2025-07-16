@@ -6,8 +6,9 @@ import { format, isValid, parse } from "date-fns";
 import Cookies from "js-cookie";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { ChangeEventHandler, useState } from "react";
+import { ChangeEventHandler, useState, useEffect } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
+import { CartItem } from "@/lib/interfaces/iCart";
 
 export const Notification = () => {
   const { statusNotif, message } = useNotif();
@@ -25,36 +26,75 @@ export const Notification = () => {
   );
 };
 
-export default function SideBar({ dataProducts, currentPrice }: any) {
+export default function SideBar({ dataProducts, currentPrice, selectedVariantId }: any) {
   const [value, setValue] = useState(0);
   const [note, setNote] = useState("");
   const [shippingAddress, setShippingAddress] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [loadingDate, setLoadingDate] = useState("");
   const [loadingTime, setLoadingTime] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [telp, setTelp] = useState("");
+  const [variant, setVariant] = useState("");
   const { data: session, status } = useSession();
   const { cart, setCart }: any = useCart();
   const { transaction }: any = useTransaction();
   const notifCart = useNotif((state) => state.notifCart);
 
+  useEffect(() => {
+    if (session && session.user) {
+      setCustomerName(session.user.name || "");
+      setTelp(session.user.telp || "");
+    }
+  }, [session]);
+
   const addCart = () => {
     notifCart(`${dataProducts.title} berhasil dimasukan ke keranjang`);
+    let variantName = "";
+    if (dataProducts.variant && dataProducts.variant.length > 0 && selectedVariantId) {
+      const selected = dataProducts.variant.find((v:any) => v.id === selectedVariantId);
+      if (selected) variantName = selected.name;
+    }
+    // Debug: log semua state
+    console.log('shippingAddress:', shippingAddress);
+    console.log('eventDate:', eventDate);
+    console.log('loadingDate:', loadingDate);
+    console.log('loadingTime:', loadingTime);
+    console.log('customerName:', customerName);
+    console.log('telp:', telp);
+    console.log('note:', note);
+    console.log('variantName:', variantName);
     const cartData = {
-      ...cart,
       product_id: dataProducts.id,
       product_name: dataProducts.title,
       price: currentPrice,
       image: dataProducts.main_image[0].url,
       quantity: value,
-      transaction_id: transaction.id,
       note: note,
       loading_date: loadingDate,
       loading_time: loadingTime,
       event_date: eventDate,
       shipping_location: shippingAddress,
+      customer_name: customerName,
+      telp: telp,
+      variant: variantName,
     };
-
-    setCart([cartData]);
+    // Debug: log cartData
+    console.log('cartData:', cartData);
+    // Ambil cart lama dari zustand, update array, lalu setCart dengan array baru
+    const cartRaw = useCart.getState().cart;
+    const prevCart: CartItem[] = Array.isArray(cartRaw) ? cartRaw : [];
+    const idx = prevCart.findIndex((item: CartItem) => item.product_id === cartData.product_id);
+    let newCart: CartItem[];
+    if (idx !== -1) {
+      // Update data jika produk sudah ada
+      newCart = [...prevCart];
+      newCart[idx] = { ...newCart[idx], ...cartData };
+    } else {
+      // Tambah produk baru
+      newCart = [...prevCart, cartData];
+    }
+    setCart(newCart);
   };
 
   return (
