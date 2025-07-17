@@ -61,7 +61,6 @@ function LoginPage() {
             password: password,
         });
 		if (result?.error) {
-			console.log(result)
 			setMessage({status:true, info:"Username atau password salah"})
 		  } 
 		else {

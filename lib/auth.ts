@@ -53,7 +53,7 @@ export const authOptions: NextAuthOptions = {
 			},
 			async authorize(credentials) {
 				console.log("Credentials:", credentials);
-				const res = await fetch(`${process.env.BASE_API}/api/auth/local?populate=*`, {
+				const res = await fetch(`${process.env.BASE_API}/api/auth/local?populate=role`, {
 					method: "POST",
 					headers: {
 					  "Content-Type": "application/json",
@@ -86,6 +86,12 @@ export const authOptions: NextAuthOptions = {
 			if (user) {
 			  token.accessToken = user.jwt; // Simpan JWT ke token
 			  token.user = user.user; // Simpan informasi user
+        // Pastikan role juga ada di token.user
+        if (user.user && user.user.role) {
+          token.user.role = user.user.role;
+        } else if (user.role) {
+          token.user = { ...token.user, role: user.role };
+        }
 			}
 			return token; // Kembalikan token yang diperbarui
 		},
@@ -94,6 +100,10 @@ export const authOptions: NextAuthOptions = {
 			// Transfer token ke session
 			session.jwt = token.accessToken; // Simpan JWT ke session
 			session.user = token.user; // Simpan informasi user ke session
+      // Pastikan role juga ada di session.user
+      if (token.user && token.user.role) {
+        session.user.role = token.user.role;
+      }
 			return session; // Kembalikan session yang diperbarui
 		},
     },

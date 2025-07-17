@@ -21,36 +21,43 @@ export function GET() {
 
 // create / post data
 export async function POST(req) {
-    const data = await req.json()
-    if (data.length === 0) {
-        throw new Error("data not found")
-    }
+    try {
+        const data = await req.json();
+        console.log('PAYMENT BODY:', data);
+        const { email, items } = data;
+        console.log('ITEMS:', items);
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            throw new Error("data not found");
+        }
 
-    const itemDetails = data.map((item) => {
-        return {
-            key:item.id,
+        const itemDetails = items.map((item) => ({
+            key: item.id,
             id: item.id,
             name: item.name,
             price: _.ceil(parseFloat(item.price.toString())),
             quantity: item.quantity
-        }
-    })
+        }));
 
-    const grossAmount = _.sumBy(itemDetails, (item)=> item.price * item.quantity)
-    const parameter = {
-        transaction_details: [itemDetails],
-        transaction_details: {
-            "order_id":_.random(100000, 999999),
-            "gross_amount":grossAmount,
-            "product_details": {
-                "id": _.random(100000, 999999),
-                "name": itemDetails[0].name,
-                "price": itemDetails[0].price
+        const grossAmount = _.sumBy(itemDetails, (item) => item.price * item.quantity);
+        const order_id = `ORDER-${Date.now()}-${_.random(1000, 9999)}`;
+
+        const parameter = {
+            transaction_details: {
+                order_id,
+                gross_amount: grossAmount
+            },
+            item_details: itemDetails,
+            customer_details: {
+                email: email || ""
             }
-        }
-    }
+        };
+        console.log('MIDTRANS PARAMETER:', parameter);
 
-    const token = await snap.createTransactionToken(parameter)
-    
-    return NextResponse.json({token})
+        const token = await snap.createTransactionToken(parameter);
+
+        return NextResponse.json({ token, order_id });
+    } catch (err) {
+        console.error('Midtrans error:', err);
+        return NextResponse.json({ error: err.message }, { status: 500 });
+    }
 }

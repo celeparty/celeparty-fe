@@ -32,6 +32,8 @@ export default function ContentProduct(props: any) {
   const dataContent = query?.data?.data;
   const [currentPrice, setCurrentPrice] = useState(dataContent?.main_price);
 
+console.log(dataContent)
+
   useEffect(() => {
     setCurrentPrice(dataContent?.main_price);
   }, []);

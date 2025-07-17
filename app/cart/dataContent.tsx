@@ -59,6 +59,7 @@ export default function CartContent() {
 
   const { data: session } = useSession();
   const userTelp = session?.user?.phone || "-";
+  const userEmail = session?.user?.email || "";
 
   // Sinkronkan telp di cart dengan session.user.phone
   useEffect(() => {
@@ -80,7 +81,6 @@ export default function CartContent() {
     item.variant
   );
 
-  console.log('cart di halaman /cart:', cart);
 
   // Hapus form input checkout, ganti dengan tampilan readonly hasil inputan user
   // Di bagian Ringkasan Belanja, tampilkan data dari cart[0] (asumsi semua produk di cart punya data yang sama)
@@ -172,15 +172,16 @@ export default function CartContent() {
     // Ambil field yang sama dari produk pertama
     const c = cart[0] || {};
     try {
-      // Proses ke payment gateway (Midtrans)
-      console.log('Kirim ke /api/payment:', data);
-      const response = await axios.post(`/api/payment`, data);
+      // Kirim email customer ke backend payment
+      const response = await axios.post(`/api/payment`, {
+        email: userEmail,
+        items: data
+      });
       const token = response.data.token;
+      const order_id = response.data.order_id;
       window.snap.pay(token, {
         onSuccess: async function(result: any) {
           try {
-            // Log pembayaran sukses
-            console.log('Pembayaran Midtrans sukses:', result);
             // Siapkan payload transaksi ke Strapi
             const transactionPayload = {
               products: cart.map((item: any) => ({ id: item.product_id, title: item.product_name })),
@@ -194,13 +195,14 @@ export default function CartContent() {
               customer_name: c.customer_name,
               telp: userTelp,
               note: notes,
+              email: userEmail,
+              order_id: order_id,
+              event_type: c.user_event_type, // Tambahan field event_type
             };
-            console.log('Kirim ke Strapi:', transactionPayload);
             const strapiRes = await axios.post(
               "/api/transaction-proxy",
               { data: transactionPayload }
             );
-            console.log('Response Strapi:', strapiRes.data);
             sessionStorage.setItem(
               "transaction_summary",
               JSON.stringify({
@@ -208,6 +210,8 @@ export default function CartContent() {
                 products: cart,
                 total: calculateTotal(),
                 ...c,
+                order_id: order_id,
+                email: userEmail,
               })
             );
             setCart([]);
@@ -236,8 +240,6 @@ export default function CartContent() {
     }
   };
 
-  console.log('cart:', cart);
-  console.log('isCartValid:', isCartValid);
 
 
   return (
@@ -257,7 +259,7 @@ export default function CartContent() {
                       <Image
                         src={
                           item.image
-                            ? process.env.BASE_API + item.image
+                            ? (process.env.BASE_API || 'http://localhost:1337') + item.image
                             : "/images/noimage.png"
                         }
                         alt="image"
