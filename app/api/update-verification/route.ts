@@ -3,15 +3,15 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { transaction_id } = body;
+    const { documentId } = body;
     
-    console.log('Update verification request for transaction ID:', transaction_id);
+    console.log('Update verification request for documentId:', documentId);
     
-    if (!transaction_id) {
-      return NextResponse.json({ error: 'Transaction ID is required' }, { status: 400 });
+    if (!documentId) {
+      return NextResponse.json({ error: 'Document ID is required' }, { status: 400 });
     }
 
-    const STRAPI_URL = `${process.env.BASE_API}/api/transactions/${transaction_id}`;
+    const STRAPI_URL = `${process.env.BASE_API}/api/transactions/${documentId}`;
     const KEY_API = process.env.KEY_API;
     
     if (!KEY_API) {

@@ -68,16 +68,42 @@ export default function QRPage() {
     }
     setNotif(null);
     setLoading(true);
+    
     try {
-      const res = await fetch('/api/update-verification', {
+      const findRes = await fetch(`/api/qr-verify?order_id=${order_id}`);
+      const findData = await findRes.json();
+      
+      if (!findRes.ok || !findData.data) {
+        setNotif('Order ID tidak ditemukan di database.');
+        setLoading(false);
+        return;
+      }
+      
+      const documentId = findData.data.documentId;
+      if (!documentId) {
+        setNotif('Document ID tidak ditemukan.');
+        setLoading(false);
+        return;
+      }
+      
+      // 2. PUT ke Strapi dengan documentId
+      const updateRes = await fetch(`/api/update-verification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transaction_id: transactionData.id }),
+        body: JSON.stringify({ 
+          documentId: documentId 
+        }),
       });
-      const data = await res.json();
-      if (res.ok) setNotif('Tiket berhasil diverifikasi!');
-      else setNotif(`Gagal verifikasi tiket: ${data.error || 'Unknown error'}`);
-    } catch {
+      
+      const updateData = await updateRes.json();
+      
+      if (updateRes.ok) {
+        setNotif('Tiket berhasil diverifikasi!');
+      } else {
+        setNotif(`Gagal verifikasi tiket: ${updateData.error || 'Unknown error'}`);
+      }
+    } catch (err) {
+      console.error('Verification failed:', err);
       setNotif('Terjadi error saat verifikasi.');
     }
     setLoading(false);

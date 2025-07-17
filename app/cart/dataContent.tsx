@@ -259,7 +259,7 @@ export default function CartContent() {
                       <Image
                         src={
                           item.image
-                            ? process.env.BASE_API + item.image
+                            ? (process.env.BASE_API || 'http://localhost:1337') + item.image
                             : "/images/noimage.png"
                         }
                         alt="image"
