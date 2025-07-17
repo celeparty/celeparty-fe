@@ -39,8 +39,8 @@ export interface iUserPermissions {
 
 export interface iProductImage {
   id: string;
-  url: string;
-  mime: string;
+  url?: string;
+  mime?: string;
   file?: File | null;
 }
 

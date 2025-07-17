@@ -61,11 +61,15 @@ const ItemInput: React.FC<iItemInputProps> = ({
 interface iProductFormProps {
   formDefaultData: iProductReq;
   isEdit: boolean;
+  hideCategory?: boolean;
+  forceUserEventType?: string;
 }
 
 export const ProductForm: React.FC<iProductFormProps> = ({
   formDefaultData,
   isEdit,
+  hideCategory = false,
+  forceUserEventType,
 }) => {
   const { data: session, status } = useSession();
   const [stateCategory, setStateCategory] = useState<{
@@ -242,66 +246,84 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           return fieldData || { id: "", url: "", mime: "" };
         })
       );
-
-      if (uploadedImages?.length > 0) {
-        const variants: iProductVariant[] = variantFields
-          ? variantFields.map((v) => ({
-              name: v.name ?? "",
-              price: Number(v.price) || 0,
-              quota: v.quota?.toString() || "0",
-              purchase_deadline:
-                v.purchase_deadline || new Date().toISOString(),
-            }))
-          : [];
-        let updatedData: iProductReq = {
-          ...data,
-          main_image: uploadedImages.filter((img) => img?.id), // Filter out empty images
-          category: stateCategory.value
-            ? { connect: parseInt(`${stateCategory.value}`) - 1 }
-            : null,
-          users_permissions_user: {
-            connect: {
+      const mainImageIds = uploadedImages
+        .map(img => Number(img && img.id))
+        .filter(id => Number.isInteger(id) && id > 0);
+      console.log("Uploaded images:", uploadedImages);
+      console.log("mainImageIds:", mainImageIds);
+      const variants = variantFields.length
+        ? variantFields.map((v, i) => ({
+            name: v.name,
+            price: Number(v.price),
+            quota: v.quota,
+            purchase_deadline: v.purchase_deadline,
+          }))
+        : [];
+      let updatedData: iProductReq = {
+        ...data,
+        "main_image":[
+          {
+              "id":"83"
+          },
+          {
+              "id":"4"
+          }
+      ],
+        category: stateCategory.value
+          ? { connect: parseInt(`${stateCategory.value}`) - 1 }
+          : null,
+        users_permissions_user: {
+          connect: [
+            {
               id: session?.user.id,
             },
-          },
-          main_price: formatPriceReq(data.main_price),
-          price_min: formatPriceReq(data.price_min),
-          price_max: formatPriceReq(data.price_max),
-          variant: variants,
-          escrow: escrowChecked,
+          ],
+        },
+        main_price: formatPriceReq(data.main_price),
+        price_min: formatPriceReq(data.price_min),
+        price_max: formatPriceReq(data.price_max),
+        variant: variants,
+        escrow: escrowChecked,
+      };
+      console.log("Submit payload:", updatedData);
+      // Inject user_event_type if forced
+      if (forceUserEventType) {
+        updatedData = {
+          ...updatedData,
+          user_event_type: forceUserEventType,
         };
+      }
 
-        let response: any;
-        if (isEdit) {
-          response =
-            stateCategory.value !== null &&
-            (await axiosUser(
-              "PUT",
-              `/api/products/${formDefaultData.documentId}`,
-              `${session && session?.jwt}`,
-              {
-                data: updatedData,
-              }
-            ));
-        } else {
-          response =
-            stateCategory.value !== null &&
-            (await axiosUser(
-              "POST",
-              "/api/products?status=draft'",
-              `${session && session?.jwt}`,
-              {
-                data: updatedData,
-              }
-            ));
-        }
-        if (response) {
-          toast({
-            title: "Sukses",
-            description: `Sukses ${isEdit ? "edit" : "menambahkan"} produk!`,
-            className: eAlertType.SUCCESS,
-          });
-        }
+      let response: any;
+      if (isEdit) {
+        response =
+          stateCategory.value !== null &&
+          (await axiosUser(
+            "PUT",
+            `/api/products/${formDefaultData.documentId}`,
+            `${session && session?.jwt}`,
+            {
+              data: updatedData,
+            }
+          ));
+      } else {
+        response =
+          stateCategory.value !== null &&
+          (await axiosUser(
+            "POST",
+            "/api/products?status=draft",
+            `${session && session?.jwt}`,
+            {
+              data: updatedData,
+            }
+          ));
+      }
+      if (response) {
+        toast({
+          title: "Sukses",
+          description: `Sukses ${isEdit ? "edit" : "menambahkan"} produk!`,
+          className: eAlertType.SUCCESS,
+        });
       }
     } catch (error: any) {
       console.error(error);
@@ -371,30 +393,35 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           </div>
         </div>
 
-        <SubTitle title="Pilih Kategori Produk" className="mb-3" />
-        <div className="flex flex-wrap gap-2 mb-5">
-          {dataCategory?.map((item: any, i: number) => {
-            const isActive = stateCategory.value === item.id;
-            return (
-              <div
-                onClick={() => {
-                  setStateCategory({
-                    status: true,
-                    value: item.id,
-                  });
-                }}
-                key={item.id}
-                className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-5 py-1 ${
-                  isActive
-                    ? "bg-c-green text-white border-c-green"
-                    : "text-c-black"
-                } text-[14px] lg:text-[16px]`}
-              >
-                {item.title}
-              </div>
-            );
-          })}
-        </div>
+        {/* Kategori Produk */}
+        {!hideCategory && (
+          <>
+            <SubTitle title="Pilih Kategori Produk" className="mb-3" />
+            <div className="flex flex-wrap gap-2 mb-5">
+              {dataCategory?.map((item: any, i: number) => {
+                const isActive = stateCategory.value === item.id;
+                return (
+                  <div
+                    onClick={() => {
+                      setStateCategory({
+                        status: true,
+                        value: item.id,
+                      });
+                    }}
+                    key={item.id}
+                    className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-5 py-1 ${
+                      isActive
+                        ? "bg-c-green text-white border-c-green"
+                        : "text-c-black"
+                    } text-[14px] lg:text-[16px]`}
+                  >
+                    {item.title}
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
         <ItemInput label="Nama Produk" required>
           <input
             className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
