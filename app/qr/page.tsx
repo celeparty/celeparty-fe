@@ -1,18 +1,22 @@
 "use client"
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
 function getStatus(eventDate: string) {
-  const [day, month, year] = eventDate.split('-').map(Number);
-  const event = new Date(year, month - 1, day);
-  const today = new Date();
-  today.setHours(0,0,0,0);
-  event.setHours(0,0,0,0);
-  return today <= event ? 'active' : 'not active';
+  try {
+    const [day, month, year] = eventDate.split('-').map(Number);
+    const event = new Date(year, month - 1, day);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    event.setHours(0,0,0,0);
+    return today <= event ? 'active' : 'not active';
+  } catch (error) {
+    return 'not active';
+  }
 }
 
-export default function QRPage() {
+function QRPageContent() {
   const params = useSearchParams();
   const { data: session } = useSession();
   const order_id = params.get('order_id') || '';
@@ -26,11 +30,6 @@ export default function QRPage() {
   const [loading, setLoading] = useState(false);
   const [transactionData, setTransactionData] = useState<any>(null);
   const [canVerify, setCanVerify] = useState(false);
-
-  // Debug session
-  useEffect(() => {
-    console.log('SESSION QR PAGE:', session);
-  }, [session]);
 
   // Check if user is logged in
   const isLoggedIn = !!session;
@@ -54,7 +53,8 @@ export default function QRPage() {
         } else {
           setCanVerify(false);
         }
-      } catch {
+      } catch (error) {
+        console.error('Error checking transaction:', error);
         setCanVerify(false);
       }
     };
@@ -146,5 +146,13 @@ export default function QRPage() {
         {notif && <div className="mt-4 text-center text-sm font-semibold text-red-600">{notif}</div>}
       </div>
     </div>
+  )
+}
+
+export default function QRPage() {
+  return (
+    <Suspense fallback={<div className="max-w-lg mx-auto my-16 p-6 bg-white rounded shadow text-center">Loading...</div>}>
+      <QRPageContent />
+    </Suspense>
   )
 } 
