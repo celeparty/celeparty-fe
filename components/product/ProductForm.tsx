@@ -212,6 +212,17 @@ export const ProductForm: React.FC<iProductFormProps> = ({
     return formattedPrice;
   };
 
+  // Helper untuk format tanggal ke yyyy-MM-dd
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return null;
+    // Jika sudah yyyy-MM-dd, return langsung
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    // Coba parse dan format (misal dari input lokal)
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return null;
+    return d.toISOString().slice(0, 10);
+  };
+
   const onSubmit = async (data: iProductReq) => {
     try {
       // Get current field values (including unregistered fields)
@@ -267,14 +278,14 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           url: img.url,
           mime: img.mime,
         }));
-      const variants = variantFields.length
-        ? variantFields.map((v, i) => ({
-            name: v.name,
-            price: Number(v.price),
-            quota: v.quota,
-            purchase_deadline: v.purchase_deadline,
-          }))
-        : [];
+      // Ambil variant dari value form, bukan dari field array
+      const rawVariants = getValues("variant") || [];
+      const variants: iProductVariant[] = rawVariants.map((v: any) => ({
+        name: v.name,
+        price: v.price,
+        quota: v.quota,
+        purchase_deadline: formatDate(v.purchase_deadline) || "",
+      }));
       let updatedData: iProductReq = {
         ...data,
         main_image,
@@ -282,11 +293,9 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           ? { connect: parseInt(`${stateCategory.value}`) - 1 }
           : null,
         users_permissions_user: {
-          connect: [
-            {
-              id: session?.user.id,
-            },
-          ],
+          connect: {
+            id: String(session?.user.id),
+          },
         },
         main_price: formatPriceReq(data.main_price),
         price_min: formatPriceReq(data.price_min),

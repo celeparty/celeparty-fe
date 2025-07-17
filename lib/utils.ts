@@ -23,6 +23,9 @@ export async function fetchAndConvertToFile(
   imageData: iProductImage
 ): Promise<File> {
   try {
+    if (!imageData.url) {
+      throw new Error("Image URL is undefined");
+    }
     let fullUrl = imageData.url;
 
     if (imageData.url.startsWith("/uploads")) {
