@@ -160,6 +160,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
         id: `temp-${Date.now()}`,
         url: URL.createObjectURL(file),
         mime: file.type,
+        file: file, // tambahkan file di sini
       };
 
       const currentImages = getValues("main_image");
@@ -221,36 +222,51 @@ export const ProductForm: React.FC<iProductFormProps> = ({
         mainImageFields.map(async (field, index) => {
           const fieldData = formValues.main_image[index];
 
-          // Skip upload if already has ID (existing image)
-          if (fieldData?.id) return fieldData;
-
-          // Upload new image if file exists
-          if (fieldData?.file) {
-            const formData = new FormData();
-            formData.append("files", fieldData.file);
-
-            const uploadRes = await axiosUser(
-              "POST",
-              "/api/upload",
-              session?.jwt || "",
-              formData
-            );
-
+          // Jika sudah ada id (gambar lama), langsung pakai
+          if (fieldData?.id && !String(fieldData.id).startsWith('temp-')) {
             return {
-              id: uploadRes[0].id,
-              url: uploadRes[0].url,
-              mime: fieldData.file.type,
+              id: String(fieldData.id),
+              url: fieldData.url || undefined,
+              mime: fieldData.mime || undefined,
             };
           }
 
-          return fieldData || { id: "", url: "", mime: "" };
+          // Jika ada file baru, upload ke Strapi
+          if (fieldData?.file) {
+            const formData = new FormData();
+            formData.append("files", fieldData.file);
+            try {
+              const uploadRes = await axiosUser(
+                "POST",
+                "/api/upload",
+                session?.jwt || "",
+                formData
+              );
+              // uploadRes bisa array of images
+              if (uploadRes && Array.isArray(uploadRes) && uploadRes[0]?.id) {
+                return {
+                  id: String(uploadRes[0].id),
+                  url: uploadRes[0].url || undefined,
+                  mime: uploadRes[0].mime || fieldData.file.type || undefined,
+                };
+              }
+            } catch (err) {
+              console.error("Image upload failed", err);
+            }
+          }
+
+          // Jika tidak ada file dan tidak ada id, skip
+          return null;
         })
       );
-      const mainImageIds = uploadedImages
-        .map(img => Number(img && img.id))
-        .filter(id => Number.isInteger(id) && id > 0);
-      console.log("Uploaded images:", uploadedImages);
-      console.log("mainImageIds:", mainImageIds);
+      // Filter hanya object yang valid dan punya id string
+      const main_image: iProductImage[] = (uploadedImages as any[])
+        .filter((img) => img && typeof img === 'object' && typeof img.id === 'string' && img.id.length > 0)
+        .map((img) => ({
+          id: img.id,
+          url: img.url,
+          mime: img.mime,
+        }));
       const variants = variantFields.length
         ? variantFields.map((v, i) => ({
             name: v.name,
@@ -261,14 +277,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
         : [];
       let updatedData: iProductReq = {
         ...data,
-        "main_image":[
-          {
-              "id":"83"
-          },
-          {
-              "id":"4"
-          }
-      ],
+        main_image,
         category: stateCategory.value
           ? { connect: parseInt(`${stateCategory.value}`) - 1 }
           : null,
@@ -288,10 +297,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
       console.log("Submit payload:", updatedData);
       // Inject user_event_type if forced
       if (forceUserEventType) {
-        updatedData = {
-          ...updatedData,
-          user_event_type: forceUserEventType,
-        };
+        (updatedData as any).user_event_type = forceUserEventType;
       }
 
       let response: any;
