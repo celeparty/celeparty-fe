@@ -77,6 +77,13 @@ export default function TicketForm() {
   // Handler untuk upload gambar
   const handleFileChange = async (index: number, file: File | null) => {
     if (file) {
+      // Preview lokal sebelum upload
+      const localUrl = URL.createObjectURL(file);
+      setForm((prev) => {
+        const imgs = [...prev.main_image];
+        imgs[index] = { id: "", url: localUrl, file };
+        return { ...prev, main_image: imgs };
+      });
       // Upload ke Strapi
       const formData = new FormData();
       formData.append("files", file);
@@ -84,13 +91,13 @@ export default function TicketForm() {
         const uploadRes = await axiosUser(
           "POST",
           "/api/upload",
-          session?.jwt || "",
+          process.env.KEY_API || "",
           formData
         );
         if (uploadRes && Array.isArray(uploadRes) && uploadRes[0]?.id) {
           const imageObj = {
             id: String(uploadRes[0].id),
-            url: uploadRes[0].url || undefined,
+            url: uploadRes[0].url ? `${process.env.BASE_API}${uploadRes[0].url}` : localUrl,
           };
           setForm((prev) => {
             const imgs = [...prev.main_image];
@@ -181,6 +188,7 @@ export default function TicketForm() {
   };
 
   return (
+    <div className="relative">
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label>Nama Tiket</label>
@@ -214,7 +222,7 @@ export default function TicketForm() {
         <label>Gambar Produk (max 5)</label>
         <div className="flex gap-2 flex-wrap mb-2">
           {form.main_image.map((img, idx) => (
-            <div key={idx} className="w-24">
+            <div key={idx} className="w-32 text-center">
               <FileUploader
                 image={img}
                 onFileChange={(file) => handleFileChange(idx, file)}
@@ -272,5 +280,6 @@ export default function TicketForm() {
       {error && <div className="text-red-500 mt-2">{error}</div>}
       {success && <div className="text-green-500 mt-2">Tiket berhasil ditambahkan!</div>}
     </form>
+    </div>
   );
 } 

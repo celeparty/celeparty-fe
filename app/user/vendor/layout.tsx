@@ -90,7 +90,7 @@ export default function DashboardLayout({
 							/>
 						</div>
 					</Box>
-					<div className="flex-1">{children}</div>
+					<div className="w-full">{children}</div>
 				</div>
 			</Basecontent>
 		</div>

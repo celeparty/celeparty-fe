@@ -16,8 +16,8 @@ export default function AddProductPage() {
       <button className={`${productType === "ticket" ? "bg-c-green text-white":"bg-slate-300 "} flex-1 py-2`} onClick={() => setProductType("ticket")}>Ticket</button>
     </div>
     {productType === "product" ? <ProductAdd/> : <TicketAdd/>}
-    <Box>
-        <div className="flex justify-center items-center">
+    <Box className="w-full">
+        <div className="flex justify-center items-center w-full">
           <Link href="/" className="flex gap-2 items-center">
             <AiFillCustomerService className="lg:text-3xl text-2xl" />
             <strong className="text-[14px] lg:text-[16px]">
