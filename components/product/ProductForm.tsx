@@ -61,11 +61,15 @@ const ItemInput: React.FC<iItemInputProps> = ({
 interface iProductFormProps {
   formDefaultData: iProductReq;
   isEdit: boolean;
+  hideCategory?: boolean;
+  forceUserEventType?: string;
 }
 
 export const ProductForm: React.FC<iProductFormProps> = ({
   formDefaultData,
   isEdit,
+  hideCategory = false,
+  forceUserEventType,
 }) => {
   const { data: session, status } = useSession();
   const [stateCategory, setStateCategory] = useState<{
@@ -156,6 +160,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
         id: `temp-${Date.now()}`,
         url: URL.createObjectURL(file),
         mime: file.type,
+        file: file, // tambahkan file di sini
       };
 
       const currentImages = getValues("main_image");
@@ -207,6 +212,17 @@ export const ProductForm: React.FC<iProductFormProps> = ({
     return formattedPrice;
   };
 
+  // Helper untuk format tanggal ke yyyy-MM-dd
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return null;
+    // Jika sudah yyyy-MM-dd, return langsung
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    // Coba parse dan format (misal dari input lokal)
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return null;
+    return d.toISOString().slice(0, 10);
+  };
+
   const onSubmit = async (data: iProductReq) => {
     try {
       // Get current field values (including unregistered fields)
@@ -217,91 +233,112 @@ export const ProductForm: React.FC<iProductFormProps> = ({
         mainImageFields.map(async (field, index) => {
           const fieldData = formValues.main_image[index];
 
-          // Skip upload if already has ID (existing image)
-          if (fieldData?.id) return fieldData;
-
-          // Upload new image if file exists
-          if (fieldData?.file) {
-            const formData = new FormData();
-            formData.append("files", fieldData.file);
-
-            const uploadRes = await axiosUser(
-              "POST",
-              "/api/upload",
-              session?.jwt || "",
-              formData
-            );
-
+          // Jika sudah ada id (gambar lama), langsung pakai
+          if (fieldData?.id && !String(fieldData.id).startsWith('temp-')) {
             return {
-              id: uploadRes[0].id,
-              url: uploadRes[0].url,
-              mime: fieldData.file.type,
+              id: String(fieldData.id),
+              url: fieldData.url || undefined,
+              mime: fieldData.mime || undefined,
             };
           }
 
-          return fieldData || { id: "", url: "", mime: "" };
+          // Jika ada file baru, upload ke Strapi
+          if (fieldData?.file) {
+            const formData = new FormData();
+            formData.append("files", fieldData.file);
+            try {
+              const uploadRes = await axiosUser(
+                "POST",
+                "/api/upload",
+                session?.jwt || "",
+                formData
+              );
+              // uploadRes bisa array of images
+              if (uploadRes && Array.isArray(uploadRes) && uploadRes[0]?.id) {
+                return {
+                  id: String(uploadRes[0].id),
+                  url: uploadRes[0].url || undefined,
+                  mime: uploadRes[0].mime || fieldData.file.type || undefined,
+                };
+              }
+            } catch (err) {
+              console.error("Image upload failed", err);
+            }
+          }
+
+          // Jika tidak ada file dan tidak ada id, skip
+          return null;
         })
       );
-
-      if (uploadedImages?.length > 0) {
-        const variants: iProductVariant[] = variantFields
-          ? variantFields.map((v) => ({
-              name: v.name ?? "",
-              price: Number(v.price) || 0,
-              quota: v.quota?.toString() || "0",
-              purchase_deadline:
-                v.purchase_deadline || new Date().toISOString(),
-            }))
-          : [];
-        let updatedData: iProductReq = {
-          ...data,
-          main_image: uploadedImages.filter((img) => img?.id), // Filter out empty images
-          category: stateCategory.value
-            ? { connect: parseInt(`${stateCategory.value}`) - 1 }
-            : null,
-          users_permissions_user: {
-            connect: {
-              id: session?.user.id,
-            },
+      // Filter hanya object yang valid dan punya id string
+      const main_image: iProductImage[] = (uploadedImages as any[])
+        .filter((img) => img && typeof img === 'object' && typeof img.id === 'string' && img.id.length > 0)
+        .map((img) => ({
+          id: img.id,
+          url: img.url,
+          mime: img.mime,
+        }));
+      // Ambil variant dari value form, bukan dari field array
+      const rawVariants = getValues("variant") || [];
+      const variants: iProductVariant[] = rawVariants.map((v: any) => ({
+        name: v.name,
+        price: v.price,
+        quota: v.quota,
+        purchase_deadline: formatDate(v.purchase_deadline) || "",
+      }));
+      let updatedData: iProductReq = {
+        ...data,
+        main_image,
+        category: stateCategory.value
+          ? { connect: parseInt(`${stateCategory.value}`) - 1 }
+          : null,
+        users_permissions_user: {
+          connect: {
+            id: String(session?.user.id),
           },
-          main_price: formatPriceReq(data.main_price),
-          price_min: formatPriceReq(data.price_min),
-          price_max: formatPriceReq(data.price_max),
-          variant: variants,
-          escrow: escrowChecked,
-        };
+        },
+        main_price: formatPriceReq(data.main_price),
+        price_min: formatPriceReq(data.price_min),
+        price_max: formatPriceReq(data.price_max),
+        variant: variants,
+        escrow: escrowChecked,
+      };
+      console.log("Submit payload:", updatedData);
+      // Inject user_event_type if forced
+      if (forceUserEventType) {
+        (updatedData as any).user_event_type = forceUserEventType;
+      }
 
-        let response: any;
-        if (isEdit) {
-          response =
-            stateCategory.value !== null &&
-            (await axiosUser(
-              "PUT",
-              `/api/products/${formDefaultData.documentId}`,
-              `${session && session?.jwt}`,
-              {
-                data: updatedData,
-              }
-            ));
-        } else {
-          response =
-            stateCategory.value !== null &&
-            (await axiosUser(
-              "POST",
-              "/api/products?status=draft'",
-              `${session && session?.jwt}`,
-              {
-                data: updatedData,
-              }
-            ));
-        }
-        if (response) {
-          toast({
-            title: "Sukses",
-            description: `Sukses ${isEdit ? "edit" : "menambahkan"} produk!`,
-            className: eAlertType.SUCCESS,
-          });
-        }
+      let response: any;
+      if (isEdit) {
+        response =
+          stateCategory.value !== null &&
+          (await axiosUser(
+            "PUT",
+            `/api/products/${formDefaultData.documentId}`,
+            `${session && session?.jwt}`,
+            {
+              data: updatedData,
+            }
+          ));
+      } else {
+        response =
+          stateCategory.value !== null &&
+          (await axiosUser(
+            "POST",
+            "/api/products?status=draft",
+            `${session && session?.jwt}`,
+            {
+              data: updatedData,
+            }
+          ));
+      }
+      if (response) {
+        toast({
+          title: "Sukses",
+          description: `Sukses ${isEdit ? "edit" : "menambahkan"} produk!`,
+          className: eAlertType.SUCCESS,
+        });
       }
     } catch (error: any) {
       console.error(error);
@@ -371,30 +408,35 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           </div>
         </div>
 
-        <SubTitle title="Pilih Kategori Produk" className="mb-3" />
-        <div className="flex flex-wrap gap-2 mb-5">
-          {dataCategory?.map((item: any, i: number) => {
-            const isActive = stateCategory.value === item.id;
-            return (
-              <div
-                onClick={() => {
-                  setStateCategory({
-                    status: true,
-                    value: item.id,
-                  });
-                }}
-                key={item.id}
-                className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-5 py-1 ${
-                  isActive
-                    ? "bg-c-green text-white border-c-green"
-                    : "text-c-black"
-                } text-[14px] lg:text-[16px]`}
-              >
-                {item.title}
-              </div>
-            );
-          })}
-        </div>
+        {/* Kategori Produk */}
+        {!hideCategory && (
+          <>
+            <SubTitle title="Pilih Kategori Produk" className="mb-3" />
+            <div className="flex flex-wrap gap-2 mb-5">
+              {dataCategory?.map((item: any, i: number) => {
+                const isActive = stateCategory.value === item.id;
+                return (
+                  <div
+                    onClick={() => {
+                      setStateCategory({
+                        status: true,
+                        value: item.id,
+                      });
+                    }}
+                    key={item.id}
+                    className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-5 py-1 ${
+                      isActive
+                        ? "bg-c-green text-white border-c-green"
+                        : "text-c-black"
+                    } text-[14px] lg:text-[16px]`}
+                  >
+                    {item.title}
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
         <ItemInput label="Nama Produk" required>
           <input
             className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
