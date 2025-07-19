@@ -98,10 +98,21 @@ export default function ProfilePage() {
     name: "serviceLocation",
   });
 
+  const sanitizeUserData = (formData: iMerchantProfile) => {
+    const {
+      role,
+      password,
+      resetPasswordToken,
+      confirmationToken,
+      ...cleanData
+    } = formData;
+    return cleanData;
+  };
+
   const onSubmit: SubmitHandler<iMerchantProfile> = async (
     formData: iMerchantProfile
   ) => {
-    const { role, ...updatedFormData } = formData;
+    const updatedFormData = sanitizeUserData(formData);
     try {
       const response = await axiosUser(
         "PUT",
