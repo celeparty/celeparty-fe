@@ -101,12 +101,13 @@ export default function ProfilePage() {
   const onSubmit: SubmitHandler<iMerchantProfile> = async (
     formData: iMerchantProfile
   ) => {
+    const { role, ...updatedFormData } = formData;
     try {
       const response = await axiosUser(
         "PUT",
         `/api/users/${formData.id}`,
         `${session && session?.jwt}`,
-        formData
+        updatedFormData
       );
 
       if (response) {
