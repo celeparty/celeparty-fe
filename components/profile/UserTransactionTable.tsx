@@ -88,7 +88,7 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {dataContent.length > 0 ? (
+          {dataContent?.length > 0 ? (
             <>
               {dataContent?.map((item, i) => {
                 const statusConfig = getStatusConfig(item.payment_status);
