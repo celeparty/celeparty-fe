@@ -56,7 +56,7 @@ const ProfilePage = () => {
   return (
     <Basecontent>
       <div className="wrapper my-10">
-        <div className="px-10 lg:py-6 py-2 lg:border-2 lg:border-gray-300 bg-[#F2F2F2] lg:rounded-lg lg:shadow-xl">
+        <div className="px-10 lg:py-6 py-2 lg:border-2 lg:border-gray-300 bg-[#FFFFFF] lg:rounded-lg lg:shadow-xl">
           <h1 className="text-[20px] lg:text-[16px] text-center lg:text-start my-4 leading-[26px] font-hind text-black font-semibold">
             Biodata Diri
           </h1>
@@ -70,7 +70,7 @@ const ProfilePage = () => {
           </div>
           <div className="mt-20 lg:h-[400px] h-auto overflow-x-auto">
             <h1 className="font-hind font-semibold text-[16px] text-black mb-6">
-              Status Pembelian
+              Daftar Pembelian
             </h1>
             <UserTransactionTable isVendor={false} />
           </div>

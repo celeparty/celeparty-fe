@@ -70,7 +70,7 @@ export default function Wallet() {
 
   return (
     <div>
-      <Box className="lg:mt-0 mt-2">
+      <Box className="lg:mt-7 mt-2">
         <div className="relative pl-[50px]">
           <Image
             src="/images/icon-wallet-2.svg"

@@ -19,7 +19,7 @@ function ItemStatus({ status, value, color }: iItemStatus): JSX.Element {
 }
 export default function HomeMitra() {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 justify-center items-center">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 justify-center items-center lg:mt-7">
       <ItemStatus status="PENDING" value={1} color="#3E2882" />
       <ItemStatus status="PROCESS" value={1} color="#56C200" />
       <ItemStatus status="CANCEL" value={1} color="#F60E0E" />

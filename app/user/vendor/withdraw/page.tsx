@@ -141,7 +141,7 @@ export default function Wallet() {
 
   return (
     <>
-      <Box className="lg:mt-0 mt-2">
+      <Box className="lg:mt-7">
         <BankAccountDetails
           accountName={dataContent?.accountName}
           accountNumber={dataContent?.accountNumber}
