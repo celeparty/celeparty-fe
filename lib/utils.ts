@@ -2,6 +2,7 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { iProductImage } from "./interfaces/iProduct";
 import { iMerchantProfile } from "./interfaces/iMerchant";
+import { format, parseISO } from "date-fns";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -68,4 +69,13 @@ export const sanitizeVendorData = (formData: iMerchantProfile) => {
     ...cleanData
   } = formData;
   return cleanData;
+};
+
+export const formatDate = (isoString: string) => {
+  try {
+    const date = parseISO(isoString);
+    return format(date, "dd-MM-yyyy");
+  } catch {
+    return ""; // Return empty string if parsing fails
+  }
 };

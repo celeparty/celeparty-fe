@@ -72,7 +72,7 @@ const ProfilePage = () => {
             <h1 className="font-hind font-semibold text-[16px] text-black mb-6">
               Status Pembelian
             </h1>
-            <UserTransactionTable />
+            <UserTransactionTable isVendor={false} />
           </div>
         </div>
       </div>
