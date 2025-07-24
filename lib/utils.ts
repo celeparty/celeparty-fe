@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { iProductImage } from "./interfaces/iProduct";
+import { iMerchantProfile } from "./interfaces/iMerchant";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -52,3 +53,19 @@ export async function fetchAndConvertToFile(
     throw error;
   }
 }
+
+export const formatMoneyReq = (price: string | number) => {
+  const formattedPrice = parseInt(String(price).replace(/\./g, ""));
+  return formattedPrice;
+};
+
+export const sanitizeVendorData = (formData: iMerchantProfile) => {
+  const {
+    role,
+    password,
+    resetPasswordToken,
+    confirmationToken,
+    ...cleanData
+  } = formData;
+  return cleanData;
+};

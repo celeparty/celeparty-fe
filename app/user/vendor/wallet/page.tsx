@@ -1,20 +1,28 @@
 "use client";
 import Box from "@/components/Box";
 import ErrorNetwork from "@/components/ErrorNetwork";
+import { BankAccountDetails } from "@/components/profile/vendor/BankAccountDetails";
 import Skeleton from "@/components/Skeleton";
-import ItemProduct from "@/components/product/ItemProduct";
 import { Button } from "@/components/ui/button";
+import { useBalanceStore } from "@/hooks/use-balance";
 import { iMerchantProfile } from "@/lib/interfaces/iMerchant";
-import { axiosUser, getDataToken } from "@/lib/services";
+import { axiosUser } from "@/lib/services";
+import { formatNumberWithDots } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import _ from "lodash";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Wallet() {
   const { data: session, status } = useSession();
+  const [mainData, setMainData] = useState<iMerchantProfile>(
+    {} as iMerchantProfile
+  );
+  const { activeBalance, refundBalance, setActiveBalance, setRefundBalance } =
+    useBalanceStore();
+  const router = useRouter();
 
   const getQuery = async () => {
     if (!session?.jwt) {
@@ -36,12 +44,28 @@ export default function Wallet() {
     retry: 3,
   });
 
+  useEffect(() => {
+    if (query.isSuccess) {
+      setMainData(query.data);
+    }
+  }, [query.isSuccess, query.data]);
+
+  useEffect(() => {
+    if (!mainData) return;
+
+    const { saldo_active, saldo_refund } = mainData;
+    setActiveBalance(saldo_active);
+    setRefundBalance(saldo_refund);
+  }, [mainData]);
+
   if (query.isLoading) {
     return <Skeleton width="100%" height="150px" />;
   }
+
   if (query.isError) {
     return <ErrorNetwork style="mt-0" />;
   }
+
   const dataContent: iMerchantProfile = query?.data;
 
   return (
@@ -62,7 +86,10 @@ export default function Wallet() {
                   Total Saldo Aktif
                 </h5>
                 <div className="font-bold text-[14px] lg:text-2xl text-c-green">
-                  Rp. 1.000.000
+                  Rp.
+                  {activeBalance && activeBalance !== "0"
+                    ? formatNumberWithDots(activeBalance)
+                    : 0}
                 </div>
                 <div className="mt-7">
                   <div className="flex gap-5">
@@ -76,10 +103,20 @@ export default function Wallet() {
                     </div>
                     <div className="r-side">
                       <div className="text-[14px] lg:text-[16px] text-c-green">
-                        Rp. 1.000.000
+                        Rp.
+                        {formatNumberWithDots(
+                          activeBalance && activeBalance !== "0"
+                            ? activeBalance
+                            : 0
+                        )}
                       </div>
                       <div className="text-[14px] lg:text-[16px] text-c-green">
-                        Rp. 0
+                        Rp.
+                        {formatNumberWithDots(
+                          refundBalance && refundBalance !== "0"
+                            ? refundBalance
+                            : "0"
+                        )}
                       </div>
                     </div>
                   </div>
@@ -87,38 +124,21 @@ export default function Wallet() {
               </div>
               <div className="r-side">
                 <div className="btn-wrapper mt-2">
-                  <Button variant={"green"}>Tarik Saldo</Button>
+                  <Button
+                    variant={"green"}
+                    onClick={() => router.push("/user/vendor/withdraw")}
+                  >
+                    Tarik Saldo
+                  </Button>
                 </div>
               </div>
             </div>
-            <div className="mt-7 [&_label]:min-w-[220px]">
-              <h4 className="text-black text-[14px] lg:text-[17px] font-extrabold">
-                Informasi Rekening
-              </h4>
-              <div className="flex">
-                <label className="text-[14px] lg:text-[16px] text-black">
-                  Nama Bank
-                </label>
-                <div className="text-[14px] lg:text-[16px] text-black uppercase">
-                  {dataContent?.bankName}
-                </div>
-              </div>
-              <div className="flex py-1">
-                <label className="text-[14px] lg:text-[16px] text-black">
-                  Nomor Rekening
-                </label>
-                <div className="text-[14px] lg:text-[16px] text-black capitalize">
-                  {dataContent?.accountNumber}
-                </div>
-              </div>
-              <div className="flex">
-                <label className="text-[14px] lg:text-[16px] text-black">
-                  Nama Pemilik Rekening
-                </label>
-                <div className="text-[14px] lg:text-[16px] text-black capitalize">
-                  {dataContent?.accountName}
-                </div>
-              </div>
+            <div className="mt-7">
+              <BankAccountDetails
+                accountName={dataContent?.accountName}
+                accountNumber={dataContent?.accountNumber}
+                bankName={dataContent?.bankName}
+              ></BankAccountDetails>
             </div>
             <Link
               href="/user/vendor/profile"

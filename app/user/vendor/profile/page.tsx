@@ -26,6 +26,8 @@ import {
 } from "react-hook-form";
 import { AiFillCustomerService } from "react-icons/ai";
 import { IoMdAddCircleOutline, IoMdRemoveCircleOutline } from "react-icons/io";
+import { ItemInput } from "@/components/form-components/ItemInput";
+import { sanitizeVendorData } from "@/lib/utils";
 
 type UserData = {
   name?: string;
@@ -42,29 +44,6 @@ type UserData = {
 type SessionData = {
   user?: UserData; // Update the type of user to include the accessToken property
 };
-
-function ItemInput({
-  label,
-  children,
-}: {
-  label?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex justify-items-start w-full gap-2 mb-3 items-start">
-      <div
-        className={`${
-          label ? "w-[130px] lg:w-[200px]" : "w-0"
-        } py-2 text-[14px] lg:text-[16px]`}
-      >
-        {label}
-      </div>
-      <div className="flex-1 pt-[6px] lg:pt-[6px] text-[14px] lg:text-[16px]">
-        {children}
-      </div>
-    </div>
-  );
-}
 
 const getProvinces = async (): Promise<iSelectOption[]> => {
   const response = await axiosRegion("GET", "provinsi");
@@ -98,21 +77,10 @@ export default function ProfilePage() {
     name: "serviceLocation",
   });
 
-  const sanitizeUserData = (formData: iMerchantProfile) => {
-    const {
-      role,
-      password,
-      resetPasswordToken,
-      confirmationToken,
-      ...cleanData
-    } = formData;
-    return cleanData;
-  };
-
   const onSubmit: SubmitHandler<iMerchantProfile> = async (
     formData: iMerchantProfile
   ) => {
-    const updatedFormData = sanitizeUserData(formData);
+    const updatedFormData = sanitizeVendorData(formData);
     try {
       const response = await axiosUser(
         "PUT",
