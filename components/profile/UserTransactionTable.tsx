@@ -1,41 +1,19 @@
-"use client";
-import ErrorNetwork from "@/components/ErrorNetwork";
-import Skeleton from "@/components/Skeleton";
-import { getDataToken } from "@/lib/services";
-import { useQuery } from "@tanstack/react-query";
-import _ from "lodash";
 import { useSession } from "next-auth/react";
-import React from "react";
-
-import Box from "@/components/Box";
+import Box from "../Box";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "../ui/table";
+import { getDataToken } from "@/lib/services";
+import { useQuery } from "@tanstack/react-query";
+import Skeleton from "../Skeleton";
+import ErrorNetwork from "../ErrorNetwork";
 
-interface iItemStatus {
-  status: string;
-  value: number | string;
-  color: string;
-}
-
-function ItemStatus({ status, value, color }: iItemStatus): JSX.Element {
-  return (
-    <div
-      className={`py-3 px-5 text-center rounded-lg text-white min-w-[160px] text-sm sm:text-base`}
-      style={{ backgroundColor: `${color}` }}
-    >
-      <h4 className="text-xs sm:text-sm">{status}</h4>
-      <strong className="text-base sm:text-lg">{value}</strong>
-    </div>
-  );
-}
-export default function HomeMitra() {
+export const UserTransactionTable = () => {
   const session = useSession();
   const dataSession = session?.data as any;
 
@@ -50,7 +28,7 @@ export default function HomeMitra() {
   };
 
   const query = useQuery({
-    queryKey: ["qMyOrder"],
+    queryKey: ["qUserOrder"],
     queryFn: getQuery,
     enabled: !!dataSession?.user?.accessToken,
   });
@@ -62,15 +40,10 @@ export default function HomeMitra() {
     return <ErrorNetwork style="mt-0" />;
   }
   const dataContent = query?.data?.data;
+  console.log(dataContent);
 
   return (
-    <div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 justify-center items-center">
-        <ItemStatus status="PENDING" value={1} color="#3E2882" />
-        <ItemStatus status="PROCESS" value={1} color="#56C200" />
-        <ItemStatus status="CANCEL" value={1} color="#F60E0E" />
-        <ItemStatus status="INCOME" value="Rp. 1.000.000" color="#44CADC" />
-      </div>
+    <>
       <Box>
         <Table>
           <TableHeader className="bg-white">
@@ -113,6 +86,6 @@ export default function HomeMitra() {
           </TableBody>
         </Table>
       </Box>
-    </div>
+    </>
   );
-}
+};
