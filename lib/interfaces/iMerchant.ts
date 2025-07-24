@@ -44,6 +44,8 @@ export interface iMerchantProfile {
   accountNumber: string;
   accountName: string;
   role: iRole;
+  saldo_active: string;
+  saldo_refund: string;
 }
 
 export interface iSubregionRes {

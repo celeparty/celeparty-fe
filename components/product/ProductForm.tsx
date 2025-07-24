@@ -8,7 +8,11 @@ import {
   iProductVariant,
 } from "@/lib/interfaces/iProduct";
 import { axiosUser } from "@/lib/services";
-import { fetchAndConvertToFile, formatNumberWithDots } from "@/lib/utils";
+import {
+  fetchAndConvertToFile,
+  formatMoneyReq,
+  formatNumberWithDots,
+} from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
@@ -207,11 +211,6 @@ export const ProductForm: React.FC<iProductFormProps> = ({
     }
   }, [formDefaultData]);
 
-  const formatPriceReq = (price: string | number) => {
-    const formattedPrice = parseInt(String(price).replace(/\./g, ""));
-    return formattedPrice;
-  };
-
   // Helper untuk format tanggal ke yyyy-MM-dd
   const formatDate = (dateStr: string) => {
     if (!dateStr) return null;
@@ -234,7 +233,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           const fieldData = formValues.main_image[index];
 
           // Jika sudah ada id (gambar lama), langsung pakai
-          if (fieldData?.id && !String(fieldData.id).startsWith('temp-')) {
+          if (fieldData?.id && !String(fieldData.id).startsWith("temp-")) {
             return {
               id: String(fieldData.id),
               url: fieldData.url || undefined,
@@ -272,7 +271,13 @@ export const ProductForm: React.FC<iProductFormProps> = ({
       );
       // Filter hanya object yang valid dan punya id string
       const main_image: iProductImage[] = (uploadedImages as any[])
-        .filter((img) => img && typeof img === 'object' && typeof img.id === 'string' && img.id.length > 0)
+        .filter(
+          (img) =>
+            img &&
+            typeof img === "object" &&
+            typeof img.id === "string" &&
+            img.id.length > 0
+        )
         .map((img) => ({
           id: img.id,
           url: img.url,
@@ -297,9 +302,9 @@ export const ProductForm: React.FC<iProductFormProps> = ({
             id: String(session?.user.id),
           },
         },
-        main_price: formatPriceReq(data.main_price),
-        price_min: formatPriceReq(data.price_min),
-        price_max: formatPriceReq(data.price_max),
+        main_price: formatMoneyReq(data.main_price),
+        price_min: formatMoneyReq(data.price_min),
+        price_max: formatMoneyReq(data.price_max),
         variant: variants,
         escrow: escrowChecked,
       };
