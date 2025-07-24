@@ -225,7 +225,7 @@ export const ProfileForm = () => {
                           field.onChange(value);
                         }
                       }}
-                      value={field.value}
+                      value={field.value ?? ""}
                     ></SelectInput>
                   </FormControl>
                 </div>

@@ -1,23 +1,17 @@
 "use client";
 import Box from "@/components/Box";
-import ErrorNetwork from "@/components/ErrorNetwork";
-import Skeleton from "@/components/Skeleton";
 import ItemProduct from "@/components/product/ItemProduct";
-import { axiosUser, getDataToken } from "@/lib/services";
-import { useQuery } from "@tanstack/react-query";
-import _ from "lodash";
-import { useSession } from "next-auth/react";
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { formatRupiah } from "@/lib/utils";
 import { useUser } from "@/lib/store/user";
+import { formatRupiah } from "@/lib/utils";
 import axios from "axios";
-import { useLocalStorage } from "@/lib/hook/useLocalStorage";
-import { FiEdit } from "react-icons/fi";
-import { FaRegTrashAlt } from "react-icons/fa";
-import { MdCancel } from "react-icons/md";
-import toast from "react-hot-toast";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { FaRegTrashAlt } from "react-icons/fa";
+import { FiEdit } from "react-icons/fi";
+import { MdCancel } from "react-icons/md";
 
 interface iItemStatus {
   status: string;

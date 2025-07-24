@@ -1,11 +1,17 @@
-import Box from "@/components/Box"
-import React from 'react'
+"use client";
+
+import Box from "@/components/Box";
+import { UserTransactionTable } from "@/components/profile/UserTransactionTable";
 
 export default function OrderPage() {
   return (
-	
-	<Box className="mt-0">
-		<div className="flex flex-wrap -mx-2">Order List</div>
-	</Box>
-  )
+    <>
+      <Box>
+        <h4 className="text-black text-[14px] lg:text-[17px] font-extrabold mb-4">
+          Data Pesanan
+        </h4>
+        <UserTransactionTable isVendor></UserTransactionTable>
+      </Box>
+    </>
+  );
 }
