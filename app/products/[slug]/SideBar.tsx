@@ -9,6 +9,7 @@ import Link from "next/link";
 import { ChangeEventHandler, useState, useEffect } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import { CartItem } from "@/lib/interfaces/iCart";
+import { eProductType } from "@/lib/enums/eProduct";
 
 export const Notification = () => {
   const { statusNotif, message } = useNotif();
@@ -26,7 +27,11 @@ export const Notification = () => {
   );
 };
 
-export default function SideBar({ dataProducts, currentPrice, selectedVariantId }: any) {
+export default function SideBar({
+  dataProducts,
+  currentPrice,
+  selectedVariantId,
+}: any) {
   const [value, setValue] = useState(0);
   const [note, setNote] = useState("");
   const [shippingAddress, setShippingAddress] = useState("");
@@ -41,6 +46,9 @@ export default function SideBar({ dataProducts, currentPrice, selectedVariantId 
   const { transaction }: any = useTransaction();
   const notifCart = useNotif((state) => state.notifCart);
 
+  const { user_event_type } = dataProducts;
+  const { name: productTypeName } = user_event_type;
+
   useEffect(() => {
     if (session && session.user) {
       setCustomerName(session.user.name || "");
@@ -51,8 +59,14 @@ export default function SideBar({ dataProducts, currentPrice, selectedVariantId 
   const addCart = () => {
     notifCart(`${dataProducts.title} berhasil dimasukan ke keranjang`);
     let variantName = "";
-    if (dataProducts.variant && dataProducts.variant.length > 0 && selectedVariantId) {
-      const selected = dataProducts.variant.find((v:any) => v.id === selectedVariantId);
+    if (
+      dataProducts.variant &&
+      dataProducts.variant.length > 0 &&
+      selectedVariantId
+    ) {
+      const selected = dataProducts.variant.find(
+        (v: any) => v.id === selectedVariantId
+      );
       if (selected) variantName = selected.name;
     }
     const cartData = {
@@ -69,11 +83,16 @@ export default function SideBar({ dataProducts, currentPrice, selectedVariantId 
       customer_name: customerName,
       telp: telp,
       variant: variantName,
-      user_event_type: dataProducts.user_event_type?.name || dataProducts.user_event_type?.id || "",
+      user_event_type:
+        dataProducts.user_event_type?.name ||
+        dataProducts.user_event_type?.id ||
+        "",
     };
     const cartRaw = useCart.getState().cart;
     const prevCart: CartItem[] = Array.isArray(cartRaw) ? cartRaw : [];
-    const idx = prevCart.findIndex((item: CartItem) => item.product_id === cartData.product_id);
+    const idx = prevCart.findIndex(
+      (item: CartItem) => item.product_id === cartData.product_id
+    );
     let newCart: CartItem[];
     if (idx !== -1) {
       // Update data jika produk sudah ada
@@ -120,76 +139,82 @@ export default function SideBar({ dataProducts, currentPrice, selectedVariantId 
           <div className="relative lg:mt-5 mt-[10px]">
             <div>Minimal Order : 1 </div>
             <div>Waktu Pemesanan : 2 Hari </div>
-            <div className="input-group">
-              <label className="mb-1 block text-black mt-3 font-bold">
-                Detail Alamat
-              </label>
-              <textarea
-                className="w-full h-[100px] border-solid border-[1px] rounded-lg border-c-gray p-3"
-                onChange={(e) => setShippingAddress(e.target.value)}
-              />
-            </div>
-            <div className="input-group">
-              <label className="mb-1 block text-black mt-3 font-bold">
-                Tanggal Acara
-              </label>
-              <DatePickerInput
-                onChange={(date) => {
-                  if (date instanceof Date && isValid(date)) {
-                    const formatted = format(date, "dd-MM-yyyy");
-                    setEventDate(formatted);
-                  }
-                }}
-                textLabel="Pilih Tanggal Acara"
-                value={
-                  eventDate ? parse(eventDate, "dd-MM-yyyy", new Date()) : null
-                }
-              />
-            </div>
-            <div className="input-group">
-              <label className="mb-1 block text-black mt-3 font-bold">
-                Tanggal Loading
-              </label>
-              <DatePickerInput
-                onChange={(date) => {
-                  if (date instanceof Date && isValid(date)) {
-                    const formatted = format(date, "dd-MM-yyyy");
-                    setLoadingDate(formatted);
-                  }
-                }}
-                textLabel="Pilih Tanggal Loading"
-                value={
-                  loadingDate
-                    ? parse(loadingDate, "dd-MM-yyyy", new Date())
-                    : null
-                }
-              />
-            </div>
-            <div className="input-group">
-              <label className="mb-1 block text-black mt-3 font-bold">
-                Jam Loading
-              </label>
-              <div className="time-input w-full border-solid border-[1px] rounded-lg border-c-gray p-3">
-                <input
-                  type="time"
-                  className="w-full"
-                  onChange={(e) => {
-                    const time = e.target.value;
-                    setLoadingTime(time);
-                  }}
-                  value={loadingTime}
-                />
-              </div>
-            </div>
-            <div className="input-group">
-              <label className="mb-1 block text-black mt-3 font-bold">
-                Tambah Catatan
-              </label>
-              <textarea
-                className="w-full h-[100px] border-solid border-[1px] rounded-lg border-c-gray p-3"
-                onChange={(e) => setNote(e.target.value)}
-              />
-            </div>
+            {productTypeName !== eProductType.ticket && (
+              <>
+                <div className="input-group">
+                  <label className="mb-1 block text-black mt-3 font-bold">
+                    Detail Alamat
+                  </label>
+                  <textarea
+                    className="w-full h-[100px] border-solid border-[1px] rounded-lg border-c-gray p-3"
+                    onChange={(e) => setShippingAddress(e.target.value)}
+                  />
+                </div>
+                <div className="input-group">
+                  <label className="mb-1 block text-black mt-3 font-bold">
+                    Tanggal Acara
+                  </label>
+                  <DatePickerInput
+                    onChange={(date) => {
+                      if (date instanceof Date && isValid(date)) {
+                        const formatted = format(date, "dd-MM-yyyy");
+                        setEventDate(formatted);
+                      }
+                    }}
+                    textLabel="Pilih Tanggal Acara"
+                    value={
+                      eventDate
+                        ? parse(eventDate, "dd-MM-yyyy", new Date())
+                        : null
+                    }
+                  />
+                </div>
+                <div className="input-group">
+                  <label className="mb-1 block text-black mt-3 font-bold">
+                    Tanggal Loading
+                  </label>
+                  <DatePickerInput
+                    onChange={(date) => {
+                      if (date instanceof Date && isValid(date)) {
+                        const formatted = format(date, "dd-MM-yyyy");
+                        setLoadingDate(formatted);
+                      }
+                    }}
+                    textLabel="Pilih Tanggal Loading"
+                    value={
+                      loadingDate
+                        ? parse(loadingDate, "dd-MM-yyyy", new Date())
+                        : null
+                    }
+                  />
+                </div>
+                <div className="input-group">
+                  <label className="mb-1 block text-black mt-3 font-bold">
+                    Jam Loading
+                  </label>
+                  <div className="time-input w-full border-solid border-[1px] rounded-lg border-c-gray p-3">
+                    <input
+                      type="time"
+                      className="w-full"
+                      onChange={(e) => {
+                        const time = e.target.value;
+                        setLoadingTime(time);
+                      }}
+                      value={loadingTime}
+                    />
+                  </div>
+                </div>
+                <div className="input-group">
+                  <label className="mb-1 block text-black mt-3 font-bold">
+                    Tambah Catatan
+                  </label>
+                  <textarea
+                    className="w-full h-[100px] border-solid border-[1px] rounded-lg border-c-gray p-3"
+                    onChange={(e) => setNote(e.target.value)}
+                  />
+                </div>
+              </>
+            )}
           </div>
           <div className="text-center mx-auto w-full lg:max-w-[150px]">
             <input
