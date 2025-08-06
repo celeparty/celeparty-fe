@@ -117,6 +117,9 @@ export function ProductContent() {
     if (filterCatsQuery.isSuccess) {
       const { data } = filterCatsQuery.data;
       if (data) {
+        if (data.length === 0) {
+          return setFilterCategories([]);
+        }
         const { categories } = data[0];
         setFilterCategories(categories);
       }
@@ -297,36 +300,40 @@ export function ProductContent() {
               </ItemInfo>
             </div>
           </div> */}
-          {[
-            "Peralatan Event",
-            "Ulang Tahun",
-            "Tasyakuran",
-            "Acara Korporasi",
-          ].includes(getType ?? "") && (
-            <div className="relative mb-7 [&_h4]:mb-3">
-              <h4>Pilih Kategori Produk</h4>
-              <div className="flex flex-col gap-3">
-                {filterCategories.map((cat, index) => (
-                  <React.Fragment key={index}>
-                    <ItemInfo
-                      icon={Bookmark}
-                      activeClass={`${
-                        activeCategory === cat.title &&
-                        "bg-c-green text-c-white"
-                      }`}
-                      onClick={() => {
-                        const isActive = activeCategory === cat.title;
-                        setActiveCategory(isActive ? null : cat.title);
-                        handleFilter(isActive ? "" : cat.title);
-                      }}
-                    >
-                      <ItemCategory title={cat.title} />
-                    </ItemInfo>
-                  </React.Fragment>
-                ))}
-              </div>
+          <div className="relative mb-7 [&_h4]:mb-3">
+            <h4 className="font-bold">Pilih Kategori Produk</h4>
+            <hr className="mb-4" />
+            <div className="flex flex-col gap-3">
+              {filterCategories.length > 0 ? (
+                <>
+                  {filterCategories.map((cat, index) => (
+                    <React.Fragment key={index}>
+                      <ItemInfo
+                        icon={Bookmark}
+                        activeClass={`${
+                          activeCategory === cat.title &&
+                          "bg-c-green text-c-white"
+                        }`}
+                        onClick={() => {
+                          const isActive = activeCategory === cat.title;
+                          setActiveCategory(isActive ? null : cat.title);
+                          handleFilter(isActive ? "" : cat.title);
+                        }}
+                      >
+                        <ItemCategory title={cat.title} />
+                      </ItemInfo>
+                    </React.Fragment>
+                  ))}
+                </>
+              ) : (
+                <>
+                  <p className="italic">
+                    Event / Product tidak memiliki subkategori
+                  </p>
+                </>
+              )}
             </div>
-          )}
+          </div>
         </Box>
         {(eventDate || selectedLocation || minimalOrder) && (
           <>
