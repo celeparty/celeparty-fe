@@ -308,7 +308,6 @@ export const ProductForm: React.FC<iProductFormProps> = ({
         variant: variants,
         escrow: escrowChecked,
       };
-      console.log("Submit payload:", updatedData);
       // Inject user_event_type if forced
       if (forceUserEventType) {
         (updatedData as any).user_event_type = forceUserEventType;
