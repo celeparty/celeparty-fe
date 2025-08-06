@@ -1,19 +1,18 @@
 "use client";
 import Box from "@/components/Box";
 import ErrorNetwork from "@/components/ErrorNetwork";
-import { DatePickerInput } from "@/components/form-components/DatePicker";
-import { SelectInput } from "@/components/form-components/SelectInput";
 import ItemProduct from "@/components/product/ItemProduct";
 import Skeleton from "@/components/Skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { iEventCategory } from "@/lib/interfaces/iCategory";
 import { iSelectOption } from "@/lib/interfaces/iCommon";
 import { axiosData } from "@/lib/services";
-import { productCategories } from "@/lib/static/categories";
 import { formatNumberWithDots, formatRupiah } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { format, isValid, parse } from "date-fns";
+import { format } from "date-fns";
 import _ from "lodash";
+import { Bookmark } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
@@ -43,6 +42,10 @@ export function ProductContent() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   // const {activeButton, setActiveButton} = useButtonStore()
   const [activeButton, setActiveButton] = useState<string | null>(null);
+
+  const [filterCategories, setFilterCategories] = useState<iEventCategory[]>(
+    []
+  );
 
   const getCombinedQuery = async () => {
     const formattedDate = eventDate
@@ -95,6 +98,30 @@ export function ProductContent() {
       setMainData(query.data.data);
     }
   }, [query.isSuccess, query.data]);
+
+  const getFilterCatsQuery = async () => {
+    return await axiosData(
+      "GET",
+      `/api/user-event-types?populate=*${
+        getType ? `&filters[name]=${encodeURIComponent(getType)}` : ""
+      }`
+    );
+  };
+
+  const filterCatsQuery = useQuery({
+    queryKey: ["qFilterCats", getType],
+    queryFn: getFilterCatsQuery,
+  });
+
+  useEffect(() => {
+    if (filterCatsQuery.isSuccess) {
+      const { data } = filterCatsQuery.data;
+      if (data) {
+        const { categories } = data[0];
+        setFilterCategories(categories);
+      }
+    }
+  }, [filterCatsQuery.isSuccess, filterCatsQuery.data]);
 
   useEffect(() => {
     if (price?.min && price?.max) {
@@ -183,6 +210,7 @@ export function ProductContent() {
   if (query.isError) {
     return <ErrorNetwork />;
   }
+
   const getSort = params.get("sort");
   const getMin = params.get("min");
   const getMax = params.get("max");
@@ -225,7 +253,7 @@ export function ProductContent() {
     <div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
       <div className="sidebar">
         <Box className="bg-c-blue text-white w-full lg:max-w-[280px] mt-0 hidden lg:block">
-          <div className="relative mb-7 [&_h4]:mb-3">
+          {/* <div className="relative mb-7 [&_h4]:mb-3">
             <h4>Informasi Acara</h4>
             <div className="flex flex-col gap-3">
               <ItemInfo image="/images/date.svg">
@@ -268,7 +296,7 @@ export function ProductContent() {
                 ></SelectInput>
               </ItemInfo>
             </div>
-          </div>
+          </div> */}
           {[
             "Peralatan Event",
             "Ulang Tahun",
@@ -278,21 +306,21 @@ export function ProductContent() {
             <div className="relative mb-7 [&_h4]:mb-3">
               <h4>Pilih Kategori Produk</h4>
               <div className="flex flex-col gap-3">
-                {productCategories.map((cat, index) => (
+                {filterCategories.map((cat, index) => (
                   <React.Fragment key={index}>
-                    <ItemInfo image={cat.icon ?? ""}>
-                      <ItemCategory
-                        title={cat.label}
-                        onClick={() => {
-                          const isActive = activeCategory === cat.value;
-                          setActiveCategory(isActive ? null : cat.value);
-                          handleFilter(isActive ? "" : cat.value);
-                        }}
-                        className={`${
-                          activeCategory === cat.value &&
-                          "bg-c-green text-c-white"
-                        }`}
-                      />
+                    <ItemInfo
+                      icon={Bookmark}
+                      activeClass={`${
+                        activeCategory === cat.title &&
+                        "bg-c-green text-c-white"
+                      }`}
+                      onClick={() => {
+                        const isActive = activeCategory === cat.title;
+                        setActiveCategory(isActive ? null : cat.title);
+                        handleFilter(isActive ? "" : cat.title);
+                      }}
+                    >
+                      <ItemCategory title={cat.title} />
                     </ItemInfo>
                   </React.Fragment>
                 ))}
