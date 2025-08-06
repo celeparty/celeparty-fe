@@ -32,8 +32,6 @@ export default function ContentProduct(props: any) {
   const dataContent = query?.data?.data;
   const [currentPrice, setCurrentPrice] = useState(dataContent?.main_price);
 
-console.log(dataContent)
-
   useEffect(() => {
     setCurrentPrice(dataContent?.main_price);
   }, []);
@@ -193,7 +191,9 @@ console.log(dataContent)
           <div className="right min-w-[275px] sticky top-0 ">
             <SideBar
               dataProducts={dataContent}
-              currentPrice={currentPrice > 0 ? currentPrice : dataContent?.main_price}
+              currentPrice={
+                currentPrice > 0 ? currentPrice : dataContent?.main_price
+              }
               selectedVariantId={selectedVariantId}
             />
           </div>

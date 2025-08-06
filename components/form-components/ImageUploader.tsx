@@ -4,7 +4,7 @@ import { eAlertType } from "@/lib/enums/eAlert";
 interface FileUploaderProps {
   selectedFile: string | File;
   imageUrl: string | File;
-  handleResult: (base64: string, file: File) => void;
+  handleResult: (file: File) => void;
   handleFileDelete: () => void;
   handleSubmitFile: () => void;
 }
@@ -21,9 +21,7 @@ export const ImageUploader: React.FC<FileUploaderProps> = ({
   const { toast } = useToast();
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
-    console.log(file);
     if (!file) return;
-    console.log(file);
     if (file.size > MaxImageSize) {
       toast({
         description: "Maximum file size is 10Mb",
@@ -31,10 +29,7 @@ export const ImageUploader: React.FC<FileUploaderProps> = ({
       });
       return;
     }
-
-    const fileUrl = URL.createObjectURL(file);
-    handleResult(fileUrl, file);
-    setTimeout(() => URL.revokeObjectURL(fileUrl), 1000);
+    handleResult(file);
   };
   return (
     <>

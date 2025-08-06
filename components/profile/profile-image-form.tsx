@@ -10,7 +10,7 @@ export const ProfileImageForm = () => {
   const { data: session, status } = useSession();
   const [imageUrl, setImageUrl] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<string | File>("");
-  const handleResult = (e: string | File) => {
+  const handleResult = (e: File) => {
     setSelectedFile(e);
   };
 
@@ -20,11 +20,13 @@ export const ProfileImageForm = () => {
 
   const submitFile = async () => {
     try {
+      const formData = new FormData();
+      formData.append("files", selectedFile);
       const response = await axiosUser(
         "POST",
         `/api/upload`,
         `${session && session?.jwt}`,
-        selectedFile
+        formData
       );
 
       if (response) {
