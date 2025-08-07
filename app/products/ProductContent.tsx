@@ -355,7 +355,7 @@ export function ProductContent() {
         )}
       </div>
       <div className="lg:flex-1 w-full">
-        <div className="w-auto lg:inline-block">
+        <div className="w-full lg:inline-block">
           <Box className="w-auto py-3 mt-0">
             <div className="flex lg:flex-row flex-col items-center gap-4 ">
               <label className="mr-3 text-[15px] pb-1 lg:pb-0 border-b-2 border-solid border-black lg:border-none">
