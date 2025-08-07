@@ -101,11 +101,13 @@ export const ProfileForm = () => {
 
   useEffect(() => {
     if (status === "authenticated") {
-      axiosUser("GET", "/api/users/me", `${session && session?.jwt}`).then(
-        (res) => {
-          setMyData(res);
-        }
-      );
+      axiosUser(
+        "GET",
+        `/api/users/${session?.user.id}`,
+        `${session && session?.jwt}`
+      ).then((res) => {
+        setMyData(res);
+      });
     }
   }, [status]);
 
@@ -145,6 +147,7 @@ export const ProfileForm = () => {
       });
     }
   };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="-mt-10 lg:mt-0">
