@@ -23,6 +23,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Button } from "../ui/button";
+import { useImageProfileStore } from "@/hooks/use-image-profile";
 
 const formSchema = z.object({
   name: z.string().nonempty({
@@ -67,6 +68,7 @@ export const ProfileForm = () => {
   const { toast } = useToast();
   const { data: session, status } = useSession();
   const [myData, setMyData] = useState<any>();
+  const { setProfileImageUrl } = useImageProfileStore();
 
   const genderOptions: iSelectOption[] = [
     {
@@ -96,6 +98,8 @@ export const ProfileForm = () => {
         bankName: myData.bankName || "",
         accountNumber: myData.accountNumber || "",
       });
+
+      setProfileImageUrl(myData.image.url);
     }
   }, [myData, form]);
 
@@ -103,7 +107,7 @@ export const ProfileForm = () => {
     if (status === "authenticated") {
       axiosUser(
         "GET",
-        `/api/users/${session?.user.id}`,
+        `/api/users/${session?.user.id}?populate=*`,
         `${session && session?.jwt}`
       ).then((res) => {
         setMyData(res);

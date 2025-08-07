@@ -1,3 +1,4 @@
+import { useImageProfileStore } from "@/hooks/use-image-profile";
 import { useToast } from "@/hooks/use-toast";
 import { eAlertType } from "@/lib/enums/eAlert";
 import { axiosUser } from "@/lib/services";
@@ -8,7 +9,7 @@ import { ImageUploader } from "../form-components/ImageUploader";
 export const ProfileImageForm = () => {
   const { toast } = useToast();
   const { data: session, status } = useSession();
-  const [imageUrl, setImageUrl] = useState<string>("");
+  const { profileImageUrl } = useImageProfileStore();
   const [selectedFile, setSelectedFile] = useState<string | File>("");
   const handleResult = (e: File) => {
     setSelectedFile(e);
@@ -76,7 +77,7 @@ export const ProfileImageForm = () => {
       <div className="w-[300px] mx-auto lg:mx-0">
         <ImageUploader
           handleResult={(e) => handleResult(e)}
-          imageUrl={imageUrl}
+          imageUrl={profileImageUrl}
           handleFileDelete={handleFileDelete}
           selectedFile={selectedFile}
           handleSubmitFile={submitFile}
