@@ -18,6 +18,7 @@ import React, { Suspense, useEffect, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { ItemCategory, ItemInfo } from "./ItemCategory";
 import { SelectInput } from "@/components/form-components/SelectInput";
+import { LocationFilterBar } from "@/components/product/LocationFilterBar";
 
 export function ProductContent() {
   const [sortDesc, setSortDesc] = useState<boolean>(true);
@@ -253,19 +254,28 @@ export function ProductContent() {
     if (minimalOrder) setMinimalOrder("");
   };
 
+  const isFilterCatsAvailable: boolean = filterCategories.length > 0;
+
   return (
-    <div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
-      <div className="sidebar">
-        <Box className="bg-c-blue text-white w-full lg:max-w-[280px] mt-0 hidden lg:block">
-          <div
-            className={`relative ${
-              filterCategories.length > 0 && "mb-7 [&_h4]:mb-3"
-            }`}
-          >
-            <h4 className="font-bold">Informasi Acara</h4>
-            <hr className="mb-4 mt-2" />
-            <div className="flex flex-col gap-3">
-              {/* 
+    <div className="grid grid-cols-12 gap-6">
+      {isFilterCatsAvailable && (
+        <>
+          <div className="col-span-12 md:col-span-3">
+            <div className="sidebar">
+              <Box className="bg-c-blue text-white mt-0 hidden lg:block">
+                <div
+                  className={`relative ${
+                    isFilterCatsAvailable && "mb-7 [&_h4]:mb-3"
+                  }`}
+                >
+                  <h4 className="font-bold">Informasi Acara</h4>
+                  <hr className="mb-4 mt-2" />
+                  <LocationFilterBar
+                    options={eventLocations}
+                    setSelectedLocation={setSelectedLocation}
+                    selectedLocation={selectedLocation}
+                  />
+                  {/* 
               <ItemInfo image="/images/date.svg">
                 <DatePickerInput
                   onChange={(date) => {
@@ -294,209 +304,201 @@ export function ProductContent() {
                 />
               </ItemInfo>
               */}
-              <div className="flex items-center">
-                <div className="w-[35px]">
-                  <MapPin />
                 </div>
-                <SelectInput
-                  options={eventLocations}
-                  label="Pilih Lokasi Acara"
-                  onChange={(value) => {
-                    if (value) {
-                      setSelectedLocation(value);
-                    }
-                  }}
-                  value={selectedLocation}
-                ></SelectInput>
-              </div>
-            </div>
-          </div>
-          <div className="relative mb-7 [&_h4]:mb-3">
-            {filterCategories.length > 0 && (
-              <>
-                <h4 className="font-bold">Pilih Kategori Produk</h4>
-                <hr className="mb-4" />
-              </>
-            )}
-            <div className="flex flex-col gap-3">
-              {filterCategories.length > 0 && (
+                {isFilterCatsAvailable && (
+                  <div className="relative mb-7 [&_h4]:mb-3">
+                    <h4 className="font-bold">Pilih Kategori Produk</h4>
+                    <hr className="mb-4" />
+                    <div className="flex flex-col gap-3">
+                      {filterCategories.map((cat, index) => (
+                        <React.Fragment key={index}>
+                          <ItemInfo
+                            icon={Bookmark}
+                            activeClass={`${
+                              activeCategory === cat.title &&
+                              "bg-c-green text-c-white"
+                            }`}
+                            onClick={() => {
+                              const isActive = activeCategory === cat.title;
+                              setActiveCategory(isActive ? null : cat.title);
+                              handleFilter(isActive ? "" : cat.title);
+                            }}
+                          >
+                            <ItemCategory title={cat.title} />
+                          </ItemInfo>
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </Box>
+              {(eventDate || selectedLocation || minimalOrder) && (
                 <>
-                  {filterCategories.map((cat, index) => (
-                    <React.Fragment key={index}>
-                      <ItemInfo
-                        icon={Bookmark}
-                        activeClass={`${
-                          activeCategory === cat.title &&
-                          "bg-c-green text-c-white"
-                        }`}
-                        onClick={() => {
-                          const isActive = activeCategory === cat.title;
-                          setActiveCategory(isActive ? null : cat.title);
-                          handleFilter(isActive ? "" : cat.title);
-                        }}
-                      >
-                        <ItemCategory title={cat.title} />
-                      </ItemInfo>
-                    </React.Fragment>
-                  ))}
+                  <div className="py-2 text-right">
+                    <Button variant={"green"} onClick={resetFilters}>
+                      Reset Filter
+                    </Button>
+                  </div>
                 </>
               )}
             </div>
           </div>
-        </Box>
-        {(eventDate || selectedLocation || minimalOrder) && (
-          <>
-            <div className="py-2 text-right">
-              <Button variant={"green"} onClick={resetFilters}>
-                Reset Filter
-              </Button>
-            </div>
-          </>
-        )}
-      </div>
-      <div className="lg:flex-1 w-full">
-        <div className="w-full lg:inline-block">
-          <Box className="w-auto py-3 mt-0">
-            <div className="flex lg:flex-row flex-col items-center gap-4 ">
-              <label className="mr-3 text-[15px] pb-1 lg:pb-0 border-b-2 border-solid border-black lg:border-none">
-                Urutkan
-              </label>
-              <Button
-                variant={`${getSort === "updated_at" ? "default" : "outline"}`}
-                onClick={() => {
-                  handleSort({ sortBy: "updatedAt" });
-                  setActiveButton("btn1");
-                  setShowOptions(false);
-                }}
-                className={`w-full lg:w-auto border-2 border-black border-solid lg:border-none ${
-                  activeButton === "btn1" ? "bg-c-blue text-white" : null
-                }`}
-              >
-                Terbaru
-              </Button>
-              <Button
-                variant={`${getSort === "sold_count" ? "default" : "outline"}`}
-                onClick={() => {
-                  handleSort({ sortBy: "sold_count" });
-                  setActiveButton("btn2");
-                  setShowOptions(false);
-                }}
-                className={`w-full lg:w-auto  border-2 border-black border-solid lg:border-none ${
-                  activeButton === "btn2" ? "bg-c-blue text-white" : null
-                }`}
-              >
-                Terlaris
-              </Button>
-              <div className="relative flex items-center gap-4">
-                <div className="lg:order-1 order-2">
+        </>
+      )}
+      <div
+        className={`col-span-12 ${
+          isFilterCatsAvailable ? "md:col-span-9" : "md:col-span-12"
+        }`}
+      >
+        <div className="grid grid-cols-12 gap-4">
+          {!isFilterCatsAvailable && (
+            <>
+              <div className="col-span-12 md:col-span-3">
+                <Box className="bg-c-blue text-white mt-0 hidden lg:block">
+                  <LocationFilterBar
+                    options={eventLocations}
+                    setSelectedLocation={setSelectedLocation}
+                    selectedLocation={selectedLocation}
+                  />
+                </Box>
+              </div>
+            </>
+          )}
+          <div
+            className={`col-span-12 ${
+              !isFilterCatsAvailable ? "md:col-span-9" : "md:col-span-12"
+            }`}
+          >
+            <div className="w-full lg:inline-block">
+              <Box className="w-auto py-3 mt-0">
+                <div className="flex lg:flex-row flex-col items-center gap-4 ">
+                  <label className="mr-3 text-[15px] pb-1 lg:pb-0 border-b-2 border-solid border-black lg:border-none">
+                    Urutkan
+                  </label>
                   <Button
-                    variant={`${getSort === "price" ? "default" : "outline"}`}
+                    variant={`${
+                      getSort === "updated_at" ? "default" : "outline"
+                    }`}
                     onClick={() => {
-                      setActiveButton("btn3");
-                      toggleDropdown();
-                      setStatusValue(!statusValue);
-                      setStatusSortBy(!statusSortBy);
-                      handleSort({
-                        sortBy: statusSortBy ? "price_min" : "price_max",
-                      });
+                      handleSort({ sortBy: "updatedAt" });
+                      setActiveButton("btn1");
+                      setShowOptions(false);
                     }}
-                    className={`flex gap-1 items-center w-full lg:w-auto border-2 border-black border-solid lg:border-none ${
-                      activeButton === "btn3" ? "bg-c-blue text-white" : null
+                    className={`w-full lg:w-auto border-2 border-black border-solid lg:border-none ${
+                      activeButton === "btn1" ? "bg-c-blue text-white" : null
                     }`}
                   >
-                    {statusValue ? "Harga Temurah" : "Harga Termahal"}{" "}
-                    {sortDesc ? <IoIosArrowUp /> : <IoIosArrowDown />}
+                    Terbaru
                   </Button>
-                  {/* {
-								showOptions && (
-									<div className="absolute -right-[2px] top-[70px] lg:top-12 lg:right-[432px] w-40 bg-white border border-gray-300 rounded shadow-lg z-50">
-										<div className="flex flex-col gap-2">
-											<Button 
-											onClick={() => {
-												handleSort({ sortBy: "price_min" });
-												setShowOptions(!showOptions)
-												setStatusValue("Harga Termurah")
-											}}>Harga Termurah</Button>
-
-											<Button onClick={() => {
-												handleSort({ sortBy: "price_max" });
-												setShowOptions(!showOptions)
-												setStatusValue("Harga Termahal")
-											}}>Harga Termahal</Button>
-
-											<Button onClick={() => {
-												handleSort({ sortBy: "main_price" });
-												setShowOptions(!showOptions)
-												setStatusValue("Seluruh Harga")
-											}}>Seluruh Harga</Button>
-										</div>
-									</div>
-								)
-							} */}
-                </div>
-                <div className="flex lg:flex-row flex-col gap-2 lg:order-2 order-1">
-                  <div className="flex items-center gap-2 w-full lg:w-auto">
-                    Rp{" "}
-                    <Input
-                      className="border-2 border-black border-solid lg:border-none"
-                      placeholder="Harga Minimum"
-                      onChange={(e) => {
-                        const rawValue = e.target.value.replace(/\D/g, ""); // Only digits
-                        const formatted = formatNumberWithDots(rawValue);
-                        setPrice((prev) => ({ ...prev, min: formatted }));
-                      }}
-                      value={price.min > 0 ? price.min : ""}
-                    />
+                  <Button
+                    variant={`${
+                      getSort === "sold_count" ? "default" : "outline"
+                    }`}
+                    onClick={() => {
+                      handleSort({ sortBy: "sold_count" });
+                      setActiveButton("btn2");
+                      setShowOptions(false);
+                    }}
+                    className={`w-full lg:w-auto  border-2 border-black border-solid lg:border-none ${
+                      activeButton === "btn2" ? "bg-c-blue text-white" : null
+                    }`}
+                  >
+                    Terlaris
+                  </Button>
+                  <div className="relative flex items-center gap-4">
+                    <div className="lg:order-1 order-2">
+                      <Button
+                        variant={`${
+                          getSort === "price" ? "default" : "outline"
+                        }`}
+                        onClick={() => {
+                          setActiveButton("btn3");
+                          toggleDropdown();
+                          setStatusValue(!statusValue);
+                          setStatusSortBy(!statusSortBy);
+                          handleSort({
+                            sortBy: statusSortBy ? "price_min" : "price_max",
+                          });
+                        }}
+                        className={`flex gap-1 items-center w-full lg:w-auto border-2 border-black border-solid lg:border-none ${
+                          activeButton === "btn3"
+                            ? "bg-c-blue text-white"
+                            : null
+                        }`}
+                      >
+                        {statusValue ? "Harga Temurah" : "Harga Termahal"}{" "}
+                        {sortDesc ? <IoIosArrowUp /> : <IoIosArrowDown />}
+                      </Button>
+                    </div>
+                    <div className="flex lg:flex-row flex-col gap-2 lg:order-2 order-1">
+                      <div className="flex items-center gap-2 w-full lg:w-auto">
+                        Rp{" "}
+                        <Input
+                          className="border-2 border-black border-solid lg:border-none"
+                          placeholder="Harga Minimum"
+                          onChange={(e) => {
+                            const rawValue = e.target.value.replace(/\D/g, ""); // Only digits
+                            const formatted = formatNumberWithDots(rawValue);
+                            setPrice((prev) => ({ ...prev, min: formatted }));
+                          }}
+                          value={price.min > 0 ? price.min : ""}
+                        />
+                      </div>
+                      <div className="flex items-center gap-2 w-full lg:w-auto">
+                        Rp{" "}
+                        <Input
+                          className="border-2 border-black border-solid lg:border-none"
+                          placeholder="Harga Maximum"
+                          onChange={(e) => {
+                            const rawValue = e.target.value.replace(/\D/g, ""); // Only digits
+                            const formatted = formatNumberWithDots(rawValue);
+                            setPrice((prev) => ({ ...prev, max: formatted }));
+                          }}
+                          value={price.max > 0 ? price.max : ""}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 w-full lg:w-auto">
-                    Rp{" "}
-                    <Input
-                      className="border-2 border-black border-solid lg:border-none"
-                      placeholder="Harga Maximum"
-                      onChange={(e) => {
-                        const rawValue = e.target.value.replace(/\D/g, ""); // Only digits
-                        const formatted = formatNumberWithDots(rawValue);
-                        setPrice((prev) => ({ ...prev, max: formatted }));
-                      }}
-                      value={price.max > 0 ? price.max : ""}
-                    />
-                  </div>
                 </div>
-              </div>
+              </Box>
             </div>
-          </Box>
-        </div>
-        <Box className="mt-3 px-[10px] lg:px-9">
-          <div className="flex flex-wrap -mx-2">
-            {mainData?.length > 0 ? (
-              mainData?.map((item: any) => {
-                return (
-                  <ItemProduct
-                    url={`/products/${item.documentId}`}
-                    key={item.id}
-                    title={item.title}
-                    image_url={
-                      item.main_image
-                        ? process.env.BASE_API + item.main_image[0].url
-                        : "/images/noimage.png"
-                    }
-                    // image_url="/images/noimage.png"
-                    price={
-                      item.main_price
-                        ? formatRupiah(item.main_price)
-                        : formatRupiah(0)
-                    }
-                    rate={item.rate ? `${item.rate}` : "1"}
-                    sold={item.sold_count}
-                    location={item.region ? item.region : null}
-                  ></ItemProduct>
-                );
-              })
-            ) : (
-              <div className="text-center w-full">Product Tidak Ditemukan</div>
-            )}
           </div>
-        </Box>
+          <div className="col-span-12">
+            <Box className="lg:mt-0 px-[10px] lg:px-9">
+              <div className="flex flex-wrap -mx-2">
+                {mainData?.length > 0 ? (
+                  mainData?.map((item: any) => {
+                    return (
+                      <ItemProduct
+                        url={`/products/${item.documentId}`}
+                        key={item.id}
+                        title={item.title}
+                        image_url={
+                          item.main_image
+                            ? process.env.BASE_API + item.main_image[0].url
+                            : "/images/noimage.png"
+                        }
+                        // image_url="/images/noimage.png"
+                        price={
+                          item.main_price
+                            ? formatRupiah(item.main_price)
+                            : formatRupiah(0)
+                        }
+                        rate={item.rate ? `${item.rate}` : "1"}
+                        sold={item.sold_count}
+                        location={item.region ? item.region : null}
+                      ></ItemProduct>
+                    );
+                  })
+                ) : (
+                  <div className="text-center w-full">
+                    Product Tidak Ditemukan
+                  </div>
+                )}
+              </div>
+            </Box>
+          </div>
+        </div>
       </div>
     </div>
   );
