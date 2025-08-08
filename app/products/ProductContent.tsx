@@ -12,11 +12,12 @@ import { formatNumberWithDots, formatRupiah } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import _ from "lodash";
-import { Bookmark } from "lucide-react";
+import { Bookmark, MapPin } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { ItemCategory, ItemInfo } from "./ItemCategory";
+import { SelectInput } from "@/components/form-components/SelectInput";
 
 export function ProductContent() {
   const [sortDesc, setSortDesc] = useState<boolean>(true);
@@ -256,9 +257,15 @@ export function ProductContent() {
     <div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7">
       <div className="sidebar">
         <Box className="bg-c-blue text-white w-full lg:max-w-[280px] mt-0 hidden lg:block">
-          {/* <div className="relative mb-7 [&_h4]:mb-3">
-            <h4>Informasi Acara</h4>
+          <div
+            className={`relative ${
+              filterCategories.length > 0 && "mb-7 [&_h4]:mb-3"
+            }`}
+          >
+            <h4 className="font-bold">Informasi Acara</h4>
+            <hr className="mb-4 mt-2" />
             <div className="flex flex-col gap-3">
+              {/* 
               <ItemInfo image="/images/date.svg">
                 <DatePickerInput
                   onChange={(date) => {
@@ -286,7 +293,11 @@ export function ProductContent() {
                   value={minimalOrder}
                 />
               </ItemInfo>
-              <ItemInfo image="/images/location.svg">
+              */}
+              <div className="flex items-center">
+                <div className="w-[35px]">
+                  <MapPin />
+                </div>
                 <SelectInput
                   options={eventLocations}
                   label="Pilih Lokasi Acara"
@@ -297,14 +308,18 @@ export function ProductContent() {
                   }}
                   value={selectedLocation}
                 ></SelectInput>
-              </ItemInfo>
+              </div>
             </div>
-          </div> */}
+          </div>
           <div className="relative mb-7 [&_h4]:mb-3">
-            <h4 className="font-bold">Pilih Kategori Produk</h4>
-            <hr className="mb-4" />
+            {filterCategories.length > 0 && (
+              <>
+                <h4 className="font-bold">Pilih Kategori Produk</h4>
+                <hr className="mb-4" />
+              </>
+            )}
             <div className="flex flex-col gap-3">
-              {filterCategories.length > 0 ? (
+              {filterCategories.length > 0 && (
                 <>
                   {filterCategories.map((cat, index) => (
                     <React.Fragment key={index}>
@@ -325,12 +340,6 @@ export function ProductContent() {
                     </React.Fragment>
                   ))}
                 </>
-              ) : (
-                <>
-                  <p className="italic">
-                    Event / Product tidak memiliki subkategori
-                  </p>
-                </>
               )}
             </div>
           </div>
@@ -346,7 +355,7 @@ export function ProductContent() {
         )}
       </div>
       <div className="lg:flex-1 w-full">
-        <div className="w-auto lg:inline-block">
+        <div className="w-full lg:inline-block">
           <Box className="w-auto py-3 mt-0">
             <div className="flex lg:flex-row flex-col items-center gap-4 ">
               <label className="mr-3 text-[15px] pb-1 lg:pb-0 border-b-2 border-solid border-black lg:border-none">

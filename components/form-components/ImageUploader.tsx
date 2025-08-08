@@ -3,7 +3,7 @@ import { eAlertType } from "@/lib/enums/eAlert";
 
 interface FileUploaderProps {
   selectedFile: string | File;
-  imageUrl: string | File;
+  imageUrl: string | File | null;
   handleResult: (file: File) => void;
   handleFileDelete: () => void;
   handleSubmitFile: () => void;
@@ -46,9 +46,13 @@ export const ImageUploader: React.FC<FileUploaderProps> = ({
           />
         </div>
       ) : imageUrl ? (
-        <div className="w-full h-[300px] mb-4 bg-black rounded-lg">
+        <div className="w-full h-[300px] mb-4 flex justify-center items-center rounded-lg">
           <img
-            src={typeof imageUrl === "string" ? imageUrl : ""}
+            src={
+              typeof imageUrl === "string"
+                ? process.env.BASE_API + imageUrl
+                : ""
+            }
             alt="Existing"
             className="w-32 h-32 object-cover rounded-md"
           />

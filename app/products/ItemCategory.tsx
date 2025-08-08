@@ -6,8 +6,7 @@ import { LucideIcon } from "lucide-react";
 interface iItemInfo {
   icon: LucideIcon;
   children: React.ReactNode;
-  activeClass: string;
-
+  activeClass?: string;
   onClick?: () => void;
 }
 
