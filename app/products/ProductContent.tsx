@@ -19,6 +19,7 @@ import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { ItemCategory, ItemInfo } from "./ItemCategory";
 import { SelectInput } from "@/components/form-components/SelectInput";
 import { LocationFilterBar } from "@/components/product/LocationFilterBar";
+import { off } from "process";
 
 export function ProductContent() {
   const [sortDesc, setSortDesc] = useState<boolean>(true);
@@ -238,7 +239,11 @@ export function ProductContent() {
 
   const handleFilter = (category: string) => {
     const filterCategory: any = _.filter(dataContent, (item) => {
-      return category ? item?.category?.title === category : item;
+      if (category === "Lainnya") {
+        return true;
+      } else {
+        return category ? item?.category?.title === category : item;
+      }
     });
     setMainData(filterCategory);
   };
@@ -252,6 +257,7 @@ export function ProductContent() {
     if (selectedLocation) setSelectedLocation("");
     if (eventDate) setEventDate("");
     if (minimalOrder) setMinimalOrder("");
+    if (activeCategory) setActiveCategory("");
   };
 
   const isFilterCatsAvailable: boolean = filterCategories.length > 0;
@@ -328,19 +334,33 @@ export function ProductContent() {
                           </ItemInfo>
                         </React.Fragment>
                       ))}
+                      <ItemInfo
+                        icon={Bookmark}
+                        activeClass={`${
+                          activeCategory === "Lainnya" &&
+                          "bg-c-green text-c-white"
+                        }`}
+                        onClick={() => {
+                          const isActive = activeCategory === "Lainnya";
+                          setActiveCategory(isActive ? null : "Lainnya");
+                          handleFilter(isActive ? "" : "Lainnya");
+                        }}
+                      >
+                        <ItemCategory title={"Lainnya"} />
+                      </ItemInfo>
                     </div>
                   </div>
                 )}
+                {(eventDate || selectedLocation || minimalOrder) && (
+                  <>
+                    <div className="py-2 text-right">
+                      <Button variant={"green"} onClick={resetFilters}>
+                        Reset Filter
+                      </Button>
+                    </div>
+                  </>
+                )}
               </Box>
-              {(eventDate || selectedLocation || minimalOrder) && (
-                <>
-                  <div className="py-2 text-right">
-                    <Button variant={"green"} onClick={resetFilters}>
-                      Reset Filter
-                    </Button>
-                  </div>
-                </>
-              )}
             </div>
           </div>
         </>
