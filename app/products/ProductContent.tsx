@@ -19,6 +19,7 @@ import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { ItemCategory, ItemInfo } from "./ItemCategory";
 import { SelectInput } from "@/components/form-components/SelectInput";
 import { LocationFilterBar } from "@/components/product/LocationFilterBar";
+import { off } from "process";
 
 export function ProductContent() {
   const [sortDesc, setSortDesc] = useState<boolean>(true);
@@ -256,6 +257,7 @@ export function ProductContent() {
     if (selectedLocation) setSelectedLocation("");
     if (eventDate) setEventDate("");
     if (minimalOrder) setMinimalOrder("");
+    if (activeCategory) setActiveCategory("");
   };
 
   const isFilterCatsAvailable: boolean = filterCategories.length > 0;
