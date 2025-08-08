@@ -238,7 +238,11 @@ export function ProductContent() {
 
   const handleFilter = (category: string) => {
     const filterCategory: any = _.filter(dataContent, (item) => {
-      return category ? item?.category?.title === category : item;
+      if (category === "Lainnya") {
+        return true;
+      } else {
+        return category ? item?.category?.title === category : item;
+      }
     });
     setMainData(filterCategory);
   };
@@ -328,19 +332,33 @@ export function ProductContent() {
                           </ItemInfo>
                         </React.Fragment>
                       ))}
+                      <ItemInfo
+                        icon={Bookmark}
+                        activeClass={`${
+                          activeCategory === "Lainnya" &&
+                          "bg-c-green text-c-white"
+                        }`}
+                        onClick={() => {
+                          const isActive = activeCategory === "Lainnya";
+                          setActiveCategory(isActive ? null : "Lainnya");
+                          handleFilter(isActive ? "" : "Lainnya");
+                        }}
+                      >
+                        <ItemCategory title={"Lainnya"} />
+                      </ItemInfo>
                     </div>
                   </div>
                 )}
+                {(eventDate || selectedLocation || minimalOrder) && (
+                  <>
+                    <div className="py-2 text-right">
+                      <Button variant={"green"} onClick={resetFilters}>
+                        Reset Filter
+                      </Button>
+                    </div>
+                  </>
+                )}
               </Box>
-              {(eventDate || selectedLocation || minimalOrder) && (
-                <>
-                  <div className="py-2 text-right">
-                    <Button variant={"green"} onClick={resetFilters}>
-                      Reset Filter
-                    </Button>
-                  </div>
-                </>
-              )}
             </div>
           </div>
         </>
