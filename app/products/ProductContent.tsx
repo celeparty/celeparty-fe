@@ -2,6 +2,7 @@
 import Box from "@/components/Box";
 import ErrorNetwork from "@/components/ErrorNetwork";
 import ItemProduct from "@/components/product/ItemProduct";
+import { LocationFilterBar } from "@/components/product/LocationFilterBar";
 import Skeleton from "@/components/Skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,14 +13,11 @@ import { formatNumberWithDots, formatRupiah } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import _ from "lodash";
-import { Bookmark, MapPin } from "lucide-react";
+import { Bookmark } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { ItemCategory, ItemInfo } from "./ItemCategory";
-import { SelectInput } from "@/components/form-components/SelectInput";
-import { LocationFilterBar } from "@/components/product/LocationFilterBar";
-import { off } from "process";
 
 export function ProductContent() {
   const [sortDesc, setSortDesc] = useState<boolean>(true);
@@ -281,35 +279,6 @@ export function ProductContent() {
                     setSelectedLocation={setSelectedLocation}
                     selectedLocation={selectedLocation}
                   />
-                  {/* 
-              <ItemInfo image="/images/date.svg">
-                <DatePickerInput
-                  onChange={(date) => {
-                    if (date instanceof Date && isValid(date)) {
-                      const formatted = format(date, "dd-MM-yyyy");
-                      setEventDate(formatted);
-                    }
-                  }}
-                  textLabel="Pilih Tanggal Acara"
-                  value={
-                    eventDate
-                      ? parse(eventDate, "dd-MM-yyyy", new Date())
-                      : null
-                  }
-                />
-              </ItemInfo>
-              <ItemInfo image="/images/group.svg">
-                <Input
-                  placeholder="Jumlah Tamu/ Pax"
-                  className="text-c-black"
-                  onChange={(e) => {
-                    let value = e.target.value;
-                    setMinimalOrder(value);
-                  }}
-                  value={minimalOrder}
-                />
-              </ItemInfo>
-              */}
                 </div>
                 {isFilterCatsAvailable && (
                   <div className="relative mb-7 [&_h4]:mb-3">
