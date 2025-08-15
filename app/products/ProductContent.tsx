@@ -13,7 +13,7 @@ import { formatNumberWithDots, formatRupiah } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import _ from "lodash";
-import { Bookmark } from "lucide-react";
+import { Bookmark, LucideX, LucideXCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
@@ -343,8 +343,8 @@ export function ProductContent() {
           {!isFilterCatsAvailable && (
             <>
               <div className="col-span-12 md:col-span-3">
-                <Box className="bg-c-blue text-white mt-0 flex gap-2 items-center">
-                  <div className={!selectedLocation ? "w-full" : ""}>
+                <Box className="bg-c-blue text-white mt-0 flex gap-2 items-center lg:px-6">
+                  <div className={!selectedLocation ? "w-full" : "flex-1"}>
                     <LocationFilterBar
                       options={eventLocations}
                       setSelectedLocation={setSelectedLocation}
@@ -353,9 +353,10 @@ export function ProductContent() {
                   </div>
                   {selectedLocation && (
                     <>
-                      <Button variant={"green"} onClick={resetFilters}>
-                        Reset Filter
-                      </Button>
+                      <LucideXCircle
+                        className="cursor-pointer"
+                        onClick={resetFilters}
+                      />
                     </>
                   )}
                 </Box>
