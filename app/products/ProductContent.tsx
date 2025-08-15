@@ -343,12 +343,21 @@ export function ProductContent() {
           {!isFilterCatsAvailable && (
             <>
               <div className="col-span-12 md:col-span-3">
-                <Box className="bg-c-blue text-white mt-0 hidden lg:block">
-                  <LocationFilterBar
-                    options={eventLocations}
-                    setSelectedLocation={setSelectedLocation}
-                    selectedLocation={selectedLocation}
-                  />
+                <Box className="bg-c-blue text-white mt-0 flex gap-2 items-center">
+                  <div className={!selectedLocation ? "w-full" : ""}>
+                    <LocationFilterBar
+                      options={eventLocations}
+                      setSelectedLocation={setSelectedLocation}
+                      selectedLocation={selectedLocation}
+                    />
+                  </div>
+                  {selectedLocation && (
+                    <>
+                      <Button variant={"green"} onClick={resetFilters}>
+                        Reset Filter
+                      </Button>
+                    </>
+                  )}
                 </Box>
               </div>
             </>
