@@ -190,6 +190,7 @@ export default function CartContent() {
                   }}
                 />
               </div>
+              
             </div>
           </div>
         ))}
@@ -294,6 +295,17 @@ export default function CartContent() {
     }
   };
 
+  const checkoutTicket = async () => {
+    const response = await axios.post(`/api/payment`, data)
+    .then(res => {
+        return res.data.token
+    })
+    .catch(error => {
+        console.log(error)
+    })
+window.snap.pay(response)
+  }
+
   return (
     <div className="wrapper">
       {cart.length > 0 ? (
@@ -343,6 +355,7 @@ export default function CartContent() {
                         </div>
                         <div className="mb-1">
                           <b>Nama Pemesan:</b> {item.customer_name || "-"}
+
                         </div>
                         <div className="mb-1">
                           <b>No. Telepon:</b> {userTelp}
@@ -449,14 +462,23 @@ export default function CartContent() {
                   </div>
                 </div>
                 {/* Tombol pembayaran aktif jika semua produk di cart sudah lengkap */}
-                <div
-                  className={`bg-c-green text-white text-center py-3 mt-5 rounded-lg cursor-pointer ${
-                    !isCartValid ? "opacity-50 pointer-events-none" : ""
-                  }`}
-                  onClick={!isCartValid ? undefined : handleCheckout}
-                >
-                  Pembayaran
-                </div>
+                {
+                  cart[0]?.user_event_type !== eProductType.ticket ? (
+                    <div
+                    className={`bg-c-green text-white text-center py-3 mt-5 rounded-lg cursor-pointer ${
+                      !isCartValid ? "opacity-50 pointer-events-none" : ""
+                    }`}
+                    onClick={!isCartValid ? undefined : handleCheckout}
+                  >
+                    Pembayaran
+                  </div>
+                  ) : (
+                    <div className="bg-c-green text-white text-center py-3 mt-5 rounded-lg cursor-pointer" onClick={checkoutTicket}>
+                      Pembayaran
+                    </div>
+                  )
+                }
+
               </div>
             </Box>
           </div>
