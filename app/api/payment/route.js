@@ -22,42 +22,57 @@ export function GET() {
 // create / post data
 export async function POST(req) {
     try {
-        const data = await req.json();
-        console.log('PAYMENT BODY:', data);
-        const { email, items } = data;
-        console.log('ITEMS:', items);
-        if (!items || !Array.isArray(items) || items.length === 0) {
-            throw new Error("data not found");
+        const requestData = await req.json()
+        console.log("Request data:", requestData)
+        
+        // Handle both old format (array) and new format (object with items)
+        let items = []
+        if (Array.isArray(requestData)) {
+            items = requestData
+        } else if (requestData.items && Array.isArray(requestData.items)) {
+            items = requestData.items
+        } else {
+            throw new Error("Invalid data format")
+        }
+        
+        if (items.length === 0) {
+            throw new Error("No items found")
         }
 
-        const itemDetails = items.map((item) => ({
-            key: item.id,
-            id: item.id,
-            name: item.name,
-            price: _.ceil(parseFloat(item.price.toString())),
-            quantity: item.quantity
-        }));
-
-        const grossAmount = _.sumBy(itemDetails, (item) => item.price * item.quantity);
-        const order_id = `ORDER-${Date.now()}-${_.random(1000, 9999)}`;
-
-        const parameter = {
-            transaction_details: {
-                order_id,
-                gross_amount: grossAmount
-            },
-            item_details: itemDetails,
-            customer_details: {
-                email: email || ""
+        const itemDetails = items.map((item) => {
+            return {
+                id: item.id,
+                price: _.ceil(parseFloat(item.price.toString())),
+                quantity: item.quantity,
+                name: item.name
             }
-        };
-        console.log('MIDTRANS PARAMETER:', parameter);
+        })
 
-        const token = await snap.createTransactionToken(parameter);
+                const grossAmount = _.sumBy(itemDetails, (item) => item.price * item.quantity)
+        
+        // Gunakan order_id yang sudah ada atau generate baru
+        const orderId = requestData.order_id || `ORDER-${Date.now()}-${_.random(1000, 9999)}`
+        
+        const parameter = {
+          item_details: itemDetails,
+          transaction_details: {
+            order_id: orderId,
+            gross_amount: grossAmount
+          }
+        }
 
-        return NextResponse.json({ token, order_id });
-    } catch (err) {
-        console.error('Midtrans error:', err);
-        return NextResponse.json({ error: err.message }, { status: 500 });
+        console.log("Midtrans parameter:", parameter)
+        const token = await snap.createTransactionToken(parameter)
+        
+        return NextResponse.json({
+            token: token,
+            order_id: orderId
+        })
+    } catch (error) {
+        console.error("Payment API error:", error)
+        return NextResponse.json(
+            { error: error.message || "Payment processing failed" },
+            { status: 500 }
+        )
     }
 }
