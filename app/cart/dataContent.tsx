@@ -74,19 +74,45 @@ export default function CartContent() {
     // eslint-disable-next-line
   }, [userTelp]);
 
-  // Validasi cart, cek userTelp bukan item.telp
+  // Validasi cart berdasarkan tipe produk
   const isCartValid =
     cart.length > 0 &&
-    cart.every(
-      (item: any) =>
+    cart.every((item: any) => {
+      // Validasi dasar yang diperlukan semua produk
+      const basicValidation = item.customer_name && userTelp && item.variant;
+      
+      // Jika produk adalah ticket, hanya perlu validasi dasar
+      if (item.user_event_type === eProductType.ticket) {
+        const isValid = basicValidation;
+        console.log(`Ticket validation for ${item.product_name}:`, {
+          customer_name: !!item.customer_name,
+          userTelp: !!userTelp,
+          variant: !!item.variant,
+          isValid
+        });
+        return isValid;
+      }
+      
+      // Jika produk bukan ticket, perlu semua field
+      const isValid = (
+        basicValidation &&
         item.event_date &&
         item.shipping_location &&
         item.loading_date &&
-        item.loading_time &&
-        item.customer_name &&
-        userTelp &&
-        item.variant
-    );
+        item.loading_time
+      );
+      console.log(`Product validation for ${item.product_name}:`, {
+        customer_name: !!item.customer_name,
+        userTelp: !!userTelp,
+        variant: !!item.variant,
+        event_date: !!item.event_date,
+        shipping_location: !!item.shipping_location,
+        loading_date: !!item.loading_date,
+        loading_time: !!item.loading_time,
+        isValid
+      });
+      return isValid;
+    });
 
   // Hapus form input checkout, ganti dengan tampilan readonly hasil inputan user
   // Di bagian Ringkasan Belanja, tampilkan data dari cart[0] (asumsi semua produk di cart punya data yang sama)
@@ -240,7 +266,7 @@ export default function CartContent() {
                 id: item.product_id,
                 title: item.product_name,
               })),
-              payment_status: "paid",
+              payment_status: "pending",
               variant: variants,
               quantity: quantities,
               shipping_location: c.shipping_location,
@@ -296,14 +322,92 @@ export default function CartContent() {
   };
 
   const checkoutTicket = async () => {
-    const response = await axios.post(`/api/payment`, data)
-    .then(res => {
-        return res.data.token
-    })
-    .catch(error => {
-        console.log(error)
-    })
-window.snap.pay(response)
+    try {
+      console.log("Cart data:", cart);
+      console.log("Data being sent to payment API:", data);
+      console.log("User email:", userEmail);
+      
+      // Kirim email customer ke backend payment
+      const response = await axios.post(`/api/payment`, {
+        email: userEmail,
+        items: data,
+      });
+      console.log("Payment API response:", response.data);
+      
+      const token = response.data.token;
+      const order_id = response.data.order_id;
+      
+      window.snap.pay(token, {
+        onSuccess: async function (result: any) {
+          try {
+            // Ambil data dari cart untuk ticket
+            const ticketItem = cart[0]; // Ambil item pertama karena untuk ticket biasanya hanya 1 item
+            
+            // Siapkan payload untuk Strapi transaction-tickets
+            const transactionTicketPayload = {
+              data: {
+                product_name: ticketItem.product_name,
+                price: ticketItem.price.toString(),
+                quantity: ticketItem.quantity.toString(),
+                variant: ticketItem.variant || "",
+                customer_name: ticketItem.customer_name || "",
+                telp: userTelp,
+                total_price: (ticketItem.price * ticketItem.quantity).toString(),
+                payment_status: "pending",
+                event_date: ticketItem.event_date || "",
+                event_type: "Ticket",
+                note: ticketItem.note || "",
+                order_id: order_id,
+                customer_mail: userEmail,
+                verification: "false",
+                vendor_id: ticketItem.vendor_id || ""
+              }
+            };
+            
+            console.log("Transaction ticket payload:", transactionTicketPayload);
+            
+            // Push data ke Strapi transaction-tickets melalui proxy
+            const strapiRes = await axios.post("/api/transaction-tickets-proxy", transactionTicketPayload);
+            console.log("Strapi response:", strapiRes.data);
+            
+            // Simpan summary transaksi ke sessionStorage
+            sessionStorage.setItem(
+              "transaction_summary",
+              JSON.stringify({
+                orderId: strapiRes.data.data.id,
+                products: cart,
+                total: calculateTotal(),
+                customer_name: ticketItem.customer_name,
+                telp: userTelp,
+                order_id: order_id,
+                email: userEmail,
+              })
+            );
+            
+            setCart([]);
+            window.location.href = "/cart/success";
+          } catch (err: any) {
+            let msg = "Transaksi berhasil di Midtrans, tapi gagal mencatat ke sistem (Strapi). Silakan hubungi admin.";
+            if (err.response && err.response.data && err.response.data.error) {
+              msg += "\n" + JSON.stringify(err.response.data.error, null, 2);
+            }
+            console.error("Error POST ke Strapi transaction-tickets:", err);
+            alert(msg);
+          }
+        },
+        onError: function (error: any) {
+          console.error("Error pembayaran Midtrans:", error);
+          alert("Pembayaran gagal di Midtrans. Silakan coba lagi.");
+        },
+        onClose: function () {
+          // User menutup popup pembayaran
+          console.log("Popup Midtrans ditutup user");
+        },
+      });
+    } catch (error) {
+      console.error("Error request ke /api/payment:", error);
+      alert("Gagal memproses pembayaran. Silakan coba lagi.");
+    }
   }
 
   return (
