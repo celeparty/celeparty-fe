@@ -250,39 +250,52 @@ export default function CartContent() {
     // Ambil field yang sama dari produk pertama
     const c = cart[0] || {};
     try {
-      // Kirim email customer ke backend payment
+      // Siapkan payload transaksi ke Strapi
+      const transactionPayload = {
+        products: cart.map((item: any) => ({
+          id: item.product_id,
+          title: item.product_name,
+        })),
+        payment_status: "pending",
+        variant: variants,
+        quantity: quantities,
+        shipping_location: c.shipping_location,
+        event_date: c.event_date,
+        loading_date: c.loading_date,
+        loading_time: c.loading_time,
+        customer_name: c.customer_name,
+        telp: userTelp,
+        note: notes,
+        email: userEmail,
+        event_type: c.user_event_type, // Tambahan field event_type
+      };
+      
+      // Push data ke Strapi terlebih dahulu
+      const strapiRes = await axios.post("/api/transaction-proxy", {
+        data: transactionPayload,
+      });
+      
+      // Ambil order_id dari response Strapi atau generate baru
+      const order_id = strapiRes.data.data.id || `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Update order_id di Strapi jika belum ada
+      if (!strapiRes.data.data.order_id) {
+        await axios.put(`/api/transaction-proxy/${strapiRes.data.data.id}`, {
+          data: { order_id: order_id }
+        });
+      }
+      
+      // Kirim ke Midtrans untuk pembayaran
       const response = await axios.post(`/api/payment`, {
         email: userEmail,
         items: data,
+        order_id: order_id
       });
       const token = response.data.token;
-      const order_id = response.data.order_id;
+      
       window.snap.pay(token, {
         onSuccess: async function (result: any) {
           try {
-            // Siapkan payload transaksi ke Strapi
-            const transactionPayload = {
-              products: cart.map((item: any) => ({
-                id: item.product_id,
-                title: item.product_name,
-              })),
-              payment_status: "pending",
-              variant: variants,
-              quantity: quantities,
-              shipping_location: c.shipping_location,
-              event_date: c.event_date,
-              loading_date: c.loading_date,
-              loading_time: c.loading_time,
-              customer_name: c.customer_name,
-              telp: userTelp,
-              note: notes,
-              email: userEmail,
-              order_id: order_id,
-              event_type: c.user_event_type, // Tambahan field event_type
-            };
-            const strapiRes = await axios.post("/api/transaction-proxy", {
-              data: transactionPayload,
-            });
             sessionStorage.setItem(
               "transaction_summary",
               JSON.stringify({
@@ -297,13 +310,8 @@ export default function CartContent() {
             setCart([]);
             window.location.href = "/cart/success";
           } catch (err: any) {
-            let msg =
-              "Transaksi berhasil di Midtrans, tapi gagal mencatat ke sistem (Strapi). Silakan hubungi admin.";
-            if (err.response && err.response.data && err.response.data.error) {
-              msg += "\n" + JSON.stringify(err.response.data.error, null, 2);
-            }
-            console.error("Error POST ke Strapi:", err);
-            alert(msg);
+            console.error("Error saving transaction summary:", err);
+            alert("Transaksi berhasil, tapi ada masalah dengan penyimpanan data.");
           }
         },
         onError: function (error: any) {
@@ -316,97 +324,121 @@ export default function CartContent() {
         },
       });
     } catch (error) {
-      console.error("Error request ke /api/payment:", error);
+      console.error("Error in handleCheckout:", error);
       alert("Gagal memproses pembayaran. Silakan coba lagi.");
     }
   };
 
   const checkoutTicket = async () => {
     try {
+      console.log("=== CHECKOUT TICKET START ===");
       console.log("Cart data:", cart);
       console.log("Data being sent to payment API:", data);
       console.log("User email:", userEmail);
       
-      // Kirim email customer ke backend payment
-      const response = await axios.post(`/api/payment`, {
-        email: userEmail,
-        items: data,
-      });
-      console.log("Payment API response:", response.data);
+      // Ambil data dari cart untuk ticket
+      const ticketItem = cart[0]; // Ambil item pertama karena untuk ticket biasanya hanya 1 item
+      console.log("Ticket item:", ticketItem);
       
-      const token = response.data.token;
-      const order_id = response.data.order_id;
+      // Generate order_id terlebih dahulu
+      const order_id = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      console.log("Generated Order ID:", order_id);
       
-      window.snap.pay(token, {
-        onSuccess: async function (result: any) {
-          try {
-            // Ambil data dari cart untuk ticket
-            const ticketItem = cart[0]; // Ambil item pertama karena untuk ticket biasanya hanya 1 item
-            
-            // Siapkan payload untuk Strapi transaction-tickets
-            const transactionTicketPayload = {
-              data: {
-                product_name: ticketItem.product_name,
-                price: ticketItem.price.toString(),
-                quantity: ticketItem.quantity.toString(),
-                variant: ticketItem.variant || "",
-                customer_name: ticketItem.customer_name || "",
-                telp: userTelp,
-                total_price: (ticketItem.price * ticketItem.quantity).toString(),
-                payment_status: "pending",
-                event_date: ticketItem.event_date || "",
-                event_type: "Ticket",
-                note: ticketItem.note || "",
-                order_id: order_id,
-                customer_mail: userEmail,
-                verification: "false",
-                vendor_id: ticketItem.vendor_id || ""
+      // Siapkan payload untuk Strapi transaction-tickets
+      const transactionTicketPayload = {
+        data: {
+          product_name: ticketItem.product_name,
+          price: ticketItem.price.toString(),
+          quantity: ticketItem.quantity.toString(),
+          variant: ticketItem.variant || "",
+          customer_name: ticketItem.customer_name || "",
+          telp: userTelp,
+          total_price: (ticketItem.price * ticketItem.quantity).toString(),
+          payment_status: "pending",
+          event_date: ticketItem.event_date || "",
+          event_type: "Ticket",
+          note: ticketItem.note || "",
+          order_id: order_id,
+          customer_mail: userEmail,
+          verification: "false",
+          vendor_id: ticketItem.vendor_id || ""
+        }
+      };
+      
+      console.log("Transaction ticket payload:", transactionTicketPayload);
+      
+      try {
+        // Push data ke Strapi transaction-tickets terlebih dahulu
+        console.log("Sending to Strapi...");
+        const strapiRes = await axios.post("/api/transaction-tickets-proxy", transactionTicketPayload);
+        console.log("Strapi response:", strapiRes.data);
+        
+        // Order ID sudah di-generate di atas
+        console.log("Using Order ID:", order_id);
+        
+        try {
+          // Kirim ke Midtrans untuk pembayaran
+          console.log("Sending to Midtrans...");
+          const response = await axios.post(`/api/payment`, {
+            email: userEmail,
+            items: data,
+            order_id: order_id
+          });
+          console.log("Payment API response:", response.data);
+          
+          const token = response.data.token;
+          console.log("Midtrans token:", token);
+          
+          window.snap.pay(token, {
+            onSuccess: async function (result: any) {
+              console.log("Midtrans success:", result);
+              try {
+                // Simpan summary transaksi ke sessionStorage
+                sessionStorage.setItem(
+                  "transaction_summary",
+                  JSON.stringify({
+                    orderId: strapiRes.data.data.id,
+                    products: cart,
+                    total: calculateTotal(),
+                    customer_name: ticketItem.customer_name,
+                    telp: userTelp,
+                    order_id: order_id,
+                    email: userEmail,
+                  })
+                );
+                
+                setCart([]);
+                window.location.href = "/cart/success";
+              } catch (err: any) {
+                console.error("Error saving transaction summary:", err);
+                alert("Transaksi berhasil, tapi ada masalah dengan penyimpanan data.");
               }
-            };
-            
-            console.log("Transaction ticket payload:", transactionTicketPayload);
-            
-            // Push data ke Strapi transaction-tickets melalui proxy
-            const strapiRes = await axios.post("/api/transaction-tickets-proxy", transactionTicketPayload);
-            console.log("Strapi response:", strapiRes.data);
-            
-            // Simpan summary transaksi ke sessionStorage
-            sessionStorage.setItem(
-              "transaction_summary",
-              JSON.stringify({
-                orderId: strapiRes.data.data.id,
-                products: cart,
-                total: calculateTotal(),
-                customer_name: ticketItem.customer_name,
-                telp: userTelp,
-                order_id: order_id,
-                email: userEmail,
-              })
-            );
-            
-            setCart([]);
-            window.location.href = "/cart/success";
-          } catch (err: any) {
-            let msg = "Transaksi berhasil di Midtrans, tapi gagal mencatat ke sistem (Strapi). Silakan hubungi admin.";
-            if (err.response && err.response.data && err.response.data.error) {
-              msg += "\n" + JSON.stringify(err.response.data.error, null, 2);
-            }
-            console.error("Error POST ke Strapi transaction-tickets:", err);
-            alert(msg);
-          }
-        },
-        onError: function (error: any) {
-          console.error("Error pembayaran Midtrans:", error);
-          alert("Pembayaran gagal di Midtrans. Silakan coba lagi.");
-        },
-        onClose: function () {
-          // User menutup popup pembayaran
-          console.log("Popup Midtrans ditutup user");
-        },
-      });
-    } catch (error) {
-      console.error("Error request ke /api/payment:", error);
-      alert("Gagal memproses pembayaran. Silakan coba lagi.");
+            },
+            onError: function (error: any) {
+              console.error("Error pembayaran Midtrans:", error);
+              alert("Pembayaran gagal di Midtrans. Silakan coba lagi.");
+            },
+            onClose: function () {
+              // User menutup popup pembayaran
+              console.log("Popup Midtrans ditutup user");
+            },
+          });
+        } catch (paymentError: any) {
+          console.error("Error calling payment API:", paymentError);
+          console.error("Payment error response:", paymentError.response?.data);
+          alert(`Error payment API: ${paymentError.response?.data?.error || paymentError.message}`);
+        }
+        
+      } catch (strapiError: any) {
+        console.error("Error calling Strapi:", strapiError);
+        console.error("Strapi error response:", strapiError.response?.data);
+        alert(`Error Strapi: ${strapiError.response?.data?.error || strapiError.message}`);
+      }
+      
+    } catch (error: any) {
+      console.error("Error in checkoutTicket:", error);
+      console.error("Error response:", error.response?.data);
+      alert(`Gagal memproses pembayaran: ${error.response?.data?.error || error.message}`);
     }
   }
 
@@ -565,7 +597,7 @@ export default function CartContent() {
                     </div>
                   </div>
                 </div>
-                {/* Tombol pembayaran aktif jika semua produk di cart sudah lengkap */}
+                {/* Tombol pembayaran */}
                 {
                   cart[0]?.user_event_type !== eProductType.ticket ? (
                     <div

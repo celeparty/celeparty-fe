@@ -48,15 +48,17 @@ export async function POST(req) {
             }
         })
 
-        const grossAmount = _.sumBy(itemDetails, (item) => item.price * item.quantity)
-        const orderId = `ORDER-${Date.now()}-${_.random(1000, 9999)}`
+                const grossAmount = _.sumBy(itemDetails, (item) => item.price * item.quantity)
+        
+        // Gunakan order_id yang sudah ada atau generate baru
+        const orderId = requestData.order_id || `ORDER-${Date.now()}-${_.random(1000, 9999)}`
         
         const parameter = {
-            item_details: itemDetails,
-            transaction_details: {
-                order_id: orderId,
-                gross_amount: grossAmount
-            }
+          item_details: itemDetails,
+          transaction_details: {
+            order_id: orderId,
+            gross_amount: grossAmount
+          }
         }
 
         console.log("Midtrans parameter:", parameter)
