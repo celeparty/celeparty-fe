@@ -331,18 +331,18 @@ export default function CartContent() {
 
   const checkoutTicket = async () => {
     try {
-      console.log("=== CHECKOUT TICKET START ===");
-      console.log("Cart data:", cart);
-      console.log("Data being sent to payment API:", data);
-      console.log("User email:", userEmail);
+      // console.log("=== CHECKOUT TICKET START ===");
+      // console.log("Cart data:", cart);
+      // console.log("Data being sent to payment API:", data);
+      // console.log("User email:", userEmail);
       
       // Ambil data dari cart untuk ticket
       const ticketItem = cart[0]; // Ambil item pertama karena untuk ticket biasanya hanya 1 item
-      console.log("Ticket item:", ticketItem);
+      // console.log("Ticket item:", ticketItem);
       
       // Generate order_id terlebih dahulu
       const order_id = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      console.log("Generated Order ID:", order_id);
+      // console.log("Generated Order ID:", order_id);
       
       // Siapkan payload untuk Strapi transaction-tickets
       const transactionTicketPayload = {
