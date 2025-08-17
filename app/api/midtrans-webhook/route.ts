@@ -65,12 +65,28 @@ export async function POST(req: NextRequest) {
     // First, try to update transaction-tickets
     try {
       console.log(`Searching for transaction-ticket with order_id: ${order_id}`);
-      const ticketResponse = await fetch(`${BASE_API}/api/transaction-tickets?filters[order_id][$eq]=${order_id}`, {
+      
+      // Try exact match first
+      let ticketResponse = await fetch(`${BASE_API}/api/transaction-tickets?filters[order_id][$eq]=${order_id}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${KEY_API}`,
         },
       });
+      
+      // If not found, try searching all tickets to see what we have
+      if (!ticketResponse.ok || (await ticketResponse.json()).data.length === 0) {
+        console.log('Exact match not found, searching all tickets...');
+        ticketResponse = await fetch(`${BASE_API}/api/transaction-tickets`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${KEY_API}`,
+          },
+        });
+        
+        const allTickets = await ticketResponse.json();
+        console.log('All tickets found:', allTickets.data?.map((t: any) => ({ id: t.id, order_id: t.order_id })));
+      }
 
       console.log(`Ticket search response status: ${ticketResponse.status}`);
       
