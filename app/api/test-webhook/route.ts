@@ -35,9 +35,9 @@ export async function POST(req: NextRequest) {
       status: webhookResponse.status
     });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Test webhook error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Unknown error' }, { status: 500 });
   }
 }
 
