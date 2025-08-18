@@ -69,7 +69,8 @@ export async function POST(req: NextRequest) {
       console.log(`Searching for transaction-ticket with order_id: ${order_id}`);
       
       // Try exact match first
-      let ticketResponse = await fetch(`${BASE_API}/api/transaction-tickets?filters[order_id][$eq]=${order_id}`, {
+      const encodedOrderId = encodeURIComponent(order_id);
+      let ticketResponse = await fetch(`${BASE_API}/api/transaction-tickets?filters[order_id][$eq]=${encodedOrderId}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${KEY_API}`,
@@ -115,13 +116,13 @@ export async function POST(req: NextRequest) {
       
       if (ticketData.data && ticketData.data.length > 0) {
         // Update transaction-ticket
-        const ticketId = ticketData.data[0].id;
-        console.log(`Found ticket with ID: ${ticketId}`);
-        console.log(`Updating transaction-ticket ${ticketId} with status: ${paymentStatus}`);
+        const ticketDocumentId = ticketData.data[0].documentId;
+        console.log(`Found ticket with documentId: ${ticketDocumentId}`);
+        console.log(`Updating transaction-ticket ${ticketDocumentId} with status: ${paymentStatus}`);
         
         // Update directly to Strapi
-        console.log(`Updating directly to Strapi: ${BASE_API}/api/transaction-tickets/${ticketId}`);
-        const updateResponse = await fetch(`${BASE_API}/api/transaction-tickets/${ticketId}`, {
+        console.log(`Updating directly to Strapi: ${BASE_API}/api/transaction-tickets/${ticketDocumentId}`);
+        const updateResponse = await fetch(`${BASE_API}/api/transaction-tickets/${ticketDocumentId}`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${KEY_API}`,
@@ -138,8 +139,8 @@ export async function POST(req: NextRequest) {
         
         if (updateResponse.ok) {
           const updateResult = await updateResponse.json();
-          console.log(`Successfully updated transaction-ticket ${ticketId} status to ${paymentStatus}`, updateResult);
-          return NextResponse.json({ success: true, type: 'ticket', updated_id: ticketId });
+          console.log(`Successfully updated transaction-ticket ${ticketDocumentId} status to ${paymentStatus}`, updateResult);
+          return NextResponse.json({ success: true, type: 'ticket', updated_id: ticketDocumentId });
         } else {
           const errorData = await updateResponse.json();
           console.error(`Failed to update transaction-ticket:`, errorData);
