@@ -33,6 +33,7 @@ function QRPageContent() {
   const [transactionData, setTransactionData] = useState<any>(null);
   const [canVerify, setCanVerify] = useState(false);
   const [userData, setUserData] = useState<any>(null);
+  const [verificationStatus, setVerificationStatus] = useState<boolean | null>(null);
 
   // Check if user is logged in
   const isLoggedIn = !!session;
@@ -100,9 +101,12 @@ function QRPageContent() {
           console.log('✅ Payment status is settlement, setting canVerify to true');
           setTransactionData(data.data);
           setCanVerify(true);
+          // Set verification status
+          setVerificationStatus(data.data.verification || false);
         } else {
           console.log('❌ Payment status check failed. Response ok:', res.ok, 'Data exists:', !!data.data, 'Payment status:', data.data?.payment_status);
           setCanVerify(false);
+          setVerificationStatus(null);
         }
       } catch (error) {
         console.error('Error checking transaction:', error);
@@ -150,6 +154,7 @@ function QRPageContent() {
       
       if (updateRes.ok) {
         setNotif('Tiket berhasil diverifikasi!');
+        setVerificationStatus(true); // Update verification status to true
       } else {
         setNotif(`Gagal verifikasi tiket: ${updateData.error || 'Unknown error'}`);
       }
@@ -169,6 +174,14 @@ function QRPageContent() {
       <div className="mb-2"><b>Event Type:</b> {event_type}</div>
       <div className="mb-2"><b>Tanggal Acara:</b> {event_date}</div>
       <div className="mb-2"><b>Status Tiket:</b> <span className={status === 'active' ? 'text-green-600 font-bold' : 'text-red-600 font-bold'}>{status}</span></div>
+      {verificationStatus !== null && (
+        <div className="mb-2">
+          <b>Status Verifikasi:</b> 
+          <span className={verificationStatus ? 'text-green-600 font-bold' : 'text-orange-600 font-bold'}>
+            {verificationStatus ? ' Sudah Diverifikasi' : ' Belum Diverifikasi'}
+          </span>
+        </div>
+      )}
       {!session && (
         <div className="mt-4 text-center text-sm text-red-600">
           Silakan login untuk melakukan verifikasi.
