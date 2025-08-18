@@ -12,4 +12,5 @@ export interface CartItem {
   customer_name?: string;
   telp?: string;
   variant?: string;
+  vendor_id?: string;
 } 
