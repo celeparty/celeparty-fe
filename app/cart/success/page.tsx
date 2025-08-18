@@ -2,14 +2,26 @@
 import { useEffect, useState } from "react";
 import Box from "@/components/Box";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function SuccessPage() {
   const [summary, setSummary] = useState<any>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const data = sessionStorage.getItem("transaction_summary");
     if (data) setSummary(JSON.parse(data));
   }, []);
+
+  useEffect(() => {
+    if (summary) {
+      const timer = setTimeout(() => {
+        router.push("/user/profile");
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [summary, router]);
 
   if (!summary) return <div className="text-center p-7">Memuat ringkasan transaksi...</div>;
 

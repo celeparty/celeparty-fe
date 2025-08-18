@@ -229,10 +229,16 @@ export default function SideBar({
           <div className="text-center mx-auto w-full lg:max-w-[150px]">
             <input
               type="button"
-              disabled={value >= 1 ? false : true}
+              disabled={
+                value >= 1 && 
+                (dataProducts.variant && dataProducts.variant.length > 0 ? selectedVariantId !== null : true)
+                  ? false 
+                  : true
+              }
               value="+ Keranjang"
               className={`${
-                value >= 1
+                value >= 1 && 
+                (dataProducts.variant && dataProducts.variant.length > 0 ? selectedVariantId !== null : true)
                   ? "bg-c-green cursor-pointer"
                   : "bg-c-gray-text2 opacity-30 cursor-default"
               }  mt-5 text-white text-[15px] py-3 w-full rounded-lg `}
