@@ -5,7 +5,8 @@ import { useSession } from 'next-auth/react'
 
 function getStatus(eventDate: string) {
   try {
-    const [day, month, year] = eventDate.split('-').map(Number);
+    // Backend format: YYYY-MM-DD
+    const [year, month, day] = eventDate.split('-').map(Number);
     const event = new Date(year, month - 1, day);
     const today = new Date();
     today.setHours(0,0,0,0);
@@ -47,7 +48,9 @@ function QRPageContent() {
       try {
         const res = await fetch(`/api/qr-verify?order_id=${order_id}`);
         const data = await res.json();
-        if (res.ok && data.data && data.data.payment_status === 'settlement') {
+        console.log('QR API Response:', data); // Debug: log full response
+        console.log('Payment status:', data.data?.payment_status); // Debug: log payment status
+        if (res.ok && data.data && (data.data.payment_status === 'settlement' || data.data.payment_status === 'Settlement')) {
           setTransactionData(data.data);
           setCanVerify(true);
         } else {

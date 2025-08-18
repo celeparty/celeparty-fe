@@ -11,42 +11,56 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Order ID is required', status: 400 });
     }
 
-    const STRAPI_URL = `${process.env.BASE_API}/api/transactions`;
     const KEY_API = process.env.KEY_API;
     
     if (!KEY_API) {
       return NextResponse.json({ error: 'KEY_API not set in environment', status: 500 });
     }
 
-    // Find transaction by order_id
-    console.log('Finding transaction with order_id:', order_id);
-    const findRes = await fetch(`${STRAPI_URL}?filters[order_id]=${order_id}`, {
+    // Try to find in transactions table first
+    const TRANSACTIONS_URL = `${process.env.BASE_API}/api/transactions`;
+    console.log('Searching in transactions table with order_id:', order_id);
+    const transactionsRes = await fetch(`${TRANSACTIONS_URL}?filters[order_id]=${order_id}`, {
       headers: {
         Authorization: `Bearer ${KEY_API}`,
       },
     });
 
-    const findData = await findRes.json();
-    console.log('Find response:', { status: findRes.status, data: findData });
+    const transactionsData = await transactionsRes.json();
+    console.log('Transactions search response:', { status: transactionsRes.status, data: transactionsData });
 
-    if (!findRes.ok) {
+    if (transactionsRes.ok && transactionsData?.data?.length > 0) {
+      const transaction = transactionsData.data[0];
+      console.log('Found transaction in transactions table:', transaction);
       return NextResponse.json({ 
-        error: 'Failed to find transaction,',
-        details: findData 
-      }, { status: findRes.status });
+        success: true, 
+        data: transaction 
+      });
     }
 
-    const transaction = findData?.data?.[0];
-    if (!transaction) {
-      return NextResponse.json({ error: 'Transaction not found', status: 404 });
-    }
-
-    console.log('Found transaction:', transaction);
-
-    return NextResponse.json({ 
-      success: true, 
-      data: transaction 
+    // If not found in transactions, try transaction-tickets table
+    const TICKETS_URL = `${process.env.BASE_API}/api/transaction-tickets`;
+    console.log('Searching in transaction-tickets table with order_id:', order_id);
+    const ticketsRes = await fetch(`${TICKETS_URL}?filters[order_id]=${order_id}`, {
+      headers: {
+        Authorization: `Bearer ${KEY_API}`,
+      },
     });
+
+    const ticketsData = await ticketsRes.json();
+    console.log('Transaction-tickets search response:', { status: ticketsRes.status, data: ticketsData });
+
+    if (ticketsRes.ok && ticketsData?.data?.length > 0) {
+      const ticket = ticketsData.data[0];
+      console.log('Found transaction in transaction-tickets table:', ticket);
+      return NextResponse.json({ 
+        success: true, 
+        data: ticket 
+      });
+    }
+
+    // If not found in both tables
+    return NextResponse.json({ error: 'Transaction not found in both tables', status: 404 });
 
   } catch (err: any) {
     console.error('Error in QR verification GET:', err);
@@ -68,51 +82,76 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Order ID is required', status: 400 });
     }
 
-    const STRAPI_URL = `${process.env.BASE_API}/api/transactions`;
     const KEY_API = process.env.KEY_API;
     
     console.log('Environment check:', {
       BASE_API: process.env.BASE_API,
-      KEY_API: KEY_API ? 'SET' : 'NOT SET',
-      STRAPI_URL
+      KEY_API: KEY_API ? 'SET' : 'NOT SET'
     });
     
     if (!KEY_API) {
       return NextResponse.json({ error: 'KEY_API not set in environment', status: 500 });
     }
 
-    // 1. Find transaction by order_id
-    console.log('Finding transaction with order_id:', order_id);
-    const findRes = await fetch(`${STRAPI_URL}?filters[order_id]=${order_id}`, {
+    // Try to find in transactions table first
+    const TRANSACTIONS_URL = `${process.env.BASE_API}/api/transactions`;
+    console.log('Searching in transactions table with order_id:', order_id);
+    const transactionsRes = await fetch(`${TRANSACTIONS_URL}?filters[order_id]=${order_id}`, {
       headers: {
         Authorization: `Bearer ${KEY_API}`,
       },
     });
 
-    const findData = await findRes.json();
-    console.log('Find response:', { status: findRes.status, data: findData });
+    const transactionsData = await transactionsRes.json();
+    console.log('Transactions search response:', { status: transactionsRes.status, data: transactionsData });
 
-    if (!findRes.ok) {
-      return NextResponse.json({ 
-        error: 'Failed to find transaction,',
-        details: findData 
-      }, { status: findRes.status });
+    let transaction = null;
+    let isTicket = false;
+
+    if (transactionsRes.ok && transactionsData?.data?.length > 0) {
+      transaction = transactionsData.data[0];
+      isTicket = false;
+      console.log('Found transaction in transactions table:', transaction);
+    } else {
+      // If not found in transactions, try transaction-tickets table
+      const TICKETS_URL = `${process.env.BASE_API}/api/transaction-tickets`;
+      console.log('Searching in transaction-tickets table with order_id:', order_id);
+      const ticketsRes = await fetch(`${TICKETS_URL}?filters[order_id]=${order_id}`, {
+        headers: {
+          Authorization: `Bearer ${KEY_API}`,
+        },
+      });
+
+      const ticketsData = await ticketsRes.json();
+      console.log('Transaction-tickets search response:', { status: ticketsRes.status, data: ticketsData });
+
+      if (ticketsRes.ok && ticketsData?.data?.length > 0) {
+        transaction = ticketsData.data[0];
+        isTicket = true;
+        console.log('Found transaction in transaction-tickets table:', transaction);
+      }
     }
 
-    const transaction = findData?.data?.[0];
     if (!transaction) {
-      return NextResponse.json({ error: 'Transaction not found', status: 404 });
+      return NextResponse.json({ error: 'Transaction not found in both tables', status: 404 });
     }
 
-    console.log('Found transaction:', transaction);
-
-    if (transaction.payment_status !== 'paid') {
-      return NextResponse.json({ error: 'Payment status is not paid', status: 400 });
+    // Check payment status (different field names for different tables)
+    const paymentStatus = transaction.payment_status || transaction.attributes?.payment_status;
+    if (paymentStatus !== 'settlement' && paymentStatus !== 'paid') {
+      return NextResponse.json({ 
+        error: `Payment status is not settlement/paid. Current status: ${paymentStatus}`, 
+        status: 400 
+      });
     }
 
-    // 2. Update verification status
-    console.log('Updating verification for transaction ID:', transaction.id);
-    const updateRes = await fetch(`${STRAPI_URL}/${transaction.id}`, {
+    // Update verification status
+    const updateUrl = isTicket 
+      ? `${process.env.BASE_API}/api/transaction-tickets/${transaction.id}`
+      : `${TRANSACTIONS_URL}/${transaction.id}`;
+
+    console.log('Updating verification for transaction ID:', transaction.id, 'isTicket:', isTicket);
+    const updateRes = await fetch(updateUrl, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -134,7 +173,7 @@ export async function POST(req: NextRequest) {
         status: updateRes.status,
         details: updateData,
         transaction_id: transaction.id,
-        strapi_url: STRAPI_URL
+        update_url: updateUrl
       }, { status: updateRes.status });
     }
 
