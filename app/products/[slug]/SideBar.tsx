@@ -47,7 +47,7 @@ export default function SideBar({
   const notifCart = useNotif((state) => state.notifCart);
 
   const { user_event_type } = dataProducts;
-  const { name: productTypeName } = user_event_type;
+  const { name: productTypeName } = user_event_type || {};
 
   useEffect(() => {
     if (session && session.user) {
