@@ -28,3 +28,26 @@ export interface iOrderItem {
   verification: string | null;
   vendor_doc_id: string;
 }
+
+export interface iOrderTicket {
+  id: number;
+  documentId: string;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string;
+  product_name: string;
+  price: string;
+  quantity: string;
+  variant: string;
+  customer_name: string;
+  telp: string;
+  total_price: string;
+  payment_status: string;
+  event_date: string;
+  note: string;
+  order_id: string;
+  customer_mail: string;
+  verification: boolean;
+  vendor_id: string;
+  event_type: string;
+}

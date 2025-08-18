@@ -1,4 +1,4 @@
-import { iOrderItem } from "@/lib/interfaces/iOrder";
+import { iOrderItem, iOrderTicket } from "@/lib/interfaces/iOrder";
 import { getStatusConfig } from "@/lib/orderStatusUtils";
 import { axiosUser } from "@/lib/services";
 import { formatDate } from "@/lib/utils";
@@ -20,10 +20,12 @@ import {
 
 interface iTableDataProps {
   isVendor: boolean;
+  activeTab: string;
 }
 
 export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({
   isVendor,
+  activeTab,
 }) => {
   const { data: session, status } = useSession();
 
@@ -44,7 +46,7 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({
   };
 
   const query = useQuery({
-    queryKey: ["qUserOrder"],
+    queryKey: ["qUserOrder", activeTab],
     queryFn: getQuery,
     staleTime: 5000,
     enabled: !!session?.jwt,
@@ -57,7 +59,8 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({
   if (query.isError) {
     return <ErrorNetwork style="mt-0" />;
   }
-  const dataContent: iOrderItem[] = query?.data?.data;
+  const dataContent: iOrderTicket[] = query?.data?.data;
+  console.log(dataContent);
 
   const toggleRow = (id: number) => {
     setExpandedRows((prev) => ({
@@ -81,17 +84,16 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({
       <Table>
         <TableHeader className="bg-white">
           <TableRow>
-            <TableHead className="w-[150px]">Order Date</TableHead>
-            <TableHead>Items</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="w-[150px]">Tanggal Pesanan</TableHead>
+            <TableHead>Daftar Pesanan</TableHead>
+            <TableHead>Status Pembayaran</TableHead>
+            <TableHead>Detail</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {dataContent?.length > 0 ? (
             <>
               {dataContent?.map((item, i) => {
-                const statusConfig = getStatusConfig(item.payment_status);
                 return (
                   <React.Fragment key={item.id}>
                     <TableRow
@@ -102,46 +104,17 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({
                       </TableCell>
                       <TableCell>
                         <ul className="list-disc pl-5 space-y-1">
-                          {item.products.map((prod) => (
-                            <li key={prod.id}>{prod.title}</li>
-                          ))}
+                          <li>{item.product_name}</li>
+                          <li>Qty: {item.quantity}</li>
                         </ul>
                       </TableCell>
                       <TableCell>
-                        <span
-                          className={`px-3 py-1 rounded-full text-sm font-medium ${statusConfig.bgColor} ${statusConfig.textColor}`}
-                        >
-                          {statusConfig.text}
+                        <span className="font-bold capitalize">
+                          {item.payment_status}
                         </span>
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          {isVendor && (
-                            <>
-                              {statusConfig.actions.map(
-                                ({ label, action, variant }) => (
-                                  <Button
-                                    key={action}
-                                    size="sm"
-                                    variant={
-                                      variant as "default" | "destructive"
-                                    }
-                                    onClick={() =>
-                                      handleStatusAction(
-                                        item.id,
-                                        action as
-                                          | "process"
-                                          | "cancel"
-                                          | "complete"
-                                      )
-                                    }
-                                  >
-                                    {label}
-                                  </Button>
-                                )
-                              )}
-                            </>
-                          )}
                           <Button
                             size="sm"
                             variant="link"
@@ -171,6 +144,16 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({
                                 Detail Tiket
                               </h4>
                               <p>
+                                <span className="font-medium">Nama Tiket:</span>{" "}
+                                {item.product_name}
+                              </p>
+                              <p>
+                                <span className="font-medium">
+                                  Jenis Tiket:
+                                </span>{" "}
+                                {item.variant}
+                              </p>
+                              <p>
                                 <span className="font-medium">Nama:</span>{" "}
                                 {item.customer_name}
                               </p>
@@ -178,22 +161,20 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({
                                 <span className="font-medium">Telepon:</span>{" "}
                                 {item.telp}
                               </p>
-                              <p>
-                                <span className="font-medium">Email:</span>{" "}
-                                {item.email}
-                              </p>
                             </div>
                             <div className="md:col-span-6">
                               <h4 className="font-semibold mb-2">Info Acara</h4>
-                              <p>
-                                <span className="font-medium">Alamat:</span>{" "}
-                                {item.shipping_location}
-                              </p>
                               <p>
                                 <span className="font-medium">
                                   Tanggal Acara:
                                 </span>{" "}
                                 {item.event_date}
+                              </p>
+                              <p>
+                                <span className="font-medium">
+                                  Jenis Tiket:
+                                </span>{" "}
+                                {item.variant}
                               </p>
                             </div>
                             <div className="md:col-span-2">
