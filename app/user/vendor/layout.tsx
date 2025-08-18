@@ -53,7 +53,7 @@ export default function DashboardLayout({
       <Basecontent>
         <div className="flex lg:flex-row flex-col justify-between items-start lg:gap-7 gap-2 mx-3 lg:mx-0">
           <Box className="bg-c-blue text-white lg:max-w-[280px] w-full">
-            <h4 className="lg:text-start text-center font-extrabold lg:font-normal text-[20px] lg:text-[14px]">
+            <h4 className="lg:text-start text-center font-extrabold text-[20px] lg:text-[14px]">
               Menu Mitra
             </h4>
             <div className="relative mt-5">

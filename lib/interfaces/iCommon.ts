@@ -3,3 +3,8 @@ export interface iSelectOption {
   value: string;
   icon?: string;
 }
+
+export interface iTabNav {
+  label: string;
+  value: string;
+}
