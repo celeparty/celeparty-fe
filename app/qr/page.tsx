@@ -47,7 +47,7 @@ function QRPageContent() {
       try {
         const res = await fetch(`/api/qr-verify?order_id=${order_id}`);
         const data = await res.json();
-        if (res.ok && data.data && data.data.payment_status === 'paid') {
+        if (res.ok && data.data && data.data.payment_status === 'settlement') {
           setTransactionData(data.data);
           setCanVerify(true);
         } else {
@@ -130,7 +130,7 @@ function QRPageContent() {
       )}
       {session && isLoggedIn && !canVerify && (
         <div className="mt-4 text-center text-sm text-red-600">
-          Tiket tidak dapat diverifikasi. Pastikan status pembayaran lunas dan tiket aktif.
+          Tiket tidak dapat diverifikasi. Pastikan status pembayaran settlement dan tiket aktif.
         </div>
       )}
       <div className="mt-6 text-center">
