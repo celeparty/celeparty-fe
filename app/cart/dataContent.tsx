@@ -338,7 +338,11 @@ export default function CartContent() {
       
       // Ambil data dari cart untuk ticket
       const ticketItem = cart[0]; // Ambil item pertama karena untuk ticket biasanya hanya 1 item
-      // console.log("Ticket item:", ticketItem);
+      console.log("=== DEBUG TICKET ITEM ===");
+      console.log("Full ticket item:", ticketItem);
+      console.log("event_date:", ticketItem.event_date);
+      console.log("user_event_type:", ticketItem.user_event_type);
+      console.log("=== END DEBUG ===");
       
       // Generate order_id terlebih dahulu
       const order_id = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -356,6 +360,7 @@ export default function CartContent() {
           total_price: (ticketItem.price * ticketItem.quantity).toString(),
           payment_status: "pending",
           event_date: ticketItem.event_date || "",
+          event_type: ticketItem.user_event_type || "",
           note: ticketItem.note || "",
           order_id: order_id,
           customer_mail: userEmail,
@@ -365,6 +370,8 @@ export default function CartContent() {
       };
       
       console.log("Transaction ticket payload:", transactionTicketPayload);
+      console.log("Payload event_date:", transactionTicketPayload.data.event_date);
+      console.log("Payload event_type:", transactionTicketPayload.data.event_type);
       console.log("Ticket item vendor_id:", ticketItem.vendor_id);
       
       try {
@@ -490,8 +497,10 @@ export default function CartContent() {
                           <b>Produk:</b> {item.product_name}
                         </div>
                         <div className="mb-1">
+                          <b>Tanggal Acara:</b> {item.event_date}
+                        </div>
+                        <div className="mb-1">
                           <b>Nama Pemesan:</b> {item.customer_name || "-"}
-
                         </div>
                         <div className="mb-1">
                           <b>No. Telepon:</b> {userTelp}

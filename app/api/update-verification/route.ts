@@ -11,42 +11,101 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Document ID is required' }, { status: 400 });
     }
 
-    const STRAPI_URL = `${process.env.BASE_API}/api/transactions/${documentId}`;
     const KEY_API = process.env.KEY_API;
     
     if (!KEY_API) {
       return NextResponse.json({ error: 'KEY_API not set in environment' }, { status: 500 });
     }
 
-    console.log('Updating verification at:', STRAPI_URL);
+    // Try to find the document in transactions table first
+    const TRANSACTIONS_URL = `${process.env.BASE_API}/api/transactions/${documentId}`;
+    console.log('Checking transactions table at:', TRANSACTIONS_URL);
     
-    const updateRes = await fetch(STRAPI_URL, {
-      method: 'PUT',
+    const transactionsRes = await fetch(TRANSACTIONS_URL, {
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${KEY_API}`,
       },
-      body: JSON.stringify({
-        data: { verification: true }
-      }),
     });
 
-    const updateData = await updateRes.json();
-    console.log('Update response:', { status: updateRes.status, data: updateData });
+    if (transactionsRes.ok) {
+      // Document found in transactions table
+      console.log('Document found in transactions table, updating...');
+      const updateRes = await fetch(TRANSACTIONS_URL, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${KEY_API}`,
+        },
+        body: JSON.stringify({
+          data: { verification: true }
+        }),
+      });
 
-    if (!updateRes.ok) {
+      const updateData = await updateRes.json();
+      console.log('Transactions update response:', { status: updateRes.status, data: updateData });
+
+      if (!updateRes.ok) {
+        return NextResponse.json({ 
+          error: 'Failed to update verification in transactions',
+          status: updateRes.status,
+          details: updateData 
+        }, { status: updateRes.status });
+      }
+
       return NextResponse.json({ 
-        error: 'Failed to update verification',
-        status: updateRes.status,
-        details: updateData 
-      }, { status: updateRes.status });
+        success: true, 
+        message: 'Verification updated successfully in transactions',
+        data: updateData.data 
+      });
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Verification updated successfully',
-      data: updateData.data 
+    // If not found in transactions, try transaction-tickets table
+    const TICKETS_URL = `${process.env.BASE_API}/api/transaction-tickets/${documentId}`;
+    console.log('Document not found in transactions, checking transaction-tickets table at:', TICKETS_URL);
+    
+    const ticketsRes = await fetch(TICKETS_URL, {
+      headers: {
+        Authorization: `Bearer ${KEY_API}`,
+      },
     });
+
+    if (ticketsRes.ok) {
+      // Document found in transaction-tickets table
+      console.log('Document found in transaction-tickets table, updating...');
+      const updateRes = await fetch(TICKETS_URL, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${KEY_API}`,
+        },
+        body: JSON.stringify({
+          data: { verification: true }
+        }),
+      });
+
+      const updateData = await updateRes.json();
+      console.log('Transaction-tickets update response:', { status: updateRes.status, data: updateData });
+
+      if (!updateRes.ok) {
+        return NextResponse.json({ 
+          error: 'Failed to update verification in transaction-tickets',
+          status: updateRes.status,
+          details: updateData 
+        }, { status: updateRes.status });
+      }
+
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Verification updated successfully in transaction-tickets',
+        data: updateData.data 
+      });
+    }
+
+    // If not found in both tables
+    return NextResponse.json({ 
+      error: 'Document not found in both transactions and transaction-tickets tables',
+      status: 404 
+    }, { status: 404 });
 
   } catch (err: any) {
     console.error('Error updating verification:', err);

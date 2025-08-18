@@ -144,6 +144,11 @@ export default function ContentProduct(props: any) {
                   </div>
                 </div>
               )}
+              {dataContent?.event_date && (
+                <div className="lg:mt-5 mt-[10px] ">
+                  <b>Tanggal Acara:</b> {dataContent?.event_date}
+                </div>
+              )}
               <div className="lg:mt-5 mt-[10px] text-[12px]">
                 <h4>Deskripsi</h4>
                 <div className="line-clamp-2">

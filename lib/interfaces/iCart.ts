@@ -13,4 +13,5 @@ export interface CartItem {
   telp?: string;
   variant?: string;
   vendor_id?: string;
+  user_event_type?: string;
 } 
