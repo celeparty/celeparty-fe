@@ -356,16 +356,16 @@ export default function CartContent() {
           total_price: (ticketItem.price * ticketItem.quantity).toString(),
           payment_status: "pending",
           event_date: ticketItem.event_date || "",
-          event_type: "Ticket",
           note: ticketItem.note || "",
           order_id: order_id,
           customer_mail: userEmail,
-          verification: "false",
-          vendor_id: ticketItem.vendor_id || ""
+          verification: false,
+          vendor_id: "ppwi8orhjjp0d8x75wqoffmc" // Set vendor_id langsung
         }
       };
       
       console.log("Transaction ticket payload:", transactionTicketPayload);
+      console.log("Ticket item vendor_id:", ticketItem.vendor_id);
       
       try {
         // Push data ke Strapi transaction-tickets terlebih dahulu

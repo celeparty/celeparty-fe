@@ -29,8 +29,10 @@ export async function POST(req: NextRequest) {
     let paymentStatus = 'pending';
     switch (transaction_status) {
       case 'capture':
-      case 'settlement':
         paymentStatus = 'success';
+        break;
+      case 'settlement':
+        paymentStatus = 'settlement';
         break;
       case 'pending':
         paymentStatus = 'pending';
@@ -74,60 +76,76 @@ export async function POST(req: NextRequest) {
         },
       });
       
+      let ticketData = await ticketResponse.json();
+      console.log(`Ticket search response status: ${ticketResponse.status}`);
+      console.log(`Ticket search result:`, ticketData);
+      console.log(`Ticket data length:`, ticketData.data?.length);
+      console.log(`Ticket data:`, ticketData.data);
+      
       // If not found, try searching all tickets to see what we have
-      if (!ticketResponse.ok || (await ticketResponse.json()).data.length === 0) {
+      if (!ticketResponse.ok || ticketData.data.length === 0) {
         console.log('Exact match not found, searching all tickets...');
-        ticketResponse = await fetch(`${BASE_API}/api/transaction-tickets`, {
+        const allTicketsResponse = await fetch(`${BASE_API}/api/transaction-tickets`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${KEY_API}`,
           },
         });
         
-        const allTickets = await ticketResponse.json();
+        const allTickets = await allTicketsResponse.json();
         console.log('All tickets found:', allTickets.data?.map((t: any) => ({ id: t.id, order_id: t.order_id })));
-      }
-
-      console.log(`Ticket search response status: ${ticketResponse.status}`);
-      
-      if (ticketResponse.ok) {
-        const ticketData = await ticketResponse.json();
-        console.log(`Ticket search result:`, ticketData);
         
-        if (ticketData.data && ticketData.data.length > 0) {
-          // Update transaction-ticket
-          const ticketId = ticketData.data[0].id;
-          console.log(`Updating transaction-ticket ${ticketId} with status: ${paymentStatus}`);
-          
-          const updateResponse = await fetch(`${BASE_API}/api/transaction-tickets/${ticketId}`, {
-            method: 'PUT',
-            headers: {
-              'Authorization': `Bearer ${KEY_API}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              data: {
-                payment_status: paymentStatus
-              }
-            }),
-          });
-
-          console.log(`Update response status: ${updateResponse.status}`);
-          
-          if (updateResponse.ok) {
-            const updateResult = await updateResponse.json();
-            console.log(`Successfully updated transaction-ticket ${ticketId} status to ${paymentStatus}`, updateResult);
-            return NextResponse.json({ success: true, type: 'ticket', updated_id: ticketId });
-          } else {
-            const errorData = await updateResponse.json();
-            console.error(`Failed to update transaction-ticket:`, errorData);
-          }
+        // Try to find by partial match or use the most recent ticket
+        const matchingTicket = allTickets.data?.find((t: any) => 
+          t.order_id === order_id || 
+          t.order_id?.includes(order_id) || 
+          order_id.includes(t.order_id)
+        );
+        
+        if (matchingTicket) {
+          console.log('Found matching ticket by partial match:', matchingTicket);
+          ticketData = { data: [matchingTicket] };
         } else {
-          console.log(`No transaction-ticket found with order_id: ${order_id}`);
+          console.log('No matching ticket found even in all tickets');
+        }
+      }
+      
+      console.log(`Checking ticketData.data:`, !!ticketData.data);
+      console.log(`Checking ticketData.data.length:`, ticketData.data?.length);
+      
+      if (ticketData.data && ticketData.data.length > 0) {
+        // Update transaction-ticket
+        const ticketId = ticketData.data[0].id;
+        console.log(`Found ticket with ID: ${ticketId}`);
+        console.log(`Updating transaction-ticket ${ticketId} with status: ${paymentStatus}`);
+        
+        // Update directly to Strapi
+        console.log(`Updating directly to Strapi: ${BASE_API}/api/transaction-tickets/${ticketId}`);
+        const updateResponse = await fetch(`${BASE_API}/api/transaction-tickets/${ticketId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${KEY_API}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            data: {
+              payment_status: paymentStatus
+            }
+          }),
+        });
+
+        console.log(`Update response status: ${updateResponse.status}`);
+        
+        if (updateResponse.ok) {
+          const updateResult = await updateResponse.json();
+          console.log(`Successfully updated transaction-ticket ${ticketId} status to ${paymentStatus}`, updateResult);
+          return NextResponse.json({ success: true, type: 'ticket', updated_id: ticketId });
+        } else {
+          const errorData = await updateResponse.json();
+          console.error(`Failed to update transaction-ticket:`, errorData);
         }
       } else {
-        const errorData = await ticketResponse.json();
-        console.error(`Failed to search transaction-ticket:`, errorData);
+        console.log(`No transaction-ticket found with order_id: ${order_id}`);
       }
     } catch (error) {
       console.error('Error searching transaction-ticket:', error);
