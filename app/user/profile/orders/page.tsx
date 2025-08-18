@@ -2,10 +2,10 @@
 
 import { OrdersBaseContent } from "@/components/profile/OrdersBaseContent";
 
-export default function OrderPage() {
+export default function UserOrderPage() {
   return (
     <>
-      <OrdersBaseContent isVendor={true} />
+      <OrdersBaseContent isVendor={false} />
     </>
   );
 }

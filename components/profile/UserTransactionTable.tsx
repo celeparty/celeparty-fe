@@ -20,10 +20,12 @@ import {
 
 interface iTableDataProps {
   isVendor: boolean;
+  activeTab: string;
 }
 
 export const UserTransactionTable: React.FC<iTableDataProps> = ({
   isVendor,
+  activeTab,
 }) => {
   const { data: session, status } = useSession();
 
@@ -44,7 +46,7 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({
   };
 
   const query = useQuery({
-    queryKey: ["qUserOrder"],
+    queryKey: ["qUserOrder", activeTab],
     queryFn: getQuery,
     staleTime: 5000,
     enabled: !!session?.jwt,
@@ -81,10 +83,10 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({
       <Table>
         <TableHeader className="bg-white">
           <TableRow>
-            <TableHead className="w-[150px]">Order Date</TableHead>
-            <TableHead>Items</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="w-[150px]">Tanggal Pesanan</TableHead>
+            <TableHead>Daftar Pesanan</TableHead>
+            <TableHead>Status Pembayaran</TableHead>
+            <TableHead>Detail</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -102,7 +104,7 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({
                       </TableCell>
                       <TableCell>
                         <ul className="list-disc pl-5 space-y-1">
-                          {item.products.map((prod) => (
+                          {item?.products?.map((prod) => (
                             <li key={prod.id}>{prod.title}</li>
                           ))}
                         </ul>
