@@ -256,7 +256,8 @@ function QRPageContent() {
         </>
       )}
       
-      <div className="mt-6 text-center">
+    {
+        !verificationStatus ?       <div className="mt-6 text-center">
         {session && !isChecking && canVerify && (
           <button
             onClick={handleVerify}
@@ -268,6 +269,9 @@ function QRPageContent() {
         )}
         {session && !isChecking && notif && <div className="mt-4 text-center text-sm font-semibold text-red-600">{notif}</div>}
       </div>
+      : null
+    }
+
     </div>
   )
 }
