@@ -99,7 +99,9 @@ export const ProfileForm = () => {
         accountNumber: myData.accountNumber || "",
       });
 
-      setProfileImageUrl(myData.image.url);
+      if (myData.image) {
+        setProfileImageUrl(myData.image.url);
+      }
     }
   }, [myData, form]);
 
@@ -169,6 +171,7 @@ export const ProfileForm = () => {
                     <Input
                       className="border border-[#ADADAD] rounded-lg"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                 </div>
@@ -257,6 +260,7 @@ export const ProfileForm = () => {
                     <Input
                       className="border border-[#ADADAD] rounded-lg"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                 </div>
@@ -281,6 +285,7 @@ export const ProfileForm = () => {
                     <Input
                       className="border border-[#ADADAD] rounded-lg"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                 </div>
@@ -305,6 +310,7 @@ export const ProfileForm = () => {
                     <Input
                       className="border border-[#ADADAD] rounded-lg"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                 </div>
@@ -330,6 +336,7 @@ export const ProfileForm = () => {
                     <Input
                       className="border border-[#ADADAD] rounded-lg"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                 </div>
@@ -355,6 +362,7 @@ export const ProfileForm = () => {
                     <Input
                       className="border border-[#ADADAD] rounded-lg"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                 </div>
