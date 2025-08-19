@@ -24,43 +24,10 @@ import { Button } from "../ui/button";
 import { FileUploader } from "./FileUploader";
 import { SchemaProduct } from "./SchemaProduct";
 import { ProductVariantItem } from "./ProductVariant";
-
-interface iItemInputProps {
-  label: string;
-  sublabel?: string;
-  children: ReactNode;
-  required: boolean;
-}
+import { ProductItemInput } from "./ProductItemInput";
+import { formatYearDate } from "@/lib/dateUtils";
 
 const MAX_IMAGES = 5;
-
-const ItemInput: React.FC<iItemInputProps> = ({
-  label,
-  sublabel,
-  children,
-  required,
-}) => {
-  return (
-    <div className="flex flex-col justify-items-start w-full gap-2 mb-5  [&_input]:bg-gray-100 [&_input]:hover:bg-white [&_textarea]:bg-gray-100 [&_textarea]:hover:bg-white">
-      {label ? (
-        <div className="w-[full] text-[14px] lg:text-[16px]">
-          {label}{" "}
-          {required && (
-            <>
-              <span className="text-c-red">*</span>
-            </>
-          )}
-        </div>
-      ) : null}
-      {sublabel ? (
-        <div className="text-[#DA7E01] text-[13px] lg:text-[10px] ">
-          {sublabel}
-        </div>
-      ) : null}
-      {children}
-    </div>
-  );
-};
 
 interface iProductFormProps {
   formDefaultData: iProductReq;
@@ -211,17 +178,6 @@ export const ProductForm: React.FC<iProductFormProps> = ({
     }
   }, [formDefaultData]);
 
-  // Helper untuk format tanggal ke yyyy-MM-dd
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return null;
-    // Jika sudah yyyy-MM-dd, return langsung
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-    // Coba parse dan format (misal dari input lokal)
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return null;
-    return d.toISOString().slice(0, 10);
-  };
-
   const onSubmit = async (data: iProductReq) => {
     try {
       // Get current field values (including unregistered fields)
@@ -289,7 +245,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
         name: v.name,
         price: v.price,
         quota: v.quota,
-        purchase_deadline: formatDate(v.purchase_deadline) || "",
+        purchase_deadline: formatYearDate(v.purchase_deadline) || "",
       }));
       let updatedData: iProductReq = {
         ...data,
@@ -406,7 +362,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
                 variant={"default"}
                 onClick={handleAddImage}
               >
-                Add Image ({mainImageFields.length}/{MAX_IMAGES})
+                Tambah Gambar ({mainImageFields.length}/{MAX_IMAGES})
               </Button>
             )}
           </div>
@@ -441,7 +397,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
             </div>
           </>
         )}
-        <ItemInput label="Nama Produk" required>
+        <ProductItemInput label="Nama Produk" required>
           <input
             className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
             placeholder="Nama Produk"
@@ -456,9 +412,9 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           {errors.title && (
             <p className="text-red-500 text-[10px]">{`${errors.title.message}`}</p>
           )}
-        </ItemInput>
+        </ProductItemInput>
 
-        <ItemInput label="Harga Produk (Rp)" required>
+        <ProductItemInput label="Harga Produk (Rp)" required>
           <input
             className="border border-gray-300 rounded-md py-2 px-5 w-full"
             placeholder="Harga Produk (Rp)"
@@ -476,9 +432,9 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           {errors.main_price && (
             <p className="text-red-500 text-[10px]">{`${errors.main_price.message}`}</p>
           )}
-        </ItemInput>
+        </ProductItemInput>
 
-        <ItemInput label="Deskripsi Produk" required>
+        <ProductItemInput label="Deskripsi Produk" required>
           <textarea
             className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
             placeholder="Deskripsi Produk"
@@ -493,8 +449,8 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           {errors.description && (
             <p className="text-red-500 text-[10px]">{`${errors.description.message}`}</p>
           )}
-        </ItemInput>
-        <ItemInput label="Harga Minimal Produk (Rp)" required>
+        </ProductItemInput>
+        <ProductItemInput label="Harga Minimal Produk (Rp)" required>
           <input
             className="border border-gray-300 rounded-md py-2 px-5 w-full"
             placeholder="Harga Produk (Rp)"
@@ -512,8 +468,8 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           {errors.price_min && (
             <p className="text-red-500 text-[10px]">{`${errors.price_min.message}`}</p>
           )}
-        </ItemInput>
-        <ItemInput label="Harga Maximal Produk (Rp)" required>
+        </ProductItemInput>
+        <ProductItemInput label="Harga Maximal Produk (Rp)" required>
           <input
             className="border border-gray-300 rounded-md py-2 px-5 w-full"
             placeholder="Harga Produk (Rp)"
@@ -531,8 +487,11 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           {errors.price_max && (
             <p className="text-red-500 text-[10px]">{`${errors.price_max.message}`}</p>
           )}
-        </ItemInput>
-        <ItemInput label="Minimal Item Pembelian (Optional)" required={false}>
+        </ProductItemInput>
+        <ProductItemInput
+          label="Minimal Item Pembelian (Optional)"
+          required={false}
+        >
           <label className="text-sm block italic">
             Masukkan jumlah minimum kuantiti pembelian jika produk atau layanan
             Anda memerlukan batas minimal pesanan tertentu.
@@ -548,8 +507,11 @@ export const ProductForm: React.FC<iProductFormProps> = ({
               },
             })}
           />
-        </ItemInput>
-        <ItemInput label="Maksimal Hari Pemesanan (Optional)" required={false}>
+        </ProductItemInput>
+        <ProductItemInput
+          label="Maksimal Hari Pemesanan (Optional)"
+          required={false}
+        >
           <label className="text-sm block italic">
             Masukkan jumlah hari maksimal pemesanan jika produk atau layanan
             Anda membutuhkan persiapan lebih dari satu hari sebelum acara.
@@ -565,8 +527,8 @@ export const ProductForm: React.FC<iProductFormProps> = ({
               },
             })}
           />
-        </ItemInput>
-        <ItemInput label="Rate Produk" required={false}>
+        </ProductItemInput>
+        <ProductItemInput label="Rate Produk" required={false}>
           <input
             className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
             placeholder="Rate Produk"
@@ -581,14 +543,12 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           {errors.title && (
             <p className="text-red-500 text-[10px]">{`${errors.title.message}`}</p>
           )}
-        </ItemInput>
+        </ProductItemInput>
         <SubTitle title="Tambah Variant Produk" className="mb-3" />
         <div className="w-full mb-3">
-          {mainImageFields.length < MAX_IMAGES && (
-            <Button type="button" variant={"default"} onClick={addVariant}>
-              Tambah Varian
-            </Button>
-          )}
+          <Button type="button" variant={"default"} onClick={addVariant}>
+            Tambah Varian
+          </Button>
           <div className="text-xs py-2">
             Gunakan varian untuk menyesuaikan harga berdasarkan varian, jumlah,
             durasi, atau kategori layanan. <br /> Contoh: Untuk membedakan jenis
@@ -610,7 +570,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
         ))}
 
         <SubTitle title="Pembayaran Lunas / Escrow" className="mb-3" />
-        <ItemInput label="Set Escrow" required={false}>
+        <ProductItemInput label="Set Escrow" required={false}>
           <Controller
             name="escrow"
             control={control}
@@ -633,7 +593,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           {errors.escrow && (
             <p className="text-red-500 text-[10px]">{`${errors.escrow.message}`}</p>
           )}
-        </ItemInput>
+        </ProductItemInput>
 
         {escrowChecked && (
           <div className="mb-4 p-4 bg-gray-50 rounded-lg">
@@ -652,17 +612,19 @@ export const ProductForm: React.FC<iProductFormProps> = ({
 
         <div className="flex justify-center">
           {stateCategory.status ? (
-            <input
+            <button
               type="submit"
-              value="Simpan Produk"
               className="border border-gray-300 rounded-[30px] py-4 px-7 min-w-[250px] hover:bg-slate-300 cursor-pointer bg-c-green text-white shadow text-[14px] lg:text-[16px]"
-            />
+            >
+              Simpan Produk
+            </button>
           ) : (
-            <input
-              type="disabled"
-              value="Simpan Produk"
+            <button
+              disabled
               className="border-0 outline-none border-gray-300 text-center rounded-[30px] py-4 px-7 min-w-[250px] bg-slate-300 cursor-default  text-white shadow text-[14px] lg:text-[16px]"
-            />
+            >
+              Simpan Produk
+            </button>
           )}
         </div>
       </form>

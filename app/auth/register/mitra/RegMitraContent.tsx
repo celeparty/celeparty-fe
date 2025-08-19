@@ -396,25 +396,21 @@ const Registration = () => {
               </div>
             ))}
 
-            {fields.length < 5 && (
-              <>
-                <button
-                  type="button"
-                  className="flex gap-1 items-center bg-c-blue py-2 px-5 "
-                  onClick={() =>
-                    append({
-                      region: "",
-                      subregion: "",
-                    })
-                  }
-                >
-                  <IoMdAddCircleOutline /> Tambah Lokasi
-                </button>
-              </>
-            )}
-            {fields.length >= 5 && (
+            <button
+              type="button"
+              className="flex gap-1 items-center bg-c-blue py-2 px-5 "
+              onClick={() =>
+                append({
+                  region: "",
+                  subregion: "",
+                })
+              }
+            >
+              <IoMdAddCircleOutline /> Tambah Lokasi
+            </button>
+            {/* {fields.length >= 5 && (
               <div className="text-red-500">Maximal 5 lokasi pelayanan</div>
-            )}
+            )} */}
           </div>
 
           <div className="relative">

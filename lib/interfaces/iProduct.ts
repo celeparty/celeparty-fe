@@ -71,3 +71,32 @@ export interface iProductVariant {
 export interface iProductVariantFormValues {
   variant: iProductVariant[];
 }
+
+export interface iTicketVariant {
+  name: string;
+  price: number;
+  quota: string;
+  purchase_deadline?: string;
+}
+
+export interface iTicketImage {
+  id: string;
+  url?: string;
+  file?: File;
+}
+export interface iTicketFormReq {
+  title: string;
+  description: string;
+  main_price: number;
+  minimal_order: number;
+  minimal_order_date: string;
+  main_image: iTicketImage[];
+  price_min: number;
+  price_max: number;
+  users_permissions_user: number | null;
+  variant: iTicketVariant[];
+  event_date: string;
+  waktu_event: string;
+  lokasi_event: string;
+  kota_event: string;
+}

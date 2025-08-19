@@ -13,7 +13,7 @@ export default function Home() {
 	useEffect(() => {
 		if (status === "authenticated") {
 			axiosUser("GET", "/api/users/me", `${session && session?.jwt}`).then((res) => {
-				res?.role.type === "vendor" ? router.push("/user/vendor/home") : router.push("/user/profile/bio")
+				res?.role.type === "vendor" ? router.push("/user/vendor/profile") : router.push("/user/profile/bio")
 			})
 		}
 	}, [status]);
