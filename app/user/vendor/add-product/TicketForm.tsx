@@ -12,6 +12,7 @@ import {
   iTicketVariant,
 } from "@/lib/interfaces/iProduct";
 import { axiosUser } from "@/lib/services";
+import { formatMoneyReq } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -215,7 +216,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
     const rawVariants = getValues("variant") || [];
     const variants: iTicketVariant[] = rawVariants.map((v: any) => ({
       name: v.name,
-      price: v.price,
+      price: formatMoneyReq(v.price),
       quota: v.quota,
       purchase_deadline: "",
     }));

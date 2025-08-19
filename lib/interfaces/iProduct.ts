@@ -72,12 +72,7 @@ export interface iProductVariantFormValues {
   variant: iProductVariant[];
 }
 
-export interface iTicketVariant {
-  name: string;
-  price: number;
-  quota: string;
-  purchase_deadline?: string;
-}
+export interface iTicketVariant extends iProductVariant {}
 
 export interface iTicketImage {
   id: string;
