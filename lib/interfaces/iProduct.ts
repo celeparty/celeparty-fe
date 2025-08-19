@@ -59,6 +59,14 @@ export interface iProductRes
   main_image: iProductImage[];
   category: iProdCatRes;
   documentId: string;
+  user_event_type: {
+    id: number;
+    name: string;
+  };
+  event_date: string;
+  kota_event: string;
+  waktu_event: string;
+  lokasi_event: string;
 }
 
 export interface iProductVariant {
@@ -80,12 +88,13 @@ export interface iTicketImage {
   file?: File;
 }
 export interface iTicketFormReq {
+  documentId?: string;
   title: string;
   description: string;
   main_price: number;
   minimal_order: number;
   minimal_order_date: string;
-  main_image: iTicketImage[];
+  main_image: iProductImage[];
   price_min: number;
   price_max: number;
   users_permissions_user: number | null;

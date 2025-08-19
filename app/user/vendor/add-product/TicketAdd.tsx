@@ -1,8 +1,8 @@
 "use client";
 import React from "react";
 import Box from "@/components/Box";
-import { iTicketFormReq } from "@/lib/interfaces/iProduct";
-import { TicketForm } from "./TicketForm";
+import { iProductImage, iTicketFormReq } from "@/lib/interfaces/iProduct";
+import { TicketForm } from "../../../../components/product/TicketForm";
 
 export default function TicketAdd() {
   const initialState: iTicketFormReq = {
@@ -11,7 +11,7 @@ export default function TicketAdd() {
     main_price: 0,
     minimal_order: 0,
     minimal_order_date: "",
-    main_image: [{} as any],
+    main_image: [{} as iProductImage],
     price_min: 0,
     price_max: 0,
     users_permissions_user: null,
@@ -20,6 +20,7 @@ export default function TicketAdd() {
     event_date: "",
     kota_event: "",
     waktu_event: "",
+    documentId: "",
   };
 
   return (

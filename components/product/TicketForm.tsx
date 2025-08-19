@@ -7,15 +7,18 @@ import { useToast } from "@/hooks/use-toast";
 import { formatYearDate } from "@/lib/dateUtils";
 import { eAlertType } from "@/lib/enums/eAlert";
 import {
+  iProductImage,
   iTicketFormReq,
   iTicketImage,
   iTicketVariant,
 } from "@/lib/interfaces/iProduct";
 import { axiosUser } from "@/lib/services";
-import { formatMoneyReq } from "@/lib/utils";
+import { fetchAndConvertToFile, formatMoneyReq } from "@/lib/utils";
 import { useSession } from "next-auth/react";
-import React, { useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import React, { useEffect, useState } from "react";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { DatePickerInput } from "../form-components/DatePicker";
+import { parse, isValid as isDateValid, format } from "date-fns";
 
 const MAX_IMAGES = 5;
 
@@ -66,6 +69,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
     setValue,
     getValues,
     control,
+    reset,
     formState: { errors, isValid },
   } = formMethods;
 
@@ -119,11 +123,48 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
   //   fetchSubregion();
   // }, [selectedProvince]);
 
+  useEffect(() => {
+    if (formDefaultData) {
+      reset(formDefaultData);
+      if (formDefaultData && formDefaultData.main_image) {
+        convertAndSetEditImages();
+      }
+    }
+  }, [formDefaultData]);
+
+  const convertAndSetEditImages = async () => {
+    if (!formDefaultData?.main_image) return;
+
+    // Convert all images to File objects (for preview) while keeping original data
+    const processedImages = await Promise.all(
+      formDefaultData.main_image.map(async (img) => {
+        if (img.url && !img.url.startsWith("blob:")) {
+          try {
+            const file = await fetchAndConvertToFile(img);
+            return {
+              ...img,
+              file, // Temporary file reference
+              url: URL.createObjectURL(file), // Create preview URL
+            };
+          } catch (error) {
+            console.error("Failed to convert image:", error);
+            return img;
+          }
+        }
+        return img;
+      })
+    );
+
+    // Set form values
+    setValue("main_image", processedImages);
+  };
+
   const handleFileChange = async (index: number, file: File | null) => {
     if (file) {
-      const imageObj: iTicketImage = {
+      const imageObj: iProductImage = {
         id: `temp-${Date.now()}`,
         url: URL.createObjectURL(file),
+        mime: file.type,
         file: file,
       };
 
@@ -252,6 +293,14 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
       let response: any;
 
       if (isEdit) {
+        response = await axiosUser(
+          "PUT",
+          `/api/products/${formDefaultData.documentId}`,
+          `${session && session?.jwt}`,
+          {
+            data: payload,
+          }
+        );
       } else {
         response = await axiosUser(
           "POST",
@@ -340,16 +389,28 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
           )}
         </ProductItemInput>
         <ProductItemInput label="Tanggal Acara" required>
-          <input
-            className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
-            type="date"
-            {...register("event_date", {
-              required: true,
-              onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-                const value = e.target.value;
-                setValue("event_date", value);
-              },
-            })}
+          <Controller
+            name="event_date"
+            control={control}
+            render={({ field }) => {
+              const dateValue = field.value
+                ? parse(field.value, "yyyy-MM-dd", new Date()) // string -> Date
+                : null;
+
+              return (
+                <DatePickerInput
+                  textLabel="Pilih Tanggal Acara"
+                  value={dateValue}
+                  onChange={(date) => {
+                    if (date instanceof Date && isDateValid(date)) {
+                      field.onChange(format(date, "yyyy-MM-dd"));
+                    } else {
+                      field.onChange("");
+                    }
+                  }}
+                />
+              );
+            }}
           />
           {errors.event_date && (
             <p className="text-red-500 text-[10px]">{`${errors.event_date.message}`}</p>
@@ -372,16 +433,28 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
           )}
         </ProductItemInput>
         <ProductItemInput label="Tanggal Minimal Order" required>
-          <input
-            className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
-            type="date"
-            {...register("minimal_order_date", {
-              required: true,
-              onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-                const value = e.target.value;
-                setValue("minimal_order_date", value);
-              },
-            })}
+          <Controller
+            name="minimal_order_date"
+            control={control}
+            render={({ field }) => {
+              const dateValue = field.value
+                ? parse(field.value, "yyyy-MM-dd", new Date()) // string -> Date
+                : null;
+
+              return (
+                <DatePickerInput
+                  textLabel="Pilih Tanggal Minimal Order"
+                  value={dateValue}
+                  onChange={(date) => {
+                    if (date instanceof Date && isDateValid(date)) {
+                      field.onChange(format(date, "yyyy-MM-dd"));
+                    } else {
+                      field.onChange("");
+                    }
+                  }}
+                />
+              );
+            }}
           />
           {errors.main_price && (
             <p className="text-red-500 text-[10px]">{`${errors.main_price.message}`}</p>
