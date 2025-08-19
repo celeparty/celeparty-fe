@@ -14,6 +14,7 @@ import { FaStar } from "react-icons/fa";
 import { FcHighPriority } from "react-icons/fc";
 import SideBar from "./SideBar";
 import { ProductImageSlider } from "@/components/product/ProductImageSlider";
+import { getLowestVariantPrice } from "@/lib/productUtils";
 
 export default function ContentProduct(props: any) {
   const [selectedVariantId, setSelectedVariantId] = useState<number | null>(
@@ -30,11 +31,19 @@ export default function ContentProduct(props: any) {
   });
 
   const dataContent = query?.data?.data;
-  const [currentPrice, setCurrentPrice] = useState(dataContent?.main_price);
+  const [variantPrice, setVariantPrice] = useState(
+    dataContent?.variant[0]?.price
+  );
 
   useEffect(() => {
-    setCurrentPrice(dataContent?.main_price);
-  }, []);
+    if (query.isSuccess) {
+      const { variant } = dataContent;
+      const lowestPrice = getLowestVariantPrice(variant);
+      if (lowestPrice) {
+        setVariantPrice(lowestPrice);
+      }
+    }
+  }, [dataContent]);
 
   const populateImageUrls = () => {
     let urls: string[] = [];
@@ -97,8 +106,10 @@ export default function ContentProduct(props: any) {
                   : "Produk Tidak Tersedia"}{" "}
               </h1>
               <h4 className="text-[20px] text-c-orange font-bold">
-                {currentPrice > 0
-                  ? formatRupiah(currentPrice)
+                {dataContent?.variant &&
+                dataContent.variant.length > 0 &&
+                variantPrice > 0
+                  ? formatRupiah(variantPrice)
                   : formatRupiah(dataContent.main_price)}
               </h4>
               <div className="flex gap-1 items-center">
@@ -133,7 +144,7 @@ export default function ContentProduct(props: any) {
                               : "bg-white"
                           }`}
                           onClick={() => {
-                            setCurrentPrice(variant.price);
+                            setVariantPrice(variant.price);
                             setSelectedVariantId(variant.id);
                           }}
                         >
@@ -197,7 +208,7 @@ export default function ContentProduct(props: any) {
             <SideBar
               dataProducts={dataContent}
               currentPrice={
-                currentPrice > 0 ? currentPrice : dataContent?.main_price
+                variantPrice > 0 ? variantPrice : dataContent?.main_price
               }
               selectedVariantId={selectedVariantId}
             />

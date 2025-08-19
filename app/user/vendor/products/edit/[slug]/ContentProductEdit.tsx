@@ -1,11 +1,14 @@
 "use client";
 import Box from "@/components/Box";
 import { ProductForm } from "@/components/product/ProductForm";
+import { TicketForm } from "@/components/product/TicketForm";
 import { useToast } from "@/hooks/use-toast";
 import { eAlertType } from "@/lib/enums/eAlert";
+import { eProductType } from "@/lib/enums/eProduct";
 import {
   iProductReq,
   iProductRes,
+  iTicketFormReq,
   iUpdateProduct,
 } from "@/lib/interfaces/iProduct";
 import { axiosData } from "@/lib/services";
@@ -17,32 +20,37 @@ import { useEffect, useState } from "react";
 import { AiFillCustomerService } from "react-icons/ai";
 
 export default function ContentProductEdit(props: any) {
-  const [defaultFormData, setDefaultFormData] = useState<iProductReq>({
-    title: "",
-    description: "",
-    main_price: "0",
-    minimal_order: 0,
-    main_image: [
-      {
-        id: "",
-        url: "",
-        mime: "",
+  const [defaultProductFormData, setDefaultProductFormData] =
+    useState<iProductReq>({
+      title: "",
+      description: "",
+      main_price: "0",
+      minimal_order: 0,
+      main_image: [
+        {
+          id: "",
+          url: "",
+          mime: "",
+        },
+      ],
+      price_min: "0",
+      price_max: "0",
+      category: null,
+      kabupaten: "",
+      rate: 0,
+      minimal_order_date: "",
+      users_permissions_user: {
+        connect: {
+          id: "",
+        },
       },
-    ],
-    price_min: "0",
-    price_max: "0",
-    category: null,
-    kabupaten: "",
-    rate: 0,
-    minimal_order_date: "",
-    users_permissions_user: {
-      connect: {
-        id: "",
-      },
-    },
-    variant: [],
-    escrow: false,
-  });
+      variant: [],
+      escrow: false,
+    });
+
+  const [defaultTicketFormData, setDefaultTicketFormData] =
+    useState<iTicketFormReq>({} as iTicketFormReq);
+
   const [title, setTitle] = useState<string>("");
   const [rate, setRate] = useState<number>(0);
   const [main_price, setMainPrice] = useState<string>("0");
@@ -53,6 +61,8 @@ export default function ContentProductEdit(props: any) {
   const [description, setDescription] = useState<string>("");
   const router = useRouter();
   const { toast } = useToast();
+
+  const [isTicketType, setIsTicketType] = useState<boolean>(false);
 
   const getQuery = async () => {
     return await axiosData("GET", `/api/products/${props.slug}?populate=*`);
@@ -66,29 +76,55 @@ export default function ContentProductEdit(props: any) {
 
   useEffect(() => {
     if (dataContent) {
-      const formData: iProductReq = {
-        title: dataContent.title,
-        description: dataContent.description,
-        main_price: formatPriceValue(dataContent.main_price),
-        minimal_order: dataContent.minimal_order,
-        main_image: dataContent.main_image,
-        price_min: formatPriceValue(dataContent.price_min),
-        price_max: formatPriceValue(dataContent.price_max),
-        kabupaten: dataContent.kabupaten,
-        category: { connect: dataContent.category?.id },
-        rate: dataContent.rate,
-        minimal_order_date: dataContent.minimal_order_date,
-        users_permissions_user: {
-          connect: {
-            id: dataContent.users_permissions_user.id,
-          },
-        },
-        documentId: dataContent.documentId,
-        variant: dataContent.variant,
-        escrow: dataContent.escrow,
-      };
+      const { user_event_type } = dataContent;
+      const { name: productTypeName } = user_event_type || {};
+      setIsTicketType(productTypeName === eProductType.ticket ? true : false);
 
-      setDefaultFormData(formData);
+      if (productTypeName !== eProductType.ticket) {
+        const formData: iProductReq = {
+          title: dataContent.title,
+          description: dataContent.description,
+          main_price: formatPriceValue(dataContent.main_price),
+          minimal_order: dataContent.minimal_order,
+          main_image: dataContent.main_image,
+          price_min: formatPriceValue(dataContent.price_min),
+          price_max: formatPriceValue(dataContent.price_max),
+          kabupaten: dataContent.kabupaten,
+          category: { connect: dataContent.category?.id },
+          rate: dataContent.rate,
+          minimal_order_date: dataContent.minimal_order_date,
+          users_permissions_user: {
+            connect: {
+              id: dataContent.users_permissions_user.id,
+            },
+          },
+          documentId: dataContent.documentId,
+          variant: dataContent.variant,
+          escrow: dataContent.escrow,
+        };
+
+        setDefaultProductFormData(formData);
+      } else {
+        console.log(dataContent);
+        const ticketFormData: iTicketFormReq = {
+          title: dataContent.title,
+          description: dataContent.description,
+          main_price: 0,
+          minimal_order: 0,
+          main_image: dataContent.main_image,
+          price_min: 0,
+          price_max: 0,
+          users_permissions_user: null,
+          variant: dataContent.variant,
+          event_date: dataContent.event_date,
+          kota_event: dataContent.kota_event,
+          waktu_event: dataContent.waktu_event,
+          minimal_order_date: dataContent.minimal_order_date,
+          lokasi_event: dataContent.lokasi_event,
+          documentId: dataContent.documentId,
+        };
+        setDefaultTicketFormData(ticketFormData);
+      }
     }
   }, [dataContent]);
 
@@ -141,12 +177,25 @@ export default function ContentProductEdit(props: any) {
 
   return (
     <>
-      <h1 className="text-2xl font-bold mb-4">Edit Produk</h1>
+      <h1 className="text-2xl font-bold mb-4">
+        Edit {isTicketType ? "Tiket" : "Produk"}
+      </h1>
       <Box className="mt-0">
-        <ProductForm
-          isEdit={true}
-          formDefaultData={defaultFormData}
-        ></ProductForm>
+        {isTicketType ? (
+          <>
+            <TicketForm
+              isEdit={true}
+              formDefaultData={defaultTicketFormData}
+            ></TicketForm>
+          </>
+        ) : (
+          <>
+            <ProductForm
+              isEdit={true}
+              formDefaultData={defaultProductFormData}
+            ></ProductForm>
+          </>
+        )}
       </Box>
       <Box>
         <div className="flex justify-center items-center">

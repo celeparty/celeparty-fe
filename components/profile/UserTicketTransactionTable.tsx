@@ -60,7 +60,6 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({
     return <ErrorNetwork style="mt-0" />;
   }
   const dataContent: iOrderTicket[] = query?.data?.data;
-  console.log(dataContent);
 
   const toggleRow = (id: number) => {
     setExpandedRows((prev) => ({
@@ -177,10 +176,20 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({
                                 {item.variant}
                               </p>
                             </div>
-                            <div className="md:col-span-2">
+                            <div className="md:col-span-6">
                               <p>
                                 <span className="font-semibold">Catatan:</span>{" "}
                                 {item.note || "-"}
+                              </p>
+                            </div>
+                            <div className="md:col-span-6">
+                              <p>
+                                <span className="font-semibold">
+                                  Status verifikasi:
+                                </span>{" "}
+                                {`${
+                                  item.verification ? "Sudah" : "Belum"
+                                } terverifikasi`}
                               </p>
                             </div>
                           </div>

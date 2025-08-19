@@ -198,28 +198,20 @@ export default function ProfilePage() {
                         </React.Fragment>
                       ))}
 
-                      {fields.length >= 5 && (
-                        <p className="text-red-500 text-sm mt-2">
-                          Maximum Province Allowed is 5
-                        </p>
-                      )}
-
-                      {fields.length < 5 && (
-                        <button
-                          type="button"
-                          className="flex gap-1 items-center bg-c-blue py-2 px-5 text-white"
-                          onClick={() =>
-                            append({
-                              region: "",
-                              subregion: "",
-                              id: "",
-                              idSubRegion: "",
-                            })
-                          }
-                        >
-                          <IoMdAddCircleOutline /> Tambah Lokasi
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        className="flex gap-1 items-center bg-c-blue py-2 px-5 text-white"
+                        onClick={() =>
+                          append({
+                            region: "",
+                            subregion: "",
+                            id: "",
+                            idSubRegion: "",
+                          })
+                        }
+                      >
+                        <IoMdAddCircleOutline /> Tambah Lokasi
+                      </button>
                     </div>
                   </ItemInput>
                 </div>
