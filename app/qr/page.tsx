@@ -34,14 +34,20 @@ function QRPageContent() {
   const [canVerify, setCanVerify] = useState(false);
   const [userData, setUserData] = useState<any>(null);
   const [verificationStatus, setVerificationStatus] = useState<boolean | null>(null);
+  const [vendorMatch, setVendorMatch] = useState<boolean | null>(null);
+  const [isChecking, setIsChecking] = useState(true);
 
   // Check if user is logged in
   const isLoggedIn = !!session;
   
+  // Debug: log state changes
+  useEffect(() => {
+    console.log('isChecking state changed to:', isChecking);
+  }, [isChecking]);
+  
   // Debug: log user role information
   console.log('Session:', session);
   console.log('User data from API:', userData);
-  console.log('User role type:', userData?.role?.type);
 
   // Get user data from API
   useEffect(() => {
@@ -50,6 +56,11 @@ function QRPageContent() {
         try {
           const userResponse = await axiosUser("GET", "/api/users/me", session.jwt);
           console.log('User API Response:', userResponse);
+          console.log('=== USER DATA STRUCTURE DEBUG ===');
+          console.log('User response id:', userResponse?.id);
+          console.log('User response documentId:', userResponse?.documentId);
+          console.log('User response attributes:', userResponse?.attributes);
+          console.log('User response attributes id:', userResponse?.attributes?.id);
           setUserData(userResponse);
         } catch (error) {
           console.error('Error fetching user data:', error);
@@ -71,6 +82,7 @@ function QRPageContent() {
       if (!isLoggedIn) {
         console.log('❌ User not logged in');
         setCanVerify(false);
+        setIsChecking(false);
         return;
       }
       
@@ -80,6 +92,7 @@ function QRPageContent() {
       if (userRole !== 'vendor') {
         console.log('❌ User is not vendor, role is:', userRole);
         setCanVerify(false);
+        setIsChecking(false);
         return;
       }
       console.log('✅ User is vendor');
@@ -87,6 +100,7 @@ function QRPageContent() {
       if (status !== 'active' || order_id === '') {
         console.log('❌ Status not active or order_id empty. Status:', status, 'Order ID:', order_id);
         setCanVerify(false);
+        setIsChecking(false);
         return;
       }
       console.log('✅ Status is active and order_id exists');
@@ -100,18 +114,44 @@ function QRPageContent() {
         if (res.ok && data.data && (data.data.payment_status === 'settlement' || data.data.payment_status === 'Settlement')) {
           console.log('✅ Payment status is settlement, setting canVerify to true');
           setTransactionData(data.data);
-          setCanVerify(true);
+          
+          // Check vendor ID match
+          const ticketVendorId = data.data.vendor_id || data.data.vendor_doc_id;
+          const currentUserId = userData?.id;
+          const currentUserDocumentId = userData?.documentId;
+          console.log('Ticket vendor ID:', ticketVendorId);
+          console.log('Current user ID:', currentUserId);
+          console.log('Current user documentId:', currentUserDocumentId);
+          
+          // Try matching with both user ID and documentId
+          const vendorMatches = (ticketVendorId && currentUserId && ticketVendorId === currentUserId) ||
+                               (ticketVendorId && currentUserDocumentId && ticketVendorId === currentUserDocumentId);
+          
+          if (vendorMatches) {
+            console.log('✅ Vendor ID matches');
+            setVendorMatch(true);
+            setCanVerify(true);
+          } else {
+            console.log('❌ Vendor ID does not match');
+            setVendorMatch(false);
+            setCanVerify(false);
+          }
+          
           // Set verification status
           setVerificationStatus(data.data.verification || false);
         } else {
           console.log('❌ Payment status check failed. Response ok:', res.ok, 'Data exists:', !!data.data, 'Payment status:', data.data?.payment_status);
           setCanVerify(false);
           setVerificationStatus(null);
+          setVendorMatch(null);
         }
       } catch (error) {
         console.error('Error checking transaction:', error);
         setCanVerify(false);
+        setVendorMatch(null);
       }
+      console.log('✅ Setting isChecking to false');
+      setIsChecking(false);
     };
     check();
   }, [isLoggedIn, status, order_id, userData]);
@@ -168,42 +208,57 @@ function QRPageContent() {
   return (
     <div className="max-w-lg mx-auto my-16 p-6 bg-white rounded shadow">
       <h1 className="text-2xl font-bold mb-4 text-center">E-Ticket Celeparty</h1>
-      <div className="mb-2"><b>Order ID:</b> {order_id}</div>
-      <div className="mb-2"><b>Nama Pemesan:</b> {decodeURIComponent(customer_name)}</div>
-      <div className="mb-2"><b>Email:</b> {email}</div>
-      <div className="mb-2"><b>Event Type:</b> {event_type}</div>
-      <div className="mb-2"><b>Tanggal Acara:</b> {event_date}</div>
-      <div className="mb-2"><b>Status Tiket:</b> <span className={status === 'active' ? 'text-green-600 font-bold' : 'text-red-600 font-bold'}>{status}</span></div>
-      {verificationStatus !== null && (
-        <div className="mb-2">
-          <b>Status Verifikasi:</b> 
-          <span className={verificationStatus ? 'text-green-600 font-bold' : 'text-orange-600 font-bold'}>
-            {verificationStatus ? ' Sudah Diverifikasi' : ' Belum Diverifikasi'}
-          </span>
+      
+      {isChecking ? (
+        <div className="text-center text-gray-600">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+          <div>Memeriksa tiket...</div>
         </div>
-      )}
-      {!session && (
-        <div className="mt-4 text-center text-sm text-red-600">
-          Silakan login untuk melakukan verifikasi.
+      ) : !session ? (
+        <div className="text-center text-red-600 font-semibold">
+          Silahkan login sebagai vendor
         </div>
-      )}
-      {session && !isLoggedIn && (
-        <div className="mt-4 text-center text-sm text-red-600">
-          Silakan login untuk melakukan verifikasi.
+      ) : !isLoggedIn || userData?.role?.type !== 'vendor' ? (
+        <div className="text-center text-gray-400 font-semibold bg-gray-100 px-2 py-9">
+          Akun tidak sesuai
         </div>
-      )}
-      {session && isLoggedIn && userData?.role?.type !== 'vendor' && (
-        <div className="mt-4 text-center text-sm text-red-600">
-          Hanya user dengan level vendor yang dapat melakukan verifikasi tiket.
+      ) : vendorMatch === false ? (
+        <div className="text-center text-gray-400 font-semibold bg-gray-100 px-2 py-9">
+          Akun tidak sesuai
         </div>
+      ) : vendorMatch === true ? (
+        <>
+          <div className="mb-2"><b>Order ID:</b> {order_id}</div>
+          <div className="mb-2"><b>Nama Pemesan:</b> {decodeURIComponent(customer_name)}</div>
+          <div className="mb-2"><b>Email:</b> {email}</div>
+          <div className="mb-2"><b>Nama Event:</b> {transactionData?.product_name || (transactionData?.products && typeof transactionData.products === 'object' ? transactionData.products.title || transactionData.products.name || 'N/A' : 'N/A')}</div>
+          <div className="mb-2"><b>Tipe Event:</b> {event_type}</div>
+          <div className="mb-2"><b>Tanggal Acara:</b> {event_date}</div>
+          <div className="mb-2"><b>Status Tiket:</b> <span className={status === 'active' ? 'text-green-600 font-bold' : 'text-red-600 font-bold'}>{status}</span></div>
+          {verificationStatus !== null && (
+            <div className="mb-2">
+              <b>Status Verifikasi:</b> 
+              <span className={verificationStatus ? 'text-green-600 font-bold' : 'text-orange-600 font-bold'}>
+                {verificationStatus ? ' Sudah Diverifikasi' : ' Belum Diverifikasi'}
+              </span>
+            </div>
+          )}
+        </>
+      ) : null}
+      
+      {session && !isChecking && (
+        <>
+          {isLoggedIn && userData?.role?.type === 'vendor' && !canVerify && vendorMatch !== false && (
+            <div className="mt-4 text-center text-sm text-red-600">
+              Tiket tidak dapat diverifikasi. Pastikan status pembayaran settlement dan tiket aktif.
+            </div>
+          )}
+        </>
       )}
-      {session && isLoggedIn && userData?.role?.type === 'vendor' && !canVerify && (
-        <div className="mt-4 text-center text-sm text-red-600">
-          Tiket tidak dapat diverifikasi. Pastikan status pembayaran settlement dan tiket aktif.
-        </div>
-      )}
-      <div className="mt-6 text-center">
-        {canVerify && (
+      
+    {
+        !verificationStatus ?       <div className="mt-6 text-center">
+        {session && !isChecking && canVerify && (
           <button
             onClick={handleVerify}
             disabled={loading}
@@ -212,8 +267,11 @@ function QRPageContent() {
             {loading ? 'Memverifikasi...' : 'Verifikasi'}
           </button>
         )}
-        {notif && <div className="mt-4 text-center text-sm font-semibold text-red-600">{notif}</div>}
+        {session && !isChecking && notif && <div className="mt-4 text-center text-sm font-semibold text-red-600">{notif}</div>}
       </div>
+      : null
+    }
+
     </div>
   )
 }
