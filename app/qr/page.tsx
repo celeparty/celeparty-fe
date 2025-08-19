@@ -41,7 +41,6 @@ function QRPageContent() {
   // Debug: log user role information
   console.log('Session:', session);
   console.log('User data from API:', userData);
-  console.log('User role type:', userData?.role?.type);
 
   // Get user data from API
   useEffect(() => {
