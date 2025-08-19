@@ -34,6 +34,7 @@ function QRPageContent() {
   const [canVerify, setCanVerify] = useState(false);
   const [userData, setUserData] = useState<any>(null);
   const [verificationStatus, setVerificationStatus] = useState<boolean | null>(null);
+  const [vendorMatch, setVendorMatch] = useState<boolean | null>(null);
 
   // Check if user is logged in
   const isLoggedIn = !!session;
@@ -49,6 +50,11 @@ function QRPageContent() {
         try {
           const userResponse = await axiosUser("GET", "/api/users/me", session.jwt);
           console.log('User API Response:', userResponse);
+          console.log('=== USER DATA STRUCTURE DEBUG ===');
+          console.log('User response id:', userResponse?.id);
+          console.log('User response documentId:', userResponse?.documentId);
+          console.log('User response attributes:', userResponse?.attributes);
+          console.log('User response attributes id:', userResponse?.attributes?.id);
           setUserData(userResponse);
         } catch (error) {
           console.error('Error fetching user data:', error);
@@ -99,17 +105,41 @@ function QRPageContent() {
         if (res.ok && data.data && (data.data.payment_status === 'settlement' || data.data.payment_status === 'Settlement')) {
           console.log('✅ Payment status is settlement, setting canVerify to true');
           setTransactionData(data.data);
-          setCanVerify(true);
+          
+          // Check vendor ID match
+          const ticketVendorId = data.data.vendor_id || data.data.vendor_doc_id;
+          const currentUserId = userData?.id;
+          const currentUserDocumentId = userData?.documentId;
+          console.log('Ticket vendor ID:', ticketVendorId);
+          console.log('Current user ID:', currentUserId);
+          console.log('Current user documentId:', currentUserDocumentId);
+          
+          // Try matching with both user ID and documentId
+          const vendorMatches = (ticketVendorId && currentUserId && ticketVendorId === currentUserId) ||
+                               (ticketVendorId && currentUserDocumentId && ticketVendorId === currentUserDocumentId);
+          
+          if (vendorMatches) {
+            console.log('✅ Vendor ID matches');
+            setVendorMatch(true);
+            setCanVerify(true);
+          } else {
+            console.log('❌ Vendor ID does not match');
+            setVendorMatch(false);
+            setCanVerify(false);
+          }
+          
           // Set verification status
           setVerificationStatus(data.data.verification || false);
         } else {
           console.log('❌ Payment status check failed. Response ok:', res.ok, 'Data exists:', !!data.data, 'Payment status:', data.data?.payment_status);
           setCanVerify(false);
           setVerificationStatus(null);
+          setVendorMatch(null);
         }
       } catch (error) {
         console.error('Error checking transaction:', error);
         setCanVerify(false);
+        setVendorMatch(null);
       }
     };
     check();
@@ -179,6 +209,29 @@ function QRPageContent() {
           <span className={verificationStatus ? 'text-green-600 font-bold' : 'text-orange-600 font-bold'}>
             {verificationStatus ? ' Sudah Diverifikasi' : ' Belum Diverifikasi'}
           </span>
+        </div>
+      )}
+      {vendorMatch !== null && (
+        <div className="mb-2">
+          <b>Vendor Status:</b> 
+          <span className={vendorMatch ? 'text-green-600 font-bold' : 'text-red-600 font-bold'}>
+            {vendorMatch ? ' vendor ok' : ' vendor tidak sesuai'}
+          </span>
+        </div>
+      )}
+      {vendorMatch !== null && (
+        <div className="mb-2 text-sm text-gray-600">
+          <b>Ticket Vendor ID:</b> {transactionData?.vendor_id || transactionData?.vendor_doc_id || 'N/A'}
+        </div>
+      )}
+      {vendorMatch !== null && (
+        <div className="mb-2 text-sm text-gray-600">
+          <b>Current User ID:</b> {userData?.id || 'N/A'}
+        </div>
+      )}
+      {vendorMatch !== null && (
+        <div className="mb-2 text-sm text-gray-600">
+          <b>Current User DocumentId:</b> {userData?.documentId || 'N/A'}
         </div>
       )}
       {!session && (
