@@ -289,18 +289,17 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
         }
       });
       let response: any;
-
+      delete payload.data.documentId;
+      delete payload.data.user_event_type;
+      
       if (isEdit) {
         response = await axiosUser(
           "PUT",
           `/api/products/${formDefaultData.documentId}`,
           `${session && session?.jwt}`,
-          {
-            data: payload,
-          }
+          payload
         );
       } else {
-        delete payload.data.documentId;
         response = await axiosUser(
           "POST",
           "/api/products?status=draft",
