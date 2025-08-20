@@ -96,7 +96,6 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
       name: "",
       price: 0,
       quota: "",
-      purchase_deadline: "",
     });
   };
 
@@ -255,14 +254,13 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
     const images = await handleUploadImage();
 
     const rawVariants = getValues("variant") || [];
-    const variants: iTicketVariant[] = rawVariants.map((v: any) => ({
+    const variants: iTicketVariant[] = rawVariants.map((v: iTicketVariant) => ({
       name: v.name,
       price: formatMoneyReq(v.price),
       quota: v.quota,
-      purchase_deadline: "",
     }));
 
-    const payload: any = {
+    let payload: any = {
       data: {
         ...data,
         main_image: images,
@@ -302,6 +300,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
           }
         );
       } else {
+        delete payload.data.documentId;
         response = await axiosUser(
           "POST",
           "/api/products?status=draft",
@@ -316,6 +315,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
           description: `Sukses ${isEdit ? "edit" : "menambahkan"} tiket!`,
           className: eAlertType.SUCCESS,
         });
+        reset({} as iTicketFormReq);
       }
     } catch (error: any) {
       toast({

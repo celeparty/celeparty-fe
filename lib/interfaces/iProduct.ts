@@ -80,7 +80,8 @@ export interface iProductVariantFormValues {
   variant: iProductVariant[];
 }
 
-export interface iTicketVariant extends iProductVariant {}
+export interface iTicketVariant
+  extends Omit<iProductVariant, "purchase_deadline"> {}
 
 export interface iTicketImage {
   id: string;

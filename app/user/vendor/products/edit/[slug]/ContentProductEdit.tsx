@@ -105,7 +105,6 @@ export default function ContentProductEdit(props: any) {
 
         setDefaultProductFormData(formData);
       } else {
-        console.log(dataContent);
         const ticketFormData: iTicketFormReq = {
           title: dataContent.title,
           description: dataContent.description,
