@@ -299,6 +299,8 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           description: `Sukses ${isEdit ? "edit" : "menambahkan"} produk!`,
           className: eAlertType.SUCCESS,
         });
+        if (!isEdit) reset({} as iProductReq);
+        window.location.reload();
       }
     } catch (error: any) {
       console.error(error);
