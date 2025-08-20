@@ -316,7 +316,8 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
           description: `Sukses ${isEdit ? "edit" : "menambahkan"} tiket!`,
           className: eAlertType.SUCCESS,
         });
-        reset({} as iTicketFormReq);
+        if (!isEdit) reset({} as iTicketFormReq);
+        window.location.reload();
       }
     } catch (error: any) {
       toast({
