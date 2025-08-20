@@ -272,7 +272,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
           ],
         },
         user_event_type: {
-          connect: [{ id: 15 }],
+          connect: [{ id: 16 }],
         },
         variant: variants,
       },
