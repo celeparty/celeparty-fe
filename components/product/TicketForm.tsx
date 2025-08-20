@@ -19,6 +19,7 @@ import React, { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { DatePickerInput } from "../form-components/DatePicker";
 import { parse, isValid as isDateValid, format } from "date-fns";
+import { getLowestVariantPrice } from "@/lib/productUtils";
 
 const MAX_IMAGES = 5;
 
@@ -259,13 +260,14 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
       price: formatMoneyReq(v.price),
       quota: v.quota,
     }));
-
+    const lowestPrice = getLowestVariantPrice(variants);
     let payload: any = {
       data: {
         ...data,
         main_image: images,
         event_date: formatYearDate(data.event_date) ?? "",
         minimal_order_date: formatYearDate(data.minimal_order_date) ?? "",
+        main_price: formatMoneyReq(lowestPrice),
         users_permissions_user: {
           connect: [
             { id: session?.user?.id ? Number(session.user.id) : undefined },
@@ -291,7 +293,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
       let response: any;
       delete payload.data.documentId;
       delete payload.data.user_event_type;
-      
+
       if (isEdit) {
         response = await axiosUser(
           "PUT",
