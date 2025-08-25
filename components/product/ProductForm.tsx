@@ -452,7 +452,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
             <p className="text-red-500 text-[10px]">{`${errors.description.message}`}</p>
           )}
         </ProductItemInput>
-        <ProductItemInput label="Harga Minimal Produk (Rp)" required>
+        {/* <ProductItemInput label="Harga Minimal Produk (Rp)" required>
           <input
             className="border border-gray-300 rounded-md py-2 px-5 w-full"
             placeholder="Harga Produk (Rp)"
@@ -489,7 +489,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           {errors.price_max && (
             <p className="text-red-500 text-[10px]">{`${errors.price_max.message}`}</p>
           )}
-        </ProductItemInput>
+        </ProductItemInput> */}
         <ProductItemInput
           label="Minimal Item Pembelian (Optional)"
           required={false}
@@ -534,11 +534,18 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           <input
             className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
             placeholder="Rate Produk"
+            type="number"
+            min="1"
             {...register("rate", {
               required: false,
+              valueAsNumber: true,
               onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
                 const value = e.target.value;
-                setValue("rate", parseInt(value));
+                if (value === "" || isNaN(parseInt(value))) {
+                  setValue("rate", 0);
+                } else {
+                  setValue("rate", parseInt(value));
+                }
               },
             })}
           />
