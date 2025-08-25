@@ -434,7 +434,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
             <p className="text-red-500 text-[10px]">{`${errors.waktu_event.message}`}</p>
           )}
         </ProductItemInput>
-        <ProductItemInput label="Tanggal Minimal Order" required>
+        <ProductItemInput label="Batas Waktu Pemesanan" required>
           <Controller
             name="minimal_order_date"
             control={control}
@@ -445,7 +445,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
 
               return (
                 <DatePickerInput
-                  textLabel="Pilih Tanggal Minimal Order"
+                  textLabel="Pilih Batas Waktu Pemesanan"
                   value={dateValue}
                   onChange={(date) => {
                     if (date instanceof Date && isDateValid(date)) {
