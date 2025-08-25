@@ -266,7 +266,7 @@ export function ProductContent() {
         <>
           <div className="col-span-12 md:col-span-3">
             <div className="sidebar">
-              <Box className="bg-c-blue text-white mt-0 hidden lg:block">
+              <Box className="bg-c-blue text-white mt-0">
                 <div
                   className={`relative ${
                     isFilterCatsAvailable && "mb-7 [&_h4]:mb-3"
