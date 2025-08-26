@@ -1,0 +1,104 @@
+name: Deploy to Digital Ocean
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Create environment file
+      run: |
+        echo "URL_BASE=${{ secrets.URL_BASE }}" >> .env.local
+        echo "URL_API=${{ secrets.URL_API }}" >> .env.local
+        echo "BASE_API=${{ secrets.BASE_API }}" >> .env.local
+        echo "URL_MEDIA=${{ secrets.URL_MEDIA }}" >> .env.local
+        echo "KEY_API=${{ secrets.KEY_API }}" >> .env.local
+        echo "BASE_API_REGION=${{ secrets.BASE_API_REGION }}" >> .env.local
+        echo "KEY_REGION=${{ secrets.KEY_REGION }}" >> .env.local
+        echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> .env.local
+        echo "NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}" >> .env.local
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env.local
+
+    - name: Run linting
+      run: npm run lint
+
+    - name: Build application
+      run: npm run build
+
+    - name: Deploy to Digital Ocean
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.DO_HOST }}
+        username: ${{ secrets.DO_USERNAME }}
+        password: ${{ secrets.DO_PASSWORD }}
+        script: |
+          # Navigate to project directory
+          cd /var/www/celeparty.com/celeparty-fe
+          
+          # Backup current deployment
+          if [ -d "current" ]; then
+            mv current backup-$(date +%Y%m%d-%H%M%S)
+            # Keep only last 3 backups
+            ls -dt backup-* | tail -n +4 | xargs rm -rf
+          fi
+          
+          # Pull latest code
+          git fetch origin
+          git reset --hard origin/master
+          
+          # Install dependencies
+          npm ci --production
+          
+          # Build application
+          npm run build
+          
+          # Create/update environment file
+          cat > .env.local << EOF
+          URL_BASE=${{ secrets.URL_BASE }}
+          URL_API=${{ secrets.URL_API }}
+          BASE_API=${{ secrets.BASE_API }}
+          URL_MEDIA=${{ secrets.URL_MEDIA }}
+          KEY_API=${{ secrets.KEY_API }}
+          BASE_API_REGION=${{ secrets.BASE_API_REGION }}
+          KEY_REGION=${{ secrets.KEY_REGION }}
+          NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          EOF
+          
+          # Set proper permissions
+          chown -R www-data:www-data /var/www/celeparty.com/celeparty-fe
+          chmod -R 755 /var/www/celeparty.com/celeparty-fe
+          
+          # Restart PM2 process (if using PM2)
+          if command -v pm2 &> /dev/null; then
+            pm2 restart celeparty-fe || pm2 start npm --name "celeparty-fe" -- start
+          fi
+          
+          # Restart nginx
+          systemctl reload nginx
+
+    - name: Notify deployment success
+      if: success()
+      run: echo "🚀 Deployment completed successfully!"
+
+    - name: Notify deployment failure
+      if: failure()
+      run: echo "❌ Deployment failed!"
