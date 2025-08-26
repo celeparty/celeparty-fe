@@ -436,7 +436,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
         </ProductItemInput>
         <ProductItemInput label="Batas Waktu Pemesanan" required>
           <Controller
-            name="minimal_order_date"
+            name="maximal_order_date"
             control={control}
             render={({ field }) => {
               const dateValue = field.value

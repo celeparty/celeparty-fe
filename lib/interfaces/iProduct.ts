@@ -104,4 +104,5 @@ export interface iTicketFormReq {
   waktu_event: string;
   lokasi_event: string;
   kota_event: string;
+  maximal_order_date: string;
 }
