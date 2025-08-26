@@ -119,6 +119,7 @@ export default function ContentProductEdit(props: any) {
           kota_event: dataContent.kota_event,
           waktu_event: dataContent.waktu_event,
           minimal_order_date: dataContent.minimal_order_date,
+          maximal_order_date: "",
           lokasi_event: dataContent.lokasi_event,
           documentId: dataContent.documentId,
         };

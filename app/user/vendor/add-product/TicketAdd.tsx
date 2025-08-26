@@ -11,6 +11,7 @@ export default function TicketAdd() {
     main_price: 0,
     minimal_order: 0,
     minimal_order_date: "",
+    maximal_order_date: "",
     main_image: [{} as iProductImage],
     price_min: 0,
     price_max: 0,
