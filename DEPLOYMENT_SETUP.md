@@ -2,6 +2,16 @@
 
 This guide will help you set up automatic deployment from GitHub to your Digital Ocean server.
 
+## 🎯 **Optimized for 1GB RAM Server**
+
+This deployment is specifically optimized for low-memory servers:
+- **Build di GitHub Actions** (unlimited RAM)
+- **Deploy file static ke server** (minimal memory usage)
+- **Production-only dependencies** di server
+- **Memory-optimized configuration**
+
+📖 **Untuk setup server 1GB RAM, lihat:** `LOW_MEMORY_SERVER_SETUP.md`
+
 ## 🔐 GitHub Secrets Configuration
 
 Go to your GitHub repository → Settings → Secrets and variables → Actions, then add the following secrets:
@@ -154,10 +164,15 @@ pm2 startup
 ## 🚀 How the Deployment Works
 
 1. **Trigger**: Push to `master` branch triggers the workflow
-2. **Build**: GitHub Actions builds your Next.js application
-3. **Deploy**: Code is deployed to `/var/www/celeparty.com/celeparty-fe`
-4. **Backup**: Previous version is backed up automatically
-5. **Restart**: PM2 process and Nginx are restarted
+2. **Build di GitHub**: GitHub Actions builds your Next.js application (using unlimited RAM)
+3. **Package**: Create optimized deployment package with only production files
+4. **Transfer**: Upload built files to server (lightweight transfer)
+5. **Deploy**: Extract and install only production dependencies on server
+6. **Start**: Start application with memory-optimized PM2 configuration
+
+### Memory Usage Comparison:
+- **Old Method**: Build di server (~800MB+ RAM usage)
+- **New Method**: Build di GitHub + deploy static (~400MB RAM usage) ✅
 
 ## 🔍 Monitoring and Logs
 
