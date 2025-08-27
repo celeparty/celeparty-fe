@@ -27,6 +27,11 @@ const nextConfig = {
 				pathname: "**",
 			},
 			{
+				protocol: "https",
+				hostname: "https://papi.celeparty.com",
+				pathname: "**",
+			},
+			{
 				protocol: "http",
 				hostname: "localhost",
 				pathname: "**",
