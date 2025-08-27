@@ -12,6 +12,7 @@ const nextConfig = {
 		NEXTAUTH_URL: process.env.NEXTAUTH_URL,
 		JWT_SECRET: process.env.JWT_SECRET,
 	},
+	output: 'standalone',
 	reactStrictMode: true,
 	images: {
 		remotePatterns: [
