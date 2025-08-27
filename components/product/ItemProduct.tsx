@@ -18,7 +18,6 @@ interface iItemProduct {
 }
 
 export default function ItemProduct(props: iItemProduct) {
-  console.log(props);
   return (
     <div className="lg:p-2 lg:w-1/5 w-1/2 p-2  lg:shadow-gray-400 lg:shadow-none">
       <section className=" rounded-lg shadow-md flex flex-col justify-between h-full p-3">
@@ -42,13 +41,11 @@ export default function ItemProduct(props: iItemProduct) {
             </div>
             <div>
               <div className="flex items-center gap-1 lg:text-[10px] text-[12px] font-medium mt-2 text-c-gray-text2">
-                {props.rate && props.sold ? (
-                  <>
-                    <FaStar className="text-[#FDD835]" />
-                    {props.rate ? props.rate + " | " : null} Terjual{" "}
-                    {props.sold}
-                  </>
-                ) : null}
+                <FaStar className="text-[#FDD835]" />
+                {props.rate ? props.rate : null}{" "}
+                {props.sold && (
+                  <span className="sold-indicator">| {props.sold} Terjual</span>
+                )}
               </div>
               {props.location ? (
                 <div className="flex gap-1 items-center text-[12px] lg:text-[10px] mt-2  text-c-gray-text2 capitalize">

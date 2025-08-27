@@ -429,7 +429,7 @@ export function ProductContent() {
                         {sortDesc ? <IoIosArrowUp /> : <IoIosArrowDown />}
                       </Button>
                     </div>
-                    <div className="flex lg:flex-row flex-col gap-2 lg:order-2 order-1">
+                    {/* <div className="flex lg:flex-row flex-col gap-2 lg:order-2 order-1">
                       <div className="flex items-center gap-2 w-full lg:w-auto">
                         Rp{" "}
                         <Input
@@ -456,7 +456,7 @@ export function ProductContent() {
                           value={price.max > 0 ? price.max : ""}
                         />
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </Box>
