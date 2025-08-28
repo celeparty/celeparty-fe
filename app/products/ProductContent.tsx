@@ -55,7 +55,7 @@ export function ProductContent() {
 
     return await axiosData(
       "GET",
-      `/api/products?populate=*${
+      `/api/products?populate=*&&sort=updatedAt:desc${
         getType
           ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(
               getType
