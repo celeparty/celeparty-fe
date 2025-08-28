@@ -37,8 +37,10 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({
     const response = await axiosUser(
       "GET",
       `/api/transactions?filters[${
-        isVendor ? "vendor_doc_id" : "[email][$eq]"
-      }]=${session?.user?.email}`,
+        isVendor
+          ? `[vendor_doc_id][$eq]=${session?.user?.documentId}`
+          : `[email][$eq]=${session?.user?.email}`
+      }]=${documentId}`,
       `${session && session?.jwt}`
     );
 
@@ -211,7 +213,7 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({
                                 <span className="font-semibold">Produk:</span>{" "}
                               </p>
                               <ul className="list-disc pl-5 space-y-1">
-                                {item.products.map((prod) => (
+                                {item.products?.map((prod) => (
                                   <li key={prod.id}>{prod.title}</li>
                                 ))}
                               </ul>
