@@ -1,0 +1,61 @@
+name: CI/CD Next.js to DigitalOcean
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  # ========================
+  # 1. CI Job (build & test)
+  # ========================
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.5.1"
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run Lint
+        run: yarn lint
+
+      - name: Build
+        run: yarn build
+
+  # ========================
+  # 2. CD Job (deploy ke server)
+  # ========================
+  cd:
+    runs-on: ubuntu-latest
+    needs: ci   # hanya jalan kalau CI sukses
+
+    steps:
+      - name: Deploy & Build on Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DO_HOST }}
+          username: ${{ secrets.DO_USERNAME }}
+          password: ${{ secrets.DO_PASSWORD }}
+          port: 22
+          script: |
+            cd /var/www/celeparty.com/celeparty-fe
+
+            echo "📥 Pulling latest code..."
+            git fetch origin master
+            git reset --hard origin/master
+
+            echo "📦 Installing dependencies..."
+            yarn install --frozen-lockfile
+
+            echo "⚒️ Building app..."
+            yarn build
+
+            echo "🚀 Restarting app with pm2..."
+            pm2 restart celeparty.com || pm2 start yarn --name "celeparty.com" -- start
