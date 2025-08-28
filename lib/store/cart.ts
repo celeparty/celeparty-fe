@@ -17,7 +17,7 @@ export interface CartStore {
   updateQuantity: (productId: string | number, newQuantity: number) => void;
   deleteItem: (productId: string | number) => void;
   calculateTotal: () => number;
-  test: () => void;
+  test?: () => void;
 }
 
 export const useCart = create<CartStore>()(
