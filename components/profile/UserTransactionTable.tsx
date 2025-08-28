@@ -36,11 +36,11 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({
   const getQuery = async () => {
     const response = await axiosUser(
       "GET",
-      `/api/transactions?filters[${
+      `/api/transactions?filters${
         isVendor
           ? `[vendor_doc_id][$eq]=${session?.user?.documentId}`
           : `[email][$eq]=${session?.user?.email}`
-      }]=${documentId}&sort=createdAt:desc`,
+      }&sort=createdAt:desc`,
       `${session && session?.jwt}`
     );
 
