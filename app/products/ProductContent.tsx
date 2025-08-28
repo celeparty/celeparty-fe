@@ -18,6 +18,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { ItemCategory, ItemInfo } from "./ItemCategory";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 
 export function ProductContent() {
   const [sortDesc, setSortDesc] = useState<boolean>(true);
@@ -29,6 +30,9 @@ export function ProductContent() {
     max: 0,
   });
   const [mainData, setMainData] = useState<any>([]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [pageSize] = useState<number>(15); // Number of items per page
   const router = useRouter();
   const params = useSearchParams();
   const getType = params.get("type");
@@ -55,7 +59,7 @@ export function ProductContent() {
 
     return await axiosData(
       "GET",
-      `/api/products?populate=*&&sort=updatedAt:desc${
+      `/api/products?populate=*&&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}${
         getType
           ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(
               getType
@@ -90,6 +94,7 @@ export function ProductContent() {
       selectedLocation,
       eventDate,
       minimalOrder,
+      currentPage,
     ],
     queryFn: getCombinedQuery,
   });
@@ -97,8 +102,17 @@ export function ProductContent() {
   useEffect(() => {
     if (query.isSuccess) {
       setMainData(query.data.data);
+      // Set total pages from pagination metadata
+      if (query.data.meta?.pagination) {
+        setTotalPages(query.data.meta.pagination.pageCount);
+      }
     }
   }, [query.isSuccess, query.data]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [getType, getSearch, getCategory, selectedLocation, eventDate, minimalOrder]);
 
   const getFilterCatsQuery = async () => {
     return await axiosData(
@@ -233,6 +247,7 @@ export function ProductContent() {
         : item.updatedAt;
     });
     setMainData(dataSort);
+    setCurrentPage(1); // Reset to first page when sorting
   };
 
   const handleFilter = (category: string) => {
@@ -244,6 +259,7 @@ export function ProductContent() {
       }
     });
     setMainData(filterCategory);
+    setCurrentPage(1); // Reset to first page when filtering
   };
 
   const toggleDropdown = (): void => {
@@ -256,6 +272,13 @@ export function ProductContent() {
     if (eventDate) setEventDate("");
     if (minimalOrder) setMinimalOrder("");
     if (activeCategory) setActiveCategory("");
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top when page changes
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const isFilterCatsAvailable: boolean = filterCategories.length > 0;
@@ -495,6 +518,31 @@ export function ProductContent() {
                   </div>
                 )}
               </div>
+              
+              {/* Pagination Info and Controls */}
+              {mainData?.length > 0 && totalPages > 1 && (
+                <div className="mt-8">
+                  {/* Page Info */}
+                  <div className="text-center mb-4 text-sm text-slate-600">
+                    Halaman {currentPage} dari {totalPages} 
+                    {query.data?.meta?.pagination?.total && (
+                      <span className="ml-2">
+                        ({query.data.meta.pagination.total} produk)
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Pagination Controls */}
+                  <div className="flex justify-center">
+                    <PaginationControls
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={handlePageChange}
+                      className="mb-4"
+                    />
+                  </div>
+                </div>
+              )}
             </Box>
           </div>
         </div>
