@@ -40,7 +40,7 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({
         isVendor
           ? `[vendor_doc_id][$eq]=${session?.user?.documentId}`
           : `[email][$eq]=${session?.user?.email}`
-      }]=${documentId}`,
+      }]=${documentId}&sort=createdAt:desc`,
       `${session && session?.jwt}`
     );
 
