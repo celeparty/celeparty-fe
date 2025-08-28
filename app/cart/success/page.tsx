@@ -16,7 +16,7 @@ export default function SuccessPage() {
   useEffect(() => {
     if (summary) {
       const timer = setTimeout(() => {
-        router.push("/user/profile");
+        router.push("/user/profile/bio");
       }, 3000);
 
       return () => clearTimeout(timer);
