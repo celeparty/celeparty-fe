@@ -16,7 +16,6 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Missing environment variables' }, { status: 500 });
     }
     
-    console.log(`Searching for order_id: ${order_id}`);
     
     // Search in transaction-tickets
     const ticketResponse = await fetch(`${BASE_API}/api/transaction-tickets?filters[order_id][$eq]=${order_id}`, {
@@ -27,8 +26,6 @@ export async function GET(req: NextRequest) {
     });
     
     const ticketData = await ticketResponse.json();
-    console.log(`Ticket search status: ${ticketResponse.status}`);
-    console.log(`Ticket data:`, ticketData);
     
     // Search in transactions
     const transactionResponse = await fetch(`${BASE_API}/api/transactions?filters[order_id][$eq]=${order_id}`, {
@@ -39,8 +36,6 @@ export async function GET(req: NextRequest) {
     });
     
     const transactionData = await transactionResponse.json();
-    console.log(`Transaction search status: ${transactionResponse.status}`);
-    console.log(`Transaction data:`, transactionData);
     
     return NextResponse.json({
       order_id,

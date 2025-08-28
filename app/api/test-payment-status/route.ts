@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing order_id or payment_status' }, { status: 400 });
     }
     
-    console.log('Testing payment status update:', { order_id, payment_status });
+
     
     const BASE_API = process.env.BASE_API;
     const KEY_API = process.env.KEY_API;
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     }
     
     // First, find the transaction by order_id
-    console.log('Searching for transaction with order_id:', order_id);
+
     const searchResponse = await fetch(`${BASE_API}/api/transaction-tickets?filters[order_id][$eq]=${order_id}`, {
       method: 'GET',
       headers: {
@@ -27,9 +27,7 @@ export async function POST(req: NextRequest) {
       },
     });
     
-    console.log('Search response status:', searchResponse.status);
     const searchData = await searchResponse.json();
-    console.log('Search response data:', searchData);
     
     if (!searchResponse.ok || !searchData.data || searchData.data.length === 0) {
       return NextResponse.json({ 
@@ -39,8 +37,7 @@ export async function POST(req: NextRequest) {
     }
     
     const transaction = searchData.data[0];
-    console.log('Found transaction:', transaction);
-    console.log('Current payment_status:', transaction.payment_status);
+
     
     // Check if status is already the target status
     if (transaction.payment_status === payment_status) {
@@ -52,7 +49,7 @@ export async function POST(req: NextRequest) {
     }
     
     // Update the payment status
-    console.log(`Updating payment status from ${transaction.payment_status} to ${payment_status}`);
+
     const updateResponse = await fetch(`${BASE_API}/api/transaction-tickets/${transaction.id}`, {
       method: 'PUT',
       headers: {
@@ -67,9 +64,7 @@ export async function POST(req: NextRequest) {
       }),
     });
     
-    console.log('Update response status:', updateResponse.status);
     const updateData = await updateResponse.json();
-    console.log('Update response data:', updateData);
     
     if (!updateResponse.ok) {
       return NextResponse.json({ 

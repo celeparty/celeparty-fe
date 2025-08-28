@@ -5,7 +5,6 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const order_id = searchParams.get('order_id');
     
-    console.log('GET request for order_id:', order_id);
     
     if (!order_id) {
       return NextResponse.json({ error: 'Order ID is required', status: 400 });
@@ -19,7 +18,7 @@ export async function GET(req: NextRequest) {
 
     // Try to find in transactions table first
     const TRANSACTIONS_URL = `${process.env.BASE_API}/api/transactions`;
-    console.log('Searching in transactions table with order_id:', order_id);
+
     const transactionsRes = await fetch(`${TRANSACTIONS_URL}?filters[order_id]=${order_id}`, {
       headers: {
         Authorization: `Bearer ${KEY_API}`,
@@ -27,11 +26,11 @@ export async function GET(req: NextRequest) {
     });
 
     const transactionsData = await transactionsRes.json();
-    console.log('Transactions search response:', { status: transactionsRes.status, data: transactionsData });
+
 
     if (transactionsRes.ok && transactionsData?.data?.length > 0) {
       const transaction = transactionsData.data[0];
-      console.log('Found transaction in transactions table:', transaction);
+  
       return NextResponse.json({ 
         success: true, 
         data: transaction 
@@ -40,7 +39,7 @@ export async function GET(req: NextRequest) {
 
     // If not found in transactions, try transaction-tickets table
     const TICKETS_URL = `${process.env.BASE_API}/api/transaction-tickets`;
-    console.log('Searching in transaction-tickets table with order_id:', order_id);
+
     const ticketsRes = await fetch(`${TICKETS_URL}?filters[order_id]=${order_id}`, {
       headers: {
         Authorization: `Bearer ${KEY_API}`,
@@ -48,11 +47,11 @@ export async function GET(req: NextRequest) {
     });
 
     const ticketsData = await ticketsRes.json();
-    console.log('Transaction-tickets search response:', { status: ticketsRes.status, data: ticketsData });
+
 
     if (ticketsRes.ok && ticketsData?.data?.length > 0) {
       const ticket = ticketsData.data[0];
-      console.log('Found transaction in transaction-tickets table:', ticket);
+  
       return NextResponse.json({ 
         success: true, 
         data: ticket 
@@ -76,18 +75,11 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { order_id } = body;
     
-    console.log('QR verification request:', { order_id });
-    
     if (!order_id) {
       return NextResponse.json({ error: 'Order ID is required', status: 400 });
     }
 
     const KEY_API = process.env.KEY_API;
-    
-    console.log('Environment check:', {
-      BASE_API: process.env.BASE_API,
-      KEY_API: KEY_API ? 'SET' : 'NOT SET'
-    });
     
     if (!KEY_API) {
       return NextResponse.json({ error: 'KEY_API not set in environment', status: 500 });
@@ -95,7 +87,6 @@ export async function POST(req: NextRequest) {
 
     // Try to find in transactions table first
     const TRANSACTIONS_URL = `${process.env.BASE_API}/api/transactions`;
-    console.log('Searching in transactions table with order_id:', order_id);
     const transactionsRes = await fetch(`${TRANSACTIONS_URL}?filters[order_id]=${order_id}`, {
       headers: {
         Authorization: `Bearer ${KEY_API}`,
@@ -103,7 +94,6 @@ export async function POST(req: NextRequest) {
     });
 
     const transactionsData = await transactionsRes.json();
-    console.log('Transactions search response:', { status: transactionsRes.status, data: transactionsData });
 
     let transaction = null;
     let isTicket = false;
@@ -111,11 +101,9 @@ export async function POST(req: NextRequest) {
     if (transactionsRes.ok && transactionsData?.data?.length > 0) {
       transaction = transactionsData.data[0];
       isTicket = false;
-      console.log('Found transaction in transactions table:', transaction);
     } else {
       // If not found in transactions, try transaction-tickets table
       const TICKETS_URL = `${process.env.BASE_API}/api/transaction-tickets`;
-      console.log('Searching in transaction-tickets table with order_id:', order_id);
       const ticketsRes = await fetch(`${TICKETS_URL}?filters[order_id]=${order_id}`, {
         headers: {
           Authorization: `Bearer ${KEY_API}`,
@@ -123,12 +111,10 @@ export async function POST(req: NextRequest) {
       });
 
       const ticketsData = await ticketsRes.json();
-      console.log('Transaction-tickets search response:', { status: ticketsRes.status, data: ticketsData });
 
       if (ticketsRes.ok && ticketsData?.data?.length > 0) {
         transaction = ticketsData.data[0];
         isTicket = true;
-        console.log('Found transaction in transaction-tickets table:', transaction);
       }
     }
 
@@ -150,7 +136,6 @@ export async function POST(req: NextRequest) {
       ? `${process.env.BASE_API}/api/transaction-tickets/${transaction.id}`
       : `${TRANSACTIONS_URL}/${transaction.id}`;
 
-    console.log('Updating verification for transaction ID:', transaction.id, 'isTicket:', isTicket);
     const updateRes = await fetch(updateUrl, {
       method: 'PUT',
       headers: {
@@ -163,7 +148,6 @@ export async function POST(req: NextRequest) {
     });
 
     const updateData = await updateRes.json();
-    console.log('Update response:', { status: updateRes.status, data: updateData });
 
     if (!updateRes.ok) {
       console.error('Update failed with status:', updateRes.status);
@@ -177,7 +161,7 @@ export async function POST(req: NextRequest) {
       }, { status: updateRes.status });
     }
 
-    console.log('Update successful:', updateData);
+
     return NextResponse.json({ 
       success: true, 
       message: 'Ticket verified successfully',

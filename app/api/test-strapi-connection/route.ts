@@ -2,20 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
   try {
-    console.log('Testing Strapi connection...');
+
     
     const BASE_API = process.env.BASE_API;
     const KEY_API = process.env.KEY_API;
     
-    console.log('BASE_API:', BASE_API);
-    console.log('KEY_API exists:', !!KEY_API);
+
     
     if (!BASE_API || !KEY_API) {
       return NextResponse.json({ error: 'Missing environment variables' }, { status: 500 });
     }
     
     // Test 1: Basic connection to Strapi
-    console.log('Testing basic connection...');
+
     const basicResponse = await fetch(`${BASE_API}/api/transaction-tickets`, {
       method: 'GET',
       headers: {
@@ -23,15 +22,12 @@ export async function GET(req: NextRequest) {
       },
     });
     
-    console.log('Basic response status:', basicResponse.status);
     const basicData = await basicResponse.json();
-    console.log('Basic response data:', basicData);
     
     // Test 2: Try to get a specific transaction
     if (basicData.data && basicData.data.length > 0) {
       const firstTransaction = basicData.data[0];
-      console.log('Testing specific transaction update...');
-      console.log('Transaction ID:', firstTransaction.id);
+      
       
       const updateResponse = await fetch(`${BASE_API}/api/transaction-tickets/${firstTransaction.id}`, {
         method: 'PUT',
@@ -46,9 +42,7 @@ export async function GET(req: NextRequest) {
         }),
       });
       
-      console.log('Update response status:', updateResponse.status);
-      const updateData = await updateResponse.json();
-      console.log('Update response data:', updateData);
+          const updateData = await updateResponse.json();
       
       return NextResponse.json({ 
         success: true,

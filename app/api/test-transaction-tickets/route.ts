@@ -3,11 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    console.log('Test endpoint received:', body);
+
     
     // Test environment variables
-    console.log('BASE_API:', process.env.BASE_API);
-    console.log('KEY_API exists:', !!process.env.KEY_API);
+
     
     const STRAPI_URL = `${process.env.BASE_API}/api/transaction-tickets`;
     const KEY_API = process.env.KEY_API;
@@ -16,7 +15,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'KEY_API not set in environment' }, { status: 500 });
     }
     
-    console.log('Making request to:', STRAPI_URL);
+
     
     const strapiRes = await fetch(STRAPI_URL, {
       method: 'POST',
@@ -27,10 +26,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(body),
     });
     
-    console.log('Strapi response status:', strapiRes.status);
-    
     const data = await strapiRes.json();
-    console.log('Strapi response data:', data);
     
     if (!strapiRes.ok) {
       return NextResponse.json({ 

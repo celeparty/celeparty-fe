@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { documentId } = body;
     
-    console.log('Update verification request for documentId:', documentId);
+
     
     if (!documentId) {
       return NextResponse.json({ error: 'Document ID is required' }, { status: 400 });
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     // Try to find the document in transactions table first
     const TRANSACTIONS_URL = `${process.env.BASE_API}/api/transactions/${documentId}`;
-    console.log('Checking transactions table at:', TRANSACTIONS_URL);
+
     
     const transactionsRes = await fetch(TRANSACTIONS_URL, {
       headers: {
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     if (transactionsRes.ok) {
       // Document found in transactions table
-      console.log('Document found in transactions table, updating...');
+  
       const updateRes = await fetch(TRANSACTIONS_URL, {
         method: 'PUT',
         headers: {
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       });
 
       const updateData = await updateRes.json();
-      console.log('Transactions update response:', { status: updateRes.status, data: updateData });
+  
 
       if (!updateRes.ok) {
         return NextResponse.json({ 
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
 
     // If not found in transactions, try transaction-tickets table
     const TICKETS_URL = `${process.env.BASE_API}/api/transaction-tickets/${documentId}`;
-    console.log('Document not found in transactions, checking transaction-tickets table at:', TICKETS_URL);
+
     
     const ticketsRes = await fetch(TICKETS_URL, {
       headers: {
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
 
     if (ticketsRes.ok) {
       // Document found in transaction-tickets table
-      console.log('Document found in transaction-tickets table, updating...');
+  
       const updateRes = await fetch(TICKETS_URL, {
         method: 'PUT',
         headers: {
@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
       });
 
       const updateData = await updateRes.json();
-      console.log('Transaction-tickets update response:', { status: updateRes.status, data: updateData });
+  
 
       if (!updateRes.ok) {
         return NextResponse.json({ 

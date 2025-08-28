@@ -41,7 +41,7 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'KEY_API not set in environment' }, { status: 500 });
     }
     
-    console.log('Updating transaction:', { id, data, STRAPI_URL });
+
     
     const strapiRes = await fetch(STRAPI_URL, {
       method: 'PUT',
@@ -53,7 +53,7 @@ export async function PUT(req: NextRequest) {
     });
     
     const resData = await strapiRes.json();
-    console.log('Strapi response:', { status: strapiRes.status, data: resData });
+
     
     if (!strapiRes.ok) {
       return NextResponse.json({ 

@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing id or payment_status' }, { status: 400 });
     }
     
-    console.log('Testing Strapi update:', { id, payment_status });
+
     
     const BASE_API = process.env.BASE_API;
     const KEY_API = process.env.KEY_API;
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     }
     
     const STRAPI_URL = `${BASE_API}/api/transaction-tickets/${id}`;
-    console.log('Strapi URL:', STRAPI_URL);
+
     
     const updateResponse = await fetch(STRAPI_URL, {
       method: 'PUT',
@@ -34,10 +34,7 @@ export async function POST(req: NextRequest) {
       }),
     });
     
-    console.log('Update response status:', updateResponse.status);
-    
     const updateData = await updateResponse.json();
-    console.log('Update response data:', updateData);
     
     if (!updateResponse.ok) {
       return NextResponse.json({ 

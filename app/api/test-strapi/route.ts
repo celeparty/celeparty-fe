@@ -5,12 +5,6 @@ export async function GET(req: NextRequest) {
     const STRAPI_URL = `${process.env.BASE_API}/api/transactions`;
     const KEY_API = process.env.KEY_API;
     
-    console.log('Environment check:', {
-      BASE_API: process.env.BASE_API,
-      KEY_API: process.env.KEY_API ? 'SET' : 'NOT SET',
-      STRAPI_URL
-    });
-    
     if (!KEY_API) {
       return NextResponse.json({ 
         error: 'KEY_API not set in environment',

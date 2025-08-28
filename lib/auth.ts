@@ -52,7 +52,6 @@ export const authOptions: NextAuthOptions = {
                 },
 			},
 			async authorize(credentials) {
-				console.log("Credentials:", credentials);
 				const res = await fetch(`${process.env.BASE_API}/api/auth/local?populate=role`, {
 					method: "POST",
 					headers: {
@@ -62,11 +61,9 @@ export const authOptions: NextAuthOptions = {
 				  });
 			  
 				  const user = await res.json();
-				  console.log("API Response:", user);
 
 			  
 				if (res.ok && user.jwt) {
-					console.log("Login sukses, user:", user);
 				  return user; // Kembalikan respons API langsung
 				}
 			  

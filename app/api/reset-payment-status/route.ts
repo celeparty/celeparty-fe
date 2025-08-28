@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing order_id' }, { status: 400 });
     }
     
-    console.log('Resetting payment status to pending for order_id:', order_id);
+
     
     const BASE_API = process.env.BASE_API;
     const KEY_API = process.env.KEY_API;
@@ -35,8 +35,7 @@ export async function POST(req: NextRequest) {
     }
     
     const transaction = searchData.data[0];
-    console.log('Found transaction:', transaction.id);
-    console.log('Current payment_status:', transaction.payment_status);
+    
     
     // Reset to pending
     const updateResponse = await fetch(`${BASE_API}/api/transaction-tickets/${transaction.id}`, {

@@ -39,15 +39,6 @@ function QRPageContent() {
 
   // Check if user is logged in
   const isLoggedIn = !!session;
-  
-  // Debug: log state changes
-  useEffect(() => {
-    console.log('isChecking state changed to:', isChecking);
-  }, [isChecking]);
-  
-  // Debug: log user role information
-  console.log('Session:', session);
-  console.log('User data from API:', userData);
 
   // Get user data from API
   useEffect(() => {
@@ -55,12 +46,6 @@ function QRPageContent() {
       if (isLoggedIn && session?.jwt) {
         try {
           const userResponse = await axiosUser("GET", "/api/users/me", session.jwt);
-          console.log('User API Response:', userResponse);
-          console.log('=== USER DATA STRUCTURE DEBUG ===');
-          console.log('User response id:', userResponse?.id);
-          console.log('User response documentId:', userResponse?.documentId);
-          console.log('User response attributes:', userResponse?.attributes);
-          console.log('User response attributes id:', userResponse?.attributes?.id);
           setUserData(userResponse);
         } catch (error) {
           console.error('Error fetching user data:', error);
@@ -72,15 +57,7 @@ function QRPageContent() {
 
   useEffect(() => {
     const check = async () => {
-      console.log('=== CHECKING VERIFICATION CONDITIONS ===');
-      console.log('isLoggedIn:', isLoggedIn);
-      console.log('userData:', userData);
-      console.log('userRole:', userData?.role?.type);
-      console.log('status:', status);
-      console.log('order_id:', order_id);
-      
       if (!isLoggedIn) {
-        console.log('❌ User not logged in');
         setCanVerify(false);
         setIsChecking(false);
         return;
@@ -88,70 +65,55 @@ function QRPageContent() {
       
       // Check if user has vendor role using API data
       const userRole = userData?.role?.type;
-      console.log('Checking user role:', userRole);
       if (userRole !== 'vendor') {
-        console.log('❌ User is not vendor, role is:', userRole);
         setCanVerify(false);
         setIsChecking(false);
         return;
       }
-      console.log('✅ User is vendor');
       
       if (status !== 'active' || order_id === '') {
-        console.log('❌ Status not active or order_id empty. Status:', status, 'Order ID:', order_id);
         setCanVerify(false);
         setIsChecking(false);
         return;
       }
-      console.log('✅ Status is active and order_id exists');
       
-      try {
-        const res = await fetch(`/api/qr-verify?order_id=${order_id}`);
-        const data = await res.json();
-        console.log('QR API Response:', data); // Debug: log full response
-        console.log('Payment status:', data.data?.payment_status); // Debug: log payment status
-        
-        if (res.ok && data.data && (data.data.payment_status === 'settlement' || data.data.payment_status === 'Settlement')) {
-          console.log('✅ Payment status is settlement, setting canVerify to true');
-          setTransactionData(data.data);
+              try {
+          const res = await fetch(`/api/qr-verify?order_id=${order_id}`);
+          const data = await res.json();
           
-          // Check vendor ID match
-          const ticketVendorId = data.data.vendor_id || data.data.vendor_doc_id;
-          const currentUserId = userData?.id;
-          const currentUserDocumentId = userData?.documentId;
-          console.log('Ticket vendor ID:', ticketVendorId);
-          console.log('Current user ID:', currentUserId);
-          console.log('Current user documentId:', currentUserDocumentId);
-          
-          // Try matching with both user ID and documentId
-          const vendorMatches = (ticketVendorId && currentUserId && ticketVendorId === currentUserId) ||
-                               (ticketVendorId && currentUserDocumentId && ticketVendorId === currentUserDocumentId);
-          
-          if (vendorMatches) {
-            console.log('✅ Vendor ID matches');
-            setVendorMatch(true);
-            setCanVerify(true);
+          if (res.ok && data.data && (data.data.payment_status === 'settlement' || data.data.payment_status === 'Settlement')) {
+            setTransactionData(data.data);
+            
+            // Check vendor ID match
+            const ticketVendorId = data.data.vendor_id || data.data.vendor_doc_id;
+            const currentUserId = userData?.id;
+            const currentUserDocumentId = userData?.documentId;
+            
+            // Try matching with both user ID and documentId
+            const vendorMatches = (ticketVendorId && currentUserId && ticketVendorId === currentUserId) ||
+                                 (ticketVendorId && currentUserDocumentId && ticketVendorId === currentUserDocumentId);
+            
+            if (vendorMatches) {
+              setVendorMatch(true);
+              setCanVerify(true);
+            } else {
+              setVendorMatch(false);
+              setCanVerify(false);
+            }
+            
+            // Set verification status
+            setVerificationStatus(data.data.verification || false);
           } else {
-            console.log('❌ Vendor ID does not match');
-            setVendorMatch(false);
             setCanVerify(false);
+            setVerificationStatus(null);
+            setVendorMatch(null);
           }
-          
-          // Set verification status
-          setVerificationStatus(data.data.verification || false);
-        } else {
-          console.log('❌ Payment status check failed. Response ok:', res.ok, 'Data exists:', !!data.data, 'Payment status:', data.data?.payment_status);
+        } catch (error) {
+          console.error('Error checking transaction:', error);
           setCanVerify(false);
-          setVerificationStatus(null);
           setVendorMatch(null);
         }
-      } catch (error) {
-        console.error('Error checking transaction:', error);
-        setCanVerify(false);
-        setVendorMatch(null);
-      }
-      console.log('✅ Setting isChecking to false');
-      setIsChecking(false);
+        setIsChecking(false);
     };
     check();
   }, [isLoggedIn, status, order_id, userData]);

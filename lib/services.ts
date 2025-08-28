@@ -67,7 +67,7 @@ export const getData = (url: string) =>
 			return res;
 		})
 		.catch((error) => {
-			console.log(error);
+			console.error('Request failed:', error);
 		});
 
 export const getDataToken = (url: string, token: string) =>
@@ -81,7 +81,7 @@ export const getDataToken = (url: string, token: string) =>
 			return res;
 		})
 		.catch((error) => {
-			console.log(error);
+			console.error('Request failed:', error);
 		});
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -93,11 +93,10 @@ export const putDataToken = (url: string, token: string, data: any) =>
 			},
 		})
 		.then((res) => {
-			console.log(res);
 			return res;
 		})
 		.catch((error) => {
-			console.log(error);
+			console.error('Request failed:', error);
 		});
 
 export const getDataOpen = (url: string) =>
@@ -107,7 +106,7 @@ export const getDataOpen = (url: string) =>
 			return res;
 		})
 		.catch((error) => {
-			console.log(error);
+			console.error('Request failed:', error);
 		});
 
 export const postDataOpen = (url: string, data: []) =>
@@ -117,5 +116,5 @@ export const postDataOpen = (url: string, data: []) =>
 			return res;
 		})
 		.catch((error) => {
-			console.log(error);
+			console.error('Request failed:', error);
 		});

@@ -66,7 +66,7 @@ export const useCart = create<CartStore>()(
           return total + (item.price * item.quantity || 0);
         }, 0);
       },
-      test: () => console.log("test"),
+      
     }),
     {
       name: "cart",

@@ -75,7 +75,7 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({
     action: "process" | "cancel" | "complete"
   ) => {
     // Implement your API call here
-    console.log(`Changing order ${orderId} to ${action}`);
+
     // await updateOrderStatus(orderId, action);
     // refetchOrders();
   };

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    console.log('Test webhook received:', body);
+
     
     // Simulate Midtrans webhook data
     const mockWebhookData = {
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       signature_key: body.signature_key || "test_signature"
     };
     
-    console.log('Mock webhook data:', mockWebhookData);
+
     
     // Call the actual webhook endpoint
     const webhookResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/midtrans-webhook`, {
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     });
     
     const webhookResult = await webhookResponse.json();
-    console.log('Webhook result:', webhookResult);
+
     
     return NextResponse.json({
       success: true,

@@ -84,12 +84,6 @@ export default function CartContent() {
       // Jika produk adalah ticket, hanya perlu validasi dasar
       if (item.user_event_type === eProductType.ticket) {
         const isValid = basicValidation;
-        console.log(`Ticket validation for ${item.product_name}:`, {
-          customer_name: !!item.customer_name,
-          userTelp: !!userTelp,
-          variant: !!item.variant,
-          isValid
-        });
         return isValid;
       }
       
@@ -101,16 +95,6 @@ export default function CartContent() {
         item.loading_date &&
         item.loading_time
       );
-      console.log(`Product validation for ${item.product_name}:`, {
-        customer_name: !!item.customer_name,
-        userTelp: !!userTelp,
-        variant: !!item.variant,
-        event_date: !!item.event_date,
-        shipping_location: !!item.shipping_location,
-        loading_date: !!item.loading_date,
-        loading_time: !!item.loading_time,
-        isValid
-      });
       return isValid;
     });
 
@@ -318,10 +302,9 @@ export default function CartContent() {
           console.error("Error pembayaran Midtrans:", error);
           alert("Pembayaran gagal di Midtrans. Silakan coba lagi.");
         },
-        onClose: function () {
-          // User menutup popup pembayaran
-          console.log("Popup Midtrans ditutup user");
-        },
+                    onClose: function () {
+              // User menutup popup pembayaran
+            },
       });
     } catch (error) {
       console.error("Error in handleCheckout:", error);
@@ -338,11 +321,6 @@ export default function CartContent() {
       
       // Ambil data dari cart untuk ticket
       const ticketItem = cart[0]; // Ambil item pertama karena untuk ticket biasanya hanya 1 item
-      console.log("=== DEBUG TICKET ITEM ===");
-      console.log("Full ticket item:", ticketItem);
-      console.log("event_date:", ticketItem.event_date);
-      console.log("user_event_type:", ticketItem.user_event_type);
-      console.log("=== END DEBUG ===");
       
       // Generate order_id terlebih dahulu
       const order_id = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -369,36 +347,26 @@ export default function CartContent() {
         }
       };
       
-      console.log("Transaction ticket payload:", transactionTicketPayload);
-      console.log("Payload event_date:", transactionTicketPayload.data.event_date);
-      console.log("Payload event_type:", transactionTicketPayload.data.event_type);
-      console.log("Ticket item vendor_id:", ticketItem.vendor_id);
+
       
       try {
         // Push data ke Strapi transaction-tickets terlebih dahulu
-        console.log("Sending to Strapi...");
         const strapiRes = await axios.post("/api/transaction-tickets-proxy", transactionTicketPayload);
-        console.log("Strapi response:", strapiRes.data);
         
         // Order ID sudah di-generate di atas
-        console.log("Using Order ID:", order_id);
         
         try {
           // Kirim ke Midtrans untuk pembayaran
-          console.log("Sending to Midtrans...");
           const response = await axios.post(`/api/payment`, {
             email: userEmail,
             items: data,
             order_id: order_id
           });
-          console.log("Payment API response:", response.data);
           
           const token = response.data.token;
-          console.log("Midtrans token:", token);
           
           window.snap.pay(token, {
             onSuccess: async function (result: any) {
-              console.log("Midtrans success:", result);
               try {
                 // Simpan summary transaksi ke sessionStorage
                 sessionStorage.setItem(
@@ -427,7 +395,6 @@ export default function CartContent() {
             },
             onClose: function () {
               // User menutup popup pembayaran
-              console.log("Popup Midtrans ditutup user");
             },
           });
         } catch (paymentError: any) {

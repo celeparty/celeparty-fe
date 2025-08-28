@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing environment variables' }, { status: 500 });
     }
     
-    console.log(`Updating transaction ${transaction_id} to status: ${payment_status}`);
+
     
     // Update transaction-ticket directly
     const updateResponse = await fetch(`${BASE_API}/api/transaction-tickets/${transaction_id}`, {
@@ -33,11 +33,11 @@ export async function POST(req: NextRequest) {
       }),
     });
     
-    console.log(`Update response status: ${updateResponse.status}`);
+
     
     if (updateResponse.ok) {
       const updateResult = await updateResponse.json();
-      console.log(`Successfully updated transaction ${transaction_id} status to ${payment_status}`, updateResult);
+  
       return NextResponse.json({ 
         success: true, 
         updated_id: transaction_id,
