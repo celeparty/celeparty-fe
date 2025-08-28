@@ -9,7 +9,6 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'order_id parameter is required' }, { status: 400 });
     }
     
-    console.log(`Checking transaction structure for order_id: ${orderId}`);
     
     const BASE_API = process.env.BASE_API;
     const KEY_API = process.env.KEY_API;
@@ -26,9 +25,7 @@ export async function GET(req: NextRequest) {
       },
     });
     
-    console.log('Search response status:', searchResponse.status);
     const searchData = await searchResponse.json();
-    console.log('Search response data:', searchData);
     
     if (!searchResponse.ok || !searchData.data || searchData.data.length === 0) {
       return NextResponse.json({ 

@@ -4,7 +4,6 @@ import crypto from 'crypto';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    console.log('Midtrans webhook received:', body);
 
     // Verify webhook signature (optional but recommended for security)
     const signatureKey = process.env.MIDTRANS_SIGNATURE_KEY;
@@ -53,7 +52,6 @@ export async function POST(req: NextRequest) {
       paymentStatus = 'failed';
     }
 
-    console.log(`Updating payment status for order ${order_id} to ${paymentStatus}`);
 
     // Update transaction in Strapi
     const BASE_API = process.env.BASE_API;
@@ -66,7 +64,6 @@ export async function POST(req: NextRequest) {
 
     // First, try to update transaction-tickets
     try {
-      console.log(`Searching for transaction-ticket with order_id: ${order_id}`);
       
       // Try exact match first
       const encodedOrderId = encodeURIComponent(order_id);
@@ -78,14 +75,9 @@ export async function POST(req: NextRequest) {
       });
       
       let ticketData = await ticketResponse.json();
-      console.log(`Ticket search response status: ${ticketResponse.status}`);
-      console.log(`Ticket search result:`, ticketData);
-      console.log(`Ticket data length:`, ticketData.data?.length);
-      console.log(`Ticket data:`, ticketData.data);
       
       // If not found, try searching all tickets to see what we have
       if (!ticketResponse.ok || ticketData.data.length === 0) {
-        console.log('Exact match not found, searching all tickets...');
         const allTicketsResponse = await fetch(`${BASE_API}/api/transaction-tickets`, {
           method: 'GET',
           headers: {
@@ -94,7 +86,6 @@ export async function POST(req: NextRequest) {
         });
         
         const allTickets = await allTicketsResponse.json();
-        console.log('All tickets found:', allTickets.data?.map((t: any) => ({ id: t.id, order_id: t.order_id })));
         
         // Try to find by partial match or use the most recent ticket
         const matchingTicket = allTickets.data?.find((t: any) => 
@@ -104,24 +95,17 @@ export async function POST(req: NextRequest) {
         );
         
         if (matchingTicket) {
-          console.log('Found matching ticket by partial match:', matchingTicket);
           ticketData = { data: [matchingTicket] };
         } else {
-          console.log('No matching ticket found even in all tickets');
         }
       }
       
-      console.log(`Checking ticketData.data:`, !!ticketData.data);
-      console.log(`Checking ticketData.data.length:`, ticketData.data?.length);
       
       if (ticketData.data && ticketData.data.length > 0) {
         // Update transaction-ticket
         const ticketDocumentId = ticketData.data[0].documentId;
-        console.log(`Found ticket with documentId: ${ticketDocumentId}`);
-        console.log(`Updating transaction-ticket ${ticketDocumentId} with status: ${paymentStatus}`);
         
         // Update directly to Strapi
-        console.log(`Updating directly to Strapi: ${BASE_API}/api/transaction-tickets/${ticketDocumentId}`);
         const updateResponse = await fetch(`${BASE_API}/api/transaction-tickets/${ticketDocumentId}`, {
           method: 'PUT',
           headers: {
@@ -135,18 +119,15 @@ export async function POST(req: NextRequest) {
           }),
         });
 
-        console.log(`Update response status: ${updateResponse.status}`);
         
         if (updateResponse.ok) {
           const updateResult = await updateResponse.json();
-          console.log(`Successfully updated transaction-ticket ${ticketDocumentId} status to ${paymentStatus}`, updateResult);
           return NextResponse.json({ success: true, type: 'ticket', updated_id: ticketDocumentId });
         } else {
           const errorData = await updateResponse.json();
           console.error(`Failed to update transaction-ticket:`, errorData);
         }
       } else {
-        console.log(`No transaction-ticket found with order_id: ${order_id}`);
       }
     } catch (error) {
       console.error('Error searching transaction-ticket:', error);
@@ -180,7 +161,6 @@ export async function POST(req: NextRequest) {
           });
 
           if (updateResponse.ok) {
-            console.log(`Successfully updated transaction ${transactionId} status to ${paymentStatus}`);
             return NextResponse.json({ success: true, type: 'transaction' });
           }
         }
@@ -189,7 +169,6 @@ export async function POST(req: NextRequest) {
       console.error('Error updating transaction:', error);
     }
 
-    console.log(`No transaction found for order_id: ${order_id}`);
     return NextResponse.json({ error: 'Transaction not found' }, { status: 404 });
 
   } catch (error) {

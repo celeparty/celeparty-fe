@@ -23,8 +23,6 @@ export function GET() {
 export async function POST(req) {
     try {
         const requestData = await req.json()
-        console.log("Request data:", requestData)
-        
         // Handle both old format (array) and new format (object with items)
         let items = []
         if (Array.isArray(requestData)) {
@@ -61,7 +59,6 @@ export async function POST(req) {
           }
         }
 
-        console.log("Midtrans parameter:", parameter)
         const token = await snap.createTransactionToken(parameter)
         
         return NextResponse.json({

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
   try {
-    console.log('Listing all transactions...');
     
     const BASE_API = process.env.BASE_API;
     const KEY_API = process.env.KEY_API;

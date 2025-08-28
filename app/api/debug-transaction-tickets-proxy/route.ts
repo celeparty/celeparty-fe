@@ -5,11 +5,6 @@ export async function GET(req: NextRequest) {
     const STRAPI_URL = `${process.env.BASE_API}/api/transaction-tickets`;
     const KEY_API = process.env.KEY_API;
     
-    console.log('Debug info:', {
-      BASE_API: process.env.BASE_API,
-      KEY_API: KEY_API ? 'SET' : 'NOT SET',
-      STRAPI_URL,
-    });
     
     if (!KEY_API) {
       return NextResponse.json({ 
@@ -59,12 +54,6 @@ export async function POST(req: NextRequest) {
     const STRAPI_URL = `${process.env.BASE_API}/api/transaction-tickets`;
     const KEY_API = process.env.KEY_API;
     
-    console.log('Debug POST info:', {
-      BASE_API: process.env.BASE_API,
-      KEY_API: KEY_API ? 'SET' : 'NOT SET',
-      STRAPI_URL,
-      body,
-    });
     
     if (!KEY_API) {
       return NextResponse.json({ 

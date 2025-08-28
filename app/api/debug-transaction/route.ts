@@ -9,7 +9,6 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'order_id parameter is required' }, { status: 400 });
     }
     
-    console.log(`Debug: Searching for order_id: ${orderId}`);
     
     const BASE_API = process.env.BASE_API;
     const KEY_API = process.env.KEY_API;
@@ -19,7 +18,6 @@ export async function GET(req: NextRequest) {
     }
     
     // Search in transaction-tickets
-    console.log('Searching in transaction-tickets...');
     const ticketResponse = await fetch(`${BASE_API}/api/transaction-tickets?filters[order_id][$eq]=${orderId}`, {
       method: 'GET',
       headers: {
@@ -27,12 +25,9 @@ export async function GET(req: NextRequest) {
       },
     });
     
-    console.log(`Ticket search status: ${ticketResponse.status}`);
     const ticketData = await ticketResponse.json();
-    console.log('Ticket search result:', ticketData);
     
     // Search in regular transactions
-    console.log('Searching in regular transactions...');
     const transactionResponse = await fetch(`${BASE_API}/api/transactions?filters[order_id][$eq]=${orderId}`, {
       method: 'GET',
       headers: {
@@ -40,12 +35,9 @@ export async function GET(req: NextRequest) {
       },
     });
     
-    console.log(`Transaction search status: ${transactionResponse.status}`);
     const transactionData = await transactionResponse.json();
-    console.log('Transaction search result:', transactionData);
     
     // Search without filters to see all records
-    console.log('Searching all transaction-tickets...');
     const allTicketsResponse = await fetch(`${BASE_API}/api/transaction-tickets`, {
       method: 'GET',
       headers: {
@@ -54,7 +46,6 @@ export async function GET(req: NextRequest) {
     });
     
     const allTicketsData = await allTicketsResponse.json();
-    console.log('All tickets:', allTicketsData);
     
     return NextResponse.json({
       order_id: orderId,
