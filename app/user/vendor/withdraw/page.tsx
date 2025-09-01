@@ -135,8 +135,10 @@ export default function Wallet() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value.replace(/\D/g, "");
-    const formatted = rawValue === "" ? "" : formatNumberWithDots(rawValue);
-    setWithDrawBalance(formatted);
+    if (rawValue) {
+      const formatted = rawValue === "" ? "" : formatNumberWithDots(rawValue);
+      setWithDrawBalance(formatted);
+    }
   };
 
   return (

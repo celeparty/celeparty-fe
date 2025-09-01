@@ -16,7 +16,7 @@ export const formatRupiah = (val: number) => {
 };
 
 export const formatNumberWithDots = (value: string | number): string => {
-  const numberString = value.toString().replace(/\D/g, "");
+  const numberString = value?.toString().replace(/\D/g, "");
   if (!numberString) return "";
   return numberString.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };
