@@ -10,6 +10,7 @@ import { PiSmileySadDuotone } from "react-icons/pi";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import { eProductType } from "@/lib/enums/eProduct";
+import { isValid } from "date-fns";
 
 declare global {
   interface Window {
@@ -79,22 +80,21 @@ export default function CartContent() {
     cart.length > 0 &&
     cart.every((item: any) => {
       // Validasi dasar yang diperlukan semua produk
-      const basicValidation = item.customer_name && userTelp && item.variant;
-      
+      const basicValidation = item.customer_name && userTelp;
+
       // Jika produk adalah ticket, hanya perlu validasi dasar
-      if (item.user_event_type === eProductType.ticket) {
+      if (item.user_event_type === eProductType.ticket && item.variant) {
         const isValid = basicValidation;
         return isValid;
       }
-      
+
       // Jika produk bukan ticket, perlu semua field
-      const isValid = (
+      const isValid =
         basicValidation &&
         item.event_date &&
         item.shipping_location &&
         item.loading_date &&
-        item.loading_time
-      );
+        item.loading_time;
       return isValid;
     });
 
@@ -200,7 +200,6 @@ export default function CartContent() {
                   }}
                 />
               </div>
-              
             </div>
           </div>
         ))}
@@ -253,30 +252,32 @@ export default function CartContent() {
         email: userEmail,
         event_type: c.user_event_type, // Tambahan field event_type
       };
-      
+
       // Push data ke Strapi terlebih dahulu
       const strapiRes = await axios.post("/api/transaction-proxy", {
         data: transactionPayload,
       });
-      
+
       // Ambil order_id dari response Strapi atau generate baru
-      const order_id = strapiRes.data.data.id || `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
+      const order_id =
+        strapiRes.data.data.id ||
+        `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
       // Update order_id di Strapi jika belum ada
       if (!strapiRes.data.data.order_id) {
         await axios.put(`/api/transaction-proxy/${strapiRes.data.data.id}`, {
-          data: { order_id: order_id }
+          data: { order_id: order_id },
         });
       }
-      
+
       // Kirim ke Midtrans untuk pembayaran
       const response = await axios.post(`/api/payment`, {
         email: userEmail,
         items: data,
-        order_id: order_id
+        order_id: order_id,
       });
       const token = response.data.token;
-      
+
       window.snap.pay(token, {
         onSuccess: async function (result: any) {
           try {
@@ -295,16 +296,18 @@ export default function CartContent() {
             window.location.href = "/cart/success";
           } catch (err: any) {
             console.error("Error saving transaction summary:", err);
-            alert("Transaksi berhasil, tapi ada masalah dengan penyimpanan data.");
+            alert(
+              "Transaksi berhasil, tapi ada masalah dengan penyimpanan data."
+            );
           }
         },
         onError: function (error: any) {
           console.error("Error pembayaran Midtrans:", error);
           alert("Pembayaran gagal di Midtrans. Silakan coba lagi.");
         },
-                    onClose: function () {
-              // User menutup popup pembayaran
-            },
+        onClose: function () {
+          // User menutup popup pembayaran
+        },
       });
     } catch (error) {
       console.error("Error in handleCheckout:", error);
@@ -318,14 +321,16 @@ export default function CartContent() {
       // console.log("Cart data:", cart);
       // console.log("Data being sent to payment API:", data);
       // console.log("User email:", userEmail);
-      
+
       // Ambil data dari cart untuk ticket
       const ticketItem = cart[0]; // Ambil item pertama karena untuk ticket biasanya hanya 1 item
-      
+
       // Generate order_id terlebih dahulu
-      const order_id = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const order_id = `ORDER-${Date.now()}-${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
       // console.log("Generated Order ID:", order_id);
-      
+
       // Siapkan payload untuk Strapi transaction-tickets
       const transactionTicketPayload = {
         data: {
@@ -343,28 +348,29 @@ export default function CartContent() {
           order_id: order_id,
           customer_mail: userEmail,
           verification: false,
-          vendor_id: "ppwi8orhjjp0d8x75wqoffmc" // Set vendor_id langsung
-        }
+          vendor_id: "ppwi8orhjjp0d8x75wqoffmc", // Set vendor_id langsung
+        },
       };
-      
 
-      
       try {
         // Push data ke Strapi transaction-tickets terlebih dahulu
-        const strapiRes = await axios.post("/api/transaction-tickets-proxy", transactionTicketPayload);
-        
+        const strapiRes = await axios.post(
+          "/api/transaction-tickets-proxy",
+          transactionTicketPayload
+        );
+
         // Order ID sudah di-generate di atas
-        
+
         try {
           // Kirim ke Midtrans untuk pembayaran
           const response = await axios.post(`/api/payment`, {
             email: userEmail,
             items: data,
-            order_id: order_id
+            order_id: order_id,
           });
-          
+
           const token = response.data.token;
-          
+
           window.snap.pay(token, {
             onSuccess: async function (result: any) {
               try {
@@ -381,12 +387,14 @@ export default function CartContent() {
                     email: userEmail,
                   })
                 );
-                
+
                 setCart([]);
                 window.location.href = "/cart/success";
               } catch (err: any) {
                 console.error("Error saving transaction summary:", err);
-                alert("Transaksi berhasil, tapi ada masalah dengan penyimpanan data.");
+                alert(
+                  "Transaksi berhasil, tapi ada masalah dengan penyimpanan data."
+                );
               }
             },
             onError: function (error: any) {
@@ -400,21 +408,31 @@ export default function CartContent() {
         } catch (paymentError: any) {
           console.error("Error calling payment API:", paymentError);
           console.error("Payment error response:", paymentError.response?.data);
-          alert(`Error payment API: ${paymentError.response?.data?.error || paymentError.message}`);
+          alert(
+            `Error payment API: ${
+              paymentError.response?.data?.error || paymentError.message
+            }`
+          );
         }
-        
       } catch (strapiError: any) {
         console.error("Error calling Strapi:", strapiError);
         console.error("Strapi error response:", strapiError.response?.data);
-        alert(`Error Strapi: ${strapiError.response?.data?.error || strapiError.message}`);
+        alert(
+          `Error Strapi: ${
+            strapiError.response?.data?.error || strapiError.message
+          }`
+        );
       }
-      
     } catch (error: any) {
       console.error("Error in checkoutTicket:", error);
       console.error("Error response:", error.response?.data);
-      alert(`Gagal memproses pembayaran: ${error.response?.data?.error || error.message}`);
+      alert(
+        `Gagal memproses pembayaran: ${
+          error.response?.data?.error || error.message
+        }`
+      );
     }
-  }
+  };
 
   return (
     <div className="wrapper">
@@ -574,9 +592,8 @@ export default function CartContent() {
                   </div>
                 </div>
                 {/* Tombol pembayaran */}
-                {
-                  cart[0]?.user_event_type !== eProductType.ticket ? (
-                    <div
+                {cart[0]?.user_event_type !== eProductType.ticket ? (
+                  <div
                     className={`bg-c-green text-white text-center py-3 mt-5 rounded-lg cursor-pointer ${
                       !isCartValid ? "opacity-50 pointer-events-none" : ""
                     }`}
@@ -584,13 +601,14 @@ export default function CartContent() {
                   >
                     Pembayaran
                   </div>
-                  ) : (
-                    <div className="bg-c-green text-white text-center py-3 mt-5 rounded-lg cursor-pointer" onClick={checkoutTicket}>
-                      Pembayaran
-                    </div>
-                  )
-                }
-
+                ) : (
+                  <div
+                    className="bg-c-green text-white text-center py-3 mt-5 rounded-lg cursor-pointer"
+                    onClick={checkoutTicket}
+                  >
+                    Pembayaran
+                  </div>
+                )}
               </div>
             </Box>
           </div>
