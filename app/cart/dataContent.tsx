@@ -251,6 +251,7 @@ export default function CartContent() {
         note: notes,
         email: userEmail,
         event_type: c.user_event_type, // Tambahan field event_type
+        vendor_doc_id: c.vendor_id || "", // Tambahkan vendor_id dari cart item
       };
 
       // Push data ke Strapi terlebih dahulu
@@ -348,7 +349,7 @@ export default function CartContent() {
           order_id: order_id,
           customer_mail: userEmail,
           verification: false,
-          vendor_id: "ppwi8orhjjp0d8x75wqoffmc", // Set vendor_id langsung
+          vendor_id: ticketItem.vendor_id || "", // Ambil dari cart item, bukan hardcode
         },
       };
 
