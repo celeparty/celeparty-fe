@@ -89,7 +89,7 @@ export default function SideBar({
         dataProducts.user_event_type?.name ||
         dataProducts.user_event_type?.id ||
         "",
-      vendor_id: dataProducts.users_permissions_user?.id || "",
+      vendor_id: dataProducts.users_permissions_user?.documentId || "",
     };
     const cartRaw = useCart.getState().cart;
     const prevCart: CartItem[] = Array.isArray(cartRaw) ? cartRaw : [];

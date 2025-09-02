@@ -353,6 +353,10 @@ export default function CartContent() {
         },
       };
 
+
+      // console.log({ticketItem});
+
+
       try {
         // Push data ke Strapi transaction-tickets terlebih dahulu
         const strapiRes = await axios.post(
