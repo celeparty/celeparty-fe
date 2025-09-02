@@ -300,7 +300,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           className: eAlertType.SUCCESS,
         });
         if (!isEdit) reset({} as iProductReq);
-        window.location.reload();
+        window.location.href = "/user/vendor/products";
       }
     } catch (error: any) {
       console.error(error);

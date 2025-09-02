@@ -319,7 +319,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
           className: eAlertType.SUCCESS,
         });
         if (!isEdit) reset({} as iTicketFormReq);
-        window.location.reload();
+        window.location.href = "/user/vendor/products";
       }
     } catch (error: any) {
       toast({
