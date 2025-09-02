@@ -8,6 +8,7 @@ import { formatYearDate } from "@/lib/dateUtils";
 import { eAlertType } from "@/lib/enums/eAlert";
 import {
   iProductImage,
+  iProductVariant,
   iTicketFormReq,
   iTicketImage,
   iTicketVariant,
@@ -266,7 +267,8 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
         ...data,
         main_image: images,
         event_date: formatYearDate(data.event_date) ?? "",
-        minimal_order_date: formatYearDate(data.minimal_order_date) ?? "",
+        minimal_order_date: formatYearDate(data.maximal_order_date) ?? "",
+        maximal_order_date: formatYearDate(data.maximal_order_date) ?? "",
         main_price: formatMoneyReq(lowestPrice),
         users_permissions_user: {
           connect: [
