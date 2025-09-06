@@ -25,6 +25,9 @@ export default function Footer() {
                 <li>
                   <Link href="/blog">Blog</Link>
                 </li>
+                 <li>
+                  <Link href="/policy">Syarat dan Ketentuan</Link>
+                </li>
                 <li>
                   <Link href="/contact">Hubungi Kami</Link>
                 </li>
