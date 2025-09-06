@@ -263,6 +263,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
         price_max: formatMoneyReq(data.price_max),
         variant: variants,
         escrow: escrowChecked,
+        rate: 5,
       };
       // Inject user_event_type if forced
       if (forceUserEventType) {
@@ -529,29 +530,6 @@ export const ProductForm: React.FC<iProductFormProps> = ({
               },
             })}
           />
-        </ProductItemInput>
-        <ProductItemInput label="Rate Produk" required={false}>
-          <input
-            className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
-            placeholder="Rate Produk"
-            type="number"
-            min="1"
-            {...register("rate", {
-              required: false,
-              valueAsNumber: true,
-              onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-                const value = e.target.value;
-                if (value === "" || isNaN(parseInt(value))) {
-                  setValue("rate", 0);
-                } else {
-                  setValue("rate", parseInt(value));
-                }
-              },
-            })}
-          />
-          {errors.title && (
-            <p className="text-red-500 text-[10px]">{`${errors.title.message}`}</p>
-          )}
         </ProductItemInput>
         <SubTitle title="Tambah Variant Produk" className="mb-3" />
         <div className="w-full mb-3">
