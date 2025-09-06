@@ -99,6 +99,8 @@ export const DatePickerInput: React.FC<iDatePickerProps> = ({
                     handleDayRangeClick(dates);
                   }}
                   disabled={minDate ? { before: minDate } : undefined}
+                  captionLayout="dropdown"
+                  hideNavigation
                 />
               </>
             ) : (
@@ -118,6 +120,12 @@ export const DatePickerInput: React.FC<iDatePickerProps> = ({
                   disabled={minDate ? { before: minDate } : undefined}
                   showOutsideDays
                   fixedWeeks
+                  captionLayout="dropdown"
+                  hideNavigation
+                  classNames={{
+                    selected: `bg-c-green rounded-[100%] font-bold text-white`,
+                  }}
+                  mode="single"
                 />
               </>
             )}
