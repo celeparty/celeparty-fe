@@ -171,11 +171,11 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({
                                 </span>{" "}
                                 {item.event_date}
                               </p>
-                              <p>
+                               <p>
                                 <span className="font-medium">
-                                  Jenis Tiket:
+                                  Waktu Acara:
                                 </span>{" "}
-                                {item.variant}
+                                {item.waktu_event}
                               </p>
                             </div>
                             <div className="md:col-span-6">

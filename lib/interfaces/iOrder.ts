@@ -50,4 +50,5 @@ export interface iOrderTicket {
   verification: boolean;
   vendor_id: string;
   event_type: string;
+  waktu_event: string;
 }
