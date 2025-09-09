@@ -195,6 +195,8 @@ function QRPageContent() {
           <div className="mb-2"><b>Email:</b> {email}</div>
           <div className="mb-2"><b>Nama Event:</b> {transactionData?.product_name || (transactionData?.products && typeof transactionData.products === 'object' ? transactionData.products.title || transactionData.products.name || 'N/A' : 'N/A')}</div>
           <div className="mb-2"><b>Tipe Event:</b> {event_type}</div>
+          <div className="mb-2"><b>Varian:</b> {transactionData?.variant}</div>
+          <div className="mb-2"><b>Quantity:</b> {transactionData?.quantity}</div>
           <div className="mb-2"><b>Tanggal Acara:</b> {event_date}</div>
           <div className="mb-2"><b>Status Tiket:</b> <span className={status === 'active' ? 'text-green-600 font-bold' : 'text-red-600 font-bold'}>{status}</span></div>
           {verificationStatus !== null && (
