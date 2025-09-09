@@ -227,11 +227,12 @@ export default function CartContent() {
       return;
     }
     // Gabungkan field yang bisa berbeda antar produk
-    const variants = cart.map((item: any) => item.variant).join(",");
+    const variants = cart.map((item: any) => item.variant).filter((v: string) => v && v.trim() !== "").join(",");
     const quantities = cart.map((item: any) => item.quantity).join(",");
     const notes = cart.map((item: any) => item.note).join("; ");
     // Ambil field yang sama dari produk pertama
     const c = cart[0] || {};
+
     try {
       // Siapkan payload transaksi ke Strapi
       const transactionPayload = {
@@ -259,17 +260,23 @@ export default function CartContent() {
         data: transactionPayload,
       });
 
-      // Ambil order_id dari response Strapi atau generate baru
-      const order_id =
-        strapiRes.data.data.id ||
-        `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-      // Update order_id di Strapi jika belum ada
-      if (!strapiRes.data.data.order_id) {
-        await axios.put(`/api/transaction-proxy/${strapiRes.data.data.id}`, {
-          data: { order_id: order_id },
-        });
-      }
+      console.log("Transaction Payload:", JSON.stringify(transactionPayload, null, 2));
+      console.log("Cart data:", cart);
+      console.log("Variants:", variants);    
+  
+
+      // const order_id =
+      //   strapiRes.data.data.id ||
+      //   `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+      // if (!strapiRes.data.data.order_id) {
+      //   await axios.put(`/api/transaction-proxy/${strapiRes.data.data.id}`, {
+      //     data: { order_id: order_id },
+      //   });
+      // }
+      const order_id = strapiRes.data.data.id || `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
 
       // Kirim ke Midtrans untuk pembayaran
       const response = await axios.post(`/api/payment`, {
