@@ -231,14 +231,14 @@ export default function SideBar({
               type="button"
               disabled={
                 value >= 1 && 
-                (dataProducts.variant && dataProducts.variant.length > 0 ? selectedVariantId !== null : true)
+                (dataProducts.variant && dataProducts.variant.length > 1 ? selectedVariantId !== null : true)
                   ? false 
                   : true
               }
               value="+ Keranjang"
               className={`${
                 value >= 1 && 
-                (dataProducts.variant && dataProducts.variant.length > 0 ? selectedVariantId !== null : true)
+                (dataProducts.variant && dataProducts.variant.length > 1 ? selectedVariantId !== null : true)
                   ? "bg-c-green cursor-pointer"
                   : "bg-c-gray-text2 opacity-30 cursor-default"
               }  mt-5 text-white text-[15px] py-3 w-full rounded-lg `}
