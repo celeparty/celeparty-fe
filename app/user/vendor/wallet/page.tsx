@@ -98,7 +98,7 @@ export default function Wallet() {
                         Saldo Penghasilan
                       </div>
                       <div className="text-[14px] lg:text-[16px] font-bold text-black">
-                        Saldo Refund
+                        Processing Refund
                       </div>
                     </div>
                     <div className="r-side">
