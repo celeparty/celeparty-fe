@@ -171,7 +171,7 @@ export default function SideBar({
                 : "1"}{" "}
             </div>
             <div>
-              Waktu Pemesanan : {dataProducts.minimal_order_date ?? "-"}{" "}
+              Batas waktu pemesanan : {dataProducts.maximal_order_date ?? "-"}{" "}
             </div>
             {/* Field Tanggal Acara - untuk produk non-ticket saja */}
             {productTypeName !== eProductType.ticket && (
