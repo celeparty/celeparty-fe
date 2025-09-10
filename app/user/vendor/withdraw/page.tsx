@@ -118,7 +118,7 @@ export default function Wallet() {
       if (response) {
         toast({
           title: "Sukses",
-          description: "Permintaan Anda berhasil di proses!",
+          description: "Permintaan anda akan segera diproses maksimal 2x24 jam.",
           className: eAlertType.SUCCESS,
         });
         setWithDrawBalance("");

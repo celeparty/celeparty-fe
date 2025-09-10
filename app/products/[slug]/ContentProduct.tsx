@@ -129,9 +129,7 @@ export default function ContentProduct(props: any) {
                 </div>
                 <div>{dataContent?.average_rating}</div>
               </div>
-              {
-                console.log(dataContent)
-              }
+
               {dataContent?.variant.length > 1 && (
                 <div className="relative text-[18px] lg:mt-5 mt-[10px]">
                   <h4>Varian</h4>

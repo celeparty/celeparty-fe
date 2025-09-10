@@ -1,15 +1,16 @@
 "use client";
 import { DatePickerInput } from "@/components/form-components/DatePicker";
+import { useToast } from "@/hooks/use-toast";
+import { eAlertType } from "@/lib/enums/eAlert";
+import { eProductType } from "@/lib/enums/eProduct";
+import { CartItem } from "@/lib/interfaces/iCart";
 import { useCart, useNotif } from "@/lib/store/cart";
 import { useTransaction } from "@/lib/store/transaction";
 import { format, isValid, parse } from "date-fns";
-import Cookies from "js-cookie";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { ChangeEventHandler, useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
-import { CartItem } from "@/lib/interfaces/iCart";
-import { eProductType } from "@/lib/enums/eProduct";
 
 export const Notification = () => {
   const { statusNotif, message } = useNotif();
@@ -32,7 +33,7 @@ export default function SideBar({
   currentPrice,
   selectedVariantId,
 }: any) {
-  const [value, setValue] = useState(0);
+  const [qtyValue, setQtyValue] = useState(0);
   const [note, setNote] = useState("");
   const [shippingAddress, setShippingAddress] = useState("");
   const [eventDate, setEventDate] = useState("");
@@ -40,11 +41,18 @@ export default function SideBar({
   const [loadingTime, setLoadingTime] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [telp, setTelp] = useState("");
-  const [variant, setVariant] = useState("");
+
   const { data: session, status } = useSession();
   const { cart, setCart }: any = useCart();
   const { transaction }: any = useTransaction();
   const notifCart = useNotif((state) => state.notifCart);
+
+  const selectedVariant = dataProducts.variant.find(
+    (v: any) => v.id === selectedVariantId
+  );
+  const maxQuota = selectedVariant ? Number(selectedVariant.quota) : 0;
+
+  const { toast } = useToast();
 
   const { user_event_type } = dataProducts;
   const { name: productTypeName } = user_event_type || {};
@@ -74,13 +82,14 @@ export default function SideBar({
       product_name: dataProducts.title,
       price: currentPrice,
       image: dataProducts.main_image[0].url,
-      quantity: value,
+      quantity: qtyValue,
       note: note,
       loading_date: loadingDate,
       loading_time: loadingTime,
-      event_date: productTypeName === eProductType.ticket 
-        ? dataProducts.event_date || "" 
-        : eventDate,
+      event_date:
+        productTypeName === eProductType.ticket
+          ? dataProducts.event_date || ""
+          : eventDate,
       shipping_location: shippingAddress,
       customer_name: customerName,
       telp: telp,
@@ -108,6 +117,17 @@ export default function SideBar({
     setCart(newCart);
   };
 
+  const showErrorToast = () => {
+    toast({
+      description:
+        qtyValue >= maxQuota && selectedVariantId !== null
+          ? "Anda telah memilih melebihi batas kuota tiket"
+          : "Silahkan pilih variant Produk terlebih dahulu!",
+      className: eAlertType.FAILED,
+      duration: 1000,
+    });
+  };
+
   return (
     <div className="p-5 shadow-lg rounded-lg border-solid border-[1px] border-gray-100 -mt-6 lg:-mt-0">
       {status === "authenticated" ? (
@@ -122,16 +142,20 @@ export default function SideBar({
                 <div
                   className="cursor-pointer p-3 hover:text-green-300"
                   onClick={() => {
-                    value > 0 && setValue(value - 1);
+                    qtyValue > 0 && setQtyValue(qtyValue - 1);
                   }}
                 >
                   <FaMinus />
                 </div>
-                <div>{value}</div>
+                <div>{qtyValue}</div>
                 <div
                   className="cursor-pointer p-3 hover:text-green-300"
                   onClick={() => {
-                    setValue(value + 1);
+                    if (qtyValue < maxQuota) {
+                      setQtyValue(qtyValue + 1);
+                    } else {
+                      showErrorToast();
+                    }
                   }}
                 >
                   <FaPlus />
@@ -140,8 +164,15 @@ export default function SideBar({
             </div>
           </div>
           <div className="relative lg:mt-5 mt-[10px]">
-            <div>Minimal Order : 1 </div>
-            <div>Waktu Pemesanan : 2 Hari </div>
+            <div>
+              Minimal Order :{" "}
+              {dataProducts.minimal_order > 0
+                ? dataProducts.minimal_order
+                : "1"}{" "}
+            </div>
+            <div>
+              Waktu Pemesanan : {dataProducts.minimal_order_date ?? "-"}{" "}
+            </div>
             {/* Field Tanggal Acara - untuk produk non-ticket saja */}
             {productTypeName !== eProductType.ticket && (
               <div className="input-group">
@@ -164,7 +195,7 @@ export default function SideBar({
                 />
               </div>
             )}
-            
+
             {/* Field khusus untuk produk non-ticket */}
             {productTypeName !== eProductType.ticket && (
               <>
@@ -214,7 +245,7 @@ export default function SideBar({
                 </div>
               </>
             )}
-            
+
             {/* Field catatan untuk semua produk */}
             <div className="input-group">
               <label className="mb-1 block text-black mt-3 font-bold">
@@ -230,15 +261,19 @@ export default function SideBar({
             <input
               type="button"
               disabled={
-                value >= 1 && 
-                (dataProducts.variant && dataProducts.variant.length > 1 ? selectedVariantId !== null : true)
-                  ? false 
+                qtyValue >= 1 &&
+                (dataProducts.variant && dataProducts.variant.length > 1
+                  ? selectedVariantId !== null
+                  : true)
+                  ? false
                   : true
               }
               value="+ Keranjang"
               className={`${
-                value >= 1 && 
-                (dataProducts.variant && dataProducts.variant.length > 1 ? selectedVariantId !== null : true)
+                qtyValue >= 1 &&
+                (dataProducts.variant && dataProducts.variant.length > 1
+                  ? selectedVariantId !== null
+                  : true)
                   ? "bg-c-green cursor-pointer"
                   : "bg-c-gray-text2 opacity-30 cursor-default"
               }  mt-5 text-white text-[15px] py-3 w-full rounded-lg `}
