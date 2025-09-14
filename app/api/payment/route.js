@@ -2,8 +2,11 @@ import { NextResponse } from "next/server";
 import Midtrans from "midtrans-client";
 import _ from "lodash"
 
+const isProduction = process.env.PRODUCTION_MODE === 'true';
+
+
 let snap = new Midtrans.Snap({
-    isProduction: true,
+    isProduction: isProduction,
     serverKey: process.env.SERVER_KEY,
     clientKey: process.env.NEXT_PUBLIC_CLIENT_KEY
 })  
