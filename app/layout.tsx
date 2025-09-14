@@ -25,11 +25,15 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const isProduction = process.env.PRODUCTION_MODE === 'true';
+  const midtransUrl = isProduction 
+    ? "https://app.midtrans.com/snap/snap.js"
+    : "https://app.sandbox.midtrans.com/snap/snap.js";  
   return (
     <SessionWrapper>
       <html lang="en">
         <Script
-          src="https://app.sandbox.midtrans.com/snap/snap.js"
+          src={midtransUrl}
           data-client-key={process.env.NEXT_PUBLIC_CLIENT_KEY}
         ></Script>
         <body
