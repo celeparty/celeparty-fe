@@ -3,7 +3,7 @@ import Midtrans from "midtrans-client";
 import _ from "lodash"
 
 let snap = new Midtrans.Snap({
-    isProduction: false,
+    isProduction: process.env.PRODUCTION_MODE,
     serverKey: process.env.SERVER_KEY,
     clientKey: process.env.NEXT_PUBLIC_CLIENT_KEY
 })  
