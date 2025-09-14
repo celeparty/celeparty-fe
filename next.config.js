@@ -11,6 +11,7 @@ const nextConfig = {
 		NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
 		NEXTAUTH_URL: process.env.NEXTAUTH_URL,
 		JWT_SECRET: process.env.JWT_SECRET,
+		PRODUCTION_MODE: process.env.PRODUCTION_MODE,
 	},
 	output: 'standalone',
 	reactStrictMode: true,
