@@ -147,6 +147,7 @@ const Registration = () => {
       const updatedData: any = [...prev];
       updatedData[index] = {
         ...updatedData[index],
+        id: selectedRegion ? selectedRegion.id : null,
         region: selectedRegion ? selectedRegion.name : null,
       };
       return updatedData;
@@ -163,6 +164,7 @@ const Registration = () => {
       updatedData[index] = {
         ...updatedData[index],
         subregion: selectedSubregion ? selectedSubregion.name : null,
+        idSubRegion: selectedSubregion ? subregionId : null,
       };
       return updatedData;
     });
@@ -187,6 +189,7 @@ const Registration = () => {
         password: values.password,
         role: 3,
       };
+
       const response = await axiosData(
         "POST",
         "/api/auth/custom-register",
