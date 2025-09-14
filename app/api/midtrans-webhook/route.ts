@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 
 export async function POST(req: NextRequest) {
+  console.log('=== MIDTRANS WEBHOOK RECEIVED ===');
+  console.log('Timestamp:', new Date().toISOString());
   try {
     const body = await req.json();
 
@@ -175,4 +177,12 @@ export async function POST(req: NextRequest) {
     console.error('Webhook error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
+}
+
+export async function GET() {
+  return NextResponse.json({ 
+    message: 'Midtrans webhook endpoint is working',
+    timestamp: new Date().toISOString(),
+    status: 'ok'
+  });
 }
