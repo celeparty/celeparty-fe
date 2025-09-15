@@ -18,7 +18,11 @@ const sections = [
   { id: "hukum", title: "Hukum Yang Berlaku" },
   { id: "kontak", title: "Kontak Celeparty" },
 ];
-	return (
+
+export default function PolicyPage() {
+  const [active, setActive] = useState("definisi");
+
+return (
 		<div className="lg:mx-auto wrapper bg-c-blue lg:rounded-lg lg:my-8">
 			<div className="max-w-[707px] mx-auto  leading-[20px] pt-8 pb-12 px-2 lg:px-0">
 				<main className="max-w-6xl mx-auto flex gap-8 py-12 px-4">
