@@ -206,13 +206,13 @@ return (
 			            Larangan
 			          </h3>
 			          <p className="text-gray-700">
-			            Pengguna di larang:
+			            Pengguna di larang: </p>
 						  <ul>
 							  <li>Menjual produk/jasa ilegal atau yang dilarang hukum.</li>
 							  <li>Mengunggah konten yang melanggar hak cipta, SARA, atau pornografi.</li>
 							  <li>Menggunakan sistem untuk tindakan penipuan atau peretasan.</li>
 						  </ul>
-			          </p>
+			         
 			        </section>
 
 					  <section id="haki">
@@ -240,15 +240,17 @@ return (
 			            Syarat dan Ketentuan ini tunduk pada hukum yang berlaku di Republik Indonesia.
 						Segala sengketa akan diselesaikan melalui musyawarah, atau jika perlu melalui jalur hukum di pengadilan.
 			          </p>
+					</section>
+					  
 			        <section id="kontak">
 			          <h3 className="text-xl font-semibold mb-4">Kontak Celeparty</h3>
 			          <p className="text-gray-700">
-			            Jika ada pertanyaan mengenai Syarat dan Ketentuan ini, hubungi kami di:
+			            Jika ada pertanyaan mengenai Syarat dan Ketentuan ini, hubungi kami di:    </p>
 						<ul><li>📧: celeparty.id@gmail.com </li>
 							<li>📞: +6285211119011 </li>
 						</ul>
 						
-			          </p>
+			       
 			        </section>
 			      </div>
 			    </main>
@@ -257,4 +259,3 @@ return (
 	);
 };
 
-export default Test;
