@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 const sections = [
-  { id: "definisi", title: "Definisi & Interpretasi" },
+  { id: "definisi", title: "Definisi dan Interpretasi" },
   { id: "ruang", title: "Ruang Lingkup Layanan" },
   { id: "akun", title: "Pendaftaran dan Akun" },
   { id: "kek", title: "Ketentuan Event Kreator" },
@@ -14,7 +14,7 @@ const sections = [
   { id: "batasan", title: "Batasan Tanggung Jawab" },
   { id: "larangan", title: "Larangan" },
   { id: "haki", title: "Hak Kekayaan Intelektual" },
-  { id: "perubahan", title: "Perubahan Syarat & Ketentuan" },
+  { id: "perubahan", title: "Perubahan Syarat dan Ketentuan" },
   { id: "hukum", title: "Hukum Yang Berlaku" },
   { id: "kontak", title: "Kontak Celeparty" },
 ];
@@ -24,7 +24,7 @@ const sections = [
 				<main className="max-w-6xl mx-auto flex gap-8 py-12 px-4">
 			      {/* Sidebar */}
 			      <aside className="w-1/4">
-			        <h2 className="text-2xl font-bold mb-6">Syarat & Ketentuan</h2>
+			        <h2 className="text-2xl font-bold mb-6">Syarat dan Ketentuan</h2>
 			        <ul className="space-y-2 text-sm">
 			          {sections.map((s) => (
 			            <li key={s.id}>
@@ -45,7 +45,7 @@ const sections = [
 			      {/* Content */}
 			      <div className="flex-1 space-y-12">
 			        <section id="definisi">
-			          <h3 className="text-xl font-semibold mb-4">Definisi & Interpretasi</h3>
+			          <h3 className="text-xl font-semibold mb-4">Definisi dan Interpretasi</h3>
 			          <ol className="list-decimal pl-6 space-y-2 text-gray-700">
 			            <li>
 			             "Website" berarti platform CELEPARTY yang menyediakan layanan penjualan tiket event dan penyewaan peralatan event.
@@ -84,7 +84,7 @@ const sections = [
 			        </section>
 			
 			        <section id="akun">
-			          <h3 className="text-xl font-semibold mb-4">Pendaftaran & Akun</h3>
+			          <h3 className="text-xl font-semibold mb-4">Pendaftaran dan Akun</h3>
 			          <ol className="list-decimal pl-6 space-y-2 text-gray-700">
 			            <li>
 			             Untuk menggunakan layanan tertentu, Pengguna wajib membuat akun dengan data yang benar, lengkap, dan terkini.
@@ -153,7 +153,7 @@ const sections = [
 			          </ol>
 			        </section>
 			        <section id="pb">
-			          <h3 className="text-xl font-semibold mb-4">Pembayaran & Biaya</h3>
+			          <h3 className="text-xl font-semibold mb-4">Pembayaran dan Biaya</h3>
 			          <ol className="list-decimal pl-6 space-y-2 text-gray-700">
 			            <li>
 			             Pembayaran dilakukan melalui metode resmi yang disediakan Website.
@@ -167,7 +167,7 @@ const sections = [
 			          </ol>
 			        </section>
 			        <section id="refund">
-			          <h3 className="text-xl font-semibold mb-4">Kebijakan Pembatalan & Refund</h3>
+			          <h3 className="text-xl font-semibold mb-4">Kebijakan Pembatalan dan Refund</h3>
 			          <ol className="list-decimal pl-6 space-y-2 text-gray-700">
 			            <li>
 			             Kebijakan refund tiket ditentukan oleh masing-masing Event Kreator.
@@ -224,22 +224,22 @@ const sections = [
 			        </section>
 
 					  	  <section id="perubahan">
-			          <h3 className="text-xl font-semibold mb-4">Perubahan Syarat & Ketentuan</h3>
+			          <h3 className="text-xl font-semibold mb-4">Perubahan Syarat dan Ketentuan</h3>
 			           <p className="text-gray-700">
-			              Website berhak memperbarui Syarat & Ketentuan ini sewaktu-waktu. Perubahan berlaku setelah dipublikasikan di halaman resmi Website.		
+			              Website berhak memperbarui Syarat dan Ketentuan ini sewaktu-waktu. Perubahan berlaku setelah dipublikasikan di halaman resmi Website.		
 			          </p>
 			        </section>
 			
 			        <section id="hukum">
 			          <h3 className="text-xl font-semibold mb-4">Hukum yang Berlaku</h3>
 			          <p className="text-gray-700">
-			            Syarat & Ketentuan ini tunduk pada hukum yang berlaku di Republik Indonesia.
+			            Syarat dan Ketentuan ini tunduk pada hukum yang berlaku di Republik Indonesia.
 						Segala sengketa akan diselesaikan melalui musyawarah, atau jika perlu melalui jalur hukum di pengadilan.
 			          </p>
 			        <section id="kontak">
 			          <h3 className="text-xl font-semibold mb-4">Kontak Celeparty</h3>
 			          <p className="text-gray-700">
-			            ika ada pertanyaan mengenai Syarat & Ketentuan ini, hubungi kami di:
+			            Jika ada pertanyaan mengenai Syarat dan Ketentuan ini, hubungi kami di:
 						<ul><li>📧: celeparty.id@gmail.com </li>
 							<li>📞: +6285211119011 </li>
 						</ul>
