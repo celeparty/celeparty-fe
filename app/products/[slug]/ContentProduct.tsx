@@ -163,7 +163,7 @@ export default function ContentProduct(props: any) {
               )}
               <div className="lg:mt-5 mt-[10px] text-[12px]">
                 <h4>Deskripsi</h4>
-                <div>
+                <div className="whitespace-pre-line">
                   {dataContent?.description ? (
                     parse(`${dataContent?.description}`)
                   ) : (
