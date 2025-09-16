@@ -207,7 +207,7 @@ return (
 			          </h3>
 			          <p className="text-black">
 			            Pengguna di larang: </p>
-						  <ul>
+						  <ul className="text-black">
 							  <li>- Menjual produk/jasa ilegal atau yang dilarang hukum.</li>
 							  <li>- Mengunggah konten yang melanggar hak cipta, SARA, atau pornografi.</li>
 							  <li>- Menggunakan sistem untuk tindakan penipuan atau peretasan.</li>
