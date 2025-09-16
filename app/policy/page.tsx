@@ -24,8 +24,8 @@ export default function PolicyPage() {
 
 return (
 		<div className="lg:mx-auto wrapper bg-c-green lg:rounded-lg lg:my-8">
-			<div className="max-w-[707px] mx-auto  leading-[20px] pt-8 pb-12 px-2 lg:px-0">
-				<main className="max-w-6xl mx-auto flex gap-8 py-12 px-4">
+{/* 			<div className="max-w-[707px] mx-auto  leading-[20px] pt-8 pb-12 px-2 lg:px-0"> */}
+				<main className="text-white max-w-6xl mx-auto flex gap-8 py-12 px-4">
 			      {/* Sidebar */}
 			      <aside className="w-1/4">
 			        <h2 className="text-2xl font-bold mb-6">Syarat dan Ketentuan</h2>
@@ -36,7 +36,7 @@ return (
 			                href={`#${s.id}`}
 			                onClick={() => setActive(s.id)}
 			                className={`block ${
-			                  active === s.id ? "text-blue-600 font-medium" : "text-gray-700"
+			                  active === s.id ? "text-blue-600 font-medium" : "text-black"
 			                } hover:text-blue-600`}
 			              >
 			                {s.title}
@@ -50,7 +50,7 @@ return (
 			      <div className="flex-1 space-y-12">
 			        <section id="definisi">
 			          <h3 className="text-xl font-semibold mb-4">Definisi dan Interpretasi</h3>
-			          <ol className="list-decimal pl-6 space-y-2 text-gray-700">
+			          <ol className="list-decimal pl-6 space-y-2 text-black">
 			            <li>
 			             "Website" berarti platform CELEPARTY yang menyediakan layanan penjualan tiket event dan penyewaan peralatan event.
 			            </li>
@@ -74,7 +74,7 @@ return (
 
 					   <section id="ruang">
 			          <h3 className="text-xl font-semibold mb-4">Ruang Lingkup Layanan</h3>
-			          <ol className="list-decimal pl-6 space-y-2 text-gray-700">
+			          <ol className="list-decimal pl-6 space-y-2 text-black">
 			            <li>
 			             Website bertindak sebagai platform penghubung antara Event Kreator, Vendor, dan Pengguna.
 			            </li>
@@ -89,7 +89,7 @@ return (
 			
 			        <section id="akun">
 			          <h3 className="text-xl font-semibold mb-4">Pendaftaran dan Akun</h3>
-			          <ol className="list-decimal pl-6 space-y-2 text-gray-700">
+			          <ol className="list-decimal pl-6 space-y-2 text-black">
 			            <li>
 			             Untuk menggunakan layanan tertentu, Pengguna wajib membuat akun dengan data yang benar, lengkap, dan terkini.
 			            </li>
@@ -104,7 +104,7 @@ return (
 			
 			        <section id="kek">
 			          <h3 className="text-xl font-semibold mb-4">Ketentuan Event Kreator</h3>
-			          <ol className="list-decimal pl-6 space-y-2 text-gray-700">
+			          <ol className="list-decimal pl-6 space-y-2 text-black">
 			            <li>
 			             Event Kreator wajib memberikan informasi event yang benar, akurat, dan tidak menyesatkan.
 			            </li>
@@ -124,7 +124,7 @@ return (
 			
 			        <section id="kv">
 			          <h3 className="text-xl font-semibold mb-4">Ketentuan Vendor</h3>
-			          <ol className="list-decimal pl-6 space-y-2 text-gray-700">
+			          <ol className="list-decimal pl-6 space-y-2 text-black">
 			            <li>
 			             Vendor wajib mencantumkan detail produk/peralatan dengan jelas (spesifikasi, harga sewa, ketersediaan).
 			            </li>
@@ -141,7 +141,7 @@ return (
 			        </section>
 			        <section id="kp">
 			          <h3 className="text-xl font-semibold mb-4">Ketentuan Pengguna/Pembeli</h3>
-			          <ol className="list-decimal pl-6 space-y-2 text-gray-700">
+			          <ol className="list-decimal pl-6 space-y-2 text-black">
 			            <li>
 			             Pengguna wajib memastikan kebenaran data yang diberikan saat melakukan pembelian tiket atau penyewaan.
 			            </li>
@@ -158,7 +158,7 @@ return (
 			        </section>
 			        <section id="pb">
 			          <h3 className="text-xl font-semibold mb-4">Pembayaran dan Biaya</h3>
-			          <ol className="list-decimal pl-6 space-y-2 text-gray-700">
+			          <ol className="list-decimal pl-6 space-y-2 text-black">
 			            <li>
 			             Pembayaran dilakukan melalui metode resmi yang disediakan Website.
 			            </li>
@@ -172,7 +172,7 @@ return (
 			        </section>
 			        <section id="refund">
 			          <h3 className="text-xl font-semibold mb-4">Kebijakan Pembatalan dan Refund</h3>
-			          <ol className="list-decimal pl-6 space-y-2 text-gray-700">
+			          <ol className="list-decimal pl-6 space-y-2 text-black">
 			            <li>
 			             Kebijakan refund tiket ditentukan oleh masing-masing Event Kreator.
 			            </li>
@@ -186,13 +186,13 @@ return (
 			        </section>
 			        <section id="batasan">
 			          <h3 className="text-xl font-semibold mb-4">Batasan Tanggung Jawab</h3>
-			          <ol className="list-decimal pl-6 space-y-2 text-gray-700">
+			          <ol className="list-decimal pl-6 space-y-2 text-black">
 			            <li>
 			             Website hanya bertindak sebagai perantara, tidak menjamin:
 							<ul>
-								<li>Keaslian event.</li>
-								<li>Kualitas peralatan.</li>
-								<li>Kepatuhan hukum penyelenggara event/Vendor.</li>
+								<li>- Keaslian event.</li>
+								<li>- Kualitas peralatan.</li>
+								<li>- Kepatuhan hukum penyelenggara event/Vendor.</li>
 							</ul>
 			            </li>
 			            <li>
@@ -205,19 +205,19 @@ return (
 			          <h3 className="text-xl font-semibold mb-4">
 			            Larangan
 			          </h3>
-			          <p className="text-gray-700">
+			          <p className="text-black">
 			            Pengguna di larang: </p>
 						  <ul>
-							  <li>Menjual produk/jasa ilegal atau yang dilarang hukum.</li>
-							  <li>Mengunggah konten yang melanggar hak cipta, SARA, atau pornografi.</li>
-							  <li>Menggunakan sistem untuk tindakan penipuan atau peretasan.</li>
+							  <li>- Menjual produk/jasa ilegal atau yang dilarang hukum.</li>
+							  <li>- Mengunggah konten yang melanggar hak cipta, SARA, atau pornografi.</li>
+							  <li>- Menggunakan sistem untuk tindakan penipuan atau peretasan.</li>
 						  </ul>
 			         
 			        </section>
 
 					  <section id="haki">
 			          <h3 className="text-xl font-semibold mb-4">Hak Kekayaan Intelektual</h3>
-			          <ol className="list-decimal pl-6 space-y-2 text-gray-700">
+			          <ol className="list-decimal pl-6 space-y-2 text-black">
 			            <li>
 			             Seluruh konten, logo, desain, dan kode sumber Website adalah milik Celeparty.
 			            </li>
@@ -229,14 +229,14 @@ return (
 
 					  	  <section id="perubahan">
 			          <h3 className="text-xl font-semibold mb-4">Perubahan Syarat dan Ketentuan</h3>
-			           <p className="text-gray-700">
+			           <p className="text-black">
 			              Website berhak memperbarui Syarat dan Ketentuan ini sewaktu-waktu. Perubahan berlaku setelah dipublikasikan di halaman resmi Website.		
 			          </p>
 			        </section>
 			
 			        <section id="hukum">
 			          <h3 className="text-xl font-semibold mb-4">Hukum yang Berlaku</h3>
-			          <p className="text-gray-700">
+			          <p className="text-black">
 			            Syarat dan Ketentuan ini tunduk pada hukum yang berlaku di Republik Indonesia.
 						Segala sengketa akan diselesaikan melalui musyawarah, atau jika perlu melalui jalur hukum di pengadilan.
 			          </p>
@@ -244,7 +244,7 @@ return (
 					  
 			        <section id="kontak">
 			          <h3 className="text-xl font-semibold mb-4">Kontak Celeparty</h3>
-			          <p className="text-gray-700">
+			          <p className="text-black">
 			            Jika ada pertanyaan mengenai Syarat dan Ketentuan ini, hubungi kami di:    </p>
 						<ul><li>📧: celeparty.id@gmail.com </li>
 							<li>📞: +6285211119011 </li>
@@ -254,7 +254,7 @@ return (
 			        </section>
 			      </div>
 			    </main>
-			</div>
+{/* 			</div> */}
 		</div>
 	);
 };
