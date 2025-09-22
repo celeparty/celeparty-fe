@@ -1,46 +1,38 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-
-  <!-- Homepage -->
-  <url>
-    <loc>https://celeparty.com/</loc>
-    <priority>1.0</priority>
-    <changefreq>daily</changefreq>
-  </url>
-
-  <!-- Halaman Mitra / Vendor -->
-  <url>
-    <loc>https://celeparty.com/mitra</loc>
-    <priority>0.8</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-
-  <!-- Halaman Blog / Artikel -->
-  <url>
-    <loc>https://celeparty.com/blog</loc>
-    <priority>0.7</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-
-  <!-- Halaman Kontak -->
-  <url>
-    <loc>https://celeparty.com/kontak</loc>
-    <priority>0.5</priority>
-    <changefreq>monthly</changefreq>
-  </url>
-
-  <!-- Halaman Tentang / About -->
-  <url>
-    <loc>https://celeparty.com/tentang</loc>
-    <priority>0.6</priority>
-    <changefreq>monthly</changefreq>
-  </url>
-
-  <!-- Halaman Syarat & Ketentuan -->
-  <url>
-    <loc>https://celeparty.com/syarat-dan-ketentuan</loc>
-    <priority>0.4</priority>
-    <changefreq>yearly</changefreq>
-  </url>
-
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!--  created with Free Online Sitemap Generator www.xml-sitemaps.com  -->
+<url>
+<loc>https://celeparty.com/</loc>
+<lastmod>2025-09-22T14:08:46+00:00</lastmod>
+<priority>1.00</priority>
+</url>
+<url>
+<loc>https://celeparty.com/about</loc>
+<lastmod>2025-09-22T14:08:46+00:00</lastmod>
+<priority>0.80</priority>
+</url>
+<url>
+<loc>https://celeparty.com/auth/login?theme=vendor</loc>
+<lastmod>2025-09-22T14:08:46+00:00</lastmod>
+<priority>0.80</priority>
+</url>
+<url>
+<loc>https://celeparty.com/blog</loc>
+<lastmod>2025-09-22T14:08:46+00:00</lastmod>
+<priority>0.80</priority>
+</url>
+<url>
+<loc>https://celeparty.com/contact</loc>
+<lastmod>2025-09-22T14:08:46+00:00</lastmod>
+<priority>0.80</priority>
+</url>
+<url>
+<loc>https://celeparty.com/cart</loc>
+<lastmod>2025-09-22T14:08:46+00:00</lastmod>
+<priority>0.80</priority>
+</url>
+<url>
+<loc>https://celeparty.com/policy</loc>
+<lastmod>2025-09-22T14:08:46+00:00</lastmod>
+<priority>0.80</priority>
+</url>
 </urlset>
