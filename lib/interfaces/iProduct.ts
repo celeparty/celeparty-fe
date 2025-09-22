@@ -1,10 +1,10 @@
 export interface iUpdateProduct {
   title: string;
   rate: number;
-  main_price: number;
+  // main_price: number;
   minimal_order: number;
-  price_min: number;
-  price_max: number;
+  // price_min: number;
+  // price_max: number;
   kabupaten: string;
   description: string;
 }
@@ -13,13 +13,13 @@ export interface iProductReq {
   title: string;
   minimal_order: number;
   minimal_order_date: string;
-  main_price: string | number;
+  // main_price: string | number;
   main_image: iProductImage[];
   description: string;
   rate: number;
   kabupaten: string;
-  price_min: string | number;
-  price_max: string | number;
+  // price_min: string | number;
+  // price_max: string | number;
   category: {
     connect: number;
   } | null;
@@ -92,12 +92,12 @@ export interface iTicketFormReq {
   documentId?: string;
   title: string;
   description: string;
-  main_price: number;
+  // main_price: number;
   minimal_order: number;
   minimal_order_date: string;
   main_image: iProductImage[];
-  price_min: number;
-  price_max: number;
+  // price_min: number;
+  // price_max: number;
   users_permissions_user: number | null;
   variant: iTicketVariant[];
   event_date: string;
