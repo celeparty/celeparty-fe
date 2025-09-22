@@ -460,9 +460,9 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
               );
             }}
           />
-          {errors.main_price && (
+{/*           {errors.main_price && (
             <p className="text-red-500 text-[10px]">{`${errors.main_price.message}`}</p>
-          )}
+          )} */}
         </ProductItemInput>
         <ProductItemInput label="Kota Acara" required>
           <input
