@@ -15,8 +15,8 @@ export default function ProductAdd() {
     // main_price: "0",
     minimal_order: 0,
     main_image: [{} as iProductImage],
-    price_min: "0",
-    price_max: "0",
+    // price_min: "0",
+    // price_max: "0",
     category: {
       connect: 0,
     },
