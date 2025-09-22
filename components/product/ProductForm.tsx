@@ -417,7 +417,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           )}
         </ProductItemInput>
 
-        <ProductItemInput label="Harga Produk (Rp)" required>
+{/*         <ProductItemInput label="Harga Produk (Rp)" required>
           <input
             className="border border-gray-300 rounded-md py-2 px-5 w-full"
             placeholder="Harga Produk (Rp)"
@@ -435,7 +435,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           {errors.main_price && (
             <p className="text-red-500 text-[10px]">{`${errors.main_price.message}`}</p>
           )}
-        </ProductItemInput>
+        </ProductItemInput> */}
 
         <ProductItemInput label="Deskripsi Produk" required>
           <textarea
