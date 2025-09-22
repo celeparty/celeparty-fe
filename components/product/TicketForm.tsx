@@ -269,7 +269,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({
         event_date: formatYearDate(data.event_date) ?? "",
         minimal_order_date: formatYearDate(data.maximal_order_date) ?? "",
         maximal_order_date: formatYearDate(data.maximal_order_date) ?? "",
-        main_price: formatMoneyReq(lowestPrice),
+        // main_price: formatMoneyReq(lowestPrice),
         users_permissions_user: {
           connect: [
             { id: session?.user?.id ? Number(session.user.id) : undefined },
