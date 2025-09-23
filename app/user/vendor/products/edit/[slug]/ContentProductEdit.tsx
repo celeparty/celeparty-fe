@@ -141,7 +141,7 @@ export default function ContentProductEdit(props: any) {
         rate,
         minimal_order,
         kabupaten,
-        description
+        description,
         main_price: formattedMainPrice,
         price_min: formattedPriceMin,
         price_max: formattedPriceMax,
