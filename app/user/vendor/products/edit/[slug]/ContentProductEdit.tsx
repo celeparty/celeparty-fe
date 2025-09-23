@@ -142,9 +142,9 @@ export default function ContentProductEdit(props: any) {
         minimal_order,
         kabupaten,
         description
-        // main_price: formattedMainPrice,
-        // price_min: formattedPriceMin,
-        // price_max: formattedPriceMax,
+        main_price: formattedMainPrice,
+        price_min: formattedPriceMin,
+        price_max: formattedPriceMax,
       };
 
       const res = await axiosData("PUT", `/api/products/${props.slug}`, {
