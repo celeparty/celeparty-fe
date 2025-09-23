@@ -92,12 +92,12 @@ export interface iTicketFormReq {
   documentId?: string;
   title: string;
   description: string;
-  // main_price: number;
+  main_price: number;
   minimal_order: number;
   minimal_order_date: string;
   main_image: iProductImage[];
-  // price_min: number;
-  // price_max: number;
+  price_min: number;
+  price_max: number;
   users_permissions_user: number | null;
   variant: iTicketVariant[];
   event_date: string;
