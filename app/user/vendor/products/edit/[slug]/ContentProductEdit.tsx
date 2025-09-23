@@ -132,9 +132,9 @@ export default function ContentProductEdit(props: any) {
     e.preventDefault();
 
     try {
-      // let formattedMainPrice = parseInt(String(main_price).replace(/\./g, ""));
-      // let formattedPriceMin = parseInt(String(price_min).replace(/\./g, ""));
-      // let formattedPriceMax = parseInt(String(price_max).replace(/\./g, ""));
+      let formattedMainPrice = parseInt(String(main_price).replace(/\./g, ""));
+      let formattedPriceMin = parseInt(String(price_min).replace(/\./g, ""));
+      let formattedPriceMax = parseInt(String(price_max).replace(/\./g, ""));
 
       const updatedData: iUpdateProduct = {
         title,
