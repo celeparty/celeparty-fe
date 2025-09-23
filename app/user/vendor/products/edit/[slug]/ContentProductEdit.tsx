@@ -24,7 +24,7 @@ export default function ContentProductEdit(props: any) {
     useState<iProductReq>({
       title: "",
       description: "",
-      // main_price: "0",
+      main_price: "0",
       minimal_order: 0,
       main_image: [
         {
@@ -33,8 +33,8 @@ export default function ContentProductEdit(props: any) {
           mime: "",
         },
       ],
-      // price_min: "0",
-      // price_max: "0",
+      price_min: "0",
+      price_max: "0",
       category: null,
       kabupaten: "",
       rate: 0,
@@ -53,10 +53,10 @@ export default function ContentProductEdit(props: any) {
 
   const [title, setTitle] = useState<string>("");
   const [rate, setRate] = useState<number>(0);
-  // const [main_price, setMainPrice] = useState<string>("0");
+  const [main_price, setMainPrice] = useState<string>("0");
   const [minimal_order, setMinimalOrder] = useState<number>(0);
-  // const [price_max, setPriceMax] = useState<string>("0");
-  // const [price_min, setPriceMin] = useState<string>("0");
+  const [price_max, setPriceMax] = useState<string>("0");
+  const [price_min, setPriceMin] = useState<string>("0");
   const [kabupaten, setKabupaten] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const router = useRouter();
@@ -84,11 +84,11 @@ export default function ContentProductEdit(props: any) {
         const formData: iProductReq = {
           title: dataContent.title,
           description: dataContent.description,
-          // main_price: formatPriceValue(dataContent.main_price),
+          main_price: formatPriceValue(dataContent.main_price),
           minimal_order: dataContent.minimal_order,
           main_image: dataContent.main_image,
-          // price_min: formatPriceValue(dataContent.price_min),
-          // price_max: formatPriceValue(dataContent.price_max),
+          price_min: formatPriceValue(dataContent.price_min),
+          price_max: formatPriceValue(dataContent.price_max),
           kabupaten: dataContent.kabupaten,
           category: { connect: dataContent.category?.id },
           rate: dataContent.rate,
@@ -108,11 +108,11 @@ export default function ContentProductEdit(props: any) {
         const ticketFormData: iTicketFormReq = {
           title: dataContent.title,
           description: dataContent.description,
-          // main_price: 0,
+          main_price: 0,
           minimal_order: 0,
           main_image: dataContent.main_image,
-          // price_min: 0,
-          // price_max: 0,
+          price_min: 0,
+          price_max: 0,
           users_permissions_user: null,
           variant: dataContent.variant,
           event_date: dataContent.event_date,
@@ -142,9 +142,9 @@ export default function ContentProductEdit(props: any) {
         minimal_order,
         kabupaten,
         description,
-        // main_price: formattedMainPrice,
-        // price_min: formattedPriceMin,
-        // price_max: formattedPriceMax,
+        main_price: formattedMainPrice,
+        price_min: formattedPriceMin,
+        price_max: formattedPriceMax,
       };
 
       const res = await axiosData("PUT", `/api/products/${props.slug}`, {
