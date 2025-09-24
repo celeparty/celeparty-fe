@@ -29,7 +29,8 @@ const settings = {
 	slidesToShow: 1,
 	slidesToScroll: 1,
 	autoplay: true,            // aktifkan auto play
-    autoplaySpeed: 3000,       // delay per slide (3 detik)
+    autoplaySpeed: 5000,		// delay per slide (5 detik)
+    cssEase: "linear",      
     pauseOnHover: true,        // berhenti kalau kursor di atas
 };
 
