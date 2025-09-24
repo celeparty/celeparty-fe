@@ -44,8 +44,8 @@ export default async function BlogDetail({
                       <div className="relative fill-current w-full h-[194px] lg:h-[450px] overflow-hidden">
                         <Image
                           src={
-                                    dataContent?.image?.formats?.large?.url
-                                  ? `${process.env.BASE_API}${dataContent?.image?.formats?.large?.url}`
+                                    dataContent?.image?.formats?.url
+                                  ? `${process.env.BASE_API}${dataContent?.image?.formats?.url}`
                                   : "/images/noimage.png"
                           }
                           fill
