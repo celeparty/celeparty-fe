@@ -3,38 +3,36 @@ import Box from "@/components/Box";
 import ErrorNetwork from "@/components/ErrorNetwork";
 import ItemProduct from "@/components/product/ItemProduct";
 import { LocationFilterBar } from "@/components/product/LocationFilterBar";
-import Skeleton from "@/components/Skeleton";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { iEventCategory } from "@/lib/interfaces/iCategory";
 import { iSelectOption } from "@/lib/interfaces/iCommon";
 import { axiosData } from "@/lib/services";
-import { formatNumberWithDots, formatRupiah } from "@/lib/utils";
+import { formatRupiah } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import _ from "lodash";
-import { Bookmark, LucideXCircle } from "lucide-react";
+import { Bookmark } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
-import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { ItemCategory, ItemInfo } from "./ItemCategory";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { getLowestVariantPrice } from "@/lib/productUtils";
 
+// === Helper untuk handle URL gambar ===
+const getImageUrl = (image: any): string => {
+  if (!image) return "/images/noimage.png";
 
-// ✅ helper auto handle gambar
-const getImageUrl = (item: any) => {
   const url =
-    item?.main_image?.data?.[0]?.attributes?.url ||
-    item?.main_image?.[0]?.url ||
-    item?.main_image?.url;
+    image?.data?.[0]?.attributes?.url ||
+    image?.[0]?.url ||
+    image?.url ||
+    null;
 
   if (!url) return "/images/noimage.png";
 
-  // kalau url sudah absolute, langsung return
+  // kalau sudah absolute URL
   if (url.startsWith("http")) return url;
 
-  // fallback kalau env belum ada → pakai domain publik
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_API || "https://celeparty.com";
 
@@ -44,16 +42,11 @@ const getImageUrl = (item: any) => {
 export function ProductContent() {
   const [sortDesc, setSortDesc] = useState<boolean>(true);
   const [showOptions, setShowOptions] = useState<boolean>(false);
-  const [statusValue, setStatusValue] = useState<boolean>(true);
-  const [statusSortBy, setStatusSortBy] = useState<boolean>(true);
-  const [price, setPrice] = useState<{ min: any; max: any }>({
-    min: 0,
-    max: 0,
-  });
   const [mainData, setMainData] = useState<any>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [pageSize] = useState<number>(15); // items per page
+  const [pageSize] = useState<number>(15);
+
   const router = useRouter();
   const params = useSearchParams();
   const getType = params.get("type") || "";
@@ -66,8 +59,6 @@ export function ProductContent() {
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [minimalOrder, setMinimalOrder] = useState<string>("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [activeButton, setActiveButton] = useState<string | null>(null);
-
   const [filterCategories, setFilterCategories] = useState<iEventCategory[]>([]);
 
   const getCombinedQuery = async () => {
@@ -93,11 +84,9 @@ export function ProductContent() {
         selectedLocation
           ? `&filters[region][$eq]=${encodeURIComponent(selectedLocation)}`
           : ""
-      }${
-        formattedDate
-          ? `&filters[minimal_order_date][$eq]=${formattedDate}`
-          : ""
-      }${minimalOrder ? `&filters[minimal_order][$eq]=${minimalOrder}` : ""}`
+      }${formattedDate ? `&filters[minimal_order_date][$eq]=${formattedDate}` : ""}${
+        minimalOrder ? `&filters[minimal_order][$eq]=${minimalOrder}` : ""
+      }`
     );
   };
 
@@ -152,34 +141,6 @@ export function ProductContent() {
 
   const dataContent = query?.data?.data || [];
 
-  const [variantPrice, setVariantPrice] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (query.isSuccess && Array.isArray(dataContent) && dataContent.length > 0) {
-      const firstItem = dataContent[0];
-      const lowestPrice = firstItem?.variant
-        ? getLowestVariantPrice(firstItem.variant)
-        : null;
-      setVariantPrice(lowestPrice);
-    }
-  }, [query.isSuccess, dataContent]);
-
-  const handleSort = (sort: any) => {
-    const dataSort: any = _.sortBy(dataContent, (item) => {
-      return sort.sortBy === "sold_count"
-        ? item.sold_count
-        : sort.sortBy === "main_price"
-        ? item.main_price
-        : sort.sortBy === "price_min"
-        ? item.price_min
-        : sort.sortBy === "price_max"
-        ? item.price_max
-        : item.updatedAt;
-    });
-    setMainData(dataSort);
-    setCurrentPage(1);
-  };
-
   const handleFilter = (category: string) => {
     const filterCategory: any = _.filter(dataContent, (item) => {
       if (category === "Lainnya") return true;
@@ -187,11 +148,6 @@ export function ProductContent() {
     });
     setMainData(filterCategory);
     setCurrentPage(1);
-  };
-
-  const toggleDropdown = (): void => {
-    setSortDesc(!sortDesc);
-    setShowOptions(!showOptions);
   };
 
   const resetFilters = () => {
@@ -292,12 +248,7 @@ export function ProductContent() {
                       url={`/products/${item.documentId}`}
                       key={item.id}
                       title={item.title}
-                      image_url={ getImageUrl(item)
-                        /* item?.main_image?.[0]?.url
-                          ? process.env.NEXT_PUBLIC_BASE_API +
-                            item.main_image[0].url
-                          : "/images/noimage.png" */
-                      }
+                      image_url={getImageUrl(item.main_image)}
                       price={
                         item?.variant && item.variant.length > 0
                           ? formatRupiah(getLowestVariantPrice(item.variant))
@@ -310,7 +261,7 @@ export function ProductContent() {
                   ))
                 ) : (
                   <div className="text-center w-full">
-                    Product Tidak Ditemukan
+                    Produk Tidak Ditemukan
                   </div>
                 )}
               </div>
@@ -350,3 +301,4 @@ export default function SectionProductContent() {
     </Suspense>
   );
 }
+
