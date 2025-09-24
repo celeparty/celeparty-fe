@@ -243,7 +243,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
       const rawVariants = getValues("variant") || [];
       const variants: iProductVariant[] = rawVariants.map((v: any) => ({
         name: v.name,
-        price: v.price,
+        price: formatMoneyReq(v.price),
         quota: v.quota,
         purchase_deadline: formatYearDate(v.purchase_deadline) || "",
       }));
