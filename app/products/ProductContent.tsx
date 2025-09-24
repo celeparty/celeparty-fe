@@ -252,7 +252,6 @@ export function ProductContent() {
     const lowestPrice = firstItem?.variant ? getLowestVariantPrice(firstItem.variant) : null;
     setVariantPrice(lowestPrice);
       }
-    }
     }, [query.isSuccess, dataContent]);
   // }, [dataContent]);
 
