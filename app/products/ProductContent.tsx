@@ -113,21 +113,6 @@ export function ProductContent() {
   useEffect(() => {
     setCurrentPage(1);
   }, [getType, getSearch, getCategory, selectedLocation, eventDate, minimalOrder]);
-
-  const dataContent = query?.data?.data;
-  const [variantPrice, setVariantPrice] = useState(
-    dataContent?.variant[0]?.price
-  );
-
-  useEffect(() => {
-    if (query.isSuccess) {
-      const { variant } = dataContent;
-      const lowestPrice = getLowestVariantPrice(variant);
-      if (lowestPrice) {
-        setVariantPrice(lowestPrice);
-      }
-    }
-  }, [dataContent]);
   
   const getFilterCatsQuery = async () => {
     return await axiosData(
@@ -248,6 +233,20 @@ export function ProductContent() {
   const getMin = params.get("min");
   const getMax = params.get("max");
   const dataContent = query?.data?.data;
+
+  const [variantPrice, setVariantPrice] = useState(
+    dataContent?.variant[0]?.price
+  );
+
+  useEffect(() => {
+    if (query.isSuccess) {
+      const { variant } = dataContent;
+      const lowestPrice = getLowestVariantPrice(variant);
+      if (lowestPrice) {
+        setVariantPrice(lowestPrice);
+      }
+    }
+  }, [dataContent]);
 
   const handleSort = (sort: any) => {
     const dataSort: any = _.sortBy(dataContent, (item) => {
