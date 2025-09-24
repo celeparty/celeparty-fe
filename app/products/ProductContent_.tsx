@@ -24,18 +24,22 @@ import { getLowestVariantPrice } from "@/lib/productUtils";
 
 // ✅ helper auto handle gambar
 const getImageUrl = (item: any) => {
-    const url =
-      item?.main_image?.data?.[0]?.attributes?.url ||
-      item?.main_image?.[0]?.url ||
-      item?.main_image?.url;
+  const url =
+    item?.main_image?.data?.[0]?.attributes?.url ||
+    item?.main_image?.[0]?.url ||
+    item?.main_image?.url;
 
-    console.log("🖼️ Gambar produk:", item.title, url);
+  if (!url) return "/images/noimage.png";
 
-    if (!url) return "/images/noimage.png";
+  // kalau url sudah absolute, langsung return
+  if (url.startsWith("http")) return url;
 
-    if (url.startsWith("http")) return url; // absolute URL
-    return `${process.env.NEXT_PUBLIC_BASE_API}${url}`;
-  };
+  // fallback kalau env belum ada → pakai domain publik
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_API || "https://celeparty.com";
+
+  return `${baseUrl}${url}`;
+};
 
 export function ProductContent() {
   const [sortDesc, setSortDesc] = useState<boolean>(true);
