@@ -517,11 +517,9 @@ export function ProductContent() {
                             : "/images/noimage.png"
                         }
                         // image_url="/images/noimage.png"
-                        price={
-                           item.main_price
-                            ? formatRupiah(item.main_price)
-                            : formatRupiah(0)
-                        }
+                        price={getLowestVariantPrice(item.variant) 
+                             ? formatRupiah(getLowestVariantPrice(item.variant)) 
+                             : formatRupiah(item.main_price)}
                         rate={item.rate ? `${item.rate}` : "1"}
                         sold={item.sold_count}
                         location={item.region ? item.region : null}
