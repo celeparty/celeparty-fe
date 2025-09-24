@@ -342,6 +342,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
   }
   const dataCategory = query?.data?.data;
   return (
+    <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <SubTitle title="Pilih Foto Produk" className="mb-3" />
         <div className="image-upload-container flex flex-wrap gap-2 mb-5">
