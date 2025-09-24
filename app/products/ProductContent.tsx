@@ -19,7 +19,7 @@ import React, { Suspense, useEffect, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { ItemCategory, ItemInfo } from "./ItemCategory";
 import { PaginationControls } from "@/components/ui/pagination-controls";
-// import { getLowestVariantPrice } from "@/lib/productUtils";
+import { getLowestVariantPrice } from "@/lib/productUtils";
 
 
 export function ProductContent() {
@@ -236,19 +236,19 @@ export function ProductContent() {
   const getMax = params.get("max");
   const dataContent = query?.data?.data;
 
-  // const [variantPrice, setVariantPrice] = useState(
-  //   dataContent?.variant[0]?.price
-  // );
+  const [variantPrice, setVariantPrice] = useState(
+    dataContent?.variant[0]?.price
+  );
 
-  // useEffect(() => {
-  //   if (query.isSuccess) {
-  //     const { variant } = dataContent;
-  //     const lowestPrice = getLowestVariantPrice(variant);
-  //     if (lowestPrice) {
-  //       setVariantPrice(lowestPrice);
-  //     }
-  //   }
-  // }, [dataContent]);
+  useEffect(() => {
+    if (query.isSuccess) {
+      const { variant } = dataContent;
+      const lowestPrice = getLowestVariantPrice(variant);
+      if (lowestPrice) {
+        setVariantPrice(lowestPrice);
+      }
+    }
+  }, [dataContent]);
 
   const handleSort = (sort: any) => {
     const dataSort: any = _.sortBy(dataContent, (item) => {
