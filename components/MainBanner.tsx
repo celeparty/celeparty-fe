@@ -28,7 +28,9 @@ const settings = {
 	speed: 500,
 	slidesToShow: 1,
 	slidesToScroll: 1,
-	autoplay: false,
+	autoplay: true,            // aktifkan auto play
+    autoplaySpeed: 3000,       // delay per slide (3 detik)
+    pauseOnHover: true,        // berhenti kalau kursor di atas
 };
 
 export default function MainBanner() {
