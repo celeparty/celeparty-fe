@@ -236,7 +236,7 @@ export function ProductContent() {
   const getMax = params.get("max");
   const dataContent = query?.data?.data || [];
 
-  const [variantPrice, setVariantPrice] = useStateuseState <number | null>(null);
+  const [variantPrice, setVariantPrice] = useState <number | null>(null);
   //   (
   //   dataContent?.variant[0]?.price
   // );
