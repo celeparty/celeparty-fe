@@ -90,6 +90,27 @@ export function ProductContent() {
     );
   };
 
+  interface ItemProductProps {
+  url: string;
+  title: string;
+  image_url: string;
+  price: string;
+  rate: string;
+  sold: number;
+  location?: string | null;
+}
+
+export default function ItemProduct({
+  url,
+  title,
+  image_url,
+  price,
+  rate,
+  sold,
+  location,
+}: ItemProductProps) {
+  const isAbsoluteUrl = /^https?:\/\//i.test(image_url);
+
   const query = useQuery({
     queryKey: [
       "qProducts",
@@ -245,6 +266,43 @@ export function ProductContent() {
                 {mainData?.length > 0 ? (
                   mainData?.map((item: any) => (
                     <ItemProduct
+                       <a href={url} className="block group">
+      <div className="w-full h-48 relative rounded-lg overflow-hidden border">
+        {isAbsoluteUrl ? (
+          // ✅ coba pakai next/image (auto optimize)
+          <Image
+            src={image_url}
+            alt={title}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform"
+            onError={(e) => {
+              // fallback kalau gagal load
+              (e.target as HTMLImageElement).src = "/images/noimage.png";
+            }}
+          />
+        ) : (
+          // ✅ fallback ke <img> biasa
+          <img
+            src={image_url || "/images/noimage.png"}
+            alt={title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = "/images/noimage.png";
+            }}
+          />
+        )}
+      </div>
+      <div className="mt-2 text-sm">
+        <h3 className="font-semibold line-clamp-2">{title}</h3>
+        <p className="text-c-green font-bold">{price}</p>
+        <p className="text-xs text-slate-500">
+          ⭐ {rate} | Terjual {sold}
+        </p>
+        {location && (
+          <p className="text-xs text-slate-400">📍 {location}</p>
+        )}
+      </div>
+    </a>
                       url={`/products/${item.documentId}`}
                       key={item.id}
                       title={item.title}
