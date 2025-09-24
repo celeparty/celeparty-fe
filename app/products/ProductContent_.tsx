@@ -17,6 +17,7 @@ import React, { Suspense, useEffect, useState } from "react";
 import { ItemCategory, ItemInfo } from "./ItemCategory";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { getLowestVariantPrice } from "@/lib/productUtils";
+import Image from "next/image";
 
 // === Helper untuk handle URL gambar ===
 const getImageUrl = (image: any): string => {
