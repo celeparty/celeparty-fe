@@ -4,6 +4,7 @@ import { iBlogPost } from "@/lib/interfaces/iPost";
 import { formatRupiah } from "@/lib/utils";
 import React from "react";
 import ItemProduct from "./ItemProduct";
+import { getLowestVariantPrice } from "@/lib/productUtils";
 
 interface iProductListProps {
   posts: iBlogPost[];
@@ -24,7 +25,9 @@ export const ProductListBox: React.FC<iProductListProps> = ({ posts }) => {
                 : "/images/noimage.png"
             }
             price={
-              item.main_price ? formatRupiah(item.main_price) : formatRupiah(0)
+              item?.variant && item.variant.length > 0
+                          ? formatRupiah(getLowestVariantPrice(item.variant))
+                          : formatRupiah(item?.main_price || 0)
             }
             rate={item.rate ? `${item.rate}` : "1"}
             sold={item.sold_count}
