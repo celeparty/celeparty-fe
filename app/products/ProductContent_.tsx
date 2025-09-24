@@ -24,24 +24,18 @@ import { getLowestVariantPrice } from "@/lib/productUtils";
 
 // ✅ helper auto handle gambar
 const getImageUrl = (item: any) => {
-  // case 1: Strapi format -> main_image.data[0].attributes.url
-  if (item?.main_image?.data?.[0]?.attributes?.url) {
-    return `${process.env.NEXT_PUBLIC_BASE_API}${item.main_image.data[0].attributes.url}`;
-  }
+    const url =
+      item?.main_image?.data?.[0]?.attributes?.url ||
+      item?.main_image?.[0]?.url ||
+      item?.main_image?.url;
 
-  // case 2: langsung array -> main_image[0].url
-  if (item?.main_image?.[0]?.url) {
-    return `${process.env.NEXT_PUBLIC_BASE_API}${item.main_image[0].url}`;
-  }
+    console.log("🖼️ Gambar produk:", item.title, url);
 
-  // case 3: langsung property url
-  if (item?.main_image?.url) {
-    return `${process.env.NEXT_PUBLIC_BASE_API}${item.main_image.url}`;
-  }
+    if (!url) return "/images/noimage.png";
 
-  // fallback
-  return "/images/noimage.png";
-};
+    if (url.startsWith("http")) return url; // absolute URL
+    return `${process.env.NEXT_PUBLIC_BASE_API}${url}`;
+  };
 
 export function ProductContent() {
   const [sortDesc, setSortDesc] = useState<boolean>(true);
