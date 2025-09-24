@@ -21,6 +21,28 @@ import { ItemCategory, ItemInfo } from "./ItemCategory";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { getLowestVariantPrice } from "@/lib/productUtils";
 
+
+// ✅ helper auto handle gambar
+const getImageUrl = (item: any) => {
+  // case 1: Strapi format -> main_image.data[0].attributes.url
+  if (item?.main_image?.data?.[0]?.attributes?.url) {
+    return `${process.env.NEXT_PUBLIC_BASE_API}${item.main_image.data[0].attributes.url}`;
+  }
+
+  // case 2: langsung array -> main_image[0].url
+  if (item?.main_image?.[0]?.url) {
+    return `${process.env.NEXT_PUBLIC_BASE_API}${item.main_image[0].url}`;
+  }
+
+  // case 3: langsung property url
+  if (item?.main_image?.url) {
+    return `${process.env.NEXT_PUBLIC_BASE_API}${item.main_image.url}`;
+  }
+
+  // fallback
+  return "/images/noimage.png";
+};
+
 export function ProductContent() {
   const [sortDesc, setSortDesc] = useState<boolean>(true);
   const [showOptions, setShowOptions] = useState<boolean>(false);
@@ -272,14 +294,11 @@ export function ProductContent() {
                       url={`/products/${item.documentId}`}
                       key={item.id}
                       title={item.title}
-                      image_url={
+                      image_url={ getImageUrl(item)
                         /* item?.main_image?.[0]?.url
                           ? process.env.NEXT_PUBLIC_BASE_API +
                             item.main_image[0].url
                           : "/images/noimage.png" */
-                        item.main_image
-                            ? process.env.NEXT_PUBLIC_BASE_API + item.main_image[0].url
-                            : "/images/noimage.png"
                       }
                       price={
                         item?.variant && item.variant.length > 0
