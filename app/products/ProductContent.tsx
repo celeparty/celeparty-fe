@@ -114,6 +114,21 @@ export function ProductContent() {
     setCurrentPage(1);
   }, [getType, getSearch, getCategory, selectedLocation, eventDate, minimalOrder]);
 
+  const dataContent = query?.data?.data;
+  const [variantPrice, setVariantPrice] = useState(
+    dataContent?.variant[0]?.price
+  );
+
+  useEffect(() => {
+    if (query.isSuccess) {
+      const { variant } = dataContent;
+      const lowestPrice = getLowestVariantPrice(variant);
+      if (lowestPrice) {
+        setVariantPrice(lowestPrice);
+      }
+    }
+  }, [dataContent]);
+  
   const getFilterCatsQuery = async () => {
     return await axiosData(
       "GET",
@@ -502,9 +517,11 @@ export function ProductContent() {
                         }
                         // image_url="/images/noimage.png"
                         price={
-                          item.main_price
-                            ? formatRupiah(item.main_price)
-                            : formatRupiah(0)
+                          dataContent?.variant &&
+                          dataContent.variant.length > 0 &&
+                          variantPrice > 0
+                            ? formatRupiah(variantPrice)
+                            : formatRupiah(dataContent.main_price)
                         }
                         rate={item.rate ? `${item.rate}` : "1"}
                         sold={item.sold_count}
