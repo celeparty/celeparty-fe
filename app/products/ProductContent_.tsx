@@ -273,10 +273,13 @@ export function ProductContent() {
                       key={item.id}
                       title={item.title}
                       image_url={
-                        item?.main_image?.[0]?.url
+                        /* item?.main_image?.[0]?.url
                           ? process.env.NEXT_PUBLIC_BASE_API +
                             item.main_image[0].url
-                          : "/images/noimage.png"
+                          : "/images/noimage.png" */
+                        item.main_image
+                            ? process.env.NEXT_PUBLIC_BASE_API + item.main_image[0].url
+                            : "/images/noimage.png"
                       }
                       price={
                         item?.variant && item.variant.length > 0
