@@ -45,7 +45,7 @@ export default async function BlogDetail({
                         <Image
                           src={
                                     dataContent?.image?.formats?.large?.url
-                                  ? `${process.env.NEXT_PUBLIC_BASE_API}${dataContent.image.formats.large.url}`
+                                  ? `${process.env.BASE_API}${dataContent?.image?.formats?.large?.url}`
                                   : "/images/noimage.png"
                           }
                           fill
