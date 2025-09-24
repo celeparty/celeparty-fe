@@ -518,11 +518,9 @@ export function ProductContent() {
                         }
                         // image_url="/images/noimage.png"
                         price={
-                          dataContent?.variant &&
-                          dataContent.variant.length > 0 &&
-                          variantPrice > 0
-                            ? formatRupiah(variantPrice)
-                            : formatRupiah(dataContent.main_price)
+                           item.main_price
+                            ? formatRupiah(item.main_price)
+                            : formatRupiah(0)
                         }
                         rate={item.rate ? `${item.rate}` : "1"}
                         sold={item.sold_count}
