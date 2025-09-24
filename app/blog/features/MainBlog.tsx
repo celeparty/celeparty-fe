@@ -47,7 +47,7 @@ export default function MainBlog() {
             <Image
               src={
                 dataContent[0]?.image?.url
-                  ? `${process.env.BASE_API}${dataContent[1]?.image?.url}`
+                  ? `${process.env.BASE_API}${dataContent[0]?.image?.url}`
                   : "/images/noimage.png"
               }
               fill
