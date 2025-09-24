@@ -46,7 +46,7 @@ export default function MainBlog() {
           >
             <Image
               src={
-                dataContent[1]?.image?.url
+                dataContent[0]?.image?.url
                   ? `${process.env.BASE_API}${dataContent[1]?.image?.url}`
                   : "/images/noimage.png"
               }
@@ -96,8 +96,8 @@ export default function MainBlog() {
               >
                 <Image
                   src={
-                    dataContent[1]?.image?.url
-                      ? `${process.env.BASE_API}${dataContent[1]?.image?.url}`
+                    dataContent[2]?.image?.url
+                      ? `${process.env.BASE_API}${dataContent[2]?.image?.url}`
                       : "/images/noimage.png"
                   }
                   fill
@@ -106,8 +106,8 @@ export default function MainBlog() {
                 />
               </div>
               <div className="absolute bottom-0 left-0 p-5 text-white bg-[linear-gradient(0deg,rgba(0,0,0,0.75)_6.82%,rgba(0,0,0,0.00)_90.44%)] w-full text-[14px] lg:text-[20px]">
-                <Link href={`/blog/${dataContent[0]?.documentId}`}>
-                  {dataContent[0]?.title}
+                <Link href={`/blog/${dataContent[2]?.documentId}`}>
+                  {dataContent[2]?.title}
                 </Link>
               </div>
             </div>
@@ -118,8 +118,8 @@ export default function MainBlog() {
               >
                 <Image
                   src={
-                    dataContent[1]?.image?.url
-                      ? `${process.env.BASE_API}${dataContent[1]?.image?.url}`
+                    dataContent[3]?.image?.url
+                      ? `${process.env.BASE_API}${dataContent[3]?.image?.url}`
                       : "/images/noimage.png"
                   }
                   fill
@@ -128,8 +128,8 @@ export default function MainBlog() {
                 />
               </div>
               <div className="absolute bottom-0 left-0 p-5 text-white bg-[linear-gradient(0deg,rgba(0,0,0,0.75)_6.82%,rgba(0,0,0,0.00)_90.44%)] w-full text-[14px] lg:text-[20px]">
-                <Link href={`/blog/${dataContent[0]?.documentId}`}>
-                  {dataContent[1]?.title}
+                <Link href={`/blog/${dataContent[3]?.documentId}`}>
+                  {dataContent[3]?.title}
                 </Link>
               </div>
             </div>
