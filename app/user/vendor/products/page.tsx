@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { FiEdit } from "react-icons/fi";
 import { MdCancel } from "react-icons/md";
+import { getLowestVariantPrice } from "@/lib/productUtils";
 
 interface iItemStatus {
   status: string;
@@ -144,9 +145,9 @@ export default function Products() {
                       : "/images/noimage.png"
                   }
                   price={
-                    item.main_price
-                      ? formatRupiah(item.main_price)
-                      : formatRupiah(0)
+                    item?.variant && item.variant.length > 0
+                          ? formatRupiah(getLowestVariantPrice(item.variant))
+                          : formatRupiah(item?.main_price || 0)
                   }
                   rate={item.rate ? `${item.rate}` : "1"}
                   sold={item.sold_count}
