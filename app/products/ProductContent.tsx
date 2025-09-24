@@ -19,6 +19,8 @@ import React, { Suspense, useEffect, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { ItemCategory, ItemInfo } from "./ItemCategory";
 import { PaginationControls } from "@/components/ui/pagination-controls";
+import { getLowestVariantPrice } from "@/lib/productUtils";
+
 
 export function ProductContent() {
   const [sortDesc, setSortDesc] = useState<boolean>(true);
