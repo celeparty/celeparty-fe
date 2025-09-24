@@ -342,7 +342,6 @@ export const ProductForm: React.FC<iProductFormProps> = ({
   }
   const dataCategory = query?.data?.data;
   return (
-    <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <SubTitle title="Pilih Foto Produk" className="mb-3" />
         <div className="image-upload-container flex flex-wrap gap-2 mb-5">
@@ -615,18 +614,18 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           )}
         </div>
       </form>
-      {/* /* {message ? (
+      {/*{message ? (
         <div className="lg:mt-1 mt-3 text-green-500 text-[14px] lg:text-[16px] text-center">
           Add product berhasil, produk akan direview oleh admin
         </div>
-      ) : null}  */ */}
-      {/* /* {errorMessage ? (
+      ) : null}
+      { {errorMessage ? (
         <div className="text-red-500 lg:mt-1 mt-3 text-[14px] lg:text-[16px] text-center">
           {errorMessage === "Network Error"
             ? "Pilih gambar lebih kecil"
             : errorMessage}
         </div>
-      ) : null} */ */}
+      ) : null} */}
     </>
   );
 };
