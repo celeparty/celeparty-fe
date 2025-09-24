@@ -615,7 +615,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
           )}
         </div>
       </form>
-      {message ? (
+      {/* /* {message ? (
         <div className="lg:mt-1 mt-3 text-green-500 text-[14px] lg:text-[16px] text-center">
           Add product berhasil, produk akan direview oleh admin
         </div>
@@ -626,7 +626,7 @@ export const ProductForm: React.FC<iProductFormProps> = ({
             ? "Pilih gambar lebih kecil"
             : errorMessage}
         </div>
-      ) : null} 
+      ) : null}  */ */}
     </>
   );
 };
