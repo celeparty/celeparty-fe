@@ -37,7 +37,7 @@ export function ProductContent() {
   const [pageSize] = useState<number>(15); // Number of items per page
   const router = useRouter();
   const params = useSearchParams();
-  const getType = params.get("type");
+  const getType = params.get("type") || "";
   const getSearch = params.get("search");
   const getCategory = params.get("cat");
   const [cat, setCat] = useState(`${getCategory ? getCategory : ""}`);
@@ -234,21 +234,27 @@ export function ProductContent() {
   const getSort = params.get("sort");
   const getMin = params.get("min");
   const getMax = params.get("max");
-  const dataContent = query?.data?.data;
+  const dataContent = query?.data?.data || [];
 
-  const [variantPrice, setVariantPrice] = useState(
-    dataContent?.variant[0]?.price
-  );
+  const [variantPrice, setVariantPrice] = useStateuseState <number | null>(null);
+  //   (
+  //   dataContent?.variant[0]?.price
+  // );
 
   useEffect(() => {
-    if (query.isSuccess) {
-      const { variant } = dataContent;
-      const lowestPrice = getLowestVariantPrice(variant);
-      if (lowestPrice) {
-        setVariantPrice(lowestPrice);
+    // if (query.isSuccess) {
+    //   const { variant } = dataContent;
+    //   const lowestPrice = getLowestVariantPrice(variant);
+    //   if (lowestPrice) {
+    //     setVariantPrice(lowestPrice);
+    if (query.isSuccess && Array.isArray(dataContent) && dataContent.length > 0) {
+    const firstItem = dataContent[0];
+    const lowestPrice = firstItem?.variant ? getLowestVariantPrice(firstItem.variant) : null;
+    setVariantPrice(lowestPrice);
       }
     }
-  }, [dataContent]);
+    }, [query.isSuccess, dataContent]);
+  // }, [dataContent]);
 
   const handleSort = (sort: any) => {
     const dataSort: any = _.sortBy(dataContent, (item) => {
@@ -299,6 +305,21 @@ export function ProductContent() {
 
   const isFilterCatsAvailable: boolean = filterCategories.length > 0;
 
+    // ✅ fallback UI
+  if (query.isLoading) {
+    return <div>Loading produk...</div>;
+  }
+
+  if (query.isError) {
+    return <div>Terjadi kesalahan jaringan. Silakan coba lagi.</div>;
+  }
+
+  if (!dataContent || dataContent.length === 0) {
+    return <div>Tidak ada produk untuk kategori ini.</div>;
+  }
+
+  // ✅ kalau semua aman, render produk
+  
   return (
     <div className="grid grid-cols-12 gap-6">
       {isFilterCatsAvailable && (
