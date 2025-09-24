@@ -34,7 +34,7 @@ const getImageUrl = (image: any): string => {
   if (url.startsWith("http")) return url;
 
   const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_API || "https://celeparty.com";
+    process.env.NEXT_PUBLIC_BASE_API || "https://papi.celeparty.com";
 
   return `${baseUrl}${url}`;
 };
