@@ -18,6 +18,10 @@ export default async function BlogDetail({
   const dataBlog = await axiosData("GET", `/api/blogs/${slug}?populate[image]=true&populate[category]=true&populate[products][populate][0]=main_image`);
 
   const dataContent = dataBlog ? dataBlog?.data : null;
+  export const metadata = {
+  title: '${dataContent?.title}' , 
+  description: "Temukan event seru dan produk terbaik di Celeparty.",
+};
   return (
     <Basecontent>
       <div className="relative py-7">
