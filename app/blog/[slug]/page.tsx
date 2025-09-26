@@ -15,13 +15,23 @@ export default async function BlogDetail({
   params: { slug: string };
 }) {
   const slug = params.slug;
+
+  const dataBlog = await axiosData(
+    "GET",
+    `/api/blogs/${slug}?populate[image]=true&populate[category]=true&populate[products][populate][0]=main_image`
+  );
+
+  const dataContent = dataBlog ? dataBlog?.data : null;
+
+  return {
+    title: dataContent?.title,
+    description: dataContent?.title - "Artikel terbaik di Celeparty",
+  };
+
   const dataBlog = await axiosData("GET", `/api/blogs/${slug}?populate[image]=true&populate[category]=true&populate[products][populate][0]=main_image`);
 
   const dataContent = dataBlog ? dataBlog?.data : null;
-  export const metadata = {
-  title: '${dataContent?.title}' , 
-  description: "Temukan event seru dan produk terbaik di Celeparty.",
-};
+ 
   return (
     <Basecontent>
       <div className="relative py-7">
