@@ -16,9 +16,13 @@ const quick = Quicksand({
 });
 
 export const metadata = {
-  title: "Celeparty",
+  title: {
+    default: "Celeparty",
+    template: "%s | Celeparty", // semua halaman pakai format ini
+  },
   description: "Event and ticketing providers",
 };
+
 
 export default function RootLayout({
   children,
