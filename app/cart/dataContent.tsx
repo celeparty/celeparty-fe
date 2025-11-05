@@ -93,10 +93,19 @@ export default function CartContent() {
       // Validasi dasar yang diperlukan semua produk
       const basicValidation = item.customer_name && userTelp;
 
-      // Jika produk adalah ticket, hanya perlu validasi dasar
+      // Jika produk adalah ticket
       if (item.user_event_type === eProductType.ticket && item.variant) {
-        const isValid = basicValidation;
-        return isValid;
+        // Untuk ticket dengan quantity > 1, validasi recipients
+        if (item.quantity > 1) {
+          const recipientsValid = item.recipients &&
+            item.recipients.length === item.quantity &&
+            item.recipients.every((recipient: any) =>
+              recipient.name && recipient.email && recipient.contact
+            );
+          return basicValidation && recipientsValid;
+        }
+        // Untuk ticket dengan quantity = 1, hanya validasi dasar
+        return basicValidation;
       }
 
       // Jika produk bukan ticket, perlu semua field
@@ -437,7 +446,7 @@ export default function CartContent() {
                           {Array.from({ length: item.quantity }, (_, idx) => (
                             <div key={idx} className="mb-3 p-3 border rounded">
                               <h6 className="font-semibold mb-2">Tiket {idx + 1}</h6>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                 <input
                                   type="text"
                                   placeholder="Nama Penerima"
@@ -445,7 +454,7 @@ export default function CartContent() {
                                   value={item.recipients?.[idx]?.name || ""}
                                   onChange={(e) => {
                                     const newRecipients = [...(item.recipients || [])];
-                                    if (!newRecipients[idx]) newRecipients[idx] = { name: "", email: "" };
+                                    if (!newRecipients[idx]) newRecipients[idx] = { name: "", email: "", contact: "" };
                                     newRecipients[idx].name = e.target.value;
                                     updateRecipients(item.product_id, newRecipients);
                                   }}
@@ -457,8 +466,20 @@ export default function CartContent() {
                                   value={item.recipients?.[idx]?.email || ""}
                                   onChange={(e) => {
                                     const newRecipients = [...(item.recipients || [])];
-                                    if (!newRecipients[idx]) newRecipients[idx] = { name: "", email: "" };
+                                    if (!newRecipients[idx]) newRecipients[idx] = { name: "", email: "", contact: "" };
                                     newRecipients[idx].email = e.target.value;
+                                    updateRecipients(item.product_id, newRecipients);
+                                  }}
+                                />
+                                <input
+                                  type="text"
+                                  placeholder="Kontak Penerima"
+                                  className="border rounded p-2"
+                                  value={item.recipients?.[idx]?.contact || ""}
+                                  onChange={(e) => {
+                                    const newRecipients = [...(item.recipients || [])];
+                                    if (!newRecipients[idx]) newRecipients[idx] = { name: "", email: "", contact: "" };
+                                    newRecipients[idx].contact = e.target.value;
                                     updateRecipients(item.product_id, newRecipients);
                                   }}
                                 />
@@ -541,8 +562,10 @@ export default function CartContent() {
                   </div>
                 ) : (
                   <div
-                    className="bg-c-green text-white text-center py-3 mt-5 rounded-lg cursor-pointer"
-                    onClick={checkoutTicket}
+                    className={`bg-c-green text-white text-center py-3 mt-5 rounded-lg cursor-pointer ${
+                      !isCartValid ? "opacity-50 pointer-events-none" : ""
+                    }`}
+                    onClick={!isCartValid ? undefined : checkoutTicket}
                   >
                     Pembayaran
                   </div>

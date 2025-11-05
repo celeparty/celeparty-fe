@@ -21,4 +21,5 @@ export interface CartItem {
 export interface TicketRecipient {
   name: string;
   email: string;
+  contact: string;
 }
