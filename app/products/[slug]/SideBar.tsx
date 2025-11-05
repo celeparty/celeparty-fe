@@ -98,6 +98,7 @@ export default function SideBar({
         dataProducts.user_event_type?.name ||
         dataProducts.user_event_type?.id ||
         "",
+      product_type: productTypeName === eProductType.ticket ? 'ticket' as const : 'equipment' as const,
       vendor_id: dataProducts.users_permissions_user?.documentId || "",
     };
     const cartRaw = useCart.getState().cart;

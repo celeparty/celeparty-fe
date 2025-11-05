@@ -79,8 +79,8 @@ export default function CartContent() {
   }, [userTelp]);
 
   // Pisahkan cart berdasarkan tipe produk
-  const ticketItems = cart.filter((item: any) => item.user_event_type === eProductType.ticket);
-  const equipmentItems = cart.filter((item: any) => item.user_event_type !== eProductType.ticket);
+  const ticketItems = cart.filter((item: any) => item.product_type === 'ticket');
+  const equipmentItems = cart.filter((item: any) => item.product_type !== 'ticket');
 
   // Validasi: tidak boleh ada campuran tiket dan perlengkapan dalam satu cart
   const hasMixedProducts = ticketItems.length > 0 && equipmentItems.length > 0;
@@ -94,7 +94,7 @@ export default function CartContent() {
       const basicValidation = item.customer_name && userTelp;
 
       // Jika produk adalah ticket
-      if (item.user_event_type === eProductType.ticket && item.variant) {
+      if (item.product_type === 'ticket' && item.variant) {
         // Untuk ticket dengan quantity > 1, validasi recipients
         if (item.quantity > 1) {
           const recipientsValid = item.recipients &&
@@ -402,7 +402,7 @@ export default function CartContent() {
                         <div className="mb-1">
                           <b>Varian Produk:</b> {item.variant || "-"}
                         </div>
-                        {item.user_event_type !== eProductType.ticket && (
+                        {item.product_type !== 'ticket' && (
                           <>
                             <div className="mb-1">
                               <b>Detail Alamat:</b>{" "}
@@ -424,7 +424,7 @@ export default function CartContent() {
                   </div>
                   <div className="flex lg:gap-7 gap-3 mt-2 lg:mt-0">
                     <div className="flex-1">
-                      {item.user_event_type !== eProductType.ticket && (
+                      {item.product_type !== 'ticket' && (
                         <>
                           <h5 className="mb-2 lg:mb-0 font-bold py-2">
                             Catatan
@@ -440,7 +440,7 @@ export default function CartContent() {
                       )}
 
                       {/* Recipient form for tickets with quantity > 1 */}
-                      {item.user_event_type === eProductType.ticket && item.quantity > 1 && (
+                      {item.product_type === 'ticket' && item.quantity > 1 && (
                         <div className="mt-4">
                           <h5 className="mb-2 font-bold">Detail Penerima Tiket</h5>
                           {Array.from({ length: item.quantity }, (_, idx) => (
@@ -551,7 +551,7 @@ export default function CartContent() {
                   </div>
                 </div>
                 {/* Tombol pembayaran */}
-                {cart[0]?.user_event_type !== eProductType.ticket ? (
+                {cart[0]?.product_type !== 'ticket' ? (
                   <div
                     className={`bg-c-green text-white text-center py-3 mt-5 rounded-lg cursor-pointer ${
                       !isCartValid ? "opacity-50 pointer-events-none" : ""
