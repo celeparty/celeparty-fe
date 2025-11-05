@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { CartItem } from "@/lib/interfaces/iCart";
+import { CartItem, TicketRecipient } from "@/lib/interfaces/iCart";
 
 interface NotifState {
 	statusNotif: boolean;
@@ -17,6 +17,9 @@ export interface CartStore {
   updateQuantity: (productId: string | number, newQuantity: number) => void;
   deleteItem: (productId: string | number) => void;
   calculateTotal: () => number;
+  hasMixedProducts: () => boolean; // Check if cart has both tickets and equipment
+  addItem: (item: CartItem) => boolean; // Add item with validation
+  updateRecipients: (productId: string | number, recipients: TicketRecipient[]) => void;
   test?: () => void;
 }
 
@@ -66,7 +69,47 @@ export const useCart = create<CartStore>()(
           return total + (item.price * item.quantity || 0);
         }, 0);
       },
-      
+      hasMixedProducts: () => {
+        const cart = get().cart;
+        const productTypes = cart.map(item => item.product_type).filter(Boolean);
+        return new Set(productTypes).size > 1;
+      },
+      addItem: (item: CartItem) => {
+        const cart = get().cart;
+        const existingItem = cart.find(cartItem => cartItem.product_id === item.product_id);
+
+        // Check if adding this item would create mixed products
+        if (cart.length > 0) {
+          const firstItemType = cart[0].product_type;
+          if (firstItemType && item.product_type && firstItemType !== item.product_type) {
+            return false; // Cannot mix ticket and equipment
+          }
+        }
+
+        if (existingItem) {
+          // Update quantity if item already exists
+          set((state) => ({
+            cart: state.cart.map((cartItem) =>
+              cartItem.product_id === item.product_id
+                ? { ...cartItem, quantity: cartItem.quantity + item.quantity }
+                : cartItem
+            ),
+          }));
+        } else {
+          // Add new item
+          set((state) => ({
+            cart: [...state.cart, item],
+          }));
+        }
+        return true;
+      },
+      updateRecipients: (productId, recipients) => {
+        set((state) => ({
+          cart: state.cart.map((item) =>
+            item.product_id === productId ? { ...item, recipients } : item
+          ),
+        }));
+      },
     }),
     {
       name: "cart",

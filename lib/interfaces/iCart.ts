@@ -14,4 +14,11 @@ export interface CartItem {
   variant?: string;
   vendor_id?: string;
   user_event_type?: string;
-} 
+  product_type?: 'ticket' | 'equipment'; // Add product type to distinguish between tickets and equipment
+  recipients?: TicketRecipient[]; // For tickets with quantity > 1
+}
+
+export interface TicketRecipient {
+  name: string;
+  email: string;
+}

@@ -59,6 +59,9 @@ export default function CartContent() {
   const [editQuantity, setEditQuantity] = useState(1);
   const [editNote, setEditNote] = useState("");
 
+  // State untuk recipient details (untuk ticket dengan quantity > 1)
+  const { updateRecipients } = useCart();
+
   const { data: session } = useSession();
   const userTelp = session?.user?.phone || "-";
   const userEmail = session?.user?.email || "";
@@ -75,9 +78,17 @@ export default function CartContent() {
     // eslint-disable-next-line
   }, [userTelp]);
 
+  // Pisahkan cart berdasarkan tipe produk
+  const ticketItems = cart.filter((item: any) => item.user_event_type === eProductType.ticket);
+  const equipmentItems = cart.filter((item: any) => item.user_event_type !== eProductType.ticket);
+
+  // Validasi: tidak boleh ada campuran tiket dan perlengkapan dalam satu cart
+  const hasMixedProducts = ticketItems.length > 0 && equipmentItems.length > 0;
+
   // Validasi cart berdasarkan tipe produk
   const isCartValid =
     cart.length > 0 &&
+    !hasMixedProducts && // Tidak boleh campur tiket dan perlengkapan
     cart.every((item: any) => {
       // Validasi dasar yang diperlukan semua produk
       const basicValidation = item.customer_name && userTelp;
@@ -98,126 +109,7 @@ export default function CartContent() {
       return isValid;
     });
 
-  // Hapus form input checkout, ganti dengan tampilan readonly hasil inputan user
-  // Di bagian Ringkasan Belanja, tampilkan data dari cart[0] (asumsi semua produk di cart punya data yang sama)
-  {
-    cart.length > 0 && (
-      <div className="mb-4 p-3 border rounded bg-gray-50">
-        <div className="mb-1">
-          <b>Nama Pemesan:</b> {cart[0]?.customer_name || "-"}
-        </div>
-        <div className="mb-1">
-          <b>No. Telepon:</b> {cart[0]?.telp || "-1"}
-        </div>
-        <div className="mb-1">
-          <b>Alamat Pengiriman:</b> {cart[0]?.shipping_location || "-"}
-        </div>
-        <div className="mb-1">
-          <b>Tanggal Acara:</b> {cart[0]?.event_date || "-"}
-        </div>
-        <div className="mb-1">
-          <b>Tanggal Loading:</b> {cart[0]?.loading_date || "-"}
-        </div>
-        <div className="mb-1">
-          <b>Jam Loading:</b> {cart[0]?.loading_time || "-"}
-        </div>
-        <div className="mb-1">
-          <b>Varian Produk:</b> {cart[0]?.variant || "-"}
-        </div>
-      </div>
-    );
-  }
 
-  // Ringkasan data inputan user di cart (readonly, untuk semua produk)
-  {
-    cart.length > 0 && (
-      <>
-        {cart.map((item: any, idx: number) => (
-          <div
-            key={item.product_id || idx}
-            className="mb-6 border-b pb-4 last:border-b-0 last:pb-0 flex gap-4"
-          >
-            <div className="w-[100px] h-[100px] relative">
-              <Image
-                src={item.image ? item.image : "/images/noimage.png"}
-                alt="image"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="flex-1">
-              <div className="mb-1">
-                <b>Produk:</b> {item.product_name}
-              </div>
-              <div className="mb-1">
-                <b>Nama Pemesan:</b> {item.customer_name || "-"}
-              </div>
-              <div className="mb-1">
-                <b>No. Telepon:</b> {userTelp}
-              </div>
-              <div className="mb-1">
-                <b>Varian Produk:</b> {item.variant || "-"}
-              </div>
-              <div className="mb-1">
-                <b>Detail Alamat:</b> {item.shipping_location || "-"}
-              </div>
-              <div className="mb-1">
-                <b>Tanggal Acara:</b> {item.event_date || "-"}
-              </div>
-              <div className="mb-1">
-                <b>Tanggal Loading:</b> {item.loading_date || "-"}
-              </div>
-              <div className="mb-1">
-                <b>Jam Loading:</b> {item.loading_time || "-"}
-              </div>
-              <div className="mb-1 flex items-center gap-2">
-                <b>Jumlah:</b>
-                <input
-                  type="number"
-                  min={1}
-                  className="border rounded p-1 w-16"
-                  value={item.quantity}
-                  onChange={(e) => {
-                    const updatedCart = cart.map((it: any, i: number) =>
-                      i === idx
-                        ? { ...it, quantity: Number(e.target.value) }
-                        : it
-                    );
-                    setCart(updatedCart);
-                  }}
-                />
-              </div>
-              <div className="mb-1">
-                <b>Catatan:</b>
-                <textarea
-                  className="border rounded p-1 w-full"
-                  value={item.note || ""}
-                  onChange={(e) => {
-                    const updatedCart = cart.map((it: any, i: number) =>
-                      i === idx ? { ...it, note: e.target.value } : it
-                    );
-                    setCart(updatedCart);
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        ))}
-      </>
-    );
-  }
-
-  // Fungsi update cart item
-  const handleSaveEdit = (idx: number) => {
-    const updatedCart = cart.map((item: any, i: number) => {
-      if (i === idx) {
-        return { ...item, quantity: editQuantity, note: editNote };
-      }
-      return item;
-    });
-    setCart(updatedCart);
-    setEditIndex(null);
-  };
 
   const handleCheckout = async () => {
     if (!isCartValid) {
@@ -325,11 +217,6 @@ export default function CartContent() {
 
   const checkoutTicket = async () => {
     try {
-      // console.log("=== CHECKOUT TICKET START ===");
-      // console.log("Cart data:", cart);
-      // console.log("Data being sent to payment API:", data);
-      // console.log("User email:", userEmail);
-
       // Ambil data dari cart untuk ticket
       const ticketItem = cart[0]; // Ambil item pertama karena untuk ticket biasanya hanya 1 item
 
@@ -337,7 +224,6 @@ export default function CartContent() {
       const order_id = `ORDER-${Date.now()}-${Math.random()
         .toString(36)
         .substr(2, 9)}`;
-      // console.log("Generated Order ID:", order_id);
 
       // Siapkan payload untuk Strapi transaction-tickets
       const transactionTicketPayload = {
@@ -356,13 +242,11 @@ export default function CartContent() {
           order_id: order_id,
           customer_mail: userEmail,
           verification: false,
-          vendor_id: ticketItem.vendor_id || "", // Ambil dari cart item, bukan hardcode
+          vendor_id: ticketItem.vendor_id || "",
+          // Include recipients data if quantity > 1
+          recipients: ticketItem.quantity > 1 ? ticketItem.recipients : null,
         },
       };
-
-
-      // console.log({ticketItem});
-
 
       try {
         // Push data ke Strapi transaction-tickets terlebih dahulu
@@ -370,8 +254,6 @@ export default function CartContent() {
           "/api/transaction-tickets-proxy",
           transactionTicketPayload
         );
-
-        // Order ID sudah di-generate di atas
 
         try {
           // Kirim ke Midtrans untuk pembayaran
@@ -397,6 +279,7 @@ export default function CartContent() {
                     telp: userTelp,
                     order_id: order_id,
                     email: userEmail,
+                    recipients: ticketItem.quantity > 1 ? ticketItem.recipients : null,
                   })
                 );
 
@@ -448,7 +331,12 @@ export default function CartContent() {
 
   return (
     <div className="wrapper">
-      {cart.length > 0 ? (
+      {hasMixedProducts ? (
+        <Box className="mb-7 flex gap-1 items-center justify-center text-2xl text-red-600">
+          <div>Tidak dapat mencampur produk tiket dan perlengkapan event dalam satu keranjang</div>
+          <PiSmileySadDuotone />
+        </Box>
+      ) : cart.length > 0 ? (
         <div className="flex lg:flex-row flex-col lg:gap-5 gap-2">
           <div className="lg:w-8/12 w-full">
             {cart.map((item: any, index: number) => {
@@ -540,6 +428,44 @@ export default function CartContent() {
                             }
                           />
                         </>
+                      )}
+
+                      {/* Recipient form for tickets with quantity > 1 */}
+                      {item.user_event_type === eProductType.ticket && item.quantity > 1 && (
+                        <div className="mt-4">
+                          <h5 className="mb-2 font-bold">Detail Penerima Tiket</h5>
+                          {Array.from({ length: item.quantity }, (_, idx) => (
+                            <div key={idx} className="mb-3 p-3 border rounded">
+                              <h6 className="font-semibold mb-2">Tiket {idx + 1}</h6>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <input
+                                  type="text"
+                                  placeholder="Nama Penerima"
+                                  className="border rounded p-2"
+                                  value={item.recipients?.[idx]?.name || ""}
+                                  onChange={(e) => {
+                                    const newRecipients = [...(item.recipients || [])];
+                                    if (!newRecipients[idx]) newRecipients[idx] = { name: "", email: "" };
+                                    newRecipients[idx].name = e.target.value;
+                                    updateRecipients(item.product_id, newRecipients);
+                                  }}
+                                />
+                                <input
+                                  type="email"
+                                  placeholder="Email Penerima"
+                                  className="border rounded p-2"
+                                  value={item.recipients?.[idx]?.email || ""}
+                                  onChange={(e) => {
+                                    const newRecipients = [...(item.recipients || [])];
+                                    if (!newRecipients[idx]) newRecipients[idx] = { name: "", email: "" };
+                                    newRecipients[idx].email = e.target.value;
+                                    updateRecipients(item.product_id, newRecipients);
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       )}
                     </div>
 
