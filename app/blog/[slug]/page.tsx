@@ -26,13 +26,13 @@ export default async function BlogDetail({
   return {
     title: dataContent?.title,
     description: dataContent?.title - "Artikel terbaik di Celeparty",
-  };
+  // };
 
-  const dataBlog = await axiosData("GET", `/api/blogs/${slug}?populate[image]=true&populate[category]=true&populate[products][populate][0]=main_image`);
+  // const dataBlog = await axiosData("GET", `/api/blogs/${slug}?populate[image]=true&populate[category]=true&populate[products][populate][0]=main_image`);
 
-  const dataContent = dataBlog ? dataBlog?.data : null;
+  // const dataContent = dataBlog ? dataBlog?.data : null;
  
-  return (
+  // return (
     <Basecontent>
       <div className="relative py-7">
         <Box rounded={false}>
