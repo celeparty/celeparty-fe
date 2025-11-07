@@ -9,6 +9,23 @@ import NewArticles from "./NewArticles";
 import ItemProduct from "@/components/product/ItemProduct";
 import { formatNumberWithDots, formatRupiah } from "@/lib/utils";
 
+
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const slug = params.slug;
+
+  const dataBlog = await axiosData(
+    "GET",
+    `/api/blogs/${slug}?populate[image]=true&populate[category]=true&populate[products][populate][0]=main_image`
+  );
+
+  const dataContent = dataBlog ? dataBlog?.data : null;
+
+  return {
+    title: dataContent?.title || "Blog - Celeparty",
+    description: `${dataContent?.title || ""} - Artikel terbaik di Celeparty`,
+  };
+}
+
 export default async function BlogDetail({
   params,
 }: {
@@ -23,16 +40,9 @@ export default async function BlogDetail({
 
   const dataContent = dataBlog ? dataBlog?.data : null;
 
-  return {
-    title: dataContent?.title,
-    description: dataContent?.title - "Artikel terbaik di Celeparty",
-  // };
-
-  // const dataBlog = await axiosData("GET", `/api/blogs/${slug}?populate[image]=true&populate[category]=true&populate[products][populate][0]=main_image`);
-
-  // const dataContent = dataBlog ? dataBlog?.data : null;
+  };
  
-  // return (
+  return (
     <Basecontent>
       <div className="relative py-7">
         <Box rounded={false}>
