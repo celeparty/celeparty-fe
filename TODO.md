@@ -9,3 +9,7 @@
 - [x] Test the validation works correctly
 - [x] Add product_type field to cart items when adding to cart
 - [x] Update cart component to use product_type instead of user_event_type for conditional rendering
+- [x] Update ticket-detail schema to include identity_type, identity_number, whatsapp_number
+- [x] Update TicketRecipient interface with new fields
+- [x] Update cart form to include new recipient fields with validation
+- [x] Update lifecycles.js to populate new fields when creating ticket details

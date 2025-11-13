@@ -20,6 +20,8 @@ export interface CartItem {
 
 export interface TicketRecipient {
   name: string;
+  identity_type: 'KTP' | 'SIM' | 'Lainnya';
+  identity_number: string;
+  whatsapp_number: string;
   email: string;
-  contact: string;
 }

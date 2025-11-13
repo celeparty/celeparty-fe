@@ -95,17 +95,19 @@ export default function CartContent() {
 
       // Jika produk adalah ticket
       if (item.product_type === 'ticket' && item.variant) {
-        // Untuk ticket dengan quantity > 1, validasi recipients
-        if (item.quantity > 1) {
-          const recipientsValid = item.recipients &&
-            item.recipients.length === item.quantity &&
-            item.recipients.every((recipient: any) =>
-              recipient.name && recipient.email && recipient.contact
-            );
-          return basicValidation && recipientsValid;
-        }
-        // Untuk ticket dengan quantity = 1, hanya validasi dasar
-        return basicValidation;
+        // Untuk ticket dengan quantity >= 1, validasi recipients
+        const recipientsValid = item.recipients &&
+          item.recipients.length === item.quantity &&
+          item.recipients.every((recipient: any) =>
+            recipient.name &&
+            recipient.identity_type &&
+            recipient.identity_number &&
+            recipient.whatsapp_number &&
+            recipient.email &&
+            /^\d+$/.test(recipient.identity_number) &&
+            /^\d+$/.test(recipient.whatsapp_number)
+          );
+        return basicValidation && recipientsValid;
       }
 
       // Jika produk bukan ticket, perlu semua field
@@ -252,8 +254,8 @@ export default function CartContent() {
           customer_mail: userEmail,
           verification: false,
           vendor_id: ticketItem.vendor_id || "",
-          // Include recipients data if quantity > 1
-          recipients: ticketItem.quantity > 1 ? ticketItem.recipients : null,
+          // Include recipients data always for tickets
+          recipients: ticketItem.recipients,
         },
       };
 
@@ -288,7 +290,7 @@ export default function CartContent() {
                     telp: userTelp,
                     order_id: order_id,
                     email: userEmail,
-                    recipients: ticketItem.quantity > 1 ? ticketItem.recipients : null,
+                    recipients: ticketItem.recipients,
                   })
                 );
 
@@ -439,53 +441,89 @@ export default function CartContent() {
                         </>
                       )}
 
-                      {/* Recipient form for tickets with quantity > 1 */}
-                      {item.product_type === 'ticket' && item.quantity > 1 && (
+                      {/* Recipient form for tickets - always show for quantity >= 1 */}
+                      {item.product_type === 'ticket' && item.quantity >= 1 && (
                         <div className="mt-4">
                           <h5 className="mb-2 font-bold">Detail Penerima Tiket</h5>
-                          {Array.from({ length: item.quantity }, (_, idx) => (
-                            <div key={idx} className="mb-3 p-3 border rounded">
-                              <h6 className="font-semibold mb-2">Tiket {idx + 1}</h6>
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                <input
-                                  type="text"
-                                  placeholder="Nama Penerima"
-                                  className="border rounded p-2"
-                                  value={item.recipients?.[idx]?.name || ""}
-                                  onChange={(e) => {
-                                    const newRecipients = [...(item.recipients || [])];
-                                    if (!newRecipients[idx]) newRecipients[idx] = { name: "", email: "", contact: "" };
-                                    newRecipients[idx].name = e.target.value;
-                                    updateRecipients(item.product_id, newRecipients);
-                                  }}
-                                />
-                                <input
-                                  type="email"
-                                  placeholder="Email Penerima"
-                                  className="border rounded p-2"
-                                  value={item.recipients?.[idx]?.email || ""}
-                                  onChange={(e) => {
-                                    const newRecipients = [...(item.recipients || [])];
-                                    if (!newRecipients[idx]) newRecipients[idx] = { name: "", email: "", contact: "" };
-                                    newRecipients[idx].email = e.target.value;
-                                    updateRecipients(item.product_id, newRecipients);
-                                  }}
-                                />
-                                <input
-                                  type="text"
-                                  placeholder="Kontak Penerima"
-                                  className="border rounded p-2"
-                                  value={item.recipients?.[idx]?.contact || ""}
-                                  onChange={(e) => {
-                                    const newRecipients = [...(item.recipients || [])];
-                                    if (!newRecipients[idx]) newRecipients[idx] = { name: "", email: "", contact: "" };
-                                    newRecipients[idx].contact = e.target.value;
-                                    updateRecipients(item.product_id, newRecipients);
-                                  }}
-                                />
+                          {Array.from({ length: item.quantity }, (_, idx) => {
+                            // Auto-fill first recipient with user data if available
+                            const isFirstRecipient = idx === 0;
+                            const defaultName = isFirstRecipient ? (session?.user?.name || "") : "";
+                            const defaultEmail = isFirstRecipient ? userEmail : "";
+                            const defaultIdentityType = isFirstRecipient ? "KTP" : "KTP";
+                            const defaultIdentityNumber = isFirstRecipient ? (session?.user?.nik || "") : "";
+                            const defaultWhatsappNumber = isFirstRecipient ? userTelp : "";
+
+                            return (
+                              <div key={idx} className="mb-3 p-3 border rounded">
+                                <h6 className="font-semibold mb-2">Tiket {idx + 1}</h6>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                  <input
+                                    type="text"
+                                    placeholder="Nama Lengkap"
+                                    className="border rounded p-2"
+                                    value={item.recipients?.[idx]?.name || defaultName}
+                                    onChange={(e) => {
+                                      const newRecipients = [...(item.recipients || [])];
+                                      if (!newRecipients[idx]) newRecipients[idx] = { name: defaultName, identity_type: defaultIdentityType, identity_number: defaultIdentityNumber, whatsapp_number: defaultWhatsappNumber, email: defaultEmail };
+                                      newRecipients[idx].name = e.target.value;
+                                      updateRecipients(item.product_id, newRecipients);
+                                    }}
+                                  />
+                                  <select
+                                    className="border rounded p-2"
+                                    value={item.recipients?.[idx]?.identity_type || defaultIdentityType}
+                                    onChange={(e) => {
+                                      const newRecipients = [...(item.recipients || [])];
+                                      if (!newRecipients[idx]) newRecipients[idx] = { name: defaultName, identity_type: defaultIdentityType, identity_number: defaultIdentityNumber, whatsapp_number: defaultWhatsappNumber, email: defaultEmail };
+                                      newRecipients[idx].identity_type = e.target.value as 'KTP' | 'SIM' | 'Lainnya';
+                                      updateRecipients(item.product_id, newRecipients);
+                                    }}
+                                  >
+                                    <option value="KTP">KTP</option>
+                                    <option value="SIM">SIM</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                  </select>
+                                  <input
+                                    type="text"
+                                    placeholder="Nomor Identitas"
+                                    className="border rounded p-2"
+                                    value={item.recipients?.[idx]?.identity_number || defaultIdentityNumber}
+                                    onChange={(e) => {
+                                      const newRecipients = [...(item.recipients || [])];
+                                      if (!newRecipients[idx]) newRecipients[idx] = { name: defaultName, identity_type: defaultIdentityType, identity_number: defaultIdentityNumber, whatsapp_number: defaultWhatsappNumber, email: defaultEmail };
+                                      newRecipients[idx].identity_number = e.target.value;
+                                      updateRecipients(item.product_id, newRecipients);
+                                    }}
+                                  />
+                                  <input
+                                    type="text"
+                                    placeholder="Nomor WhatsApp"
+                                    className="border rounded p-2"
+                                    value={item.recipients?.[idx]?.whatsapp_number || defaultWhatsappNumber}
+                                    onChange={(e) => {
+                                      const newRecipients = [...(item.recipients || [])];
+                                      if (!newRecipients[idx]) newRecipients[idx] = { name: defaultName, identity_type: defaultIdentityType, identity_number: defaultIdentityNumber, whatsapp_number: defaultWhatsappNumber, email: defaultEmail };
+                                      newRecipients[idx].whatsapp_number = e.target.value;
+                                      updateRecipients(item.product_id, newRecipients);
+                                    }}
+                                  />
+                                  <input
+                                    type="email"
+                                    placeholder="Email"
+                                    className="border rounded p-2 md:col-span-2 lg:col-span-1"
+                                    value={item.recipients?.[idx]?.email || defaultEmail}
+                                    onChange={(e) => {
+                                      const newRecipients = [...(item.recipients || [])];
+                                      if (!newRecipients[idx]) newRecipients[idx] = { name: defaultName, identity_type: defaultIdentityType, identity_number: defaultIdentityNumber, whatsapp_number: defaultWhatsappNumber, email: defaultEmail };
+                                      newRecipients[idx].email = e.target.value;
+                                      updateRecipients(item.product_id, newRecipients);
+                                    }}
+                                  />
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       )}
                     </div>
