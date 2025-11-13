@@ -12,19 +12,10 @@ export default function Home() {
 	
 	useEffect(() => {
 		if (status === "authenticated") {
-			// Check for redirect parameter
-			const urlParams = new URLSearchParams(window.location.search);
-			const redirectUrl = urlParams.get("redirect");
-
-			if (redirectUrl) {
-				// Redirect to the stored URL
-				router.push(redirectUrl);
-			} else {
-				// Default behavior: check user role and redirect accordingly
-				axiosUser("GET", "/api/users/me", `${session && session?.jwt}`).then((res) => {
-					res?.role.type === "vendor" ? router.push("/user/vendor/profile") : router.push("/user/profile/bio")
-				})
-			}
+			// Default behavior: check user role and redirect accordingly
+			axiosUser("GET", "/api/users/me", `${session && session?.jwt}`).then((res) => {
+				res?.role.type === "vendor" ? router.push("/user/vendor/profile") : router.push("/user/profile/bio")
+			})
 		}
 	}, [status]);
 

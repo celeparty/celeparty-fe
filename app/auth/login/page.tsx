@@ -65,8 +65,12 @@ function LoginPage() {
 		  }
 		else {
 			setMessage({status:false, info:""})
-			const redirectUrl = params.get("redirect") || "/user/home";
-			router.replace(redirectUrl);
+			const redirectUrl = params.get("redirect");
+			if (redirectUrl) {
+				router.replace(redirectUrl);
+			} else {
+				router.replace("/user/home");
+			}
 			window.location.reload();
 		  }
     };
