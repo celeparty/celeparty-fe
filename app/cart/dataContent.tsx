@@ -227,6 +227,27 @@ export default function CartContent() {
   };
 
   const checkoutTicket = async () => {
+    // Check recipient validation for ticket products
+    const ticketItem = cart[0];
+    if (ticketItem.product_type === 'ticket' && ticketItem.quantity >= 1) {
+      const recipientsValid = ticketItem.recipients &&
+        ticketItem.recipients.length === ticketItem.quantity &&
+        ticketItem.recipients.every((recipient: any) =>
+          recipient.name &&
+          recipient.identity_type &&
+          recipient.identity_number &&
+          recipient.whatsapp_number &&
+          recipient.email &&
+          /^\d+$/.test(recipient.identity_number) &&
+          /^\d+$/.test(recipient.whatsapp_number)
+        );
+
+      if (!recipientsValid) {
+        alert("Silakan lengkapi semua detail penerima tiket sebelum melanjutkan pembayaran.");
+        return;
+      }
+    }
+
     try {
       // Ambil data dari cart untuk ticket
       const ticketItem = cart[0]; // Ambil item pertama karena untuk ticket biasanya hanya 1 item
