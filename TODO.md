@@ -6,7 +6,7 @@
 - [x] Update login links in Header and SideBar to include redirect parameter
 - [x] Update register links to include redirect parameter
 - [x] Modify register page to redirect after successful registration
-- [ ] Test the redirect functionality
+- [x] Test the redirect functionality
 
 ## Details
 
