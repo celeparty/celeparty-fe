@@ -55,7 +55,7 @@ export const TicketScan: React.FC = () => {
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const codeReader = useRef<BrowserMultiFormatReader | null>(null);
+  const codeReader = useRef<BrowserMultiFormatReader>(new BrowserMultiFormatReader());
 
   const getVerificationHistory = async () => {
     const response = await axiosUser(
@@ -125,7 +125,7 @@ export const TicketScan: React.FC = () => {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
         setIsScanning(true);
-        codeReader.current.decodeFromVideoDevice(undefined, videoRef.current, (result, err) => {
+        codeReader.current.decodeFromVideoDevice(null, videoRef.current, (result, err) => {
           if (result) {
             const scannedText = result.getText();
             setScanResult(scannedText);
@@ -155,7 +155,6 @@ export const TicketScan: React.FC = () => {
   };
 
   useEffect(() => {
-    codeReader.current = new BrowserMultiFormatReader();
     return () => {
       if (codeReader.current) {
         codeReader.current.reset();
