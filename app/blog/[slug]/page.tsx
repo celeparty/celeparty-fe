@@ -1,13 +1,28 @@
 import Basecontent from "@/components/Basecontent";
 import Box from "@/components/Box";
-import { ProductList } from "@/components/product/ProductList";
 import { axiosData } from "@/lib/services";
 import parse from "html-react-parser";
 import moment from "moment";
 import Image from "next/image";
 import NewArticles from "./NewArticles";
 import ItemProduct from "@/components/product/ItemProduct";
-import { formatNumberWithDots, formatRupiah } from "@/lib/utils";
+import { formatRupiah } from "@/lib/utils";
+
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const slug = params.slug;
+
+  const dataBlog = await axiosData(
+    "GET",
+    `/api/blogs/${slug}?populate[image]=true&populate[category]=true&populate[products][populate][0]=main_image`
+  );
+
+  const dataContent = dataBlog ? dataBlog?.data : null;
+
+  return {
+    title: dataContent?.title || "Blog - Celeparty",
+    description: `${dataContent?.title || ""} - Artikel terbaik di Celeparty`,
+  };
+}
 
 export default async function BlogDetail({
   params,
@@ -23,15 +38,7 @@ export default async function BlogDetail({
 
   const dataContent = dataBlog ? dataBlog?.data : null;
 
-  return {
-    title: dataContent?.title,
-    description: dataContent?.title - "Artikel terbaik di Celeparty",
-  };
-
-  const dataBlog = await axiosData("GET", `/api/blogs/${slug}?populate[image]=true&populate[category]=true&populate[products][populate][0]=main_image`);
-
-  const dataContent = dataBlog ? dataBlog?.data : null;
- 
+  // 🔹 Hapus tanda kurung kurawal penutup ekstra sebelum return
   return (
     <Basecontent>
       <div className="relative py-7">
@@ -58,9 +65,9 @@ export default async function BlogDetail({
                       <div className="relative fill-current w-full h-[194px] lg:h-[450px] overflow-hidden">
                         <Image
                           src={
-                                    dataContent?.image?.url
-                                  ? `${process.env.BASE_API}${dataContent?.image?.url}`
-                                  : "/images/noimage.png"
+                            dataContent?.image?.url
+                              ? `${process.env.BASE_API}${dataContent?.image?.url}`
+                              : "/images/noimage.png"
                           }
                           fill
                           alt={dataContent?.title}
@@ -75,41 +82,32 @@ export default async function BlogDetail({
                   </div>
                 </div>
                 <div className="products-wrapper mt-4">
-                  {
-                    dataContent?.products.length>0 &&
-                  <h4 className="font-semibold text-[16px] text-black">
-                    Produk Terkait
-                  </h4>
-
-                  }
+                  {dataContent?.products?.length > 0 && (
+                    <h4 className="font-semibold text-[16px] text-black">
+                      Produk Terkait
+                    </h4>
+                  )}
                   <div className="flex flex-wrap -mx-2">
-                    {
-                      dataContent?.products && 
-                      dataContent?.products.map((item: any, index: number) => {
-                        return (
-                          <ItemProduct
-                            url={`/products/${item.documentId}`}
-                            key={item.id}
-                            title={item.title}
-                            image_url={
-                              item.main_image
-                                ? process.env.BASE_API + item.main_image[0].url
-                                : "/images/noimage.png"
-                            }
-                            // image_url="/images/noimage.png"
-                            price={
-                              item.main_price
-                                ? formatRupiah(item.main_price)
-                                : formatRupiah(0)
-                            }
-                            rate={item.rate ? `${item.rate}` : "1"}
-                            sold={item.sold_count}
-                            location={item.region ? item.region : null}
-                          />
-                        );
-                      }
-                      )
-                    }
+                    {dataContent?.products?.map((item: any, index: number) => (
+                      <ItemProduct
+                        url={`/products/${item.documentId}`}
+                        key={item.id}
+                        title={item.title}
+                        image_url={
+                          item.main_image
+                            ? process.env.BASE_API + item.main_image[0].url
+                            : "/images/noimage.png"
+                        }
+                        price={
+                          item.main_price
+                            ? formatRupiah(item.main_price)
+                            : formatRupiah(0)
+                        }
+                        rate={item.rate ? `${item.rate}` : "1"}
+                        sold={item.sold_count}
+                        location={item.region ? item.region : null}
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
