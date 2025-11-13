@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosUser } from "@/lib/services";
@@ -13,10 +13,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
-import { QrCode, Camera } from "lucide-react";
+import { QrCode, Camera, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { BrowserMultiFormatReader } from "@zxing/library";
 
 interface iVerificationHistory {
   id: number;
@@ -26,17 +34,33 @@ interface iVerificationHistory {
   event_name: string;
 }
 
+interface iTicketDetail {
+  id: number;
+  customer_name: string;
+  customer_email: string;
+  variant: string;
+  verification: boolean;
+  createdAt: string;
+  product_name: string;
+  total_price: number;
+  payment_status: string;
+  unique_token: string;
+}
+
 export const TicketScan: React.FC = () => {
   const { data: session } = useSession();
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<string>("");
+  const [ticketDetail, setTicketDetail] = useState<iTicketDetail | null>(null);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const codeReader = useRef<BrowserMultiFormatReader | null>(null);
 
   const getVerificationHistory = async () => {
     const response = await axiosUser(
       "GET",
-      `/api/transaction-tickets?filters[vendor_id][$eq]=${session?.user?.documentId}&filters[verification][$eq]=true]&sort=updatedAt:desc`,
+      `/api/transaction-tickets?filters[vendor_id][$eq]=${session?.user?.documentId}&filters[verification][$eq]=true&sort=updatedAt:desc`,
       `${session?.jwt}`
     );
     return response;
@@ -46,6 +70,28 @@ export const TicketScan: React.FC = () => {
     queryKey: ["verificationHistory"],
     queryFn: getVerificationHistory,
     enabled: !!session?.jwt,
+  });
+
+  const getTicketDetail = useMutation({
+    mutationFn: async (uniqueToken: string) => {
+      const response = await axiosUser(
+        "GET",
+        `/api/transaction-tickets?filters[unique_token][$eq]=${uniqueToken}&populate=*`,
+        `${session?.jwt}`
+      );
+      return response;
+    },
+    onSuccess: (data) => {
+      if (data?.data?.length > 0) {
+        setTicketDetail(data.data[0]);
+        setShowDetailDialog(true);
+      } else {
+        toast.error("Tiket tidak ditemukan");
+      }
+    },
+    onError: (error: any) => {
+      toast.error("Gagal mengambil detail tiket");
+    },
   });
 
   const verifyTicketMutation = useMutation({
@@ -62,6 +108,8 @@ export const TicketScan: React.FC = () => {
       toast.success("Tiket berhasil diverifikasi!");
       query.refetch();
       setScanResult("");
+      setTicketDetail(null);
+      setShowDetailDialog(false);
     },
     onError: (error: any) => {
       toast.error(error?.response?.data?.error?.message || "Gagal memverifikasi tiket");
@@ -90,21 +138,26 @@ export const TicketScan: React.FC = () => {
     }
   };
 
-  const captureAndScan = () => {
-    if (videoRef.current && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const video = videoRef.current;
-      const context = canvas.getContext('2d');
+  useEffect(() => {
+    codeReader.current = new BrowserMultiFormatReader();
+    return () => {
+      if (codeReader.current) {
+        codeReader.current.reset();
+      }
+    };
+  }, []);
 
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      context?.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      // Here you would integrate with a QR code scanning library
-      // For now, we'll simulate scanning
-      const mockQRCode = "TICKET-12345";
-      setScanResult(mockQRCode);
-      stopScanning();
+  const captureAndScan = async () => {
+    if (videoRef.current && codeReader.current) {
+      try {
+        const result = await codeReader.current.decodeOnceFromVideoDevice(undefined, videoRef.current);
+        const scannedText = result.getText();
+        setScanResult(scannedText);
+        getTicketDetail.mutate(scannedText);
+        stopScanning();
+      } catch (error) {
+        toast.error("Gagal memindai QR code");
+      }
     }
   };
 
@@ -173,6 +226,84 @@ export const TicketScan: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Ticket Detail Dialog */}
+      <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Detail Tiket</DialogTitle>
+            <DialogDescription>
+              Informasi lengkap tiket yang dipindai
+            </DialogDescription>
+          </DialogHeader>
+          {ticketDetail && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Nama Customer</p>
+                  <p className="text-sm">{ticketDetail.customer_name}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Email</p>
+                  <p className="text-sm">{ticketDetail.customer_email}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Varian</p>
+                  <p className="text-sm">{ticketDetail.variant}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Status Pembayaran</p>
+                  <p className="text-sm">{ticketDetail.payment_status}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Total Harga</p>
+                  <p className="text-sm">Rp {ticketDetail.total_price.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Tanggal Pembelian</p>
+                  <p className="text-sm">{new Date(ticketDetail.createdAt).toLocaleDateString()}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-medium text-gray-500">Status Verifikasi:</p>
+                {ticketDetail.verification ? (
+                  <div className="flex items-center gap-1 text-green-600">
+                    <CheckCircle className="h-4 w-4" />
+                    <span className="text-sm">Sudah Diverifikasi</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1 text-red-600">
+                    <XCircle className="h-4 w-4" />
+                    <span className="text-sm">Belum Diverifikasi</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex gap-2 pt-4">
+                {!ticketDetail.verification && (
+                  <Button
+                    onClick={handleVerify}
+                    disabled={verifyTicketMutation.isPending}
+                    className="flex-1"
+                  >
+                    {verifyTicketMutation.isPending ? "Memverifikasi..." : "Verifikasi Tiket"}
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowDetailDialog(false);
+                    setScanResult("");
+                    setTicketDetail(null);
+                  }}
+                  className="flex-1"
+                >
+                  Tutup
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* History Table */}
       <div>
