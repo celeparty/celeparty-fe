@@ -287,7 +287,7 @@ export default function SideBar({
           <h4>Silahkan Login Terlebih Dahulu</h4>
           <div className="h-14">
             <Link
-              href="/auth/login"
+              href={`/auth/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`}
               className="btnline justify-center items-start inline-flex"
             >
               <div className="py-1">Masuk</div>

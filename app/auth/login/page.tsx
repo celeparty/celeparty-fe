@@ -62,10 +62,11 @@ function LoginPage() {
         });
 		if (result?.error) {
 			setMessage({status:true, info:"Username atau password salah"})
-		  } 
+		  }
 		else {
 			setMessage({status:false, info:""})
-			router.replace("/user/home")
+			const redirectUrl = params.get("redirect") || "/user/home";
+			router.replace(redirectUrl);
 			window.location.reload();
 		  }
     };

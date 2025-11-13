@@ -1,15 +1,15 @@
-# Cart Recipient Validation Update
+# TODO: Implement Redirect After Login/Register
 
-## Pending Tasks
+## Tasks
 
-- [x] Update TicketRecipient interface to include contact field
-- [x] Modify recipient form in cart to include contact input
-- [x] Update isCartValid logic to validate recipient completeness
-- [x] Disable payment button when recipients incomplete for quantity > 1 tickets
-- [x] Test the validation works correctly
-- [x] Add product_type field to cart items when adding to cart
-- [x] Update cart component to use product_type instead of user_event_type for conditional rendering
-- [x] Update ticket-detail schema to include identity_type, identity_number, whatsapp_number
-- [x] Update TicketRecipient interface with new fields
-- [x] Update cart form to include new recipient fields with validation
-- [x] Update lifecycles.js to populate new fields when creating ticket details
+- [x] Modify login page to redirect to stored URL or homepage after successful login
+- [x] Update login links in Header and SideBar to include redirect parameter
+- [x] Update register links to include redirect parameter
+- [x] Modify register page to redirect after successful registration
+- [ ] Test the redirect functionality
+
+## Details
+
+- Default redirect: "/" (Celeparty homepage)
+- If user was on product page before login/register, redirect back to that page
+- Use URL query parameter "redirect" to store the current page URL

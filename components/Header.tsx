@@ -97,10 +97,10 @@ export default function Header() {
                 </div>
               ) : status === "unauthenticated" ? (
                 <div className="flex gap-3">
-                  <Link href="/auth/login" className="btnline px-3 w-32">
+                  <Link href={`/auth/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`} className="btnline px-3 w-32">
                     Masuk
                   </Link>
-                  <Link href="/auth/register" className="btn px-3">
+                  <Link href={`/auth/register?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`} className="btn px-3">
                     Daftar
                   </Link>
                 </div>

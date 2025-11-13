@@ -73,17 +73,20 @@ const Registration = () => {
 					address: values.address,
 					password: values.password,
 				};
-		  
-				const response = await axiosData("POST", "/api/auth/local/register", data);	
+
+				const response = await axiosData("POST", "/api/auth/local/register", data);
 				setErrorMessage(false);
-				setMessage(true);		
+				setMessage(true);
+				// Redirect to login page with redirect parameter
+				const redirectUrl = window.location.search.includes('redirect') ? window.location.search : '';
+				window.location.href = `/auth/login${redirectUrl}`;
 			} catch (error:any) {
 				console.error("Error:", error?.response.data.error.message);
-				setErrorMessage(error?.response.data.error.message);		
+				setErrorMessage(error?.response.data.error.message);
 			}
 		}
-		sendNow()	
-		reset()	
+		sendNow()
+		reset()
 	};
 	return (
 		<div>
