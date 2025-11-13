@@ -79,8 +79,8 @@ export default function CartContent() {
   }, [userTelp]);
 
   // Pisahkan cart berdasarkan tipe produk
-  const ticketItems = cart.filter((item: any) => item.product_type.toLowerCase() === 'ticket');
-  const equipmentItems = cart.filter((item: any) => item.product_type.toLowerCase() !== 'ticket');
+  const ticketItems = cart.filter((item: any) => item.product_type === 'ticket');
+  const equipmentItems = cart.filter((item: any) => item.product_type !== 'ticket');
 
   // Validasi: tidak boleh ada campuran tiket dan perlengkapan dalam satu cart
   const hasMixedProducts = ticketItems.length > 0 && equipmentItems.length > 0;
@@ -94,7 +94,7 @@ export default function CartContent() {
       const basicValidation = item.customer_name && userTelp;
 
       // Jika produk adalah ticket
-      if (item.product_type.toLowerCase() === 'ticket' && item.variant) {
+      if (item.product_type === 'ticket' && item.variant) {
         // Untuk ticket dengan quantity >= 1, validasi recipients
         const recipientsValid = item.recipients &&
           item.recipients.length === item.quantity &&
@@ -404,7 +404,7 @@ export default function CartContent() {
                         <div className="mb-1">
                           <b>Varian Produk:</b> {item.variant || "-"}
                         </div>
-                        {item.product_type.toLowerCase() !== 'ticket' && (
+                        {item.product_type !== 'ticket' && (
                           <>
                             <div className="mb-1">
                               <b>Detail Alamat:</b>{" "}
@@ -442,7 +442,7 @@ export default function CartContent() {
                       )}
 
                       {/* Recipient form for tickets - always show for quantity >= 1 */}
-                      {item.product_type.toLowerCase() === 'ticket' && item.quantity >= 1 && (
+                      {item.product_type === 'ticket' && item.quantity >= 1 && (
                         <div className="mt-4">
                           <h5 className="mb-2 font-bold">Detail Penerima Tiket</h5>
                           {Array.from({ length: item.quantity }, (_, idx) => {
