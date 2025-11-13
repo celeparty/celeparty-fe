@@ -65,14 +65,16 @@ export default function Header() {
           </div>
           <div className="relative lg:justify-end flex  flex-row items-center text-3xl gap-4 text-c-gray-text font-semibold lg:w-auto w-full">
             <div className="flex gap-4 w-fit p-2 lg:p-0 ">
-              <Link href="/cart" className="item relative">
-                <MdOutlineShoppingCart />
-                {cart.length > 0 ? (
-                  <div className="absolute top-[0] right-[0] bg-c-orange w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold">
-                    {userMe ? cart.length : 0}
-                  </div>
-                ) : null}
-              </Link>
+              {status === "authenticated" && (
+                <Link href="/cart" className="item relative">
+                  <MdOutlineShoppingCart />
+                  {cart.length > 0 ? (
+                    <div className="absolute top-[0] right-[0] bg-c-orange w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold">
+                      {userMe ? cart.length : 0}
+                    </div>
+                  ) : null}
+                </Link>
+              )}
               {/* <div className="item" onClick={setCartLength}>
 								<MdOutlineNotifications />
 							</div> */}
