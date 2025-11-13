@@ -116,36 +116,29 @@ export const TicketScan: React.FC = () => {
     },
   });
 
-  const scanContinuously = async () => {
-    if (!isScanning || !videoRef.current || !codeReader.current) return;
-
-    try {
-      const result = await codeReader.current.decodeOnceFromVideoDevice(undefined, videoRef.current);
-      const scannedText = result.getText();
-      setScanResult(scannedText);
-      getTicketDetail.mutate(scannedText);
-      stopScanning();
-    } catch (error) {
-      // Continue scanning if no QR code found
-      if (isScanning) {
-        setTimeout(scanContinuously, 100);
-      }
-    }
-  };
-
   const startScanning = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" }
+        video: true
       });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.play();
+        await videoRef.current.play();
         setIsScanning(true);
-        // Start continuous scanning
-        scanContinuously();
+        codeReader.current.decodeFromVideoDevice(undefined, videoRef.current, (result, err) => {
+          if (result) {
+            const scannedText = result.getText();
+            setScanResult(scannedText);
+            getTicketDetail.mutate(scannedText);
+            stopScanning();
+          }
+          if (err && err.name !== 'NotFoundException') {
+            console.error('Scanning error:', err);
+          }
+        });
       }
     } catch (error) {
+      console.error('Camera error:', error);
       toast.error("Tidak dapat mengakses kamera");
     }
   };
@@ -155,6 +148,9 @@ export const TicketScan: React.FC = () => {
       const stream = videoRef.current.srcObject as MediaStream;
       stream.getTracks().forEach(track => track.stop());
       setIsScanning(false);
+    }
+    if (codeReader.current) {
+      codeReader.current.reset();
     }
   };
 
@@ -167,19 +163,7 @@ export const TicketScan: React.FC = () => {
     };
   }, []);
 
-  const captureAndScan = async () => {
-    if (videoRef.current && codeReader.current) {
-      try {
-        const result = await codeReader.current.decodeOnceFromVideoDevice(undefined, videoRef.current);
-        const scannedText = result.getText();
-        setScanResult(scannedText);
-        getTicketDetail.mutate(scannedText);
-        stopScanning();
-      } catch (error) {
-        toast.error("Gagal memindai QR code");
-      }
-    }
-  };
+
 
   const handleVerify = () => {
     if (scanResult) {
