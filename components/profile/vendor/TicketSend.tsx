@@ -118,7 +118,7 @@ export const TicketSend: React.FC = () => {
           customer_name: recipients.map(r => r.name).join(", "),
           customer_mail: recipients.map(r => r.email).join(", "),
           telp: recipients.map(r => r.phone).join(", "),
-          total_price: (selectedProductData?.variants?.find(v => v.name === selectedVariant)?.price || 0) * quantity,
+          total_price: (selectedProductData?.variants?.find((v: { name: string; price: number; stock: number }) => v.name === selectedVariant)?.price || 0) * quantity,
           payment_status: "bypass",
           verification: false,
           vendor_id: session?.user?.documentId,
