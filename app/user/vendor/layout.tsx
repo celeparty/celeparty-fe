@@ -79,11 +79,18 @@ export default function DashboardLayout({
                 link="/user/vendor/add-product"
               />{" "}
               <ItemMenu
-                title="Pesanan"
+                title="Pesanan Perlengkapan Event"
                 icon="/images/icon-order.svg"
                 iconWidth={30}
                 iconHeight={30}
                 link="/user/vendor/orders"
+              />
+              <ItemMenu
+                title="Management Tiket"
+                icon="/images/ticket.svg"
+                iconWidth={30}
+                iconHeight={30}
+                link="/user/vendor/tickets"
               />
               <ItemMenu
                 title="Dompet Saya"

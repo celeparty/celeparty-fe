@@ -1,15 +1,37 @@
-# TODO: Implement Redirect After Login/Register
+# TODO: Implement Vendor Ticket Management Dashboard
 
 ## Tasks
 
-- [x] Modify login page to redirect to stored URL or homepage after successful login
-- [x] Update login links in Header and SideBar to include redirect parameter
-- [x] Update register links to include redirect parameter
-- [x] Modify register page to redirect after successful registration
-- [x] Test the redirect functionality
+- [ ] Update vendor layout to separate "Pesanan Perlengkapan Event" and "Management Tiket" menus
+- [ ] Create new ticket management page with 3 tabs: Dashboard Ticket, Scan Tiket, Kirim Undangan Tiket
+- [ ] Implement Dashboard Ticket tab with summary table and detail views
+- [ ] Implement Scan Tiket tab with QR scanning functionality
+- [ ] Implement Kirim Undangan Tiket tab with form and password confirmation
+- [ ] Update OrdersBaseContent to only show equipment orders
+- [ ] Create new components for ticket management features
+- [ ] Test all functionality
 
 ## Details
 
-- Default redirect: "/" (Celeparty homepage)
-- If user was on product page before login/register, redirect back to that page
-- Use URL query parameter "redirect" to store the current page URL
+### Menu Separation
+
+- Change "Pesanan" to "Pesanan Perlengkapan Event" linking to current orders page (equipment only)
+- Add new "Management Tiket" menu linking to new ticket management page
+
+### Dashboard Ticket Tab
+
+- Summary table with columns: Nama Produk Tiket, Varian Tiket, Jumlah Tiket, Jumlah Terjual, Sisa Stok, Persentasi Terjual, Jumlah Terverifikasi, Harga Jual, Total Income Bersih
+- Detail button for each product leading to detailed view
+- Detailed view: Same summary + table of sold tickets with sorting/filtering by variant and status, export to Excel/PDF/CSV
+
+### Scan Tiket Tab
+
+- Button to scan ticket (open camera)
+- Table of verification history (latest first) with verification time
+
+### Kirim Undangan Tiket Tab
+
+- Form to send tickets: select product, fill recipient details, quantity
+- Password confirmation before sending
+- Tickets marked as "bypass" payment status
+- History table of sent tickets
