@@ -116,6 +116,23 @@ export const TicketScan: React.FC = () => {
     },
   });
 
+  const scanContinuously = async () => {
+    if (!isScanning || !videoRef.current || !codeReader.current) return;
+
+    try {
+      const result = await codeReader.current.decodeOnceFromVideoDevice(undefined, videoRef.current);
+      const scannedText = result.getText();
+      setScanResult(scannedText);
+      getTicketDetail.mutate(scannedText);
+      stopScanning();
+    } catch (error) {
+      // Continue scanning if no QR code found
+      if (isScanning) {
+        setTimeout(scanContinuously, 100);
+      }
+    }
+  };
+
   const startScanning = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -123,7 +140,10 @@ export const TicketScan: React.FC = () => {
       });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        videoRef.current.play();
         setIsScanning(true);
+        // Start continuous scanning
+        scanContinuously();
       }
     } catch (error) {
       toast.error("Tidak dapat mengakses kamera");
@@ -202,12 +222,7 @@ export const TicketScan: React.FC = () => {
               className="border rounded-lg mx-auto max-w-sm"
             />
             <canvas ref={canvasRef} className="hidden" />
-            <div className="mt-4">
-              <Button onClick={captureAndScan}>
-                <QrCode className="h-4 w-4 mr-2" />
-                Scan QR Code
-              </Button>
-            </div>
+            <p className="mt-2 text-sm text-gray-600">Kamera aktif - Arahkan ke QR code tiket</p>
           </div>
         )}
 
