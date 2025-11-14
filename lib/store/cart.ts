@@ -11,6 +11,7 @@ interface NotifState {
 export interface CartStore {
 	cart: CartItem[];
 	cartLength: number;
+	selectedItems: (string | number)[]; // Array of selected product_ids
 	setCartLength: () => void;
 	setCart: (data: CartItem[] | ((prev: CartItem[]) => CartItem[])) => void;
 	updateNote: (productId: string | number, newNote: string) => void;
@@ -20,6 +21,11 @@ export interface CartStore {
 	hasMixedProducts: () => boolean; // Check if cart has both tickets and equipment
 	addItem: (item: CartItem) => boolean; // Add item with validation
 	updateRecipients: (productId: string | number, recipients: TicketRecipient[]) => void;
+	selectItem: (productId: string | number) => void;
+	deselectItem: (productId: string | number) => void;
+	clearSelection: () => void;
+	getSelectedItems: () => CartItem[];
+	validateSelection: () => boolean; // Ensure selected items are of same type
 	test?: () => void;
 }
 
@@ -28,6 +34,7 @@ export const useCart = create<CartStore>()(
 		(set, get) => ({
 			cart: [] as CartItem[],
 			cartLength: 0,
+			selectedItems: [] as (string | number)[],
 			setCartLength: () => {
 				set((state) => ({
 					cartLength: state.cartLength + 1,
@@ -59,6 +66,7 @@ export const useCart = create<CartStore>()(
 			deleteItem: (productId) => {
 				set((state) => ({
 					cart: state.cart.filter((item) => item.product_id !== productId),
+					selectedItems: state.selectedItems.filter((id) => id !== productId), // Remove from selection if deleted
 				}));
 			},
 			calculateTotal: () => {
@@ -105,6 +113,29 @@ export const useCart = create<CartStore>()(
 				set((state) => ({
 					cart: state.cart.map((item) => (item.product_id === productId ? { ...item, recipients } : item)),
 				}));
+			},
+			selectItem: (productId) => {
+				set((state) => ({
+					selectedItems: [...new Set([...state.selectedItems, productId])], // Ensure no duplicates
+				}));
+			},
+			deselectItem: (productId) => {
+				set((state) => ({
+					selectedItems: state.selectedItems.filter((id) => id !== productId),
+				}));
+			},
+			clearSelection: () => {
+				set({ selectedItems: [] });
+			},
+			getSelectedItems: () => {
+				const state = get();
+				return state.cart.filter((item) => state.selectedItems.includes(item.product_id));
+			},
+			validateSelection: () => {
+				const selectedItems = get().getSelectedItems();
+				if (selectedItems.length === 0) return false;
+				const productTypes = selectedItems.map((item) => item.product_type).filter(Boolean);
+				return new Set(productTypes).size === 1; // All selected items must be of same type
 			},
 		}),
 		{

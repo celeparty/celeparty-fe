@@ -1,10 +1,49 @@
-# TODO: Fix Redirect After Login/Register from Product Pages
+# Cart Selective Checkout Implementation
 
-## Completed Tasks
+## Current Status
 
-- [x] Update `middleware.ts` to check for `redirect` query parameter when redirecting authenticated users from `/auth/login`, and redirect to that URL if present, otherwise to `/user/home`.
-- [x] Remove `window.location.reload()` from `app/auth/login/page.tsx` to prevent interference with client-side navigation.
+- Cart currently blocks mixing ticket and equipment products entirely
+- Need to allow selective checkout with same-type validation
 
-## Pending Tasks
+## Tasks to Complete
 
-- [ ] Test the flow: Navigate from a product page → login/register → verify redirection back to the product page instead of dashboard/bio.
+### 1. Update Cart State Management ✅
+
+- [x] Add selectedItems state to cart store
+- [x] Add methods to select/deselect items
+- [x] Add validation for same product type selection
+
+### 2. Modify Cart Display Component ✅
+
+- [x] Remove hasMixedProducts blocking display
+- [x] Add checkboxes for item selection
+- [x] Update UI to show selected items count
+- [x] Add "Continue Checkout" button for selected items
+
+### 3. Create Order Summary Page ✅
+
+- [x] Create new page: app/cart/order-summary/page.tsx
+- [x] Conditional rendering for equipment vs tickets
+- [x] Equipment: Editable shipping/loading/event details
+- [x] Tickets: Recipient input forms for each quantity
+- [x] Form validation before payment
+
+### 4. Update Checkout Flow ✅
+
+- [x] Modify checkout logic to work with selected items
+- [x] Ensure same-type validation before proceeding
+- [x] Update payment handling for selected items only
+
+### 5. Improve Responsive Design ✅
+
+- [x] Enhance mobile/tablet layouts
+- [x] Better spacing and touch targets
+- [x] Optimize form layouts for small screens
+
+### 6. Testing ✅
+
+- [x] Test selective checkout with same-type items
+- [x] Verify mixed-type selection is blocked
+- [x] Test form validations
+- [x] Test complete checkout flow
+- [x] Build verification passed without errors

@@ -76,6 +76,13 @@ export default function CartContent() {
 	// Validasi: tidak boleh ada campuran tiket dan perlengkapan dalam satu cart
 	const hasMixedProducts = ticketItems.length > 0 && equipmentItems.length > 0;
 
+	// Get selected items and validation
+	const selectedItems = useCart((state) => state.getSelectedItems());
+	const validateSelection = useCart((state) => state.validateSelection());
+	const selectItem = useCart((state) => state.selectItem);
+	const deselectItem = useCart((state) => state.deselectItem);
+	const clearSelection = useCart((state) => state.clearSelection);
+
 	// Validasi cart berdasarkan tipe produk
 	const isCartValid =
 		cart.length > 0 &&
@@ -329,18 +336,28 @@ export default function CartContent() {
 
 	return (
 		<div className="wrapper">
-			{hasMixedProducts ? (
-				<Box className="mb-7 flex gap-1 items-center justify-center text-2xl text-red-600">
-					<div>Tidak dapat mencampur produk tiket dan perlengkapan event dalam satu keranjang</div>
-					<PiSmileySadDuotone />
-				</Box>
-			) : cart.length > 0 ? (
+			{cart.length > 0 ? (
 				<div className="flex lg:flex-row flex-col lg:gap-5 gap-2">
 					<div className="lg:w-8/12 w-full">
 						{cart.map((item: any, index: number) => {
+							const isSelected = selectedItems.some(selected => selected.product_id === item.product_id);
 							return (
 								<Box className="lg:mb-7 mb-3" title={item.product_name} key={index}>
 									<div className="flex w-full">
+										<div className="flex items-center mr-4">
+											<input
+												type="checkbox"
+												checked={isSelected}
+												onChange={(e) => {
+													if (e.target.checked) {
+														selectItem(item.product_id);
+													} else {
+														deselectItem(item.product_id);
+													}
+												}}
+												className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+											/>
+										</div>
 										<div className="w-[100px] h-[100px] relative">
 											<Image
 												src={
@@ -359,6 +376,12 @@ export default function CartContent() {
 											</div>
 											<div className="flex gap-1">
 												<div className="font-bold">Quantity: </div> {item.quantity}
+											</div>
+											<div className="flex gap-1">
+												<div className="font-bold">Type: </div>
+												<span className={`px-2 py-1 rounded text-xs ${item.product_type === 'ticket' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
+													{item.product_type === 'ticket' ? 'Ticket' : 'Equipment'}
+												</span>
 											</div>
 										</div>
 									</div>
@@ -840,15 +863,57 @@ export default function CartContent() {
 						<Box className="mb-7">
 							<div className="w-full">
 								<h4 className="text-lg text-black mb-2">Ringkasan Belanja</h4>
+
+								{/* Selected Items Summary */}
+								{selectedItems.length > 0 && (
+									<div className="mb-4 p-3 border rounded bg-blue-50">
+										<h5 className="font-semibold text-blue-800 mb-2">Item Terpilih ({selectedItems.length})</h5>
+										{selectedItems.map((item, idx) => (
+											<div key={idx} className="text-sm text-blue-700 mb-1">
+												• {item.product_name} (x{item.quantity})
+											</div>
+										))}
+										<div className="mt-2 pt-2 border-t border-blue-200">
+											<div className="flex justify-between font-semibold text-blue-900">
+												<span>Total Terpilih:</span>
+												<span>{formatRupiah(selectedItems.reduce((total, item) => total + (item.price * item.quantity), 0))}</span>
+											</div>
+										</div>
+									</div>
+								)}
+
 								{/* Ringkasan data inputan user di cart (readonly, untuk semua produk) */}
 								<div className="mb-4 p-3 border rounded bg-gray-50">
 									{/* Total Belanja */}
 									<div className="flex font-bold justify-between text-[16px] mt-2 w-full  pt-2">
-										<div className="">Total Harga</div>
+										<div className="">Total Keranjang</div>
 										<div className="text-c-orange">{formatRupiah(calculateTotal())}</div>
 									</div>
 								</div>
-								{/* Tombol pembayaran */}
+
+								{/* Continue Checkout Button */}
+								{selectedItems.length > 0 && (
+									<div className="mb-3">
+										{!validateSelection ? (
+											<div className="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg text-sm">
+												<strong>Peringatan:</strong> Tidak dapat mencampur produk tiket dan perlengkapan event dalam satu checkout.
+												Pilih hanya produk dengan tipe yang sama.
+											</div>
+										) : (
+											<button
+												className="w-full bg-blue-600 text-white text-center py-3 rounded-lg hover:bg-blue-700 transition-colors"
+												onClick={() => {
+													// Navigate to order summary page with selected items
+													window.location.href = '/cart/order-summary';
+												}}
+											>
+												Lanjutkan Checkout ({selectedItems.length} item)
+											</button>
+										)}
+									</div>
+								)}
+
+								{/* Tombol pembayaran lama (untuk backward compatibility) */}
 								{cart[0]?.product_type !== "ticket" ? (
 									<div
 										className={`bg-c-green text-white text-center py-3 mt-5 rounded-lg cursor-pointer ${
@@ -856,7 +921,7 @@ export default function CartContent() {
 										}`}
 										onClick={!isCartValid ? undefined : handleCheckout}
 									>
-										Pembayaran
+										Pembayaran (Semua Item)
 									</div>
 								) : (
 									<div
@@ -865,7 +930,7 @@ export default function CartContent() {
 										}`}
 										onClick={!isCartValid ? undefined : checkoutTicket}
 									>
-										Pembayaran
+										Pembayaran (Semua Item)
 									</div>
 								)}
 							</div>
