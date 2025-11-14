@@ -16,6 +16,10 @@ export function middleware(request: NextRequest) {
 	const isProtectedPath = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path));
 
 	if (cookie && request.nextUrl.pathname.startsWith("/auth/login")) {
+		const redirectUrl = request.nextUrl.searchParams.get("redirect");
+		if (redirectUrl) {
+			return Response.redirect(new URL(redirectUrl, request.url));
+		}
 		return Response.redirect(new URL("/user/home", request.url));
 	}
 

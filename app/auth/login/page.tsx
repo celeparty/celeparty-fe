@@ -62,7 +62,6 @@ function LoginPage() {
 			} else {
 				router.replace("/user/home");
 			}
-			window.location.reload();
 		}
 	};
 

@@ -1,24 +1,10 @@
-# Invoice Generation Implementation
+# TODO: Fix Redirect After Login/Register from Product Pages
 
-## Backend Changes
+## Completed Tasks
 
-- [x] Add `generateInvoice` function to `transaction-ticket.js` controller
-- [x] Add new API endpoint `/transaction-tickets/generateInvoice/:id`
-- [x] Update routes to include the new endpoint
-- [x] Integrate invoice email sending in checkout success flow
+- [x] Update `middleware.ts` to check for `redirect` query parameter when redirecting authenticated users from `/auth/login`, and redirect to that URL if present, otherwise to `/user/home`.
+- [x] Remove `window.location.reload()` from `app/auth/login/page.tsx` to prevent interference with client-side navigation.
 
-## Frontend Changes
+## Pending Tasks
 
-- [x] Create `InvoiceViewer.tsx` component
-- [x] Add invoice download button to vendor ticket dashboard (`TicketDashboard.tsx`)
-- [x] Add invoice viewing for customers in transaction history
-- [x] Integrate invoice generation into checkout success flow
-- [x] Add Terms & Conditions tab to product detail page
-- [x] Improve vendor dashboard menu UI for better user experience
-
-## Testing
-
-- [ ] Test invoice generation and download
-- [ ] Verify invoice content includes transaction summary, pricing, recipient details
-- [ ] Test email sending functionality
-- [ ] Update UI for invoice access
+- [ ] Test the flow: Navigate from a product page → login/register → verify redirection back to the product page instead of dashboard/bio.
