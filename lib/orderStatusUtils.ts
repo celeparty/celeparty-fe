@@ -42,6 +42,12 @@ const STATUS_CONFIG_MAP: Record<PaymentStatus, StatusConfig> = {
 		textColor: "text-red-800",
 		actions: [],
 	},
+	settlement: {
+		text: "Settlement",
+		bgColor: "bg-blue-100",
+		textColor: "text-blue-800",
+		actions: [],
+	},
 };
 
 export const getStatusConfig = (status: PaymentStatus): StatusConfig => {
