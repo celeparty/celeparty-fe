@@ -10,11 +10,15 @@ export const metadata = {
 
 export default function Home() {
 	return (
-		<div className="relative wrapper py-7">
+		<div className="relative wrapper py-8 lg:py-12">
 			<Basecontent>
 				<MainBanner />
-				<EventList />
-				<ProductList title="Untuk Anda" queryKey="qProductHome" showAllBtn={true} boxStyle={true} />
+				<div className="mt-8 lg:mt-12">
+					<EventList />
+				</div>
+				<div className="mt-8 lg:mt-12">
+					<ProductList title="Untuk Anda" queryKey="qProductHome" showAllBtn={true} boxStyle={true} />
+				</div>
 			</Basecontent>
 		</div>
 	);

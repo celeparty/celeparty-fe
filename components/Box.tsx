@@ -6,19 +6,50 @@ interface iBox {
 	title?: string;
 	rounded?: boolean;
 	className?: string;
+	variant?: "default" | "elevated" | "bordered";
+	size?: "sm" | "md" | "lg";
 }
 
 export default function Box(props: iBox) {
+	const {
+		variant = "default",
+		size = "md",
+		rounded = true,
+		...rest
+	} = props;
+
+	const baseClasses = "relative bg-white w-full";
+
+	const variantClasses = {
+		default: "shadow-soft",
+		elevated: "shadow-medium",
+		bordered: "border border-c-gray-200 shadow-soft",
+	};
+
+	const sizeClasses = {
+		sm: "py-3 px-4",
+		md: "py-6 px-6",
+		lg: "py-8 px-8",
+	};
+
+	const roundedClass = rounded ? "rounded-lg" : "";
+
 	return (
 		<div
 			className={cn(
-				`relative bg-white w-full shadow-lg lg:py-7 py-3 lg:px-9 px-3 lg:mt-7 ${
-					!props.rounded ? "rounded-lg" : null
-				}`,
+				baseClasses,
+				variantClasses[variant],
+				sizeClasses[size],
+				roundedClass,
 				props.className,
 			)}
+			{...rest}
 		>
-			{props.title ? <h4 className="font-semibold text-[16px] text-c-blue lg:mb-1 mb-3">{props.title}</h4> : null}
+			{props.title ? (
+				<h4 className="font-semibold text-lg text-c-blue mb-4">
+					{props.title}
+				</h4>
+			) : null}
 			{props.children}
 		</div>
 	);

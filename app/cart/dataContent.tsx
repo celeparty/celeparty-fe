@@ -76,18 +76,23 @@ export default function CartContent() {
 	// Validasi: tidak boleh ada campuran tiket dan perlengkapan dalam satu cart
 	const hasMixedProducts = ticketItems.length > 0 && equipmentItems.length > 0;
 
-	// Get selected items and validation
-	const selectedItems = useCart((state) => state.getSelectedItems());
+	// Get selected items and validation from store
+	const selectedItems = useCart((state) => state.selectedItems);
 	const validateSelection = useCart((state) => state.validateSelection());
 	const selectItem = useCart((state) => state.selectItem);
 	const deselectItem = useCart((state) => state.deselectItem);
+	const getSelectedItems = useCart((state) => state.getSelectedItems);
 	const clearSelection = useCart((state) => state.clearSelection);
 
-	// Validasi cart berdasarkan tipe produk
+	const selectedCartItems = getSelectedItems();
+	const selectedTotal = selectedCartItems.reduce((total: number, item: any) => total + (item.price * item.quantity), 0);
+	const isSelectionValid = selectedItems.length > 0 && selectedCartItems.length > 0 && selectedCartItems.every((item: any) => item.product_type === selectedCartItems[0].product_type);
+
+	// Validasi cart berdasarkan tipe produk - sekarang menggunakan selected items
 	const isCartValid =
-		cart.length > 0 &&
-		!hasMixedProducts && // Tidak boleh campur tiket dan perlengkapan
-		cart.every((item: any) => {
+		selectedCartItems.length > 0 &&
+		isSelectionValid &&
+		selectedCartItems.every((item: any) => {
 			// Validasi dasar yang diperlukan semua produk
 			const basicValidation = item.customer_name && userTelp;
 
@@ -339,8 +344,8 @@ export default function CartContent() {
 			{cart.length > 0 ? (
 				<div className="flex lg:flex-row flex-col lg:gap-5 gap-2">
 					<div className="lg:w-8/12 w-full">
-						{cart.map((item: any, index: number) => {
-							const isSelected = selectedItems.some(selected => selected.product_id === item.product_id);
+								{cart.map((item: any, index: number) => {
+							const isSelected = selectedItems.includes(item.product_id);
 							return (
 								<Box className="lg:mb-7 mb-3" title={item.product_name} key={index}>
 									<div className="flex w-full">
@@ -850,10 +855,10 @@ export default function CartContent() {
 								<h4 className="text-lg text-black mb-2">Ringkasan Belanja</h4>
 
 								{/* Selected Items Summary */}
-								{selectedItems.length > 0 && (
+								{selectedCartItems.length > 0 && (
 									<div className="mb-4 p-3 border rounded bg-blue-50">
-										<h5 className="font-semibold text-blue-800 mb-2">Item Terpilih ({selectedItems.length})</h5>
-										{selectedItems.map((item, idx) => (
+										<h5 className="font-semibold text-blue-800 mb-2">Item Terpilih ({selectedCartItems.length})</h5>
+										{selectedCartItems.map((item: any, idx: number) => (
 											<div key={idx} className="text-sm text-blue-700 mb-1">
 												• {item.product_name} (x{item.quantity})
 											</div>
@@ -861,7 +866,7 @@ export default function CartContent() {
 										<div className="mt-2 pt-2 border-t border-blue-200">
 											<div className="flex justify-between font-semibold text-blue-900">
 												<span>Total Terpilih:</span>
-												<span>{formatRupiah(selectedItems.reduce((total, item) => total + (item.price * item.quantity), 0))}</span>
+												<span>{formatRupiah(selectedTotal)}</span>
 											</div>
 										</div>
 									</div>
@@ -877,9 +882,9 @@ export default function CartContent() {
 								</div>
 
 								{/* Continue Checkout Button */}
-								{selectedItems.length > 0 && (
+								{selectedCartItems.length > 0 && (
 									<div className="mb-3">
-										{!validateSelection ? (
+										{!isSelectionValid ? (
 											<div className="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg text-sm">
 												<strong>Peringatan:</strong> Tidak dapat mencampur produk tiket dan perlengkapan event dalam satu checkout.
 												Pilih hanya produk dengan tipe yang sama.
@@ -892,7 +897,7 @@ export default function CartContent() {
 													window.location.href = '/cart/order-summary';
 												}}
 											>
-												Lanjutkan Checkout ({selectedItems.length} item)
+												Lanjutkan Checkout ({selectedCartItems.length} item)
 											</button>
 										)}
 									</div>

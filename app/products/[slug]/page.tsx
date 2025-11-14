@@ -15,7 +15,7 @@ export default async function ProductDetail({
 	params: { slug: string };
 }) {
 	return (
-		<div className="relative wrapper-big py-7">
+		<div className="relative wrapper-big py-8 lg:py-12">
 			<Basecontent>
 				<ContentProduct slug={`${params.slug}`} />
 			</Basecontent>

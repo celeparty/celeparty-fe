@@ -35,78 +35,92 @@ export default function Header() {
 
 	return (
 		<>
-			<div className="bg-white shadow-sm w-full px-4 py-4 lg:z-10 lg:sticky top-0">
+			<header className="bg-white shadow-soft w-full px-4 py-4 lg:sticky lg:top-0 lg:z-10">
 				<div className="wrapper-main flex flex-col lg:flex-row items-start justify-between gap-4 lg:gap-16">
-					<div className="flex items-center justify-center lg:justify-between w-full lg:w-fit">
-						<Link href="/">
-							<Image src="/images/logo.svg" width={234} height={63} alt="logo" />
+					{/* Logo Section */}
+					<div className="flex items-center justify-center lg:justify-start w-full lg:w-auto">
+						<Link href="/" className="hover:opacity-80 transition-opacity duration-200">
+							<Image
+								src="/images/logo.svg"
+								width={234}
+								height={63}
+								alt="Celeparty Logo"
+								className="h-12 lg:h-auto w-auto"
+							/>
 						</Link>
 					</div>
+
+					{/* Search Section */}
 					<div className="relative flex-1 w-full lg:max-w-[900px]">
-						<div className="w-full relative  mb-2 lg:mb-0">
-							<form onSubmit={handleSubmit}>
-								<IoIosSearch className="absolute left-5 text-3xl top-[50%] -translate-y-[50%]" />
+						<form onSubmit={handleSubmit} className="w-full">
+							<div className="relative">
+								<IoIosSearch className="absolute left-4 text-xl text-c-gray-500 top-1/2 -translate-y-1/2" />
 								<input
 									type="text"
 									placeholder="Cari di Celeparty"
-									className="input border-c-gray border-solid border-[1px] rounded-lg pr-5 pl-[60px] py-3 bg-white w-full"
+									className="w-full pl-12 pr-4 py-3 border border-c-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-c-blue focus:border-transparent transition-all duration-200"
 									value={searchValue}
 									onChange={(e) => setSearchValue(e.target.value)}
 								/>
-							</form>
-						</div>
+							</div>
+						</form>
 					</div>
-					<div className="relative lg:justify-end flex  flex-row items-center text-3xl gap-4 text-c-gray-text font-semibold lg:w-auto w-full">
-						<div className="flex gap-4 w-fit p-2 lg:p-0 ">
-							{status === "authenticated" && (
-								<Link href="/cart" className="item relative">
-									<MdOutlineShoppingCart />
-									{cart.length > 0 ? (
-										<div className="absolute top-[0] right-[0] bg-c-orange w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold">
-											{userMe ? cart.length : 0}
-										</div>
-									) : null}
-								</Link>
-							)}
-							{/* <div className="item" onClick={setCartLength}>
-								<MdOutlineNotifications />
-							</div> */}
-							{/* <div className="item">
-								<IoChatbubbleEllipsesOutline />
-							</div> */}
-						</div>
 
-						<div className="flex justify-around space-2">
+					{/* Actions Section */}
+					<div className="flex items-center justify-end gap-4 w-full lg:w-auto">
+						{/* Cart Icon */}
+						{status === "authenticated" && (
+							<Link
+								href="/cart"
+								className="relative p-2 hover:bg-c-gray-50 rounded-lg transition-colors duration-200"
+								aria-label="Keranjang belanja"
+							>
+								<MdOutlineShoppingCart className="text-2xl text-c-gray-700" />
+								{cart.length > 0 && (
+									<span className="absolute -top-1 -right-1 bg-c-orange text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+										{userMe ? cart.length : 0}
+									</span>
+								)}
+							</Link>
+						)}
+
+						{/* Auth Buttons */}
+						<div className="flex items-center gap-3">
 							{status === "authenticated" ? (
-								<div className="flex gap-3">
-									<Link href="/user/home" className="btn px-3">
+								<>
+									<Link
+										href="/user/home"
+										className="px-4 py-2 bg-c-blue text-white rounded-lg hover:bg-c-blue-light transition-colors duration-200 font-medium"
+									>
 										Dashboard
 									</Link>
-
-									<div className="btnline cursor-pointer px-3" onClick={() => logout()}>
+									<button
+										onClick={logout}
+										className="px-4 py-2 border border-c-gray-300 text-c-gray-700 rounded-lg hover:bg-c-gray-50 transition-colors duration-200 font-medium"
+									>
 										Keluar
-									</div>
-								</div>
+									</button>
+								</>
 							) : status === "unauthenticated" ? (
-								<div className="flex gap-3">
+								<>
 									<Link
 										href={`/auth/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`}
-										className="btnline px-3 w-32"
+										className="px-4 py-2 border border-c-gray-300 text-c-gray-700 rounded-lg hover:bg-c-gray-50 transition-colors duration-200 font-medium"
 									>
 										Masuk
 									</Link>
 									<Link
 										href={`/auth/register?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`}
-										className="btn px-3"
+										className="px-4 py-2 bg-c-green text-white rounded-lg hover:bg-c-green-light transition-colors duration-200 font-medium"
 									>
 										Daftar
 									</Link>
-								</div>
+								</>
 							) : null}
 						</div>
 					</div>
 				</div>
-			</div>
+			</header>
 
 			<Notification />
 		</>

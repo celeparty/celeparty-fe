@@ -32,14 +32,19 @@ export default function RootLayout({
 	const midtransUrl = isProduction
 		? "https://app.midtrans.com/snap/snap.js"
 		: "https://app.sandbox.midtrans.com/snap/snap.js";
+
 	return (
 		<SessionWrapper>
-			<html lang="en">
-				<Script src={midtransUrl} data-client-key={process.env.NEXT_PUBLIC_CLIENT_KEY}></Script>
-				<body className={`${inter.variable} ${quick.variable} font-inter`} suppressHydrationWarning={true}>
+			<html lang="id" className={`${inter.variable} ${quick.variable}`}>
+				<head>
+					<Script src={midtransUrl} data-client-key={process.env.NEXT_PUBLIC_CLIENT_KEY} />
+				</head>
+				<body className="font-inter antialiased bg-c-gray-50 min-h-screen" suppressHydrationWarning={true}>
 					<TopHeader />
 					<Header />
-					{children}
+					<main className="flex-1">
+						{children}
+					</main>
 					<Footer />
 					<Toaster />
 				</body>

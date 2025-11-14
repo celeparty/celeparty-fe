@@ -13,9 +13,9 @@ import Link from "next/link";
 
 function ItemSlide(props: any) {
 	return (
-		<div className="w-[415px] lg:w-full h-[200px] lg:h-[300px] relative  bg-gradient-to-r from-violet-600 to-indigo-600 ">
+		<div className="w-full h-48 sm:h-64 lg:h-80 relative bg-gradient-to-r from-violet-600 to-indigo-600 rounded-lg overflow-hidden">
 			<Link href={props.link}>
-				<Image src={props.image} fill alt="image" className="object-cover" />
+				<Image src={props.image} fill alt="image" className="object-cover hover:scale-105 transition-transform duration-300" />
 			</Link>
 		</div>
 	);
@@ -32,6 +32,22 @@ const settings = {
 	autoplaySpeed: 7000, // delay per slide (5 detik)
 	cssEase: "linear",
 	pauseOnHover: true, // berhenti kalau kursor di atas
+	responsive: [
+		{
+			breakpoint: 1024,
+			settings: {
+				arrows: true,
+				dots: true,
+			},
+		},
+		{
+			breakpoint: 768,
+			settings: {
+				arrows: false,
+				dots: true,
+			},
+		},
+	],
 };
 
 export default function MainBanner() {
@@ -45,10 +61,8 @@ export default function MainBanner() {
 
 	if (query.isLoading) {
 		return (
-			<div className=" relative flex justify-center ">
-				<div className="animate-pulse w-full">
-					<div className="rounded-sm bg-slate-200 h-[300px] w-full "></div>
-				</div>
+			<div className="relative flex justify-center">
+				<div className="animate-pulse w-full h-48 sm:h-64 lg:h-80 bg-c-gray-200 rounded-lg"></div>
 			</div>
 		);
 	}
@@ -59,7 +73,7 @@ export default function MainBanner() {
 	const dataContent = query?.data.data;
 
 	return (
-		<div className="mainslider rounded-lg w-full overflow-hidden relative">
+		<div className="mainslider rounded-lg w-full overflow-hidden relative shadow-soft">
 			{dataContent?.length > 1 ? (
 				<Slider {...settings}>
 					{dataContent?.map((item: any) => (
@@ -71,7 +85,7 @@ export default function MainBanner() {
 					))}
 				</Slider>
 			) : dataContent?.length === 1 ? (
-				<div className="w-[415px] lg:w-full h-[200px] lg:h-[300px] relative  bg-gradient-to-r from-violet-600 to-indigo-600 ">
+				<div className="w-full h-48 sm:h-64 lg:h-80 relative bg-gradient-to-r from-violet-600 to-indigo-600 rounded-lg overflow-hidden">
 					<Link href={dataContent[0].url ? dataContent[0].url : "/"}>
 						<Image
 							src={
@@ -81,7 +95,7 @@ export default function MainBanner() {
 							}
 							fill
 							alt="image"
-							className="object-cover"
+							className="object-cover hover:scale-105 transition-transform duration-300"
 						/>
 					</Link>
 				</div>
