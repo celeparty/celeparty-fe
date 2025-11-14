@@ -1,6 +1,8 @@
 import { iProductReq, iProductVariant, iTicketFormReq, iTicketVariant } from "@/lib/interfaces/iProduct";
 import { formatNumberWithDots } from "@/lib/utils";
 import { Control, Controller, FieldPath, UseFormRegister } from "react-hook-form";
+import { DatePickerInput } from "../form-components/DatePicker";
+import { format, isValid, parse } from "date-fns";
 
 type VariantItemProps = {
 	index: number;
@@ -17,7 +19,7 @@ export const TicketVariantItem = ({ index, register, onRemove, errors, control }
 	return (
 		<div className="border p-4 mb-4 rounded-lg shadow-sm">
 			<div className="grid grid-cols-12 gap-4">
-				<div className="input-group md:col-span-4">
+				<div className="input-group md:col-span-3">
 					<label className="block text-sm font-medium mb-1">Nama Variant</label>
 					<input
 						{...register(getFieldName("name"))}
@@ -29,7 +31,7 @@ export const TicketVariantItem = ({ index, register, onRemove, errors, control }
 					)}
 				</div>
 
-				<div className="input-group md:col-span-4">
+				<div className="input-group md:col-span-3">
 					<label className="block text-sm font-medium mb-1">Harga</label>
 					<Controller
 						name={`variant.${index}.price`}
@@ -53,7 +55,7 @@ export const TicketVariantItem = ({ index, register, onRemove, errors, control }
 					)}
 				</div>
 
-				<div className="input-group md:col-span-4">
+				<div className="input-group md:col-span-3">
 					<label className="block text-sm font-medium mb-1">Jumlah Stock Tiket (Opsional)</label>
 					<input
 						{...register(getFieldName("quota"))}
@@ -62,6 +64,36 @@ export const TicketVariantItem = ({ index, register, onRemove, errors, control }
 					/>
 					{errors?.variant?.[index]?.quota && (
 						<p className="text-red-500 text-xs mt-1">{errors.variant[index].quota.message}</p>
+					)}
+				</div>
+
+				<div className="input-group md:col-span-3">
+					<label className="block text-sm font-medium mb-1">Batas Waktu Pemesanan</label>
+					<Controller
+						name={`variant.${index}.purchase_deadline`}
+						control={control}
+						render={({ field }) => {
+							const dateValue = field.value
+								? parse(field.value, "yyyy-MM-dd", new Date())
+								: null;
+
+							return (
+								<DatePickerInput
+									textLabel="Pilih Batas Waktu"
+									value={dateValue}
+									onChange={(date) => {
+										if (date instanceof Date && isValid(date)) {
+											field.onChange(format(date, "yyyy-MM-dd"));
+										} else {
+											field.onChange("");
+										}
+									}}
+								/>
+							);
+						}}
+					/>
+					{errors?.variant?.[index]?.purchase_deadline && (
+						<p className="text-red-500 text-xs mt-1">{errors.variant[index].purchase_deadline.message}</p>
 					)}
 				</div>
 			</div>

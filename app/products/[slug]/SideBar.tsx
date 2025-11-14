@@ -142,7 +142,7 @@ export default function SideBar({ dataProducts, currentPrice, selectedVariantId 
 					</div>
 					<div className="relative lg:mt-5 mt-[10px]">
 						<div>Minimal Order : {dataProducts.minimal_order > 0 ? dataProducts.minimal_order : "1"} </div>
-						<div>Batas waktu pemesanan : {dataProducts.maximal_order_date ?? "-"} </div>
+						<div>Batas waktu pemesanan : {selectedVariant?.purchase_deadline || (dataProducts.maximal_order_date ?? "-")} </div>
 						{/* Field Tanggal Acara - untuk produk non-ticket saja */}
 						{productTypeName !== eProductType.ticket && (
 							<div className="input-group">

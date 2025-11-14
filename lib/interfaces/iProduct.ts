@@ -76,7 +76,9 @@ export interface iProductVariantFormValues {
 	variant: iProductVariant[];
 }
 
-export interface iTicketVariant extends Omit<iProductVariant, "purchase_deadline"> {}
+export interface iTicketVariant extends Omit<iProductVariant, "purchase_deadline"> {
+	purchase_deadline: string;
+}
 
 export interface iTicketImage {
 	id: string;

@@ -95,6 +95,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 			name: "",
 			price: 0,
 			quota: "",
+			purchase_deadline: "",
 		});
 	};
 
@@ -246,6 +247,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 			name: v.name,
 			price: formatMoneyReq(v.price),
 			quota: v.quota,
+			purchase_deadline: v.purchase_deadline,
 		}));
 		const lowestPrice = getLowestVariantPrice(variants);
 		let payload: any = {
