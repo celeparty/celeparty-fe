@@ -10,6 +10,7 @@ import ErrorNetwork from "../ErrorNetwork";
 import Skeleton from "../Skeleton";
 import { Button } from "../ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
+import { InvoiceViewer } from "../InvoiceViewer";
 
 interface iTableDataProps {
 	isVendor: boolean;
@@ -120,22 +121,30 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 														</>
 													)}
 													{!isVendor && item.payment_status === "settlement" && (
-														<Button
-															size="sm"
-															variant="outline"
-															onClick={() => {
-																// For equipment transactions, we need to find the transaction-ticket ID
-																// This is a placeholder - you might need to adjust based on your data structure
-																const link = document.createElement("a");
-																link.href = `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/transaction-tickets/generateInvoice/${item.id}`;
-																link.download = `invoice-${item.order_id || item.id}.pdf`;
-																link.click();
-															}}
-															className="flex items-center gap-2"
-														>
-															<Download className="h-4 w-4" />
-															Invoice
-														</Button>
+														<div className="flex gap-2">
+															<InvoiceViewer invoiceId={item.id} orderId={item.order_id}>
+																<Button size="sm" variant="outline" className="flex items-center gap-2">
+																	<Eye className="h-4 w-4" />
+																	View Invoice
+																</Button>
+															</InvoiceViewer>
+															<Button
+																size="sm"
+																variant="outline"
+																onClick={() => {
+																	// For equipment transactions, we need to find the transaction-ticket ID
+																	// This is a placeholder - you might need to adjust based on your data structure
+																	const link = document.createElement("a");
+																	link.href = `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/transaction-tickets/generateInvoice/${item.id}`;
+																	link.download = `invoice-${item.order_id || item.id}.pdf`;
+																	link.click();
+																}}
+																className="flex items-center gap-2"
+															>
+																<Download className="h-4 w-4" />
+																Download
+															</Button>
+														</div>
 													)}
 													<Button size="sm" variant="link" onClick={() => toggleRow(item.id)}>
 														{expandedRows[item.id] ? (

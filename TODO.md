@@ -9,7 +9,7 @@
 
 ## Frontend Changes
 
-- [ ] Create `InvoiceViewer.tsx` component
+- [x] Create `InvoiceViewer.tsx` component
 - [x] Add invoice download button to vendor ticket dashboard (`TicketDashboard.tsx`)
 - [x] Add invoice viewing for customers in transaction history
 - [x] Integrate invoice generation into checkout success flow
