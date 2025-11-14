@@ -3,7 +3,7 @@ export interface iProduct {
 	title: string;
 }
 
-export type PaymentStatus = "cancelled" | "pending" | "paid" | "processing";
+export type PaymentStatus = "cancelled" | "pending" | "paid" | "processing" | "settlement";
 
 export interface iOrderItem {
 	id: number;
