@@ -116,7 +116,9 @@ export const useCart = create<CartStore>()(
 			},
 			selectItem: (productId) => {
 				set((state) => ({
-					selectedItems: [...new Set([...state.selectedItems, productId])], // Ensure no duplicates
+					selectedItems: state.selectedItems.includes(productId)
+						? state.selectedItems
+						: [...state.selectedItems, productId], // Ensure no duplicates
 				}));
 			},
 			deselectItem: (productId) => {
