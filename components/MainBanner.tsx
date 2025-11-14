@@ -28,10 +28,10 @@ const settings = {
 	speed: 1000,
 	slidesToShow: 1,
 	slidesToScroll: 1,
-	autoplay: true,            // aktifkan auto play
-    autoplaySpeed: 7000,		// delay per slide (5 detik)
-    cssEase: "linear",      
-    pauseOnHover: true,        // berhenti kalau kursor di atas
+	autoplay: true, // aktifkan auto play
+	autoplaySpeed: 7000, // delay per slide (5 detik)
+	cssEase: "linear",
+	pauseOnHover: true, // berhenti kalau kursor di atas
 };
 
 export default function MainBanner() {
@@ -60,23 +60,34 @@ export default function MainBanner() {
 
 	return (
 		<div className="mainslider rounded-lg w-full overflow-hidden relative">
-			{
-				dataContent?.length > 1 ? (
-					<Slider {...settings}>
-						{dataContent?.map((item: any) => (
-							<ItemSlide key={item.id} link={item.url ?item.url : "/"} image={item.image ? process.env.BASE_API+item.image.url : "/images/noimage.png"} />
-						))}
-					</Slider>
-				)
-			: dataContent?.length === 1 ?(
+			{dataContent?.length > 1 ? (
+				<Slider {...settings}>
+					{dataContent?.map((item: any) => (
+						<ItemSlide
+							key={item.id}
+							link={item.url ? item.url : "/"}
+							image={item.image ? process.env.BASE_API + item.image.url : "/images/noimage.png"}
+						/>
+					))}
+				</Slider>
+			) : dataContent?.length === 1 ? (
 				<div className="w-[415px] lg:w-full h-[200px] lg:h-[300px] relative  bg-gradient-to-r from-violet-600 to-indigo-600 ">
-				<Link href={dataContent[0].url ?dataContent[0].url : "/"}>
-					<Image src={dataContent[0].image ? process.env.BASE_API+dataContent[0].image.url : "/images/noimage.png"} fill alt="image" className="object-cover" />
-				</Link>
-			</div>
-				) : <></>
-			}
-			
+					<Link href={dataContent[0].url ? dataContent[0].url : "/"}>
+						<Image
+							src={
+								dataContent[0].image
+									? process.env.BASE_API + dataContent[0].image.url
+									: "/images/noimage.png"
+							}
+							fill
+							alt="image"
+							className="object-cover"
+						/>
+					</Link>
+				</div>
+			) : (
+				<></>
+			)}
 		</div>
 	);
 }

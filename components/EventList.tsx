@@ -29,7 +29,7 @@ export default function EventList() {
 	}
 	const dataContent = query?.data.data;
 	const dataGroup = _.groupBy(dataContent, (item) => {
-		const categoryRecs = item?.categories?.length > 0
+		const categoryRecs = item?.categories?.length > 0;
 		if (categoryRecs) {
 			return "event";
 		} else {
@@ -39,17 +39,20 @@ export default function EventList() {
 
 	return (
 		<Box className="lg:px-9 px-2 lg:py-7 py-2">
-
 			<div className="flex flex-wrap justify-around gap-5 align-top">
 				<div className="relative flex-1">
 					<h4 className="font-semibold text-[16px] text-c-blue mb-2">Event</h4>
 					<div className="flex justify-around border-solid h-fit lg:min-h-[123px] border-gray-300 border-[1px] p-2 lg:p-5 rounded-lg bg-gray-50">
 						{dataGroup?.event?.map((item: any, i: number) => {
 							return (
-								<Link href={`/products?type=${item.name}`} className="text-center max-w-[120px]" key={item.id}>
+								<Link
+									href={`/products?type=${item.name}`}
+									className="text-center max-w-[120px]"
+									key={item.id}
+								>
 									<div className="relative w-[47px] h-[47px] text-center mx-auto mb-1">
 										<Image
-											src={item.image ? process.env.BASE_API+item.image.url : "/images/pic.png"}
+											src={item.image ? process.env.BASE_API + item.image.url : "/images/pic.png"}
 											fill
 											alt=""
 											className="left-0 right-0 mx-auto"
@@ -66,10 +69,14 @@ export default function EventList() {
 					<div className="flex justify-around border-solid h-fit lg:min-h-[123px] border-gray-300 border-[1px]  p-2 lg:px-5 lg:py-5 rounded-lg bg-gray-50">
 						{dataGroup?.product?.map((item: any, i: number) => {
 							return (
-								<Link href={`/products?type=${item.name}`} className="text-center max-w-[120px]" key={item.id}>
+								<Link
+									href={`/products?type=${item.name}`}
+									className="text-center max-w-[120px]"
+									key={item.id}
+								>
 									<div className="relative w-[47px] h-[47px] text-center mx-auto mb-1">
 										<Image
-											src={item.image ? process.env.BASE_API+item.image.url : "/images/pic.png"}
+											src={item.image ? process.env.BASE_API + item.image.url : "/images/pic.png"}
 											fill
 											alt=""
 											className="left-0 right-0 mx-auto"

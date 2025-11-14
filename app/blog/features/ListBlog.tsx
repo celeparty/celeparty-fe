@@ -40,7 +40,9 @@ export default function ListBlog() {
 							key={index}
 							title={item?.title}
 							date={moment(item?.publish_at).format("DD MMM YYYY")}
-							image={item?.image?.url ? `${process.env.BASE_API}${item?.image?.url}` : "/images/noimage.png"}
+							image={
+								item?.image?.url ? `${process.env.BASE_API}${item?.image?.url}` : "/images/noimage.png"
+							}
 						/>
 					);
 				})}

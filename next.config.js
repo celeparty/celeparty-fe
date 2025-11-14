@@ -13,7 +13,7 @@ const nextConfig = {
 		JWT_SECRET: process.env.JWT_SECRET,
 		PRODUCTION_MODE: process.env.PRODUCTION_MODE,
 	},
-	output: 'standalone',
+	output: "standalone",
 	reactStrictMode: true,
 	images: {
 		remotePatterns: [
@@ -47,10 +47,10 @@ const nextConfig = {
 				hostname: "avatars.githubusercontent.com",
 			},
 			{
-		        protocol: "https",
-		        hostname: "celeparty.com",
-		        pathname: "/uploads/**",
-		    },
+				protocol: "https",
+				hostname: "celeparty.com",
+				pathname: "/uploads/**",
+			},
 		],
 	},
 };

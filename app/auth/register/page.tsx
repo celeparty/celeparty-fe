@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea"
+import { Textarea } from "@/components/ui/textarea";
 import { axiosData } from "@/lib/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -28,32 +28,27 @@ const signUpSchema = z
 			.regex(/[A-Z]/, "Kata sandi harus mengandung setidaknya satu huruf besar")
 			.regex(/[a-z]/, "Kata sandi harus mengandung setidaknya satu huruf kecil")
 			.regex(/[0-9]/, "Kata sandi harus mengandung setidaknya satu angka"),
-		confirmPassword: z
-			.string()
-			.nonempty({ message: "Konfirmasi kata sandi tidak boleh kosong" }),
-		})
-		.refine((data) => data.password === data.confirmPassword, {
-			path: ["confirmPassword"], // Pesan error diarahkan ke field confirmPassword
-			message: "Konfirmasi kata sandi harus sama dengan kata sandi",
+		confirmPassword: z.string().nonempty({ message: "Konfirmasi kata sandi tidak boleh kosong" }),
+	})
+	.refine((data) => data.password === data.confirmPassword, {
+		path: ["confirmPassword"], // Pesan error diarahkan ke field confirmPassword
+		message: "Konfirmasi kata sandi harus sama dengan kata sandi",
 	});
-
 
 const Registration = () => {
 	const [message, setMessage] = useState(false);
-	const [errorMessage, setErrorMessage] = useState<string | boolean | null>(
-	  false
-	);
-  
+	const [errorMessage, setErrorMessage] = useState<string | boolean | null>(false);
+
 	const {
 		register,
 		handleSubmit,
 		reset,
 		formState: { errors },
-	  } = useForm<z.infer<typeof signUpSchema>>({
+	} = useForm<z.infer<typeof signUpSchema>>({
 		resolver: zodResolver(signUpSchema),
 		defaultValues: {
 			name: "",
-			username:"",
+			username: "",
 			email: "",
 			phone: "",
 			address: "",
@@ -78,100 +73,106 @@ const Registration = () => {
 				setErrorMessage(false);
 				setMessage(true);
 				// Redirect to login page with redirect parameter
-				const redirectUrl = window.location.search.includes('redirect') ? window.location.search : '';
+				const redirectUrl = window.location.search.includes("redirect") ? window.location.search : "";
 				window.location.href = `/auth/login${redirectUrl}`;
-			} catch (error:any) {
+			} catch (error: any) {
 				console.error("Error:", error?.response.data.error.message);
 				setErrorMessage(error?.response.data.error.message);
 			}
-		}
-		sendNow()
-		reset()
+		};
+		sendNow();
+		reset();
 	};
 	return (
 		<div>
 			<h1 className="mb-4 lg:text-start text-center text-2xl font-bold">Registrasi</h1>
 			<div className="relative">
-					<form onSubmit={handleSubmit(signUp)} className="flex flex-col gap-4">
+				<form onSubmit={handleSubmit(signUp)} className="flex flex-col gap-4">
 					<div className="relative">
-							<input type="text"
-								placeholder="Nama Lengkap"
-								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...register("name")}
-							/>
-							{errors.name && <span className="text-red-500 text-xs">{errors.name.message}</span>}
-						</div>						
-						<div className="relative">
-							<input type="text"
-								placeholder="User Name"
-								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...register("username")}
-							/>
-							{errors.username && <span className="text-red-500 text-xs">{errors.username.message}</span>}
-						</div>						
-						<div className="relative">
-							<input type="email"
-								placeholder="Email"
-								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...register("email")}
-							/>
-							{errors.email && <span className="text-red-500 text-xs">{errors.email.message}</span>}
-						</div>						
-						<div className="relative">
-							<input type="text"
-								placeholder="No Telepon"
-								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...register("phone")}
-							/>
-							{errors.phone && <span className="text-red-500 text-xs">{errors.phone.message}</span>}
-						</div>						
-						<div className="relative">
-							<textarea
-								placeholder="Alamat"
-								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...register("address")}
-							/>
-							{errors.address && <span className="text-red-500 text-xs">{errors.address.message}</span>}
-						</div>						
-						<div className="relative">
-							<input type="password"
-								placeholder="Kata Sandi"
-								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...register("password")}
-							/>
-							{errors.password && <span className="text-red-500 text-xs">{errors.password.message}</span>}
-						</div>						
-						<div className="relative">
-							<input type="password"
-								placeholder="Ulangi Kata Sandi"
-								className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-								{...register("confirmPassword")}
-							/>
-							{errors.confirmPassword && <span className="text-red-500 text-xs">{errors.confirmPassword.message}</span>}
-						</div>						
+						<input
+							type="text"
+							placeholder="Nama Lengkap"
+							className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
+							{...register("name")}
+						/>
+						{errors.name && <span className="text-red-500 text-xs">{errors.name.message}</span>}
+					</div>
+					<div className="relative">
+						<input
+							type="text"
+							placeholder="User Name"
+							className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
+							{...register("username")}
+						/>
+						{errors.username && <span className="text-red-500 text-xs">{errors.username.message}</span>}
+					</div>
+					<div className="relative">
+						<input
+							type="email"
+							placeholder="Email"
+							className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
+							{...register("email")}
+						/>
+						{errors.email && <span className="text-red-500 text-xs">{errors.email.message}</span>}
+					</div>
+					<div className="relative">
+						<input
+							type="text"
+							placeholder="No Telepon"
+							className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
+							{...register("phone")}
+						/>
+						{errors.phone && <span className="text-red-500 text-xs">{errors.phone.message}</span>}
+					</div>
+					<div className="relative">
+						<textarea
+							placeholder="Alamat"
+							className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
+							{...register("address")}
+						/>
+						{errors.address && <span className="text-red-500 text-xs">{errors.address.message}</span>}
+					</div>
+					<div className="relative">
+						<input
+							type="password"
+							placeholder="Kata Sandi"
+							className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
+							{...register("password")}
+						/>
+						{errors.password && <span className="text-red-500 text-xs">{errors.password.message}</span>}
+					</div>
+					<div className="relative">
+						<input
+							type="password"
+							placeholder="Ulangi Kata Sandi"
+							className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
+							{...register("confirmPassword")}
+						/>
+						{errors.confirmPassword && (
+							<span className="text-red-500 text-xs">{errors.confirmPassword.message}</span>
+						)}
+					</div>
 
-						<div className="mt-8 flex justify-center">
-							<div className="flex flex-col gap-2 justify-center lg:w-[172px] w-[350px]">
-								<Button className="h-[42px] text-center text-white rounded-full bg-c-green">
-									Register
-								</Button>
-								<p className="font-hind font-semibold text-[12px] text-center">
-									Sudah punya akun?{" "}
-									<Link href={"/auth/login"} className="text-c-orange">
-										Login
-									</Link>
-								</p>
-							</div>
+					<div className="mt-8 flex justify-center">
+						<div className="flex flex-col gap-2 justify-center lg:w-[172px] w-[350px]">
+							<Button className="h-[42px] text-center text-white rounded-full bg-c-green">
+								Register
+							</Button>
+							<p className="font-hind font-semibold text-[12px] text-center">
+								Sudah punya akun?{" "}
+								<Link href={"/auth/login"} className="text-c-orange">
+									Login
+								</Link>
+							</p>
 						</div>
-					</form>
+					</div>
+				</form>
 				{message ? (
 					<div className="mt-1 text-green-500 text-center">
-					Registrasi berhasil, silahkan cek email anda untuk konfirmasi
+						Registrasi berhasil, silahkan cek email anda untuk konfirmasi
 					</div>
 				) : null}
-				{errorMessage ? (
-					<div className="text-c-red mt-1 text-center">{errorMessage}</div>
-				) : null}
+				{errorMessage ? <div className="text-c-red mt-1 text-center">{errorMessage}</div> : null}
 			</div>
 		</div>
 	);

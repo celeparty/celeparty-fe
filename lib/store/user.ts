@@ -5,9 +5,9 @@ export const useUser = create(
 	persist(
 		(set, get) => ({
 			userMe: [],
-			setUserMe: (data:any)=> {
-				set({ userMe: data })
-			}
+			setUserMe: (data: any) => {
+				set({ userMe: data });
+			},
 		}),
 		{
 			name: "userMe",

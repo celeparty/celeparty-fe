@@ -1,188 +1,185 @@
-import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
+import crypto from "crypto";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  console.log('=== MIDTRANS WEBHOOK RECEIVED ===');
-  console.log('Timestamp:', new Date().toISOString());
-  try {
-    const body = await req.json();
+	console.log("=== MIDTRANS WEBHOOK RECEIVED ===");
+	console.log("Timestamp:", new Date().toISOString());
+	try {
+		const body = await req.json();
 
-    // Verify webhook signature (optional but recommended for security)
-    const signatureKey = process.env.MIDTRANS_SIGNATURE_KEY;
-    if (signatureKey && body.signature_key) {
-      const expectedSignature = crypto
-        .createHash('sha512')
-        .update(body.order_id + body.status_code + body.gross_amount + signatureKey)
-        .digest('hex');
-      
-      if (body.signature_key !== expectedSignature) {
-        console.error('Invalid webhook signature');
-        console.error('Expected:', expectedSignature);
-        console.error('Received:', body.signature_key);
-        // For now, let's not block the request if signature is invalid
-        // return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
-      }
-    }
+		// Verify webhook signature (optional but recommended for security)
+		const signatureKey = process.env.MIDTRANS_SIGNATURE_KEY;
+		if (signatureKey && body.signature_key) {
+			const expectedSignature = crypto
+				.createHash("sha512")
+				.update(body.order_id + body.status_code + body.gross_amount + signatureKey)
+				.digest("hex");
 
-    const { order_id, transaction_status, fraud_status } = body;
-    
-    // Map Midtrans status to our payment status
-    let paymentStatus = 'pending';
-    switch (transaction_status) {
-      case 'capture':
-        paymentStatus = 'success';
-        break;
-      case 'settlement':
-        paymentStatus = 'settlement';
-        break;
-      case 'pending':
-        paymentStatus = 'pending';
-        break;
-      case 'deny':
-      case 'expire':
-      case 'cancel':
-        paymentStatus = 'failed';
-        break;
-      default:
-        paymentStatus = 'pending';
-    }
+			if (body.signature_key !== expectedSignature) {
+				console.error("Invalid webhook signature");
+				console.error("Expected:", expectedSignature);
+				console.error("Received:", body.signature_key);
+				// For now, let's not block the request if signature is invalid
+				// return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+			}
+		}
 
-    // Check if fraud status is acceptable
-    if (fraud_status === 'challenge') {
-      paymentStatus = 'pending';
-    } else if (fraud_status === 'deny') {
-      paymentStatus = 'failed';
-    }
+		const { order_id, transaction_status, fraud_status } = body;
 
+		// Map Midtrans status to our payment status
+		let paymentStatus = "pending";
+		switch (transaction_status) {
+			case "capture":
+				paymentStatus = "success";
+				break;
+			case "settlement":
+				paymentStatus = "settlement";
+				break;
+			case "pending":
+				paymentStatus = "pending";
+				break;
+			case "deny":
+			case "expire":
+			case "cancel":
+				paymentStatus = "failed";
+				break;
+			default:
+				paymentStatus = "pending";
+		}
 
-    // Update transaction in Strapi
-    const BASE_API = process.env.BASE_API;
-    const KEY_API = process.env.KEY_API;
+		// Check if fraud status is acceptable
+		if (fraud_status === "challenge") {
+			paymentStatus = "pending";
+		} else if (fraud_status === "deny") {
+			paymentStatus = "failed";
+		}
 
-    if (!BASE_API || !KEY_API) {
-      console.error('Missing environment variables');
-      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
-    }
+		// Update transaction in Strapi
+		const BASE_API = process.env.BASE_API;
+		const KEY_API = process.env.KEY_API;
 
-    // First, try to update transaction-tickets
-    try {
-      
-      // Try exact match first
-      const encodedOrderId = encodeURIComponent(order_id);
-      let ticketResponse = await fetch(`${BASE_API}/api/transaction-tickets?filters[order_id][$eq]=${encodedOrderId}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${KEY_API}`,
-        },
-      });
-      
-      let ticketData = await ticketResponse.json();
-      
-      // If not found, try searching all tickets to see what we have
-      if (!ticketResponse.ok || ticketData.data.length === 0) {
-        const allTicketsResponse = await fetch(`${BASE_API}/api/transaction-tickets`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${KEY_API}`,
-          },
-        });
-        
-        const allTickets = await allTicketsResponse.json();
-        
-        // Try to find by partial match or use the most recent ticket
-        const matchingTicket = allTickets.data?.find((t: any) => 
-          t.order_id === order_id || 
-          t.order_id?.includes(order_id) || 
-          order_id.includes(t.order_id)
-        );
-        
-        if (matchingTicket) {
-          ticketData = { data: [matchingTicket] };
-        } else {
-        }
-      }
-      
-      
-      if (ticketData.data && ticketData.data.length > 0) {
-        // Update transaction-ticket
-        const ticketDocumentId = ticketData.data[0].documentId;
-        
-        // Update directly to Strapi
-        const updateResponse = await fetch(`${BASE_API}/api/transaction-tickets/${ticketDocumentId}`, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${KEY_API}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            data: {
-              payment_status: paymentStatus
-            }
-          }),
-        });
+		if (!BASE_API || !KEY_API) {
+			console.error("Missing environment variables");
+			return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
+		}
 
-        
-        if (updateResponse.ok) {
-          const updateResult = await updateResponse.json();
-          return NextResponse.json({ success: true, type: 'ticket', updated_id: ticketDocumentId });
-        } else {
-          const errorData = await updateResponse.json();
-          console.error(`Failed to update transaction-ticket:`, errorData);
-        }
-      } else {
-      }
-    } catch (error) {
-      console.error('Error searching transaction-ticket:', error);
-    }
+		// First, try to update transaction-tickets
+		try {
+			// Try exact match first
+			const encodedOrderId = encodeURIComponent(order_id);
+			let ticketResponse = await fetch(
+				`${BASE_API}/api/transaction-tickets?filters[order_id][$eq]=${encodedOrderId}`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${KEY_API}`,
+					},
+				},
+			);
 
-    // If not found in transaction-tickets, try regular transactions
-    try {
-      const transactionResponse = await fetch(`${BASE_API}/api/transactions?filters[order_id][$eq]=${order_id}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${KEY_API}`,
-        },
-      });
+			let ticketData = await ticketResponse.json();
 
-      if (transactionResponse.ok) {
-        const transactionData = await transactionResponse.json();
-        if (transactionData.data && transactionData.data.length > 0) {
-          // Update transaction
-          const transactionId = transactionData.data[0].id;
-          const updateResponse = await fetch(`${BASE_API}/api/transactions/${transactionId}`, {
-            method: 'PUT',
-            headers: {
-              'Authorization': `Bearer ${KEY_API}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              data: {
-                payment_status: paymentStatus
-              }
-            }),
-          });
+			// If not found, try searching all tickets to see what we have
+			if (!ticketResponse.ok || ticketData.data.length === 0) {
+				const allTicketsResponse = await fetch(`${BASE_API}/api/transaction-tickets`, {
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${KEY_API}`,
+					},
+				});
 
-          if (updateResponse.ok) {
-            return NextResponse.json({ success: true, type: 'transaction' });
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error updating transaction:', error);
-    }
+				const allTickets = await allTicketsResponse.json();
 
-    return NextResponse.json({ error: 'Transaction not found' }, { status: 404 });
+				// Try to find by partial match or use the most recent ticket
+				const matchingTicket = allTickets.data?.find(
+					(t: any) =>
+						t.order_id === order_id || t.order_id?.includes(order_id) || order_id.includes(t.order_id),
+				);
 
-  } catch (error) {
-    console.error('Webhook error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-  }
+				if (matchingTicket) {
+					ticketData = { data: [matchingTicket] };
+				} else {
+				}
+			}
+
+			if (ticketData.data && ticketData.data.length > 0) {
+				// Update transaction-ticket
+				const ticketDocumentId = ticketData.data[0].documentId;
+
+				// Update directly to Strapi
+				const updateResponse = await fetch(`${BASE_API}/api/transaction-tickets/${ticketDocumentId}`, {
+					method: "PUT",
+					headers: {
+						Authorization: `Bearer ${KEY_API}`,
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						data: {
+							payment_status: paymentStatus,
+						},
+					}),
+				});
+
+				if (updateResponse.ok) {
+					const updateResult = await updateResponse.json();
+					return NextResponse.json({ success: true, type: "ticket", updated_id: ticketDocumentId });
+				} else {
+					const errorData = await updateResponse.json();
+					console.error(`Failed to update transaction-ticket:`, errorData);
+				}
+			} else {
+			}
+		} catch (error) {
+			console.error("Error searching transaction-ticket:", error);
+		}
+
+		// If not found in transaction-tickets, try regular transactions
+		try {
+			const transactionResponse = await fetch(`${BASE_API}/api/transactions?filters[order_id][$eq]=${order_id}`, {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${KEY_API}`,
+				},
+			});
+
+			if (transactionResponse.ok) {
+				const transactionData = await transactionResponse.json();
+				if (transactionData.data && transactionData.data.length > 0) {
+					// Update transaction
+					const transactionId = transactionData.data[0].id;
+					const updateResponse = await fetch(`${BASE_API}/api/transactions/${transactionId}`, {
+						method: "PUT",
+						headers: {
+							Authorization: `Bearer ${KEY_API}`,
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							data: {
+								payment_status: paymentStatus,
+							},
+						}),
+					});
+
+					if (updateResponse.ok) {
+						return NextResponse.json({ success: true, type: "transaction" });
+					}
+				}
+			}
+		} catch (error) {
+			console.error("Error updating transaction:", error);
+		}
+
+		return NextResponse.json({ error: "Transaction not found" }, { status: 404 });
+	} catch (error) {
+		console.error("Webhook error:", error);
+		return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+	}
 }
 
 export async function GET() {
-  return NextResponse.json({ 
-    message: 'Midtrans webhook endpoint is working',
-    timestamp: new Date().toISOString(),
-    status: 'ok'
-  });
+	return NextResponse.json({
+		message: "Midtrans webhook endpoint is working",
+		timestamp: new Date().toISOString(),
+		status: "ok",
+	});
 }

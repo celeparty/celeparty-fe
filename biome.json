@@ -21,7 +21,7 @@
 	},
 	"linter": {
 		"enabled": true,
-		"rules": {			
+		"rules": {
 			"recommended": false
 		}
 	},

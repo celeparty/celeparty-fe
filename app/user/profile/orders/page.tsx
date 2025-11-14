@@ -3,9 +3,9 @@
 import { OrdersBaseContent } from "@/components/profile/OrdersBaseContent";
 
 export default function UserOrderPage() {
-  return (
-    <>
-      <OrdersBaseContent isVendor={false} />
-    </>
-  );
+	return (
+		<>
+			<OrdersBaseContent isVendor={false} />
+		</>
+	);
 }

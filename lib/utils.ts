@@ -1,81 +1,71 @@
 import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
-import { iProductImage } from "./interfaces/iProduct";
-import { iMerchantProfile } from "./interfaces/iMerchant";
 import { format, parseISO } from "date-fns";
+import { twMerge } from "tailwind-merge";
+import { iMerchantProfile } from "./interfaces/iMerchant";
+import { iProductImage } from "./interfaces/iProduct";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+	return twMerge(clsx(inputs));
 }
 
 export const formatRupiah = (val: number) => {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-  }).format(val);
+	return new Intl.NumberFormat("id-ID", {
+		style: "currency",
+		currency: "IDR",
+	}).format(val);
 };
 
 export const formatNumberWithDots = (value: string | number): string => {
-  const numberString = value?.toString().replace(/\D/g, "");
-  if (!numberString) return "";
-  return numberString.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+	const numberString = value?.toString().replace(/\D/g, "");
+	if (!numberString) return "";
+	return numberString.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };
 
-export async function fetchAndConvertToFile(
-  imageData: iProductImage
-): Promise<File> {
-  try {
-    if (!imageData.url) {
-      throw new Error("Image URL is undefined");
-    }
-    let fullUrl = imageData.url;
+export async function fetchAndConvertToFile(imageData: iProductImage): Promise<File> {
+	try {
+		if (!imageData.url) {
+			throw new Error("Image URL is undefined");
+		}
+		let fullUrl = imageData.url;
 
-    if (imageData.url.startsWith("/uploads")) {
-      const cleanPath = imageData.url.startsWith("/")
-        ? imageData.url.slice(1)
-        : imageData.url;
+		if (imageData.url.startsWith("/uploads")) {
+			const cleanPath = imageData.url.startsWith("/") ? imageData.url.slice(1) : imageData.url;
 
-      fullUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${cleanPath}`;
-    }
-    const response = await fetch(fullUrl);
+			fullUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${cleanPath}`;
+		}
+		const response = await fetch(fullUrl);
 
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+		if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-    const blob = await response.blob();
+		const blob = await response.blob();
 
-    const filename = imageData.url.split("/").pop() || `image-${Date.now()}`;
-    const fileExtension = blob.type.split("/")[1] || "jpg";
+		const filename = imageData.url.split("/").pop() || `image-${Date.now()}`;
+		const fileExtension = blob.type.split("/")[1] || "jpg";
 
-    return new File([blob], `${filename}.${fileExtension}`, {
-      type: blob.type || "image/jpeg",
-    });
-  } catch (error) {
-    console.error("Failed to convert image to file:", error);
-    throw error;
-  }
+		return new File([blob], `${filename}.${fileExtension}`, {
+			type: blob.type || "image/jpeg",
+		});
+	} catch (error) {
+		console.error("Failed to convert image to file:", error);
+		throw error;
+	}
 }
 
 export const formatMoneyReq = (price: string | number) => {
-  const formattedPrice = parseInt(String(price).replace(/\./g, ""));
-  return formattedPrice;
+	const formattedPrice = parseInt(String(price).replace(/\./g, ""));
+	return formattedPrice;
 };
 
 export const sanitizeVendorData = (formData: iMerchantProfile) => {
-  const {
-    role,
-    password,
-    resetPasswordToken,
-    confirmationToken,
-    ...cleanData
-  } = formData;
-  return cleanData;
+	const { role, password, resetPasswordToken, confirmationToken, ...cleanData } = formData;
+	return cleanData;
 };
 
 export const formatDate = (isoString: string) => {
-  try {
-    const date = parseISO(isoString);
-    return format(date, "dd-MM-yyyy");
-  } catch {
-    return ""; // Return empty string if parsing fails
-  }
+	try {
+		const date = parseISO(isoString);
+		return format(date, "dd-MM-yyyy");
+	} catch {
+		return ""; // Return empty string if parsing fails
+	}
 };

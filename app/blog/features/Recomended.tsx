@@ -22,7 +22,7 @@ interface Iitem {
 	average_rating: string | number;
 	sold_count: number;
 	vendor_region: string | null;
-  }
+}
 
 function RecomendedList(props: iRecomended) {
 	const router = useRouter();

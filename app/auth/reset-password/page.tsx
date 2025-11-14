@@ -1,13 +1,11 @@
-import React from 'react'
+import React from "react";
 import { Suspense } from "react";
 import ResetPasswordContent from "./ResetPasswordContent";
 
 export default function PageReset() {
 	return (
-		<Suspense fallback={<div>Loading...</div>}>			
-			<ResetPasswordContent/>
+		<Suspense fallback={<div>Loading...</div>}>
+			<ResetPasswordContent />
 		</Suspense>
-	)
+	);
 }
-
-

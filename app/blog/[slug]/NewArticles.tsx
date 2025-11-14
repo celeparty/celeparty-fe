@@ -9,27 +9,26 @@ import React from "react";
 import ItemFeature from "../features/ItemFeature";
 
 export default function NewArticles() {
+	const getQuery = async () => {
+		return await axiosData("GET", "/api/blogs?populate=*");
+	};
+	const query = useQuery({
+		queryKey: ["qEventList"],
+		queryFn: getQuery,
+	});
+	if (query.isLoading) {
+		return (
+			<div className=" relative flex justify-center ">
+				<Skeleton width="100%" height="400px" spaceBottom={"10px"} />
+			</div>
+		);
+	}
 
-		const getQuery = async () => {
-			return await axiosData("GET", "/api/blogs?populate=*");
-		};
-		const query = useQuery({
-			queryKey: ["qEventList"],
-			queryFn: getQuery,
-		});
-		if (query.isLoading) {
-			return (
-				<div className=" relative flex justify-center ">
-					<Skeleton width="100%" height="400px" spaceBottom={"10px"} />
-				</div>
-			);
-		}
-	
-		if (query.isError) {
-			return <ErrorNetwork />;
-		}
-	
-		const dataContent = query?.data?.data;
+	if (query.isError) {
+		return <ErrorNetwork />;
+	}
+
+	const dataContent = query?.data?.data;
 	return (
 		<div>
 			{dataContent?.map((item: any, index: number) => {
@@ -40,7 +39,7 @@ export default function NewArticles() {
 						key={index}
 						title={item?.title}
 						date={moment(item?.publish_at).format("DD MMM YYYY")}
-						image={item.image?.url ? `${process.env.BASE_API+item.image?.url}` : "/images/noimage.png"}
+						image={item.image?.url ? `${process.env.BASE_API + item.image?.url}` : "/images/noimage.png"}
 					/>
 				);
 			})}

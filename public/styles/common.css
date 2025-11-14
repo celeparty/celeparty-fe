@@ -1,21 +1,21 @@
 .toast-success {
-  background-color: var(--green);
-  color: #fff;
+	background-color: var(--green);
+	color: #fff;
 }
 
 .toast-failed {
-  background-color: var(--red);
-  color: #fff;
+	background-color: var(--red);
+	color: #fff;
 }
 
 .toast-warning {
-  background-color: var(--yellow);
+	background-color: var(--yellow);
 }
 
 .imageProduct button.-left-12 {
-  left: 0
+	left: 0;
 }
 
 .imageProduct button.-right-12 {
-  right: 0
+	right: 0;
 }

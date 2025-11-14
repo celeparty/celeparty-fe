@@ -4,8 +4,8 @@ import { NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
 	const cookies = request.cookies.getAll();
-	const nextAuthCookie = cookies.find(cookie => cookie.name === "next-auth.session-token");
-	const secureNextAuthCookie = cookies.find(cookie => cookie.name === "__Secure-next-auth.session-token");
+	const nextAuthCookie = cookies.find((cookie) => cookie.name === "next-auth.session-token");
+	const secureNextAuthCookie = cookies.find((cookie) => cookie.name === "__Secure-next-auth.session-token");
 
 	const cookie = nextAuthCookie || secureNextAuthCookie || false;
 
@@ -13,19 +13,18 @@ export function middleware(request: NextRequest) {
 	const protectedPaths = ["/user", "/cart"];
 
 	// Check if the current path is protected
-	const isProtectedPath = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path));
+	const isProtectedPath = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path));
 
 	if (cookie && request.nextUrl.pathname.startsWith("/auth/login")) {
-	  return Response.redirect(new URL("/user/home", request.url));
+		return Response.redirect(new URL("/user/home", request.url));
 	}
 
 	if (!cookie && isProtectedPath) {
-	  return Response.redirect(new URL("/auth/login", request.url));
+		return Response.redirect(new URL("/auth/login", request.url));
 	}
 
 	return NextResponse.next();
-  }
-  
+}
 
 export const config = {
 	matcher: ["/((?!api|_next/static|_next/image|.*\\.png$).*)"],

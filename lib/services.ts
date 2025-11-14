@@ -1,4 +1,4 @@
-import axios, { Method } from "axios"
+import axios, { Method } from "axios";
 
 export const axiosInstance = axios.create({
 	baseURL: process.env.URL_API,
@@ -11,26 +11,9 @@ export const config = {
 };
 
 export const axiosData = async (method: Method, url: string, data?: any) => {
-    try {
-        const headers: Record<string, string> = {};
-        headers['Authorization'] = `Bearer ${process.env.KEY_API}`;
-        const response = await axios({
-            method,
-            url: `${process.env.BASE_API}${url}`,
-            data,
-            headers,
-        });
-        return response?.data;
-    } catch (err) {
-        console.error('Request failed:', err);
-        throw err;
-    }
-};
-
-export const axiosUser = async (method: Method, url: string, token?: string, data?: any) => {
 	try {
 		const headers: Record<string, string> = {};
-		headers['Authorization'] = `Bearer ${token}`;
+		headers["Authorization"] = `Bearer ${process.env.KEY_API}`;
 		const response = await axios({
 			method,
 			url: `${process.env.BASE_API}${url}`,
@@ -39,12 +22,29 @@ export const axiosUser = async (method: Method, url: string, token?: string, dat
 		});
 		return response?.data;
 	} catch (err) {
-		console.error('Request failed:', err);
+		console.error("Request failed:", err);
 		throw err;
 	}
-}
+};
 
-export const axiosRegion = async (method: Method, region: string, subregioncode?:string, data?: any) => {
+export const axiosUser = async (method: Method, url: string, token?: string, data?: any) => {
+	try {
+		const headers: Record<string, string> = {};
+		headers["Authorization"] = `Bearer ${token}`;
+		const response = await axios({
+			method,
+			url: `${process.env.BASE_API}${url}`,
+			data,
+			headers,
+		});
+		return response?.data;
+	} catch (err) {
+		console.error("Request failed:", err);
+		throw err;
+	}
+};
+
+export const axiosRegion = async (method: Method, region: string, subregioncode?: string, data?: any) => {
 	try {
 		const response = await axios({
 			method,
@@ -53,12 +53,10 @@ export const axiosRegion = async (method: Method, region: string, subregioncode?
 		});
 		return response?.data;
 	} catch (err) {
-		console.error('Request failed:', err);
+		console.error("Request failed:", err);
 		throw err;
 	}
-}
-
-
+};
 
 export const getData = (url: string) =>
 	axios
@@ -67,7 +65,7 @@ export const getData = (url: string) =>
 			return res;
 		})
 		.catch((error) => {
-			console.error('Request failed:', error);
+			console.error("Request failed:", error);
 		});
 
 export const getDataToken = (url: string, token: string) =>
@@ -81,7 +79,7 @@ export const getDataToken = (url: string, token: string) =>
 			return res;
 		})
 		.catch((error) => {
-			console.error('Request failed:', error);
+			console.error("Request failed:", error);
 		});
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -96,7 +94,7 @@ export const putDataToken = (url: string, token: string, data: any) =>
 			return res;
 		})
 		.catch((error) => {
-			console.error('Request failed:', error);
+			console.error("Request failed:", error);
 		});
 
 export const getDataOpen = (url: string) =>
@@ -106,7 +104,7 @@ export const getDataOpen = (url: string) =>
 			return res;
 		})
 		.catch((error) => {
-			console.error('Request failed:', error);
+			console.error("Request failed:", error);
 		});
 
 export const postDataOpen = (url: string, data: []) =>
@@ -116,5 +114,5 @@ export const postDataOpen = (url: string, data: []) =>
 			return res;
 		})
 		.catch((error) => {
-			console.error('Request failed:', error);
+			console.error("Request failed:", error);
 		});
