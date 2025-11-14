@@ -3,7 +3,7 @@ import { getStatusConfig } from "@/lib/orderStatusUtils";
 import { axiosUser } from "@/lib/services";
 import { formatDate } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronDown, ChevronUp, Download } from "lucide-react";
+import { ChevronDown, ChevronUp, Download, Eye } from "lucide-react";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 import ErrorNetwork from "../ErrorNetwork";
