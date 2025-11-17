@@ -17,18 +17,18 @@ export default function OrderSummaryPage() {
 
 	useEffect(() => {
 		if (selectedCartItems.length === 0) {
-			router.push('/cart');
+			router.push("/cart");
 		}
 	}, [selectedCartItems, router]);
 
-	const totalAmount = selectedCartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+	const totalAmount = selectedCartItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
 	const handleProceedToPayment = async () => {
 		setIsProcessing(true);
 		try {
 			// Determine if all selected items are tickets or equipment
-			const allTickets = selectedCartItems.every(item => item.product_type === 'ticket');
-			const allEquipment = selectedCartItems.every(item => item.product_type !== 'ticket');
+			const allTickets = selectedCartItems.every((item) => item.product_type === "ticket");
+			const allEquipment = selectedCartItems.every((item) => item.product_type !== "ticket");
 
 			if (allTickets) {
 				// Handle ticket payment
@@ -37,12 +37,12 @@ export default function OrderSummaryPage() {
 				// Handle equipment payment
 				await handleEquipmentPayment();
 			} else {
-				alert('Tidak dapat mencampur produk tiket dan perlengkapan dalam satu checkout');
+				alert("Tidak dapat mencampur produk tiket dan perlengkapan dalam satu checkout");
 				return;
 			}
 		} catch (error) {
-			console.error('Payment error:', error);
-			alert('Terjadi kesalahan dalam proses pembayaran');
+			console.error("Payment error:", error);
+			alert("Terjadi kesalahan dalam proses pembayaran");
 		} finally {
 			setIsProcessing(false);
 		}
@@ -300,7 +300,7 @@ export default function OrderSummaryPage() {
 					<h2 className="text-2xl font-semibold mb-4">Tidak ada item yang dipilih</h2>
 					<p className="text-gray-600 mb-6">Silakan kembali ke keranjang dan pilih item yang ingin dibeli.</p>
 					<button
-						onClick={() => router.push('/cart')}
+						onClick={() => router.push("/cart")}
 						className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
 					>
 						Kembali ke Keranjang
@@ -322,10 +322,17 @@ export default function OrderSummaryPage() {
 							<h2 className="text-xl font-semibold mb-4 text-c-blue">Item yang Dipilih</h2>
 							<div className="space-y-4">
 								{selectedCartItems.map((item, index) => (
-									<div key={index} className="flex items-center space-x-4 p-4 border border-c-gray-200 rounded-lg shadow-soft">
+									<div
+										key={index}
+										className="flex items-center space-x-4 p-4 border border-c-gray-200 rounded-lg shadow-soft"
+									>
 										<div className="relative w-16 h-16">
 											<Image
-												src={item.image ? process.env.BASE_API + item.image : "/images/noimage.png"}
+												src={
+													item.image
+														? process.env.BASE_API + item.image
+														: "/images/noimage.png"
+												}
 												alt={item.product_name}
 												fill
 												className="object-cover rounded"
@@ -337,14 +344,16 @@ export default function OrderSummaryPage() {
 												Jumlah: {item.quantity} x {formatRupiah(item.price)}
 											</p>
 											<p className="text-sm text-c-gray-600">
-												Tipe: {item.product_type === 'ticket' ? 'Tiket' : 'Perlengkapan'}
+												Tipe: {item.product_type === "ticket" ? "Tiket" : "Perlengkapan"}
 											</p>
 											{item.variant && (
 												<p className="text-sm text-c-gray-600">Varian: {item.variant}</p>
 											)}
 										</div>
 										<div className="text-right">
-											<p className="font-semibold text-c-orange">{formatRupiah(item.price * item.quantity)}</p>
+											<p className="font-semibold text-c-orange">
+												{formatRupiah(item.price * item.quantity)}
+											</p>
 										</div>
 									</div>
 								))}
@@ -355,9 +364,15 @@ export default function OrderSummaryPage() {
 						<Box>
 							<h2 className="text-xl font-semibold mb-4 text-c-blue">Informasi Pelanggan</h2>
 							<div className="space-y-2">
-								<p><strong>Nama:</strong> {session?.user?.name || 'Tidak tersedia'}</p>
-								<p><strong>Email:</strong> {session?.user?.email || 'Tidak tersedia'}</p>
-								<p><strong>Telepon:</strong> {session?.user?.phone || 'Tidak tersedia'}</p>
+								<p>
+									<strong>Nama:</strong> {session?.user?.name || "Tidak tersedia"}
+								</p>
+								<p>
+									<strong>Email:</strong> {session?.user?.email || "Tidak tersedia"}
+								</p>
+								<p>
+									<strong>Telepon:</strong> {session?.user?.phone || "Tidak tersedia"}
+								</p>
 							</div>
 						</Box>
 					</div>
@@ -388,10 +403,10 @@ export default function OrderSummaryPage() {
 									disabled={isProcessing}
 									className="w-full bg-c-green text-white py-3 px-4 rounded-lg hover:bg-c-green-light transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
 								>
-									{isProcessing ? 'Memproses...' : 'Lanjutkan Pembayaran'}
+									{isProcessing ? "Memproses..." : "Lanjutkan Pembayaran"}
 								</button>
 								<button
-									onClick={() => router.push('/cart')}
+									onClick={() => router.push("/cart")}
 									className="w-full bg-c-gray-200 text-c-gray-700 py-3 px-4 rounded-lg hover:bg-c-gray-300 transition-colors duration-200 font-medium"
 								>
 									Kembali ke Keranjang

@@ -1,8 +1,8 @@
 import { iProductReq, iProductVariant, iTicketFormReq, iTicketVariant } from "@/lib/interfaces/iProduct";
 import { formatNumberWithDots } from "@/lib/utils";
+import { format, isValid, parse } from "date-fns";
 import { Control, Controller, FieldPath, UseFormRegister } from "react-hook-form";
 import { DatePickerInput } from "../form-components/DatePicker";
-import { format, isValid, parse } from "date-fns";
 
 type VariantItemProps = {
 	index: number;
@@ -73,9 +73,7 @@ export const TicketVariantItem = ({ index, register, onRemove, errors, control }
 						name={`variant.${index}.purchase_deadline`}
 						control={control}
 						render={({ field }) => {
-							const dateValue = field.value
-								? parse(field.value, "yyyy-MM-dd", new Date())
-								: null;
+							const dateValue = field.value ? parse(field.value, "yyyy-MM-dd", new Date()) : null;
 
 							return (
 								<DatePickerInput

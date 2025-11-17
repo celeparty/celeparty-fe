@@ -11,12 +11,7 @@ interface iBox {
 }
 
 export default function Box(props: iBox) {
-	const {
-		variant = "default",
-		size = "md",
-		rounded = true,
-		...rest
-	} = props;
+	const { variant = "default", size = "md", rounded = true, ...rest } = props;
 
 	const baseClasses = "relative bg-white w-full";
 
@@ -36,20 +31,10 @@ export default function Box(props: iBox) {
 
 	return (
 		<div
-			className={cn(
-				baseClasses,
-				variantClasses[variant],
-				sizeClasses[size],
-				roundedClass,
-				props.className,
-			)}
+			className={cn(baseClasses, variantClasses[variant], sizeClasses[size], roundedClass, props.className)}
 			{...rest}
 		>
-			{props.title ? (
-				<h4 className="font-semibold text-lg text-c-blue mb-4">
-					{props.title}
-				</h4>
-			) : null}
+			{props.title ? <h4 className="font-semibold text-lg text-c-blue mb-4">{props.title}</h4> : null}
 			{props.children}
 		</div>
 	);

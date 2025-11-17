@@ -1,15 +1,15 @@
 "use client";
-import React, { useState, useEffect } from "react";
 import Box from "@/components/Box";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Calendar, MapPin, Filter, X, Search, SlidersHorizontal } from "lucide-react";
 import { iSelectOption } from "@/lib/interfaces/iCommon";
 import { formatNumberWithDots } from "@/lib/utils";
+import { Calendar, Filter, MapPin, Search, SlidersHorizontal, X } from "lucide-react";
+import React, { useState, useEffect } from "react";
 
 interface ProductFiltersProps {
 	selectedLocation: string;
@@ -53,11 +53,11 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
 
 	const hasActiveFilters = selectedLocation || eventDate || minimalOrder || price.min || price.max || activeCategory;
 
-	const filteredCategories = filterCategories.filter(cat =>
-		cat.title.toLowerCase().includes(searchTerm.toLowerCase())
+	const filteredCategories = filterCategories.filter((cat) =>
+		cat.title.toLowerCase().includes(searchTerm.toLowerCase()),
 	);
 
-	const handlePriceChange = (field: 'min' | 'max', value: string) => {
+	const handlePriceChange = (field: "min" | "max", value: string) => {
 		const rawValue = value.replace(/\D/g, "");
 		const formatted = formatNumberWithDots(rawValue);
 		setPrice({ ...price, [field]: formatted });
@@ -67,14 +67,9 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
 		setPrice({ min: "", max: "" });
 	};
 
-	const activeFiltersCount = [
-		selectedLocation,
-		eventDate,
-		minimalOrder,
-		price.min,
-		price.max,
-		activeCategory
-	].filter(Boolean).length;
+	const activeFiltersCount = [selectedLocation, eventDate, minimalOrder, price.min, price.max, activeCategory].filter(
+		Boolean,
+	).length;
 
 	if (!isFilterCatsAvailable) {
 		return (
@@ -141,7 +136,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
 					</div>
 				</CardHeader>
 
-				<CardContent className={`space-y-6 ${isMobile && !isExpanded ? 'hidden' : ''}`}>
+				<CardContent className={`space-y-6 ${isMobile && !isExpanded ? "hidden" : ""}`}>
 					{/* Location Filter */}
 					<div className="space-y-3">
 						<div className="flex items-center gap-2">
@@ -214,14 +209,14 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
 							<Input
 								type="text"
 								value={price.min}
-								onChange={(e) => handlePriceChange('min', e.target.value)}
+								onChange={(e) => handlePriceChange("min", e.target.value)}
 								className="bg-white text-black border-0 h-10"
 								placeholder="Min"
 							/>
 							<Input
 								type="text"
 								value={price.max}
-								onChange={(e) => handlePriceChange('max', e.target.value)}
+								onChange={(e) => handlePriceChange("max", e.target.value)}
 								className="bg-white text-black border-0 h-10"
 								placeholder="Max"
 							/>
@@ -253,8 +248,8 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
 									key={index}
 									className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 ${
 										activeCategory === cat.title
-											? 'bg-c-green text-white shadow-md'
-											: 'bg-white/10 hover:bg-white/20 text-white'
+											? "bg-c-green text-white shadow-md"
+											: "bg-white/10 hover:bg-white/20 text-white"
 									}`}
 									onClick={() => {
 										const isActive = activeCategory === cat.title;
@@ -267,9 +262,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
 								</div>
 							))}
 							{filteredCategories.length === 0 && searchTerm && (
-								<div className="text-center text-white/70 py-4">
-									Tidak ada kategori yang cocok
-								</div>
+								<div className="text-center text-white/70 py-4">Tidak ada kategori yang cocok</div>
 							)}
 						</div>
 					</div>

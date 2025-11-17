@@ -42,9 +42,7 @@ export default function RootLayout({
 				<body className="font-inter antialiased bg-c-gray-50 min-h-screen" suppressHydrationWarning={true}>
 					<TopHeader />
 					<Header />
-					<main className="flex-1">
-						{children}
-					</main>
+					<main className="flex-1">{children}</main>
 					<Footer />
 					<Toaster />
 				</body>

@@ -1,15 +1,9 @@
 "use client";
 
-import React from "react";
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Eye, Download } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Download, Eye } from "lucide-react";
+import React from "react";
 
 interface InvoiceViewerProps {
 	invoiceId: number;
@@ -35,11 +29,7 @@ export const InvoiceViewer: React.FC<InvoiceViewerProps> = ({ invoiceId, orderId
 					<DialogTitle>Invoice {orderId ? `#${orderId}` : `ID: ${invoiceId}`}</DialogTitle>
 				</DialogHeader>
 				<div className="flex-1">
-					<iframe
-						src={invoiceUrl}
-						className="w-full h-full border-0"
-						title={`Invoice ${invoiceId}`}
-					/>
+					<iframe src={invoiceUrl} className="w-full h-full border-0" title={`Invoice ${invoiceId}`} />
 				</div>
 			</DialogContent>
 		</Dialog>

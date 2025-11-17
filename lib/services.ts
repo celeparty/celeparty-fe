@@ -80,9 +80,8 @@ export const getDataToken = (url: string, token: string) =>
 		})
 		.catch((error) => {
 			console.error("Request failed:", error);
-		});
+});
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export const putDataToken = (url: string, token: string, data: any) =>
 	axios
 		.put(`${process.env.URL_API + url}`, data, {

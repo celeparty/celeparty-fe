@@ -85,8 +85,11 @@ export default function CartContent() {
 	const clearSelection = useCart((state) => state.clearSelection);
 
 	const selectedCartItems = getSelectedItems();
-	const selectedTotal = selectedCartItems.reduce((total: number, item: any) => total + (item.price * item.quantity), 0);
-	const isSelectionValid = selectedItems.length > 0 && selectedCartItems.length > 0 && selectedCartItems.every((item: any) => item.product_type === selectedCartItems[0].product_type);
+	const selectedTotal = selectedCartItems.reduce((total: number, item: any) => total + item.price * item.quantity, 0);
+	const isSelectionValid =
+		selectedItems.length > 0 &&
+		selectedCartItems.length > 0 &&
+		selectedCartItems.every((item: any) => item.product_type === selectedCartItems[0].product_type);
 
 	// Validasi cart berdasarkan tipe produk - sekarang menggunakan selected items
 	const isCartValid =
@@ -344,7 +347,7 @@ export default function CartContent() {
 			{cart.length > 0 ? (
 				<div className="flex lg:flex-row flex-col lg:gap-5 gap-2">
 					<div className="lg:w-8/12 w-full">
-								{cart.map((item: any, index: number) => {
+						{cart.map((item: any, index: number) => {
 							const isSelected = selectedItems.includes(item.product_id);
 							return (
 								<Box className="lg:mb-7 mb-3" title={item.product_name} key={index}>
@@ -384,8 +387,10 @@ export default function CartContent() {
 											</div>
 											<div className="flex gap-1">
 												<div className="font-bold">Type: </div>
-												<span className={`px-2 py-1 rounded text-xs ${item.product_type === 'ticket' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
-													{item.product_type === 'ticket' ? 'Ticket' : 'Equipment'}
+												<span
+													className={`px-2 py-1 rounded text-xs ${item.product_type === "ticket" ? "bg-blue-100 text-blue-800" : "bg-green-100 text-green-800"}`}
+												>
+													{item.product_type === "ticket" ? "Ticket" : "Equipment"}
 												</span>
 											</div>
 										</div>
@@ -552,7 +557,10 @@ export default function CartContent() {
 																						};
 																					newRecipients[idx].name =
 																						e.target.value;
-																					updateRecipients(item.product_id, newRecipients);
+																					updateRecipients(
+																						item.product_id,
+																						newRecipients,
+																					);
 																				}}
 																			/>
 																			{!currentRecipient.name && (
@@ -598,7 +606,10 @@ export default function CartContent() {
 																						| "KTP"
 																						| "SIM"
 																						| "Lainnya";
-																					updateRecipients(item.product_id, newRecipients);
+																					updateRecipients(
+																						item.product_id,
+																						newRecipients,
+																					);
 																				}}
 																			>
 																				<option value="KTP">KTP</option>
@@ -653,7 +664,10 @@ export default function CartContent() {
 																							/\D/g,
 																							"",
 																						);
-																					updateRecipients(item.product_id, newRecipients);
+																					updateRecipients(
+																						item.product_id,
+																						newRecipients,
+																					);
 																				}}
 																			/>
 																			{(!currentRecipient.identity_number ||
@@ -708,7 +722,10 @@ export default function CartContent() {
 																							/\D/g,
 																							"",
 																						);
-																					updateRecipients(item.product_id, newRecipients);
+																					updateRecipients(
+																						item.product_id,
+																						newRecipients,
+																					);
 																				}}
 																			/>
 																			{(!currentRecipient.whatsapp_number ||
@@ -760,7 +777,10 @@ export default function CartContent() {
 																						};
 																					newRecipients[idx].email =
 																						e.target.value;
-																					updateRecipients(item.product_id, newRecipients);
+																					updateRecipients(
+																						item.product_id,
+																						newRecipients,
+																					);
 																				}}
 																			/>
 																			{(!currentRecipient.email ||
@@ -857,7 +877,9 @@ export default function CartContent() {
 								{/* Selected Items Summary */}
 								{selectedCartItems.length > 0 && (
 									<div className="mb-4 p-3 border rounded bg-blue-50">
-										<h5 className="font-semibold text-blue-800 mb-2">Item Terpilih ({selectedCartItems.length})</h5>
+										<h5 className="font-semibold text-blue-800 mb-2">
+											Item Terpilih ({selectedCartItems.length})
+										</h5>
 										{selectedCartItems.map((item: any, idx: number) => (
 											<div key={idx} className="text-sm text-blue-700 mb-1">
 												• {item.product_name} (x{item.quantity})
@@ -886,15 +908,16 @@ export default function CartContent() {
 									<div className="mb-3">
 										{!isSelectionValid ? (
 											<div className="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg text-sm">
-												<strong>Peringatan:</strong> Tidak dapat mencampur produk tiket dan perlengkapan event dalam satu checkout.
-												Pilih hanya produk dengan tipe yang sama.
+												<strong>Peringatan:</strong> Tidak dapat mencampur produk tiket dan
+												perlengkapan event dalam satu checkout. Pilih hanya produk dengan tipe
+												yang sama.
 											</div>
 										) : (
 											<button
 												className="w-full bg-blue-600 text-white text-center py-3 rounded-lg hover:bg-blue-700 transition-colors"
 												onClick={() => {
 													// Navigate to order summary page with selected items
-													window.location.href = '/cart/order-summary';
+													window.location.href = "/cart/order-summary";
 												}}
 											>
 												Lanjutkan Checkout ({selectedCartItems.length} item)

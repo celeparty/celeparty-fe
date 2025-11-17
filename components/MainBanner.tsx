@@ -15,7 +15,12 @@ function ItemSlide(props: any) {
 	return (
 		<div className="w-full h-48 sm:h-64 lg:h-80 relative bg-gradient-to-r from-violet-600 to-indigo-600 rounded-lg overflow-hidden">
 			<Link href={props.link}>
-				<Image src={props.image} fill alt="image" className="object-cover hover:scale-105 transition-transform duration-300" />
+				<Image
+					src={props.image}
+					fill
+					alt="image"
+					className="object-cover hover:scale-105 transition-transform duration-300"
+				/>
 			</Link>
 		</div>
 	);

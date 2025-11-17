@@ -125,9 +125,7 @@ export default function ContentProduct(props: any) {
 										/>
 									))}
 								</div>
-								<span className="text-sm text-gray-600">
-									{dataContent?.average_rating || "0.0"}
-								</span>
+								<span className="text-sm text-gray-600">{dataContent?.average_rating || "0.0"}</span>
 							</div>
 
 							{/* Variants */}
@@ -152,9 +150,11 @@ export default function ContentProduct(props: any) {
 												>
 													<div className="font-medium">{variant.name}</div>
 													{variant.purchase_deadline && (
-														<div className={`text-xs mt-1 ${
-															isSelected ? "text-green-100" : "text-gray-500"
-														}`}>
+														<div
+															className={`text-xs mt-1 ${
+																isSelected ? "text-green-100" : "text-gray-500"
+															}`}
+														>
 															Batas: {variant.purchase_deadline}
 														</div>
 													)}
@@ -199,9 +199,13 @@ export default function ContentProduct(props: any) {
 							<div className="mt-6">
 								<Tabs defaultValue="description" className="w-full">
 									<TabsList className="grid w-full grid-cols-2 bg-gray-100">
-										<TabsTrigger value="description" className="text-sm">Deskripsi</TabsTrigger>
+										<TabsTrigger value="description" className="text-sm">
+											Deskripsi
+										</TabsTrigger>
 										{dataContent?.terms_conditions && (
-											<TabsTrigger value="terms" className="text-sm">Syarat & Ketentuan</TabsTrigger>
+											<TabsTrigger value="terms" className="text-sm">
+												Syarat & Ketentuan
+											</TabsTrigger>
 										)}
 									</TabsList>
 									<TabsContent value="description" className="mt-4">
@@ -211,7 +215,9 @@ export default function ContentProduct(props: any) {
 												{dataContent?.description ? (
 													parse(dataContent.description)
 												) : (
-													<span className="text-gray-500 italic">Deskripsi tidak tersedia</span>
+													<span className="text-gray-500 italic">
+														Deskripsi tidak tersedia
+													</span>
 												)}
 											</div>
 										</div>
@@ -235,7 +241,13 @@ export default function ContentProduct(props: any) {
 									onClick={askProduct}
 									className="w-full lg:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
 								>
-									<Image src="/images/icon-wa.svg" alt="WhatsApp" width={20} height={20} className="mr-2" />
+									<Image
+										src="/images/icon-wa.svg"
+										alt="WhatsApp"
+										width={20}
+										height={20}
+										className="mr-2"
+									/>
 									Tanyakan Produk
 								</Button>
 							</div>
@@ -249,7 +261,8 @@ export default function ContentProduct(props: any) {
 										<li>2. 100% pembayaran maksimal H-1 tanggal loading</li>
 									</ol>
 									<p className="text-xs text-yellow-600 italic">
-										Jika sampai H-1 tanggal loading pembayaran belum mencapai 100%, sisa dana akan dikembalikan ke User, kecuali dana yang sudah masuk Down Payment.
+										Jika sampai H-1 tanggal loading pembayaran belum mencapai 100%, sisa dana akan
+										dikembalikan ke User, kecuali dana yang sudah masuk Down Payment.
 									</p>
 								</div>
 							)}
