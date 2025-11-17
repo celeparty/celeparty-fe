@@ -67,6 +67,8 @@
 		"@types/react": "18.2.59",
 		"@types/react-dom": "18.2.19",
 		"@types/react-slick": "^0.23.13",
+		"eslint": "^8",
+		"eslint-config-next": "16.0.3",
 		"punycode": "^2.3.1"
 	}
 }

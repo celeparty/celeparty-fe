@@ -241,6 +241,8 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
 							/>
 						</div>
 
+
+
 						{/* Category List */}
 						<div className="max-h-48 overflow-y-auto space-y-2">
 							{filteredCategories.map((cat, index) => (

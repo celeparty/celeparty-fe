@@ -207,28 +207,6 @@ export function ProductContent() {
 			<div className={`col-span-12 ${isFilterCatsAvailable ? "md:col-span-9" : "md:col-span-12"}`}>
 				<div className="grid grid-cols-12 gap-4">
 					<div className="col-span-12">
-						{/* Search Bar */}
-						<div className="mb-6">
-							<div className="relative max-w-md">
-								<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-								<Input
-									type="text"
-									placeholder="Cari produk, kategori, lokasi..."
-									value={searchQuery}
-									onChange={(e) => {
-										const value = e.target.value;
-										setSearchQuery(value);
-										if (value) {
-											router.replace(`/products?search=${encodeURIComponent(value)}`, { scroll: false });
-										} else {
-											router.replace("/products", { scroll: false });
-										}
-									}}
-									className="pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-c-blue focus:ring-0"
-								/>
-							</div>
-						</div>
-
 						<Box className="lg:mt-0 px-[10px] lg:px-9">
 							<div className="flex flex-wrap -mx-2">
 								{mainData?.length > 0 ? (
