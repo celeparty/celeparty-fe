@@ -52,16 +52,21 @@ export default function Header() {
 
 					{/* Search Section */}
 					<div className="relative flex-1 w-full lg:max-w-[900px]">
-						<form onSubmit={handleSubmit} className="w-full">
+						<form onSubmit={handleSubmit} className="w-full" role="search">
 							<div className="relative">
-								<IoIosSearch className="absolute left-4 text-xl text-c-gray-500 top-1/2 -translate-y-1/2" />
+								<label htmlFor="search-input" className="sr-only">Cari produk di Celeparty</label>
+								<IoIosSearch className="absolute left-4 text-xl text-c-gray-500 top-1/2 -translate-y-1/2" aria-hidden="true" />
 								<input
+									id="search-input"
 									type="text"
 									placeholder="Cari di Celeparty"
 									className="w-full pl-12 pr-4 py-3 border border-c-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-c-blue focus:border-transparent transition-all duration-200"
 									value={searchValue}
 									onChange={(e) => setSearchValue(e.target.value)}
+									aria-describedby="search-help"
+									autoComplete="off"
 								/>
+								<span id="search-help" className="sr-only">Tekan Enter untuk mencari produk</span>
 							</div>
 						</form>
 					</div>

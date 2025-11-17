@@ -47,13 +47,16 @@ export const ProductList: React.FC<iProductListProps> = ({ boxStyle, title, quer
 			{boxStyle ? (
 				<>
 					<Box title={title} className="lg:px-9 px-2">
-						<ProductListBox posts={dataContent}></ProductListBox>
+						<section aria-label={`${title} - daftar produk`} role="region">
+							<ProductListBox posts={dataContent}></ProductListBox>
+						</section>
 						{showAllBtn && (
 							<>
-								<div className="flex justify-center mt-7 border-c-green border border-solid py-2 lg:border-none lg:py-2  rounded-lg">
+								<div className="flex justify-center mt-7 border-c-green border border-solid py-2 lg:border-none lg:py-2 rounded-lg">
 									<Link
 										href="/products"
-										className="border border-solid lg:border-c-green rounded-lg lg:px-5 lg:py-3 text-c-green font-semibold lg:hover:bg-c-green lg:hover:text-white"
+										className="border border-solid lg:border-c-green rounded-lg lg:px-5 lg:py-3 text-c-green font-semibold lg:hover:bg-c-green lg:hover:text-white focus:outline-none focus:ring-2 focus:ring-c-green focus:ring-offset-2"
+										aria-label="Lihat semua produk"
 									>
 										Tampilkan Semua Produk
 									</Link>
@@ -64,7 +67,9 @@ export const ProductList: React.FC<iProductListProps> = ({ boxStyle, title, quer
 				</>
 			) : (
 				<>
-					<ProductListBox posts={dataContent}></ProductListBox>
+					<section aria-label={`${title} - daftar produk`} role="region">
+						<ProductListBox posts={dataContent}></ProductListBox>
+					</section>
 				</>
 			)}
 		</>

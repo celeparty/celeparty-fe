@@ -14,12 +14,13 @@ import Link from "next/link";
 function ItemSlide(props: any) {
 	return (
 		<div className="w-full h-48 sm:h-64 lg:h-80 relative bg-gradient-to-r from-violet-600 to-indigo-600 rounded-lg overflow-hidden">
-			<Link href={props.link}>
+			<Link href={props.link} aria-label={`Banner: ${props.title || 'Event promotion'}`}>
 				<Image
 					src={props.image}
 					fill
-					alt="image"
+					alt={props.title ? `Banner promosi: ${props.title}` : "Banner promosi event Celeparty"}
 					className="object-cover hover:scale-105 transition-transform duration-300"
+					loading="lazy"
 				/>
 			</Link>
 		</div>
@@ -78,20 +79,21 @@ export default function MainBanner() {
 	const dataContent = query?.data.data;
 
 	return (
-		<div className="mainslider rounded-lg w-full overflow-hidden relative shadow-soft">
+		<div className="mainslider rounded-lg w-full overflow-hidden relative shadow-soft" role="region" aria-label="Banner carousel">
 			{dataContent?.length > 1 ? (
-				<Slider {...settings}>
+				<Slider {...settings} aria-label="Event banners carousel">
 					{dataContent?.map((item: any) => (
 						<ItemSlide
 							key={item.id}
 							link={item.url ? item.url : "/"}
 							image={item.image ? process.env.BASE_API + item.image.url : "/images/noimage.png"}
+							title={item.title}
 						/>
 					))}
 				</Slider>
 			) : dataContent?.length === 1 ? (
 				<div className="w-full h-48 sm:h-64 lg:h-80 relative bg-gradient-to-r from-violet-600 to-indigo-600 rounded-lg overflow-hidden">
-					<Link href={dataContent[0].url ? dataContent[0].url : "/"}>
+					<Link href={dataContent[0].url ? dataContent[0].url : "/"} aria-label={`Banner: ${dataContent[0].title || 'Event promotion'}`}>
 						<Image
 							src={
 								dataContent[0].image
@@ -99,8 +101,9 @@ export default function MainBanner() {
 									: "/images/noimage.png"
 							}
 							fill
-							alt="image"
+							alt={dataContent[0].title ? `Banner promosi: ${dataContent[0].title}` : "Banner promosi event Celeparty"}
 							className="object-cover hover:scale-105 transition-transform duration-300"
+							loading="lazy"
 						/>
 					</Link>
 				</div>

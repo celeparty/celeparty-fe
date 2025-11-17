@@ -1,83 +1,40 @@
-# UI/UX Improvement Plan for Celeparty Website
+# Performance & Accessibility Improvement Plan
 
-## Current State Analysis
+## Phase 1: Accessibility Basics (ARIA, Semantic HTML, Alt Text)
 
-- **Framework**: Next.js with Tailwind CSS
-- **Design System**: Basic custom colors, inconsistent spacing
-- **Components**: Reusable Box, Header, but inconsistent usage
-- **Responsiveness**: Mobile-first approach partially implemented
-- **Issues**: Inconsistent spacing, mixed hardcoded styles, poor mobile UX
+- [ ] app/layout.tsx: Add semantic landmarks (`<main>`, `<header>`, `<nav>`), skip links
+- [ ] components/MainBanner.tsx: Improve alt text for banner images, add ARIA for carousel
+- [ ] components/Header.tsx: Enhance search input labeling, add ARIA for navigation
+- [ ] components/product/ItemProduct.tsx: Replace generic alt text with descriptive alternatives
+- [ ] components/product/ProductList.tsx: Add ARIA for product grid
+- [ ] app/products/ProductContent.tsx: Implement proper heading hierarchy, ARIA for filters
 
-## Planned Improvements
+## Phase 2: Performance Optimizations
 
-### 1. Design System Standardization ✅ COMPLETED
+- [ ] components/MainBanner.tsx: Add lazy loading to images
+- [ ] components/product/ItemProduct.tsx: Implement lazy loading for product images
+- [ ] components/Skeleton.tsx: Enhance skeleton components with better accessibility
+- [ ] components/ErrorBoundary.tsx: Create new error boundary component
+- [ ] app/layout.tsx: Add error boundary wrapper
 
-- [x] Create consistent spacing scale (4px increments)
-- [x] Standardize typography scale and weights
-- [x] Define component-level design tokens
-- [x] Create color palette extensions
+## Phase 3: Keyboard Navigation & Focus Management
 
-### 2. Layout & Spacing Improvements ✅ COMPLETED
+- [ ] components/ui/dialog.tsx: Enhance focus trapping for modals
+- [ ] app/products/ProductContent.tsx: Add keyboard shortcuts for filters/sorting
+- [ ] components/Header.tsx: Improve search keyboard navigation
+- [ ] components/SkipLink.tsx: Create new skip navigation component
 
-- [x] Standardize container widths and padding
-- [x] Implement consistent section spacing
-- [x] Fix mobile responsiveness across all pages
-- [x] Optimize grid layouts for better content flow
+## Phase 4: Mobile & Touch Improvements
 
-### 3. Component Refactoring ✅ COMPLETED
+- [ ] components/ui/button.tsx: Ensure minimum touch target sizes (44px)
+- [ ] components/product/ItemProduct.tsx: Optimize touch targets for mobile
+- [ ] components/MainBanner.tsx: Improve swipe gestures accessibility
 
-- [x] Refactor Box component for consistent padding
-- [x] Improve Header mobile navigation
-- [x] Standardize product card layouts
-- [x] Enhance form component consistency
+## Followup Steps
 
-### 4. Performance & Accessibility
-
-- [ ] Add proper ARIA labels and semantic HTML
-- [ ] Improve loading states and skeletons
-- [ ] Optimize image loading and sizing
-- [ ] Enhance keyboard navigation
-
-### 5. Page-Specific Improvements ✅ COMPLETED
-
-- [x] Homepage: Better banner responsiveness
-- [x] Product pages: Improved filtering and search UX
-- [x] Cart/Order pages: Streamline checkout flow
-- [x] Auth pages: Better form validation UX
-
-## Implementation Priority
-
-1. **High Priority**: Design system foundation (spacing, colors, typography) ✅ COMPLETED
-2. **High Priority**: Layout consistency and mobile responsiveness ✅ COMPLETED
-3. **Medium Priority**: Component standardization ✅ COMPLETED
-4. **Medium Priority**: Performance optimizations
-5. **Low Priority**: Advanced accessibility features
-
-## Files Updated
-
-- `tailwind.config.js` - Design tokens ✅ COMPLETED
-- `components/Box.tsx` - Component standardization ✅ COMPLETED
-- `components/Header.tsx` - Navigation improvements
-- `app/layout.tsx` - Global layout consistency
-- `app/page.tsx` - Homepage improvements ✅ COMPLETED
-- `app/products/page.tsx` - Product listing UX ✅ COMPLETED
-- `app/products/[slug]/page.tsx` - Product detail page ✅ COMPLETED
-- `app/cart/page.tsx` - Cart page UX ✅ COMPLETED
-- `app/cart/order-summary/page.tsx` - Checkout flow ✅ COMPLETED
-- Various component files for consistency
-
-## Testing & Validation
-
-- [ ] Cross-browser testing (Chrome, Firefox, Safari, Edge)
-- [ ] Mobile device testing (iOS Safari, Android Chrome)
-- [ ] Accessibility testing (WCAG 2.1 AA compliance)
-- [ ] Performance testing (Lighthouse scores)
-- [ ] User testing for improved UX
-
-## Success Metrics
-
-- Improved mobile usability scores
-- Consistent visual hierarchy across pages
-- Better accessibility compliance
-- Enhanced performance metrics
-- Reduced user friction in checkout flow
+- [ ] Install any needed dependencies (e.g., for error boundaries)
+- [ ] Test with screen readers (NVDA, JAWS)
+- [ ] Run accessibility audits (Lighthouse, axe)
+- [ ] Verify keyboard navigation
+- [ ] Test mobile touch interactions
+- [ ] Check color contrast ratios

@@ -22,28 +22,29 @@ export default function ItemProduct(props: iItemProduct) {
 		<div className="lg:p-2 lg:w-1/5 w-1/2 p-2  lg:shadow-gray-400 lg:shadow-none">
 			<section className=" rounded-lg shadow-md flex flex-col justify-between h-full p-3">
 				<div>
-					<Link href={props.url}>
+					<Link href={props.url} aria-label={`Lihat detail produk: ${props.title}`}>
 						<div>
 							<div className="relative fill-current w-full h-[100px] mx-auto text-center my-3">
 								<Image
 									src={props.image_url ? props.image_url : "/images/noimage.png"}
 									fill
-									alt="image"
+									alt={props.title ? `Gambar produk: ${props.title}` : "Gambar produk Celeparty"}
 									style={{ objectFit: "cover" }}
+									loading="lazy"
 								/>
 							</div>
-							<h4 className="text-center text-sm">{props.title}</h4>
-							<div className="text-c-orange  text-center text-[12px] font-bold">{props.price}</div>
+							<h3 className="text-center text-sm font-medium">{props.title}</h3>
+							<div className="text-c-orange text-center text-[12px] font-bold" aria-label={`Harga: ${props.price}`}>{props.price}</div>
 						</div>
 						<div>
 							<div className="flex items-center gap-1 lg:text-[10px] text-[12px] font-medium mt-2 text-c-gray-text2">
-								<FaStar className="text-[#FDD835]" />
-								{props.rate ? props.rate : null}{" "}
-								{props.sold && <span className="sold-indicator">| {props.sold} Terjual</span>}
+								<FaStar className="text-[#FDD835]" aria-hidden="true" />
+								<span aria-label={`Rating ${props.rate || 'belum ada'}`}>{props.rate ? props.rate : null}</span>{" "}
+								{props.sold && <span className="sold-indicator" aria-label={`${props.sold} produk terjual`}>| {props.sold} Terjual</span>}
 							</div>
 							{props.location ? (
-								<div className="flex gap-1 items-center text-[12px] lg:text-[10px] mt-2  text-c-gray-text2 capitalize">
-									<FaLocationDot /> {props.location}
+								<div className="flex gap-1 items-center text-[12px] lg:text-[10px] mt-2 text-c-gray-text2 capitalize" aria-label={`Lokasi: ${props.location}`}>
+									<FaLocationDot aria-hidden="true" /> {props.location}
 								</div>
 							) : null}
 						</div>

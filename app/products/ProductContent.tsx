@@ -296,10 +296,10 @@ export function ProductContent() {
 			{isFilterCatsAvailable && (
 				<>
 					<div className="col-span-12 md:col-span-3">
-						<div className="sidebar">
+						<aside className="sidebar" aria-label="Filter dan kategori produk">
 							<Box className="bg-c-blue text-white mt-0">
 								<div className={`relative ${isFilterCatsAvailable && "mb-7 [&_h4]:mb-3"}`}>
-									<h4 className="font-bold">Informasi Acara</h4>
+									<h2 className="font-bold text-lg">Informasi Acara</h2>
 									<hr className="mb-4 mt-2" />
 									<LocationFilterBar
 										options={eventLocations}
@@ -309,9 +309,9 @@ export function ProductContent() {
 								</div>
 								{isFilterCatsAvailable && (
 									<div className="relative mb-7 [&_h4]:mb-3">
-										<h4 className="font-bold">Pilih Kategori Produk</h4>
+										<h2 className="font-bold text-lg">Pilih Kategori Produk</h2>
 										<hr className="mb-4" />
-										<div className="flex flex-col gap-3">
+										<div className="flex flex-col gap-3" role="group" aria-label="Kategori produk">
 											{filterCategories.map((cat, index) => (
 												<React.Fragment key={index}>
 													<ItemInfo
@@ -348,14 +348,14 @@ export function ProductContent() {
 								{(eventDate || selectedLocation || minimalOrder) && (
 									<>
 										<div className="py-2 text-right">
-											<Button variant={"green"} onClick={resetFilters}>
+											<Button variant={"green"} onClick={resetFilters} aria-label="Reset semua filter">
 												Reset Filter
 											</Button>
 										</div>
 									</>
 								)}
 							</Box>
-						</div>
+						</aside>
 					</div>
 				</>
 			)}
@@ -384,8 +384,8 @@ export function ProductContent() {
 					<div className={`col-span-12 ${!isFilterCatsAvailable ? "md:col-span-9" : "md:col-span-12"}`}>
 						<div className="w-full lg:inline-block">
 							<Box className="w-auto py-3 mt-0">
-								<div className="flex lg:flex-row flex-col items-center gap-4 ">
-									<label className="mr-3 text-[15px] pb-1 lg:pb-0 border-b-2 border-solid border-black lg:border-none">
+								<div className="flex lg:flex-row flex-col items-center gap-4" role="group" aria-label="Opsi pengurutan produk">
+									<label className="mr-3 text-[15px] pb-1 lg:pb-0 border-b-2 border-solid border-black lg:border-none" id="sort-label">
 										Urutkan
 									</label>
 									<Button
@@ -398,6 +398,8 @@ export function ProductContent() {
 										className={`w-full lg:w-auto border-2 border-black border-solid lg:border-none ${
 											activeButton === "btn1" ? "bg-c-blue text-white" : null
 										}`}
+										aria-describedby="sort-label"
+										aria-pressed={activeButton === "btn1"}
 									>
 										Terbaru
 									</Button>
@@ -408,9 +410,11 @@ export function ProductContent() {
 											setActiveButton("btn2");
 											setShowOptions(false);
 										}}
-										className={`w-full lg:w-auto  border-2 border-black border-solid lg:border-none ${
+										className={`w-full lg:w-auto border-2 border-black border-solid lg:border-none ${
 											activeButton === "btn2" ? "bg-c-blue text-white" : null
 										}`}
+										aria-describedby="sort-label"
+										aria-pressed={activeButton === "btn2"}
 									>
 										Terlaris
 									</Button>
@@ -430,9 +434,12 @@ export function ProductContent() {
 												className={`flex gap-1 items-center w-full lg:w-auto border-2 border-black border-solid lg:border-none ${
 													activeButton === "btn3" ? "bg-c-blue text-white" : null
 												}`}
+												aria-describedby="sort-label"
+												aria-pressed={activeButton === "btn3"}
+												aria-label={`Urutkan berdasarkan harga: ${statusValue ? "Termurah ke termahal" : "Termahal ke termurah"}`}
 											>
 												{statusValue ? "Harga Temurah" : "Harga Termahal"}{" "}
-												{sortDesc ? <IoIosArrowUp /> : <IoIosArrowDown />}
+												{sortDesc ? <IoIosArrowUp aria-hidden="true" /> : <IoIosArrowDown aria-hidden="true" />}
 											</Button>
 										</div>
 										{/* <div className="flex lg:flex-row flex-col gap-2 lg:order-2 order-1">
