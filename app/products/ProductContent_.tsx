@@ -4,6 +4,7 @@ import ErrorNetwork from "@/components/ErrorNetwork";
 import ItemProduct from "@/components/product/ItemProduct";
 import { ProductFilters } from "@/components/product/ProductFilters";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { iEventCategory } from "@/lib/interfaces/iCategory";
 import { iSelectOption } from "@/lib/interfaces/iCommon";
@@ -12,6 +13,7 @@ import { axiosData } from "@/lib/services";
 import { formatRupiah } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { Search } from "lucide-react";
 import _ from "lodash";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
@@ -46,6 +48,7 @@ export function ProductContent() {
 	const getSearch = params.get("search");
 	const getCategory = params.get("cat");
 	const [cat, setCat] = useState(`${getCategory ? getCategory : ""}`);
+	const [searchQuery, setSearchQuery] = useState(getSearch || "");
 
 	const [eventDate, setEventDate] = useState<string>("");
 	const [eventLocations, setEventLocations] = useState<iSelectOption[]>([]);
@@ -58,25 +61,50 @@ export function ProductContent() {
 	const getCombinedQuery = async () => {
 		const formattedDate = eventDate ? format(new Date(eventDate), "yyyy-MM-dd") : null;
 
-		return await axiosData(
-			"GET",
-			`/api/products?populate=*&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}${
-				getType ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(getType)}` : ""
-			}${getSearch ? `&filters[title][$containsi]=${encodeURIComponent(getSearch)}` : ""}${
-				getCategory ? `&filters[category][title][$eq]=${encodeURIComponent(cat)}` : ""
-			}${
-				selectedLocation ? `&filters[region][$eq]=${encodeURIComponent(selectedLocation)}` : ""
-			}${formattedDate ? `&filters[minimal_order_date][$eq]=${formattedDate}` : ""}${
-				minimalOrder ? `&filters[minimal_order][$eq]=${minimalOrder}` : ""
-			}`,
-		);
+		let queryString = `/api/products?populate=*&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}`;
+
+		if (getType) {
+			queryString += `&filters[user_event_type][name][$eq]=${encodeURIComponent(getType)}`;
+		}
+
+		if (searchQuery) {
+			const searchFields = [
+				'title',
+				'description',
+				'category.title',
+				'region',
+				'kabupaten',
+				'lokasi_event',
+				'kota_event'
+			];
+			const orConditions = searchFields.map(field => `filters[${field}][$containsi]=${encodeURIComponent(searchQuery)}`).join('&');
+			queryString += `&${orConditions}`;
+		}
+
+		if (getCategory) {
+			queryString += `&filters[category][title][$eq]=${encodeURIComponent(cat)}`;
+		}
+
+		if (selectedLocation) {
+			queryString += `&filters[region][$eq]=${encodeURIComponent(selectedLocation)}`;
+		}
+
+		if (formattedDate) {
+			queryString += `&filters[minimal_order_date][$eq]=${formattedDate}`;
+		}
+
+		if (minimalOrder) {
+			queryString += `&filters[minimal_order][$eq]=${minimalOrder}`;
+		}
+
+		return await axiosData("GET", queryString);
 	};
 
 	const query = useQuery({
 		queryKey: [
 			"qProducts",
 			getType,
-			getSearch,
+			searchQuery,
 			getCategory,
 			selectedLocation,
 			eventDate,
@@ -97,7 +125,7 @@ export function ProductContent() {
 
 	useEffect(() => {
 		setCurrentPage(1);
-	}, [getType, getSearch, getCategory, selectedLocation, eventDate, minimalOrder]);
+	}, [getType, searchQuery, getCategory, selectedLocation, eventDate, minimalOrder]);
 
 	const getFilterCatsQuery = async () => {
 		return await axiosData(
@@ -135,7 +163,9 @@ export function ProductContent() {
 		setEventDate("");
 		setMinimalOrder("");
 		setActiveCategory(null);
+		setSearchQuery("");
 		setCurrentPage(1);
+		router.replace("/products", { scroll: false });
 	};
 
 	const handlePageChange = (page: number) => {
@@ -177,6 +207,28 @@ export function ProductContent() {
 			<div className={`col-span-12 ${isFilterCatsAvailable ? "md:col-span-9" : "md:col-span-12"}`}>
 				<div className="grid grid-cols-12 gap-4">
 					<div className="col-span-12">
+						{/* Search Bar */}
+						<div className="mb-6">
+							<div className="relative max-w-md">
+								<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+								<Input
+									type="text"
+									placeholder="Cari produk, kategori, lokasi..."
+									value={searchQuery}
+									onChange={(e) => {
+										const value = e.target.value;
+										setSearchQuery(value);
+										if (value) {
+											router.replace(`/products?search=${encodeURIComponent(value)}`, { scroll: false });
+										} else {
+											router.replace("/products", { scroll: false });
+										}
+									}}
+									className="pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-c-blue focus:ring-0"
+								/>
+							</div>
+						</div>
+
 						<Box className="lg:mt-0 px-[10px] lg:px-9">
 							<div className="flex flex-wrap -mx-2">
 								{mainData?.length > 0 ? (
