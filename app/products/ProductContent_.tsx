@@ -2,7 +2,7 @@
 import Box from "@/components/Box";
 import ErrorNetwork from "@/components/ErrorNetwork";
 import ItemProduct from "@/components/product/ItemProduct";
-import { LocationFilterBar } from "@/components/product/LocationFilterBar";
+import { ProductFilters } from "@/components/product/ProductFilters";
 import { Button } from "@/components/ui/button";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { iEventCategory } from "@/lib/interfaces/iCategory";
@@ -13,10 +13,8 @@ import { formatRupiah } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import _ from "lodash";
-import { Bookmark } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
-import { ItemCategory, ItemInfo } from "./ItemCategory";
 
 // === Helper untuk handle URL gambar ===
 const getImageUrl = (image: any): string => {
@@ -53,6 +51,7 @@ export function ProductContent() {
 	const [eventLocations, setEventLocations] = useState<iSelectOption[]>([]);
 	const [selectedLocation, setSelectedLocation] = useState<string>("");
 	const [minimalOrder, setMinimalOrder] = useState<string>("");
+	const [price, setPrice] = useState<{ min: any; max: any }>({ min: 0, max: 0 });
 	const [activeCategory, setActiveCategory] = useState<string | null>(null);
 	const [filterCategories, setFilterCategories] = useState<iEventCategory[]>([]);
 
@@ -156,57 +155,23 @@ export function ProductContent() {
 		<div className="grid grid-cols-12 gap-6">
 			{isFilterCatsAvailable && (
 				<div className="col-span-12 md:col-span-3">
-					<div className="sidebar">
-						<Box className="bg-c-blue text-white mt-0">
-							<div className="relative mb-7 [&_h4]:mb-3">
-								<h4 className="font-bold">Informasi Acara</h4>
-								<hr className="mb-4 mt-2" />
-								<LocationFilterBar
-									options={eventLocations}
-									setSelectedLocation={setSelectedLocation}
-									selectedLocation={selectedLocation}
-								/>
-							</div>
-							<div className="relative mb-7 [&_h4]:mb-3">
-								<h4 className="font-bold">Pilih Kategori Produk</h4>
-								<hr className="mb-4" />
-								<div className="flex flex-col gap-3">
-									{filterCategories.map((cat, index) => (
-										<ItemInfo
-											key={index}
-											icon={Bookmark}
-											activeClass={`${activeCategory === cat.title && "bg-c-green text-c-white"}`}
-											onClick={() => {
-												const isActive = activeCategory === cat.title;
-												setActiveCategory(isActive ? null : cat.title);
-												handleFilter(isActive ? "" : cat.title);
-											}}
-										>
-											<ItemCategory title={cat.title} />
-										</ItemInfo>
-									))}
-									<ItemInfo
-										icon={Bookmark}
-										activeClass={`${activeCategory === "Lainnya" && "bg-c-green text-c-white"}`}
-										onClick={() => {
-											const isActive = activeCategory === "Lainnya";
-											setActiveCategory(isActive ? null : "Lainnya");
-											handleFilter(isActive ? "" : "Lainnya");
-										}}
-									>
-										<ItemCategory title={"Lainnya"} />
-									</ItemInfo>
-								</div>
-							</div>
-							{(eventDate || selectedLocation || minimalOrder) && (
-								<div className="py-2 text-right">
-									<Button variant={"green"} onClick={resetFilters}>
-										Reset Filter
-									</Button>
-								</div>
-							)}
-						</Box>
-					</div>
+					<ProductFilters
+						selectedLocation={selectedLocation}
+						setSelectedLocation={setSelectedLocation}
+						eventDate={eventDate}
+						setEventDate={setEventDate}
+						minimalOrder={minimalOrder}
+						setMinimalOrder={setMinimalOrder}
+						eventLocations={eventLocations}
+						price={price}
+						setPrice={setPrice}
+						resetFilters={resetFilters}
+						activeCategory={activeCategory}
+						setActiveCategory={setActiveCategory}
+						filterCategories={filterCategories}
+						handleFilter={handleFilter}
+						isFilterCatsAvailable={isFilterCatsAvailable}
+					/>
 				</div>
 			)}
 			<div className={`col-span-12 ${isFilterCatsAvailable ? "md:col-span-9" : "md:col-span-12"}`}>

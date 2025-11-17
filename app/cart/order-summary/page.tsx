@@ -26,13 +26,270 @@ export default function OrderSummaryPage() {
 	const handleProceedToPayment = async () => {
 		setIsProcessing(true);
 		try {
-			// Here you would implement the payment logic
-			// For now, just redirect back to cart or show a message
-			alert('Payment integration would go here');
+			// Determine if all selected items are tickets or equipment
+			const allTickets = selectedCartItems.every(item => item.product_type === 'ticket');
+			const allEquipment = selectedCartItems.every(item => item.product_type !== 'ticket');
+
+			if (allTickets) {
+				// Handle ticket payment
+				await handleTicketPayment();
+			} else if (allEquipment) {
+				// Handle equipment payment
+				await handleEquipmentPayment();
+			} else {
+				alert('Tidak dapat mencampur produk tiket dan perlengkapan dalam satu checkout');
+				return;
+			}
 		} catch (error) {
 			console.error('Payment error:', error);
+			alert('Terjadi kesalahan dalam proses pembayaran');
 		} finally {
 			setIsProcessing(false);
+		}
+	};
+
+	const handleTicketPayment = async () => {
+		// Validate recipients for tickets
+		const ticketItem = selectedCartItems[0];
+		if (ticketItem.product_type === "ticket" && ticketItem.quantity >= 1) {
+			const recipientsValid =
+				ticketItem.recipients &&
+				ticketItem.recipients.length === ticketItem.quantity &&
+				ticketItem.recipients.every(
+					(recipient: any) =>
+						recipient.name &&
+						recipient.identity_type &&
+						recipient.identity_number &&
+						recipient.whatsapp_number &&
+						recipient.email &&
+						/^\d+$/.test(recipient.identity_number) &&
+						/^\d+$/.test(recipient.whatsapp_number),
+				);
+
+			if (!recipientsValid) {
+				alert("Silakan lengkapi semua detail penerima tiket sebelum melanjutkan pembayaran.");
+				return;
+			}
+		}
+
+		try {
+			// Generate order_id
+			const order_id = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+			// Prepare payload for Strapi transaction-tickets
+			const transactionTicketPayload = {
+				data: {
+					product_name: ticketItem.product_name,
+					price: ticketItem.price.toString(),
+					quantity: ticketItem.quantity.toString(),
+					variant: ticketItem.variant || "",
+					customer_name: ticketItem.customer_name || "",
+					telp: session?.user?.phone || "",
+					total_price: (ticketItem.price * ticketItem.quantity).toString(),
+					payment_status: "pending",
+					event_date: ticketItem.event_date || "",
+					event_type: ticketItem.user_event_type || "",
+					note: ticketItem.note || "",
+					order_id: order_id,
+					customer_mail: session?.user?.email || "",
+					verification: false,
+					vendor_id: ticketItem.vendor_id || "",
+					recipients: ticketItem.recipients,
+				},
+			};
+
+			// Push data to Strapi transaction-tickets
+			const strapiRes = await fetch("/api/transaction-tickets-proxy", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(transactionTicketPayload),
+			});
+
+			if (!strapiRes.ok) {
+				throw new Error("Failed to create transaction in Strapi");
+			}
+
+			const strapiData = await strapiRes.json();
+
+			// Prepare payment data for Midtrans
+			const paymentData = selectedCartItems.map((item: any) => ({
+				id: item.product_id,
+				name: item.product_name,
+				image: item.image,
+				price: parseInt(item.price),
+				quantity: item.quantity,
+				note: item.note,
+				totalPriceItem: item.price * item.quantity,
+			}));
+
+			// Send to Midtrans for payment
+			const response = await fetch(`/api/payment`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					email: session?.user?.email || "",
+					items: paymentData,
+					order_id: order_id,
+				}),
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to initiate payment");
+			}
+
+			const paymentResult = await response.json();
+			const token = paymentResult.token;
+
+			// Save transaction summary to sessionStorage
+			sessionStorage.setItem(
+				"transaction_summary",
+				JSON.stringify({
+					orderId: strapiData.data.id,
+					products: selectedCartItems,
+					total: totalAmount,
+					customer_name: ticketItem.customer_name,
+					telp: session?.user?.phone || "",
+					order_id: order_id,
+					email: session?.user?.email || "",
+					recipients: ticketItem.recipients,
+				}),
+			);
+
+			// Redirect to Midtrans payment
+			window.snap.pay(token, {
+				onSuccess: function (result: any) {
+					window.location.href = "/cart/success";
+				},
+				onError: function (error: any) {
+					console.error("Payment error:", error);
+					alert("Pembayaran gagal. Silakan coba lagi.");
+				},
+				onClose: function () {
+					console.log("Payment popup closed");
+				},
+			});
+		} catch (error) {
+			console.error("Error in ticket payment:", error);
+			alert("Gagal memproses pembayaran tiket. Silakan coba lagi.");
+		}
+	};
+
+	const handleEquipmentPayment = async () => {
+		try {
+			// Generate order_id
+			const order_id = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+			// Combine fields that can differ between products
+			const variants = selectedCartItems
+				.map((item: any) => item.variant)
+				.filter((v: string) => v && v.trim() !== "")
+				.join(",");
+			const quantities = selectedCartItems.map((item: any) => item.quantity).join(",");
+			const notes = selectedCartItems.map((item: any) => item.note).join("; ");
+
+			// Get common fields from first product
+			const firstItem = selectedCartItems[0];
+
+			// Prepare transaction payload for Strapi
+			const transactionPayload = {
+				products: selectedCartItems.map((item: any) => ({
+					id: item.product_id,
+					title: item.product_name,
+				})),
+				payment_status: "pending",
+				variant: variants,
+				quantity: quantities,
+				shipping_location: firstItem.shipping_location,
+				event_date: firstItem.event_date,
+				loading_date: firstItem.loading_date,
+				loading_time: firstItem.loading_time,
+				customer_name: firstItem.customer_name,
+				telp: session?.user?.phone || "",
+				note: notes,
+				email: session?.user?.email || "",
+				event_type: firstItem.user_event_type,
+				vendor_doc_id: firstItem.vendor_id || "",
+			};
+
+			// Push data to Strapi
+			const strapiRes = await fetch("/api/transaction-proxy", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ data: transactionPayload }),
+			});
+
+			if (!strapiRes.ok) {
+				throw new Error("Failed to create transaction in Strapi");
+			}
+
+			const strapiData = await strapiRes.json();
+
+			// Prepare payment data for Midtrans
+			const paymentData = selectedCartItems.map((item: any) => ({
+				id: item.product_id,
+				name: item.product_name,
+				image: item.image,
+				price: parseInt(item.price),
+				quantity: item.quantity,
+				note: item.note,
+				totalPriceItem: item.price * item.quantity,
+			}));
+
+			// Send to Midtrans for payment
+			const response = await fetch(`/api/payment`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					email: session?.user?.email || "",
+					items: paymentData,
+					order_id: order_id,
+				}),
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to initiate payment");
+			}
+
+			const paymentResult = await response.json();
+			const token = paymentResult.token;
+
+			// Save transaction summary to sessionStorage
+			sessionStorage.setItem(
+				"transaction_summary",
+				JSON.stringify({
+					orderId: strapiData.data.id,
+					products: selectedCartItems,
+					total: totalAmount,
+					...firstItem,
+					order_id: order_id,
+					email: session?.user?.email || "",
+				}),
+			);
+
+			// Redirect to Midtrans payment
+			window.snap.pay(token, {
+				onSuccess: function (result: any) {
+					window.location.href = "/cart/success";
+				},
+				onError: function (error: any) {
+					console.error("Payment error:", error);
+					alert("Pembayaran gagal. Silakan coba lagi.");
+				},
+				onClose: function () {
+					console.log("Payment popup closed");
+				},
+			});
+		} catch (error) {
+			console.error("Error in equipment payment:", error);
+			alert("Gagal memproses pembayaran perlengkapan. Silakan coba lagi.");
 		}
 	};
 
