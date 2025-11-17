@@ -1,6 +1,6 @@
 import Basecontent from "@/components/Basecontent";
 import React from "react";
-import ProductContent from "./ProductContent_";
+import ProductContent from "./ProductContent";
 
 export const metadata = {
 	title: "Produk Terbaik Kami",
