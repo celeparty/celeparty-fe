@@ -15,11 +15,28 @@ import { formatNumberWithDots, formatRupiah } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import _ from "lodash";
-import { Bookmark, LucideX, LucideXCircle } from "lucide-react";
+import { Bookmark, LucideX, LucideXCircle, Search, Filter } from "lucide-react";
+import { useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { ItemCategory, ItemInfo } from "./ItemCategory";
+
+// === Helper untuk handle URL gambar ===
+const getImageUrl = (image: any): string => {
+	if (!image) return "/images/noimage.png";
+
+	const url = image?.data?.[0]?.attributes?.url || image?.[0]?.url || image?.url || null;
+
+	if (!url) return "/images/noimage.png";
+
+	// kalau sudah absolute URL
+	if (url.startsWith("http")) return url;
+
+	const baseUrl = process.env.NEXT_PUBLIC_BASE_API || "https://papi.celeparty.com";
+
+	return `${baseUrl}${url}`;
+};
 
 export function ProductContent() {
 	const [sortDesc, setSortDesc] = useState<boolean>(true);
@@ -50,6 +67,16 @@ export function ProductContent() {
 	const [activeButton, setActiveButton] = useState<string | null>(null);
 
 	const [filterCategories, setFilterCategories] = useState<iEventCategory[]>([]);
+	const [searchInput, setSearchInput] = useState<string>(getSearch || "");
+
+	// Debounced search handler
+	const handleSearchChange = useCallback(
+		_.debounce((value: string) => {
+			setSearchInput(value);
+			setCurrentPage(1); // Reset to first page when searching
+		}, 500),
+		[]
+	);
 
 	const getCombinedQuery = async () => {
 		const formattedDate = eventDate ? format(new Date(eventDate), "yyyy-MM-dd") : null;
@@ -70,7 +97,7 @@ export function ProductContent() {
 		queryKey: [
 			"qProducts",
 			getType,
-			getSearch,
+			searchInput || getSearch,
 			getCategory,
 			selectedLocation,
 			eventDate,
@@ -78,6 +105,8 @@ export function ProductContent() {
 			currentPage,
 		],
 		queryFn: getCombinedQuery,
+		refetchOnWindowFocus: false,
+		staleTime: 5 * 60 * 1000, // 5 minutes
 	});
 
 	useEffect(() => {
@@ -291,250 +320,95 @@ export function ProductContent() {
 
 	// ✅ kalau semua aman, render produk
 
-	return (
-		<div className="grid grid-cols-12 gap-6">
-			{isFilterCatsAvailable && (
-				<>
-					<div className="col-span-12 md:col-span-3">
-						<aside className="sidebar" aria-label="Filter dan kategori produk">
-							<Box className="bg-c-blue text-white mt-0">
-								<div className={`relative ${isFilterCatsAvailable && "mb-7 [&_h4]:mb-3"}`}>
-									<h2 className="font-bold text-lg">Informasi Acara</h2>
-									<hr className="mb-4 mt-2" />
-									<LocationFilterBar
-										options={eventLocations}
-										setSelectedLocation={setSelectedLocation}
-										selectedLocation={selectedLocation}
-									/>
-								</div>
-								{isFilterCatsAvailable && (
-									<div className="relative mb-7 [&_h4]:mb-3">
-										<h2 className="font-bold text-lg">Pilih Kategori Produk</h2>
-										<hr className="mb-4" />
-										<div className="flex flex-col gap-3" role="group" aria-label="Kategori produk">
-											{filterCategories.map((cat, index) => (
-												<React.Fragment key={index}>
-													<ItemInfo
-														icon={Bookmark}
-														activeClass={`${
-															activeCategory === cat.title && "bg-c-green text-c-white"
-														}`}
-														onClick={() => {
-															const isActive = activeCategory === cat.title;
-															setActiveCategory(isActive ? null : cat.title);
-															handleFilter(isActive ? "" : cat.title);
-														}}
-													>
-														<ItemCategory title={cat.title} />
-													</ItemInfo>
-												</React.Fragment>
-											))}
-											<ItemInfo
-												icon={Bookmark}
-												activeClass={`${
-													activeCategory === "Lainnya" && "bg-c-green text-c-white"
-												}`}
-												onClick={() => {
-													const isActive = activeCategory === "Lainnya";
-													setActiveCategory(isActive ? null : "Lainnya");
-													handleFilter(isActive ? "" : "Lainnya");
-												}}
-											>
-												<ItemCategory title={"Lainnya"} />
-											</ItemInfo>
-										</div>
-									</div>
-								)}
-								{(eventDate || selectedLocation || minimalOrder) && (
-									<>
-										<div className="py-2 text-right">
-											<Button variant={"green"} onClick={resetFilters} aria-label="Reset semua filter">
-												Reset Filter
-											</Button>
-										</div>
-									</>
-								)}
-							</Box>
-						</aside>
-					</div>
-				</>
-			)}
-			<div className={`col-span-12 ${isFilterCatsAvailable ? "md:col-span-9" : "md:col-span-12"}`}>
-				<div className="grid grid-cols-12 gap-4">
-					{!isFilterCatsAvailable && (
-						<>
-							<div className="col-span-12 md:col-span-3">
-								<Box className="bg-c-blue text-white mt-0 flex gap-2 items-center lg:px-6">
-									<div className={!selectedLocation ? "w-full" : "flex-1"}>
-										<LocationFilterBar
-											options={eventLocations}
-											setSelectedLocation={setSelectedLocation}
-											selectedLocation={selectedLocation}
-										/>
-									</div>
-									{selectedLocation && (
-										<>
-											<LucideXCircle className="cursor-pointer" onClick={resetFilters} />
-										</>
-									)}
-								</Box>
-							</div>
-						</>
-					)}
-					<div className={`col-span-12 ${!isFilterCatsAvailable ? "md:col-span-9" : "md:col-span-12"}`}>
-						<div className="w-full lg:inline-block">
-							<Box className="w-auto py-3 mt-0">
-								<div className="flex lg:flex-row flex-col items-center gap-4" role="group" aria-label="Opsi pengurutan produk">
-									<label className="mr-3 text-[15px] pb-1 lg:pb-0 border-b-2 border-solid border-black lg:border-none" id="sort-label">
-										Urutkan
-									</label>
-									<Button
-										variant={`${getSort === "updated_at" ? "default" : "outline"}`}
-										onClick={() => {
-											handleSort({ sortBy: "updatedAt" });
-											setActiveButton("btn1");
-											setShowOptions(false);
-										}}
-										className={`w-full lg:w-auto border-2 border-black border-solid lg:border-none ${
-											activeButton === "btn1" ? "bg-c-blue text-white" : null
-										}`}
-										aria-describedby="sort-label"
-										aria-pressed={activeButton === "btn1"}
-									>
-										Terbaru
-									</Button>
-									<Button
-										variant={`${getSort === "sold_count" ? "default" : "outline"}`}
-										onClick={() => {
-											handleSort({ sortBy: "sold_count" });
-											setActiveButton("btn2");
-											setShowOptions(false);
-										}}
-										className={`w-full lg:w-auto border-2 border-black border-solid lg:border-none ${
-											activeButton === "btn2" ? "bg-c-blue text-white" : null
-										}`}
-										aria-describedby="sort-label"
-										aria-pressed={activeButton === "btn2"}
-									>
-										Terlaris
-									</Button>
-									<div className="relative flex items-center gap-4">
-										<div className="lg:order-1 order-2">
-											<Button
-												variant={`${getSort === "price" ? "default" : "outline"}`}
-												onClick={() => {
-													setActiveButton("btn3");
-													toggleDropdown();
-													setStatusValue(!statusValue);
-													setStatusSortBy(!statusSortBy);
-													handleSort({
-														sortBy: statusSortBy ? "price_min" : "price_max",
-													});
-												}}
-												className={`flex gap-1 items-center w-full lg:w-auto border-2 border-black border-solid lg:border-none ${
-													activeButton === "btn3" ? "bg-c-blue text-white" : null
-												}`}
-												aria-describedby="sort-label"
-												aria-pressed={activeButton === "btn3"}
-												aria-label={`Urutkan berdasarkan harga: ${statusValue ? "Termurah ke termahal" : "Termahal ke termurah"}`}
-											>
-												{statusValue ? "Harga Temurah" : "Harga Termahal"}{" "}
-												{sortDesc ? <IoIosArrowUp aria-hidden="true" /> : <IoIosArrowDown aria-hidden="true" />}
-											</Button>
-										</div>
-										{/* <div className="flex lg:flex-row flex-col gap-2 lg:order-2 order-1">
-                      <div className="flex items-center gap-2 w-full lg:w-auto">
-                        Rp{" "}
-                        <Input
-                          className="border-2 border-black border-solid lg:border-none"
-                          placeholder="Harga Minimum"
-                          onChange={(e) => {
-                            const rawValue = e.target.value.replace(/\D/g, ""); // Only digits
-                            const formatted = formatNumberWithDots(rawValue);
-                            setPrice((prev) => ({ ...prev, min: formatted }));
-                          }}
-                          value={price.min > 0 ? price.min : ""}
-                        />
-                      </div>
-                      <div className="flex items-center gap-2 w-full lg:w-auto">
-                        Rp{" "}
-                        <Input
-                          className="border-2 border-black border-solid lg:border-none"
-                          placeholder="Harga Maximum"
-                          onChange={(e) => {
-                            const rawValue = e.target.value.replace(/\D/g, ""); // Only digits
-                            const formatted = formatNumberWithDots(rawValue);
-                            setPrice((prev) => ({ ...prev, max: formatted }));
-                          }}
-                          value={price.max > 0 ? price.max : ""}
-                        />
-                      </div>
-                    </div> */}
-									</div>
-								</div>
-							</Box>
-						</div>
-					</div>
-					<div className="col-span-12">
-						<Box className="lg:mt-0 px-[10px] lg:px-9">
-							<div className="flex flex-wrap -mx-2">
-								{mainData?.length > 0 ? (
-									mainData?.map((item: any) => {
-										return (
-											<ItemProduct
-												url={`/products/${item.documentId}`}
-												key={item.id}
-												title={item.title}
-												image_url={
-													item.main_image
-														? process.env.NEXT_PUBLIC_BASE_API + item.main_image[0].url
-														: "/images/noimage.png"
-												}
-												// image_url="/images/noimage.png"
-												price={
-													getLowestVariantPrice(item.variant)
-														? formatRupiah(getLowestVariantPrice(item.variant))
-														: formatRupiah(item.main_price)
-												}
-												rate={item.rate ? `${item.rate}` : "1"}
-												sold={item.sold_count}
-												location={item.region ? item.region : null}
-											></ItemProduct>
-										);
-									})
-								) : (
-									<div className="text-center w-full">Product Tidak Ditemukan</div>
-								)}
-							</div>
+return (
+<div className="grid grid-cols-12 gap-6">
+{isFilterCatsAvailable && (
+<div className="col-span-12 md:col-span-3">
+<ProductFilters
+selectedLocation={selectedLocation}
+setSelectedLocation={setSelectedLocation}
+eventDate={eventDate}
+setEventDate={setEventDate}
+minimalOrder={minimalOrder}
+setMinimalOrder={setMinimalOrder}
+eventLocations={eventLocations}
+price={price}
+setPrice={setPrice}
+resetFilters={resetFilters}
+activeCategory={activeCategory}
+setActiveCategory={setActiveCategory}
+filterCategories={filterCategories}
+handleFilter={handleFilter}
+isFilterCatsAvailable={isFilterCatsAvailable}
+/>
+</div>
+)}
+<div className={`col-span-12 ${isFilterCatsAvailable ? "md:col-span-9" : "md:col-span-12"}`}>
+<div className="grid grid-cols-12 gap-6">
+{/* Search Bar - Always visible */}
+<div className="col-span-12">
+<Box className="bg-gradient-to-r from-c-blue to-c-blue-light text-white shadow-lg p-4">
+<div className="flex items-center gap-4">
+<Search className="w-5 h-5 text-c-green" />
+<Input
+type="text"
+placeholder="Cari produk..."
+defaultValue={searchInput}
+onChange={(e) => handleSearchChange(e.target.value)}
+className="bg-white text-black border-0 flex-1 max-w-md"
+/>
+</div>
+</Box>
+</div>
+<div className="col-span-12">
+<Box className="lg:mt-0 px-[10px] lg:px-9">
+<div className="flex flex-wrap -mx-2">
+{mainData?.length > 0 ? (
+mainData?.map((item: any) => (
+<ItemProduct
+url={`/products/${item.documentId}`}
+key={item.id}
+title={item.title}
+image_url={getImageUrl(item.main_image)}
+price={
+item?.variant && item.variant.length > 0
+? formatRupiah(getLowestVariantPrice(item.variant))
+: formatRupiah(item?.main_price || 0)
+}
+rate={item.rate ? `${item.rate}` : "1"}
+sold={item.sold_count}
+location={item.region || null}
+/>
+))
+) : (
+<div className="text-center w-full">Produk Tidak Ditemukan</div>
+)}
+</div>
 
-							{/* Pagination Info and Controls */}
-							{mainData?.length > 0 && totalPages > 1 && (
-								<div className="mt-8">
-									{/* Page Info */}
-									<div className="text-center mb-4 text-sm text-slate-600">
-										Halaman {currentPage} dari {totalPages}
-										{query.data?.meta?.pagination?.total && (
-											<span className="ml-2">({query.data.meta.pagination.total} produk)</span>
-										)}
-									</div>
-
-									{/* Pagination Controls */}
-									<div className="flex justify-center">
-										<PaginationControls
-											currentPage={currentPage}
-											totalPages={totalPages}
-											onPageChange={handlePageChange}
-											className="mb-4"
-										/>
-									</div>
-								</div>
-							)}
-						</Box>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
+{mainData?.length > 0 && totalPages > 1 && (
+<div className="mt-8">
+<div className="text-center mb-4 text-sm text-slate-600">
+Halaman {currentPage} dari {totalPages}
+{query.data?.meta?.pagination?.total && (
+<span className="ml-2">({query.data.meta.pagination.total} produk)</span>
+)}
+</div>
+<div className="flex justify-center">
+<PaginationControls
+currentPage={currentPage}
+totalPages={totalPages}
+onPageChange={handlePageChange}
+className="mb-4"
+/>
+</div>
+</div>
+)}
+</Box>
+</div>
+</div>
+</div>
+</div>
+);
 }
 
 export default function SectionProductContent() {

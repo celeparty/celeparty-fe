@@ -111,7 +111,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
 
 	return (
 		<div className="w-full">
-			<Card className="bg-c-blue text-white border-0 shadow-lg">
+			<Card className="bg-gradient-to-br from-c-blue via-c-blue to-c-blue-light text-white border-0 shadow-strong rounded-2xl overflow-hidden">
 				<CardHeader className="pb-3">
 					<div className="flex items-center justify-between">
 						<CardTitle className="text-lg font-bold flex items-center gap-2">
@@ -143,10 +143,10 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
 							<MapPin className="w-4 h-4 text-c-green" />
 							<label className="text-sm font-semibold">Lokasi Acara</label>
 						</div>
-						<Select onValueChange={setSelectedLocation} value={selectedLocation}>
-							<SelectTrigger className="bg-white text-black border-0 h-10">
-								<SelectValue placeholder="Pilih lokasi" />
-							</SelectTrigger>
+					<Select onValueChange={setSelectedLocation} value={selectedLocation}>
+						<SelectTrigger className="bg-white text-black border-0 h-10 rounded-lg">
+							<SelectValue placeholder="Pilih lokasi" />
+						</SelectTrigger>
 							<SelectContent>
 								{eventLocations.map((location, index) => (
 									<SelectItem key={index} value={location.value}>
@@ -165,13 +165,13 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
 							<Calendar className="w-4 h-4 text-c-green" />
 							<label className="text-sm font-semibold">Tanggal Acara</label>
 						</div>
-						<Input
-							type="date"
-							value={eventDate}
-							onChange={(e) => setEventDate(e.target.value)}
-							className="bg-white text-black border-0 h-10"
-							placeholder="Pilih tanggal"
-						/>
+					<Input
+						type="date"
+						value={eventDate}
+						onChange={(e) => setEventDate(e.target.value)}
+						className="bg-white text-black border-0 h-10 rounded-lg"
+						placeholder="Pilih tanggal"
+					/>
 					</div>
 
 					<Separator className="bg-white/20" />
@@ -179,13 +179,13 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
 					{/* Minimal Order Filter */}
 					<div className="space-y-3">
 						<label className="text-sm font-semibold">Minimal Order</label>
-						<Input
-							type="number"
-							value={minimalOrder}
-							onChange={(e) => setMinimalOrder(e.target.value)}
-							className="bg-white text-black border-0 h-10"
-							placeholder="Masukkan jumlah minimal"
-						/>
+					<Input
+						type="number"
+						value={minimalOrder}
+						onChange={(e) => setMinimalOrder(e.target.value)}
+						className="bg-white text-black border-0 h-10 rounded-lg"
+						placeholder="Masukkan jumlah minimal"
+					/>
 					</div>
 
 					<Separator className="bg-white/20" />

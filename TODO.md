@@ -1,40 +1,39 @@
-# Performance & Accessibility Improvement Plan
+# Product Page Fixes TODO
 
-## Phase 1: Accessibility Basics (ARIA, Semantic HTML, Alt Text)
+## Issues to Fix
 
-- [ ] app/layout.tsx: Add semantic landmarks (`<main>`, `<header>`, `<nav>`), skip links
-- [ ] components/MainBanner.tsx: Improve alt text for banner images, add ARIA for carousel
-- [ ] components/Header.tsx: Enhance search input labeling, add ARIA for navigation
-- [ ] components/product/ItemProduct.tsx: Replace generic alt text with descriptive alternatives
-- [ ] components/product/ProductList.tsx: Add ARIA for product grid
-- [ ] app/products/ProductContent.tsx: Implement proper heading hierarchy, ARIA for filters
+- [ ] Product images not displaying (API populate issue)
+- [ ] Search data not appearing immediately (requires debounced input)
+- [ ] Filter menu needs more professional look (c-blue theme enhancement)
 
-## Phase 2: Performance Optimizations
+## Implementation Steps
 
-- [ ] components/MainBanner.tsx: Add lazy loading to images
-- [ ] components/product/ItemProduct.tsx: Implement lazy loading for product images
-- [ ] components/Skeleton.tsx: Enhance skeleton components with better accessibility
-- [ ] components/ErrorBoundary.tsx: Create new error boundary component
-- [ ] app/layout.tsx: Add error boundary wrapper
+### 1. Fix Product Images
 
-## Phase 3: Keyboard Navigation & Focus Management
+- [ ] Update API call in `app/products/ProductContent.tsx` to use `populate=main_image` instead of `populate=*`
 
-- [ ] components/ui/dialog.tsx: Enhance focus trapping for modals
-- [ ] app/products/ProductContent.tsx: Add keyboard shortcuts for filters/sorting
-- [ ] components/Header.tsx: Improve search keyboard navigation
-- [ ] components/SkipLink.tsx: Create new skip navigation component
+### 2. Add Immediate Search
 
-## Phase 4: Mobile & Touch Improvements
+- [ ] Add debounced search input field in `app/products/ProductContent.tsx`
+- [ ] Use `lodash.debounce` for responsive searching
+- [ ] Implement local search state separate from URL params
 
-- [ ] components/ui/button.tsx: Ensure minimum touch target sizes (44px)
-- [ ] components/product/ItemProduct.tsx: Optimize touch targets for mobile
-- [ ] components/MainBanner.tsx: Improve swipe gestures accessibility
+### 3. Enhance Filter Styling
 
-## Followup Steps
+- [ ] Update `components/product/ProductFilters.tsx` with:
+  - [ ] Gradient background (c-blue to c-blue-light)
+  - [ ] Enhanced shadows and rounded corners
+  - [ ] Professional layout elements
+  - [ ] Better visual hierarchy
 
-- [ ] Install any needed dependencies (e.g., for error boundaries)
-- [ ] Test with screen readers (NVDA, JAWS)
-- [ ] Run accessibility audits (Lighthouse, axe)
-- [ ] Verify keyboard navigation
-- [ ] Test mobile touch interactions
-- [ ] Check color contrast ratios
+### 4. Testing
+
+- [ ] Test image loading functionality
+- [ ] Test immediate search responsiveness
+- [ ] Test filter professional appearance
+- [ ] Verify no breaking changes to existing functionality
+
+## Files to Modify
+
+- `app/products/ProductContent.tsx`
+- `components/product/ProductFilters.tsx`
