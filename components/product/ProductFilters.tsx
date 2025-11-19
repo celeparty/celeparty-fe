@@ -210,14 +210,14 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
 								type="text"
 								value={price.min}
 								onChange={(e) => handlePriceChange("min", e.target.value)}
-								className="bg-white text-black border-0 h-10"
+								className="bg-white text-black border-0 h-10 rounded-lg"
 								placeholder="Min"
 							/>
 							<Input
 								type="text"
 								value={price.max}
 								onChange={(e) => handlePriceChange("max", e.target.value)}
-								className="bg-white text-black border-0 h-10"
+								className="bg-white text-black border-0 h-10 rounded-lg"
 								placeholder="Max"
 							/>
 						</div>
@@ -236,7 +236,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
 								type="text"
 								value={searchTerm}
 								onChange={(e) => setSearchTerm(e.target.value)}
-								className="bg-white text-black border-0 h-10 pl-10"
+								className="bg-white text-black border-0 h-10 pl-10 rounded-lg"
 								placeholder="Cari kategori..."
 							/>
 						</div>
