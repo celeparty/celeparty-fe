@@ -30,7 +30,7 @@ interface ProductFiltersProps {
 	isMobile?: boolean;
 }
 
-export const ProductFilters: React.FC<ProductFiltersProps> = ({
+const ProductFilters: React.FC<ProductFiltersProps> = ({
 	selectedLocation,
 	setSelectedLocation,
 	eventDate,
