@@ -86,7 +86,7 @@ export function ProductContentNew() {
 	// Set cities and categories from queries
 	useEffect(() => {
 		if (citiesQuery.data?.data) {
-			const uniqueCities = [...new Set(citiesQuery.data.data.map((p: any) => p.region).filter(Boolean))];
+			const uniqueCities = Array.from(new Set(citiesQuery.data.data.map((p: any) => p.region).filter(Boolean))) as string[];
 			setCities(uniqueCities.map(city => ({ value: city, label: city })));
 		}
 	}, [citiesQuery.data]);
