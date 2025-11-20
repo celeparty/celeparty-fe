@@ -113,7 +113,6 @@ export function ProductContent() {
 		queryKey: [
 			"qProducts",
 			getType,
-			searchInput || getSearch,
 			getCategory,
 			selectedLocation,
 			eventDate,
