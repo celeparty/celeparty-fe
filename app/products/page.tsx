@@ -1,5 +1,5 @@
 import Basecontent from "@/components/Basecontent";
-import React from "react";
+import React, { Suspense } from "react";
 import ProductContentNew from "./ProductContentNew";
 
 export const metadata = {
@@ -10,7 +10,9 @@ export const metadata = {
 export default function ProductPage() {
 	return (
 		<div className="relative wrapper-main py-8 lg:py-12">
-			<ProductContentNew />
+			<Suspense fallback={<div className="text-center py-8">Memuat produk...</div>}>
+				<ProductContentNew />
+			</Suspense>
 		</div>
 	);
 }
