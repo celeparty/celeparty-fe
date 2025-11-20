@@ -228,8 +228,11 @@ export function ProductContent() {
 
 	if (query.isLoading) {
 		return (
-			<div className=" relative flex justify-center ">
-				<Skeleton width="100%" height="150px" spaceBottom={"10px"} />
+			<div className="flex justify-center py-8">
+				<div className="text-center">
+					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-c-blue mx-auto mb-4"></div>
+					<p>Loading produk...</p>
+				</div>
 			</div>
 		);
 	}
@@ -318,7 +321,7 @@ export function ProductContent() {
 				<div className="text-center">
 					<p className="text-red-600 mb-4">Terjadi kesalahan jaringan. Silakan coba lagi.</p>
 					<Button
-						onClick={() => window.location.reload()}
+						onClick={() => query.refetch()}
 						className="bg-c-blue hover:bg-c-blue-light text-white"
 					>
 						Coba Lagi
@@ -366,15 +369,32 @@ isFilterCatsAvailable={isFilterCatsAvailable}
 {/* Search Bar - Always visible */}
 <div className="col-span-12">
 <Box className="bg-gradient-to-r from-c-blue to-c-blue-light text-white shadow-lg p-4">
-<div className="flex items-center gap-4">
+<div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+<div className="flex items-center gap-4 flex-1">
 <Search className="w-5 h-5 text-c-green" />
 <Input
 type="text"
 placeholder="Cari produk..."
-defaultValue={searchInput}
+value={searchInput}
 onChange={(e) => handleSearchChange(e.target.value)}
 className="bg-white text-black border-0 flex-1 max-w-md"
 />
+</div>
+<div className="flex items-center gap-2">
+<span className="text-sm font-medium">Urutkan:</span>
+<Select value={sortBy} onValueChange={handleSort}>
+<SelectTrigger className="bg-white text-black border-0 w-48">
+<SelectValue placeholder="Pilih urutan" />
+</SelectTrigger>
+<SelectContent>
+<SelectItem value="updatedAt:desc">Terbaru</SelectItem>
+<SelectItem value="updatedAt:asc">Terlama</SelectItem>
+<SelectItem value="title:asc">Nama A-Z</SelectItem>
+<SelectItem value="title:desc">Nama Z-A</SelectItem>
+<SelectItem value="sold_count:desc">Terlaris</SelectItem>
+</SelectContent>
+</Select>
+</div>
 </div>
 </Box>
 </div>
