@@ -267,8 +267,6 @@ export function ProductContent() {
                   <div className="text-c-gray-400 text-sm mt-2">Coba ubah filter atau kata kunci pencarian</div>
                 </div>
               )}
-            </Box>
-
               {mainData?.length > 0 && totalPages > 1 && (
                 <div className="mt-8">
                   <div className="text-center mb-4 text-sm text-slate-600">
