@@ -2,7 +2,7 @@
 import Box from "@/components/Box";
 import ErrorNetwork from "@/components/ErrorNetwork";
 import ItemProduct from "@/components/product/ItemProduct";
-import { ProductFilters } from "@/components/product/ProductFilters";
+import  ProductFilters from "@/components/product/ProductFilters";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PaginationControls } from "@/components/ui/pagination-controls";
