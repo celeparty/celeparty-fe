@@ -13,7 +13,7 @@ import { iSelectOption } from "@/lib/interfaces/iCommon";
 import { getLowestVariantPrice } from "@/lib/productUtils";
 import { axiosData } from "@/lib/services";
 import { formatNumberWithDots, formatRupiah } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import _ from "lodash";
 import { Bookmark, LucideX, LucideXCircle, Search, Filter } from "lucide-react";
@@ -257,22 +257,6 @@ export function ProductContent() {
 		);
 	}
 
-	if (query.isError) {
-		return (
-			<div className="flex flex-col items-center justify-center py-8">
-				<div className="text-center">
-					<p className="text-red-600 mb-4">Terjadi kesalahan jaringan. Silakan coba lagi.</p>
-					<Button
-						onClick={() => query.refetch()}
-						className="bg-c-blue hover:bg-c-blue-light text-white"
-					>
-						Coba Lagi
-					</Button>
-				</div>
-			</div>
-		);
-	}
-
 	const getSort = params.get("sort");
 	const getMin = params.get("min");
 	const getMax = params.get("max");
@@ -335,34 +319,6 @@ export function ProductContent() {
 	};
 
 	const isFilterCatsAvailable: boolean = filterCategories.length > 0;
-
-	// ✅ fallback UI
-	if (query.isLoading) {
-		return (
-			<div className="flex justify-center py-8">
-				<div className="text-center">
-					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-c-blue mx-auto mb-4"></div>
-					<p>Loading produk...</p>
-				</div>
-			</div>
-		);
-	}
-
-	if (query.isError) {
-		return (
-			<div className="flex flex-col items-center justify-center py-8">
-				<div className="text-center">
-					<p className="text-red-600 mb-4">Terjadi kesalahan jaringan. Silakan coba lagi.</p>
-					<Button
-						onClick={() => query.refetch()}
-						className="bg-c-blue hover:bg-c-blue-light text-white"
-					>
-						Coba Lagi
-					</Button>
-				</div>
-			</div>
-		);
-	}
 
 	if (!dataContent || dataContent.length === 0) {
 		return (
