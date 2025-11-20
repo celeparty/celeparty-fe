@@ -59,12 +59,13 @@ export function ProductContent() {
 	const getType = params.get("type") || "";
 	const getSearch = params.get("search");
 	const getCategory = params.get("cat");
-	const [cat, setCat] = useState(`${getCategory ? getCategory : ""}`);
+	// Removed cat state, now using selectedCategory
 
 	const [eventDate, setEventDate] = useState<string>("");
 	const [eventLocations, setEventLocations] = useState<iSelectOption[]>([]);
 	const [selectedLocation, setSelectedLocation] = useState<string>("");
 	const [minimalOrder, setMinimalOrder] = useState<string>("");
+	const [selectedCategory, setSelectedCategory] = useState<string>("");
 	const [activeCategory, setActiveCategory] = useState<string | null>(null);
 	// const {activeButton, setActiveButton} = useButtonStore()
 	const [activeButton, setActiveButton] = useState<string | null>(null);
@@ -84,8 +85,8 @@ export function ProductContent() {
 				queryString += `&filters[user_event_type][name][$eq]=${encodeURIComponent(getType.trim())}`;
 			}
 			// Search functionality removed - now using filters only
-			if (getCategory && cat && cat.trim()) {
-				queryString += `&filters[category][title][$eq]=${encodeURIComponent(cat.trim())}`;
+			if (selectedCategory && selectedCategory.trim()) {
+				queryString += `&filters[category][title][$eq]=${encodeURIComponent(selectedCategory.trim())}`;
 			}
 			if (selectedLocation && selectedLocation.trim()) {
 				queryString += `&filters[region][$eq]=${encodeURIComponent(selectedLocation.trim())}`;
@@ -98,6 +99,12 @@ export function ProductContent() {
 			}
 			if (selectedEventType && selectedEventType.trim()) {
 				queryString += `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType.trim())}`;
+			}
+			if (price.min && price.min.trim()) {
+				queryString += `&filters[main_price][$gte]=${price.min.replace(/\D/g, "")}`;
+			}
+			if (price.max && price.max.trim()) {
+				queryString += `&filters[main_price][$lte]=${price.max.replace(/\D/g, "")}`;
 			}
 
 			console.log('API Query:', queryString); // Debug log
@@ -141,7 +148,7 @@ export function ProductContent() {
 	// Reset to first page when filters change
 	useEffect(() => {
 		setCurrentPage(1);
-	}, [getType, getCategory, selectedLocation, eventDate, minimalOrder, selectedEventType]);
+	}, [getType, selectedCategory, selectedLocation, eventDate, minimalOrder, selectedEventType, price.min, price.max]);
 
 	const getFilterCatsQuery = async () => {
 		return await axiosData(
@@ -248,14 +255,7 @@ export function ProductContent() {
 	};
 
 	const handleFilter = (category: string) => {
-		const filterCategory: any = _.filter(dataContent, (item) => {
-			if (category === "Lainnya") {
-				return true;
-			} else {
-				return category ? item?.category?.title === category : item;
-			}
-		});
-		setMainData(filterCategory);
+		setSelectedCategory(category);
 		setCurrentPage(1); // Reset to first page when filtering
 	};
 
@@ -268,6 +268,7 @@ export function ProductContent() {
 		setSelectedLocation("");
 		setEventDate("");
 		setMinimalOrder("");
+		setSelectedCategory("");
 		setActiveCategory(null);
 		setSelectedEventType("");
 		setPrice({ min: "", max: "" });
@@ -316,6 +317,8 @@ filterCategories={filterCategories}
 handleFilter={handleFilter}
 isFilterCatsAvailable={isFilterCatsAvailable}
 isMobile={true}
+selectedCategory={selectedCategory}
+setSelectedCategory={setSelectedCategory}
 />
 </div>
 )}

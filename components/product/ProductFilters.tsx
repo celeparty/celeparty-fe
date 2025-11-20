@@ -149,10 +149,10 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
 							<MapPin className="w-4 h-4 text-c-green" />
 							<label className="text-sm font-semibold">Lokasi Acara</label>
 						</div>
-					<Select onValueChange={setSelectedLocation} value={selectedLocation}>
-						<SelectTrigger className="bg-white text-black border-0 h-10 rounded-lg">
-							<SelectValue placeholder="Pilih lokasi" />
-						</SelectTrigger>
+						<Select onValueChange={setSelectedLocation} value={selectedLocation}>
+							<SelectTrigger className="bg-white text-black border-0 h-10 rounded-lg">
+								<SelectValue placeholder="Pilih lokasi" />
+							</SelectTrigger>
 							<SelectContent>
 								{eventLocations.map((location, index) => (
 									<SelectItem key={index} value={location.value}>
