@@ -83,18 +83,37 @@ export function ProductContent() {
 	);
 
 	const getCombinedQuery = async () => {
-		const formattedDate = eventDate ? format(new Date(eventDate), "yyyy-MM-dd") : null;
+		try {
+			const formattedDate = eventDate ? format(new Date(eventDate), "yyyy-MM-dd") : null;
 
-		return await axiosData(
-			"GET",
-			`/api/products?populate=*&sort=${sortBy}&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}${
-				getType ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(getType)}` : ""
-			}${searchInput ? `&filters[title][$containsi]=${encodeURIComponent(searchInput)}` : ""}${
-				getCategory ? `&filters[category][title][$eq]=${encodeURIComponent(cat)}` : ""
-			}${selectedLocation ? `&filters[region][$eq]=${encodeURIComponent(selectedLocation)}` : ""}${
-				formattedDate ? `&filters[minimal_order_date][$eq]=${formattedDate}` : ""
-			}${minimalOrder ? `&filters[minimal_order][$eq]=${minimalOrder}` : ""}`,
-		);
+			let queryString = `/api/products?populate=*&sort=${sortBy}&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}`;
+
+			if (getType && getType.trim()) {
+				queryString += `&filters[user_event_type][name][$eq]=${encodeURIComponent(getType.trim())}`;
+			}
+			if (searchInput && searchInput.trim()) {
+				queryString += `&filters[title][$containsi]=${encodeURIComponent(searchInput.trim())}`;
+			}
+			if (getCategory && cat && cat.trim()) {
+				queryString += `&filters[category][title][$eq]=${encodeURIComponent(cat.trim())}`;
+			}
+			if (selectedLocation && selectedLocation.trim()) {
+				queryString += `&filters[region][$eq]=${encodeURIComponent(selectedLocation.trim())}`;
+			}
+			if (formattedDate) {
+				queryString += `&filters[minimal_order_date][$eq]=${formattedDate}`;
+			}
+			if (minimalOrder && minimalOrder.trim()) {
+				queryString += `&filters[minimal_order][$eq]=${minimalOrder.trim()}`;
+			}
+
+			console.log('API Query:', queryString); // Debug log
+
+			return await axiosData("GET", queryString);
+		} catch (error) {
+			console.error('API Error:', error);
+			throw error;
+		}
 	};
 
 	const query = useQuery({
@@ -112,8 +131,8 @@ export function ProductContent() {
 		queryFn: getCombinedQuery,
 		refetchOnWindowFocus: false,
 		staleTime: 5 * 60 * 1000, // 5 minutes
-		retry: 0, // Disable automatic retry to show error immediately
-		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+		retry: 2, // Allow 2 retries before showing error
+		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
 	});
 
 	useEffect(() => {
@@ -244,7 +263,7 @@ export function ProductContent() {
 				<div className="text-center">
 					<p className="text-red-600 mb-4">Terjadi kesalahan jaringan. Silakan coba lagi.</p>
 					<Button
-						onClick={() => window.location.reload()}
+						onClick={() => query.refetch()}
 						className="bg-c-blue hover:bg-c-blue-light text-white"
 					>
 						Coba Lagi
@@ -281,8 +300,7 @@ export function ProductContent() {
 	const handleSort = (sortValue: string) => {
 		setSortBy(sortValue);
 		setCurrentPage(1); // Reset to first page when sorting
-		// Trigger refetch when sort changes
-		query.refetch();
+		// No need to manually refetch, query will automatically refetch when sortBy changes
 	};
 
 	const handleFilter = (category: string) => {
@@ -336,7 +354,7 @@ export function ProductContent() {
 				<div className="text-center">
 					<p className="text-red-600 mb-4">Terjadi kesalahan jaringan. Silakan coba lagi.</p>
 					<Button
-						onClick={() => window.location.reload()}
+						onClick={() => query.refetch()}
 						className="bg-c-blue hover:bg-c-blue-light text-white"
 					>
 						Coba Lagi
