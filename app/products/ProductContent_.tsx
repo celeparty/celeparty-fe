@@ -88,6 +88,10 @@ export function ProductContent() {
 			queryString += `&filters[category][title][$eq]=${encodeURIComponent(cat)}`;
 		}
 
+		if (selectedCategory) {
+			queryString += `&filters[category][title][$eq]=${encodeURIComponent(selectedCategory)}`;
+		}
+
 		if (selectedLocation) {
 			queryString += `&filters[region][$eq]=${encodeURIComponent(selectedLocation)}`;
 		}
