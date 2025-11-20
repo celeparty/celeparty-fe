@@ -4,7 +4,7 @@ import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
 import ItemProduct from "@/components/product/ItemProduct";
 import { LocationFilterBar } from "@/components/product/LocationFilterBar";
-import { ProductFilters } from "@/components/product/ProductFilters";
+import ProductFilters from "@/components/product/ProductFilters";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PaginationControls } from "@/components/ui/pagination-controls";

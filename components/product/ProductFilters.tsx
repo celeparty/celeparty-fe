@@ -287,3 +287,5 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
 		</div>
 	);
 };
+
+export default ProductFilters;
