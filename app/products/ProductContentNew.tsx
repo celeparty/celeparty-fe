@@ -55,7 +55,7 @@ export function ProductContentNew() {
 	// Fetch categories for dropdown
 	const categoriesQuery = useQuery({
 		queryKey: ["categories"],
-		queryFn: () => axiosData("GET", "/api/event-categories?populate=*"),
+		queryFn: () => axiosData("GET", "event-categories?populate=*"),
 		staleTime: 5 * 60 * 1000,
 	});
 
@@ -63,7 +63,7 @@ export function ProductContentNew() {
 	const productsQuery = useQuery({
 		queryKey: ["products", getType, getSearch, getCategory, selectedCity, selectedCategory, priceMin, priceMax, currentPage],
 		queryFn: async () => {
-			let queryString = `/api/products?populate=*&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}`;
+			let queryString = `products?populate=*&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}`;
 
 			if (getType) queryString += `&filters[user_event_type][name][$eq]=${encodeURIComponent(getType)}`;
 			if (getSearch) {
