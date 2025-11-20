@@ -21,6 +21,7 @@ import { useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ItemCategory, ItemInfo } from "./ItemCategory";
 
 // === Helper untuk handle URL gambar ===
@@ -44,6 +45,7 @@ export function ProductContent() {
 	const [showOptions, setShowOptions] = useState<boolean>(false);
 	const [statusValue, setStatusValue] = useState<boolean>(true);
 	const [statusSortBy, setStatusSortBy] = useState<boolean>(true);
+	const [sortBy, setSortBy] = useState<string>("updatedAt:desc");
 	const [price, setPrice] = useState<{ min: any; max: any }>({
 		min: 0,
 		max: 0,
@@ -84,9 +86,9 @@ export function ProductContent() {
 
 		return await axiosData(
 			"GET",
-			`/api/products?populate=*&&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}${
+			`/api/products?populate=*&sort=${sortBy}&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}${
 				getType ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(getType)}` : ""
-			}${getSearch ? `&filters[title][$containsi]=${encodeURIComponent(getSearch)}` : ""}${
+			}${searchInput ? `&filters[title][$containsi]=${encodeURIComponent(searchInput)}` : ""}${
 				getCategory ? `&filters[category][title][$eq]=${encodeURIComponent(cat)}` : ""
 			}${selectedLocation ? `&filters[region][$eq]=${encodeURIComponent(selectedLocation)}` : ""}${
 				formattedDate ? `&filters[minimal_order_date][$eq]=${formattedDate}` : ""
@@ -104,10 +106,13 @@ export function ProductContent() {
 			eventDate,
 			minimalOrder,
 			currentPage,
+			sortBy,
 		],
 		queryFn: getCombinedQuery,
 		refetchOnWindowFocus: false,
 		staleTime: 5 * 60 * 1000, // 5 minutes
+		retry: 3,
+		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 	});
 
 	useEffect(() => {
@@ -257,19 +262,8 @@ export function ProductContent() {
 	}, [query.isSuccess, dataContent]);
 	// }, [dataContent]);
 
-	const handleSort = (sort: any) => {
-		const dataSort: any = _.sortBy(dataContent, (item) => {
-			return sort.sortBy === "sold_count"
-				? item.sold_count
-				: sort.sortBy === "main_price"
-					? item.main_price
-					: sort.sortBy === "price_min"
-						? item.price_min
-						: sort.sortBy === "price_max"
-							? item.price_max
-							: item.updatedAt;
-		});
-		setMainData(dataSort);
+	const handleSort = (sortValue: string) => {
+		setSortBy(sortValue);
 		setCurrentPage(1); // Reset to first page when sorting
 	};
 
@@ -308,15 +302,38 @@ export function ProductContent() {
 
 	// ✅ fallback UI
 	if (query.isLoading) {
-		return <div>Loading produk...</div>;
+		return (
+			<div className="flex justify-center py-8">
+				<div className="text-center">
+					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-c-blue mx-auto mb-4"></div>
+					<p>Loading produk...</p>
+				</div>
+			</div>
+		);
 	}
 
 	if (query.isError) {
-		return <div>Terjadi kesalahan jaringan. Silakan coba lagi.</div>;
+		return (
+			<div className="flex flex-col items-center justify-center py-8">
+				<div className="text-center">
+					<p className="text-red-600 mb-4">Terjadi kesalahan jaringan. Silakan coba lagi.</p>
+					<Button
+						onClick={() => window.location.reload()}
+						className="bg-c-blue hover:bg-c-blue-light text-white"
+					>
+						Coba Lagi
+					</Button>
+				</div>
+			</div>
+		);
 	}
 
 	if (!dataContent || dataContent.length === 0) {
-		return <div>Tidak ada produk untuk kategori ini.</div>;
+		return (
+			<div className="text-center py-8">
+				<p className="text-gray-600">Tidak ada produk untuk kategori ini.</p>
+			</div>
+		);
 	}
 
 	// ✅ kalau semua aman, render produk

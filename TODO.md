@@ -1,39 +1,18 @@
-# Product Page Fixes TODO
+# TODO: Fix Product Page Issues
 
-## Issues to Fix
+## Issues to Fix:
 
-- [ ] Product images not displaying (API populate issue)
-- [ ] Search data not appearing immediately (requires debounced input)
-- [ ] Filter menu needs more professional look (c-blue theme enhancement)
+1. **Initial Load Error**: Page shows "terjadi kesalahan" on first visit, requires clicking "coba lagi" to load products.
+2. **Search Functionality**: Search input doesn't filter products properly.
+3. **Filter Functionality**: Ensure all filters (location, date, price, category) work correctly.
+4. **Sort Functionality**: Add sorting options (price, date, popularity, etc.).
 
-## Implementation Steps
+## Steps:
 
-### 1. Fix Product Images
-
-- [ ] Update API call in `app/products/ProductContent.tsx` to use `populate=main_image` instead of `populate=*`
-
-### 2. Add Immediate Search
-
-- [ ] Add debounced search input field in `app/products/ProductContent.tsx`
-- [ ] Use `lodash.debounce` for responsive searching
-- [ ] Implement local search state separate from URL params
-
-### 3. Enhance Filter Styling
-
-- [ ] Update `components/product/ProductFilters.tsx` with:
-  - [ ] Gradient background (c-blue to c-blue-light)
-  - [ ] Enhanced shadows and rounded corners
-  - [ ] Professional layout elements
-  - [ ] Better visual hierarchy
-
-### 4. Testing
-
-- [ ] Test image loading functionality
-- [ ] Test immediate search responsiveness
-- [ ] Test filter professional appearance
-- [ ] Verify no breaking changes to existing functionality
-
-## Files to Modify
-
-- `app/products/ProductContent.tsx`
-- `components/product/ProductFilters.tsx`
+- [ ] Add retry logic to product query to handle initial load failures
+- [ ] Fix search to use searchInput state in API query instead of URL params
+- [ ] Add sort parameters to API query
+- [ ] Add sort UI components (dropdown/button)
+- [ ] Test all filters work with API
+- [ ] Update query dependencies to include sort
+- [ ] Test the complete functionality
