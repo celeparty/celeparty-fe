@@ -243,7 +243,7 @@ export function ProductContent() {
 				<div className="text-center">
 					<p className="text-red-600 mb-4">Terjadi kesalahan jaringan. Silakan coba lagi.</p>
 					<Button
-						onClick={() => query.refetch()}
+						onClick={() => window.location.reload()}
 						className="bg-c-blue hover:bg-c-blue-light text-white"
 					>
 						Coba Lagi
@@ -358,7 +358,7 @@ export function ProductContent() {
 return (
 <div className="grid grid-cols-12 gap-6">
 {isFilterCatsAvailable && (
-<div className="col-span-12 md:col-span-3">
+<div className={`col-span-12 ${showFilters ? "md:col-span-3" : "md:hidden"}`}>
 <ProductFilters
 selectedLocation={selectedLocation}
 setSelectedLocation={setSelectedLocation}
@@ -375,10 +375,11 @@ setActiveCategory={setActiveCategory}
 filterCategories={filterCategories}
 handleFilter={handleFilter}
 isFilterCatsAvailable={isFilterCatsAvailable}
+isMobile={true}
 />
 </div>
 )}
-<div className={`col-span-12 ${isFilterCatsAvailable ? "md:col-span-9" : "md:col-span-12"}`}>
+<div className={`col-span-12 ${isFilterCatsAvailable && showFilters ? "md:col-span-9" : "md:col-span-12"}`}>
 <div className="grid grid-cols-12 gap-6">
 {/* Search Bar - Always visible */}
 <div className="col-span-12">
@@ -408,6 +409,16 @@ className="bg-white text-black border-0 flex-1 max-w-md"
 <SelectItem value="sold_count:desc">Terlaris</SelectItem>
 </SelectContent>
 </Select>
+</div>
+<div className="flex items-center gap-2">
+<Button
+variant="outline"
+className="bg-white text-c-blue border-white hover:bg-gray-50 md:hidden"
+onClick={() => setShowFilters(!showFilters)}
+>
+<Filter className="w-4 h-4 mr-2" />
+Filter
+</Button>
 </div>
 </div>
 </Box>
