@@ -19,6 +19,9 @@ interface ProductFiltersProps {
 	minimalOrder: string;
 	setMinimalOrder: (value: string) => void;
 	eventLocations: iSelectOption[];
+	selectedEventType: string;
+	setSelectedEventType: (value: string) => void;
+	eventTypes: iSelectOption[];
 	price: { min: any; max: any };
 	setPrice: (value: { min: any; max: any }) => void;
 	resetFilters: () => void;
@@ -172,6 +175,28 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
 						className="bg-white text-black border-0 h-10 rounded-lg"
 						placeholder="Pilih tanggal"
 					/>
+					</div>
+
+					<Separator className="bg-white/20" />
+
+					{/* Event Type Filter */}
+					<div className="space-y-3">
+						<div className="flex items-center gap-2">
+							<Filter className="w-4 h-4 text-c-green" />
+							<label className="text-sm font-semibold">Jenis Event</label>
+						</div>
+						<Select onValueChange={setSelectedEventType} value={selectedEventType}>
+							<SelectTrigger className="bg-white text-black border-0 h-10 rounded-lg">
+								<SelectValue placeholder="Pilih jenis event" />
+							</SelectTrigger>
+							<SelectContent>
+								{eventTypes.map((eventType, index) => (
+									<SelectItem key={index} value={eventType.value}>
+										{eventType.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 					</div>
 
 					<Separator className="bg-white/20" />
