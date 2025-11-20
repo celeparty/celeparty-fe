@@ -111,7 +111,7 @@ export function ProductContent() {
 		queryFn: getCombinedQuery,
 		refetchOnWindowFocus: false,
 		staleTime: 5 * 60 * 1000, // 5 minutes
-		retry: 3,
+		retry: 0, // Disable automatic retry to show error immediately
 		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 	});
 
@@ -238,7 +238,19 @@ export function ProductContent() {
 	}
 
 	if (query.isError) {
-		return <ErrorNetwork />;
+		return (
+			<div className="flex flex-col items-center justify-center py-8">
+				<div className="text-center">
+					<p className="text-red-600 mb-4">Terjadi kesalahan jaringan. Silakan coba lagi.</p>
+					<Button
+						onClick={() => query.refetch()}
+						className="bg-c-blue hover:bg-c-blue-light text-white"
+					>
+						Coba Lagi
+					</Button>
+				</div>
+			</div>
+		);
 	}
 
 	const getSort = params.get("sort");
@@ -268,6 +280,8 @@ export function ProductContent() {
 	const handleSort = (sortValue: string) => {
 		setSortBy(sortValue);
 		setCurrentPage(1); // Reset to first page when sorting
+		// Trigger refetch when sort changes
+		query.refetch();
 	};
 
 	const handleFilter = (category: string) => {
