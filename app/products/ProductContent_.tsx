@@ -59,6 +59,7 @@ export function ProductContent() {
 	const [filterCategories, setFilterCategories] = useState<iEventCategory[]>([]);
 	const [eventTypes, setEventTypes] = useState<iSelectOption[]>([]);
 	const [selectedEventType, setSelectedEventType] = useState<string>("");
+	const [selectedCategory, setSelectedCategory] = useState<string>("");
 
 	const getCombinedQuery = async () => {
 		const formattedDate = eventDate ? format(new Date(eventDate), "yyyy-MM-dd") : null;
@@ -165,6 +166,7 @@ export function ProductContent() {
 		setEventDate("");
 		setMinimalOrder("");
 		setActiveCategory(null);
+		setSelectedCategory("");
 		setSearchQuery("");
 		setCurrentPage(1);
 		router.replace("/products", { scroll: false });
@@ -206,6 +208,8 @@ export function ProductContent() {
 						filterCategories={filterCategories}
 						handleFilter={handleFilter}
 						isFilterCatsAvailable={isFilterCatsAvailable}
+						selectedCategory={selectedCategory}
+						setSelectedCategory={setSelectedCategory}
 					/>
 				</div>
 			)}
