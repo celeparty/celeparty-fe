@@ -6,7 +6,7 @@ import ItemProduct from "@/components/product/ItemProduct";
 import { LocationFilterBar } from "@/components/product/LocationFilterBar";
 import ProductFilters from "@/components/product/ProductFilters";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input"; // Keep for potential future use
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { iEventCategory } from "@/lib/interfaces/iCategory";
 import { iSelectOption } from "@/lib/interfaces/iCommon";
@@ -16,7 +16,7 @@ import { formatNumberWithDots, formatRupiah } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import _ from "lodash";
-import { Bookmark, LucideX, LucideXCircle, Search, Filter } from "lucide-react";
+import { Bookmark, LucideX, LucideXCircle, Filter } from "lucide-react";
 import { useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
@@ -70,19 +70,9 @@ export function ProductContent() {
 	const [activeButton, setActiveButton] = useState<string | null>(null);
 
 	const [filterCategories, setFilterCategories] = useState<iEventCategory[]>([]);
-	const [searchInput, setSearchInput] = useState<string>(getSearch || "");
 	const [showFilters, setShowFilters] = useState<boolean>(false);
 	const [eventTypes, setEventTypes] = useState<iSelectOption[]>([]);
 	const [selectedEventType, setSelectedEventType] = useState<string>("");
-
-	// Debounced search handler
-	const handleSearchChange = useCallback(
-		_.debounce((value: string) => {
-			setSearchInput(value);
-			setCurrentPage(1); // Reset to first page when searching
-		}, 500),
-		[]
-	);
 
 	const getCombinedQuery = async () => {
 		try {
@@ -93,9 +83,7 @@ export function ProductContent() {
 			if (getType && getType.trim()) {
 				queryString += `&filters[user_event_type][name][$eq]=${encodeURIComponent(getType.trim())}`;
 			}
-			if (searchInput && searchInput.trim()) {
-				queryString += `&filters[title][$containsi]=${encodeURIComponent(searchInput.trim())}`;
-			}
+			// Search functionality removed - now using filters only
 			if (getCategory && cat && cat.trim()) {
 				queryString += `&filters[category][title][$eq]=${encodeURIComponent(cat.trim())}`;
 			}
@@ -154,7 +142,7 @@ export function ProductContent() {
 	// Reset to first page when filters change
 	useEffect(() => {
 		setCurrentPage(1);
-	}, [getType, getSearch, getCategory, selectedLocation, eventDate, minimalOrder]);
+	}, [getType, getCategory, selectedLocation, eventDate, minimalOrder, selectedEventType]);
 
 	const getFilterCatsQuery = async () => {
 		return await axiosData(
@@ -190,49 +178,7 @@ export function ProductContent() {
 		}
 	}, [filterCatsQuery.isSuccess, filterCatsQuery.data]);
 
-	useEffect(() => {
-		if (price?.min && price?.max) {
-			const dataSort: any = _.filter(dataContent, (item: any) => {
-				return item.main_price >= price.min && item.main_price <= price.max;
-			});
-			setMainData(dataSort);
-		} else if (price?.min && !price?.max) {
-			const dataSort: any = _.filter(dataContent, (item: any) => {
-				return item.main_price >= price.min;
-			});
-			setMainData(dataSort);
-		} else if (!price?.min && price?.max) {
-			const dataSort: any = _.filter(dataContent, (item: any) => {
-				return item.main_price <= price.max;
-			});
-			setMainData(dataSort);
-		} else null;
-	}, [price]);
-
-	useEffect(() => {
-		const cleanMin = price?.min ? parseInt(price.min.replace(/\./g, ""), 10) : null;
-		const cleanMax = price?.max ? parseInt(price.max.replace(/\./g, ""), 10) : null;
-
-		let dataSort: any[] = [];
-
-		if (cleanMin !== null && cleanMax !== null) {
-			dataSort = _.filter(dataContent, (item: any) => {
-				return item.main_price >= cleanMin && item.main_price <= cleanMax;
-			});
-		} else if (cleanMin !== null) {
-			dataSort = _.filter(dataContent, (item: any) => {
-				return item.main_price >= cleanMin;
-			});
-		} else if (cleanMax !== null) {
-			dataSort = _.filter(dataContent, (item: any) => {
-				return item.main_price <= cleanMax;
-			});
-		}
-
-		if (dataSort.length || cleanMin !== null || cleanMax !== null) {
-			setMainData(dataSort);
-		}
-	}, [price]);
+	// Price filtering is now handled server-side via API filters
 
 	useEffect(() => {
 		if (mainData.length === 0) return;
@@ -320,11 +266,12 @@ export function ProductContent() {
 	};
 
 	const resetFilters = () => {
-		if (selectedLocation) setSelectedLocation("");
-		if (eventDate) setEventDate("");
-		if (minimalOrder) setMinimalOrder("");
-		if (activeCategory) setActiveCategory("");
-		if (selectedEventType) setSelectedEventType("");
+		setSelectedLocation("");
+		setEventDate("");
+		setMinimalOrder("");
+		setActiveCategory(null);
+		setSelectedEventType("");
+		setPrice({ min: "", max: "" });
 		setCurrentPage(1); // Reset to first page when filters change
 	};
 
@@ -375,19 +322,19 @@ isMobile={true}
 )}
 <div className={`col-span-12 ${isFilterCatsAvailable && showFilters ? "md:col-span-9" : "md:col-span-12"}`}>
 <div className="grid grid-cols-12 gap-6">
-{/* Search Bar - Always visible */}
+{/* Filter Bar - Always visible */}
 <div className="col-span-12">
 <Box className="bg-gradient-to-r from-c-blue to-c-blue-light text-white shadow-lg p-4">
 <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
 <div className="flex items-center gap-4 flex-1">
-<Search className="w-5 h-5 text-c-green" />
-<Input
-type="text"
-placeholder="Cari produk..."
-value={searchInput}
-onChange={(e) => handleSearchChange(e.target.value)}
-className="bg-white text-black border-0 flex-1 max-w-md"
-/>
+<Button
+variant="outline"
+className="bg-white text-c-blue border-white hover:bg-gray-50"
+onClick={() => setShowFilters(!showFilters)}
+>
+<Filter className="w-4 h-4 mr-2" />
+{showFilters ? 'Sembunyikan Filter' : 'Tampilkan Filter'}
+</Button>
 </div>
 <div className="flex items-center gap-2">
 <span className="text-sm font-medium">Urutkan:</span>
@@ -403,16 +350,6 @@ className="bg-white text-black border-0 flex-1 max-w-md"
 <SelectItem value="sold_count:desc">Terlaris</SelectItem>
 </SelectContent>
 </Select>
-</div>
-<div className="flex items-center gap-2">
-<Button
-variant="outline"
-className="bg-white text-c-blue border-white hover:bg-gray-50 md:hidden"
-onClick={() => setShowFilters(!showFilters)}
->
-<Filter className="w-4 h-4 mr-2" />
-Filter
-</Button>
 </div>
 </div>
 </Box>
