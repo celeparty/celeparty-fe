@@ -321,7 +321,7 @@ export function ProductContent() {
 				<div className="text-center">
 					<p className="text-red-600 mb-4">Terjadi kesalahan jaringan. Silakan coba lagi.</p>
 					<Button
-						onClick={() => query.refetch()}
+						onClick={() => window.location.reload()}
 						className="bg-c-blue hover:bg-c-blue-light text-white"
 					>
 						Coba Lagi
