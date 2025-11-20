@@ -193,6 +193,9 @@ export function ProductContent() {
 						minimalOrder={minimalOrder}
 						setMinimalOrder={setMinimalOrder}
 						eventLocations={eventLocations}
+						selectedEventType={selectedEventType}
+						setSelectedEventType={setSelectedEventType}
+						eventTypes={eventTypes}
 						price={price}
 						setPrice={setPrice}
 						resetFilters={resetFilters}
