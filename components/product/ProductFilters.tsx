@@ -41,6 +41,9 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
 	minimalOrder,
 	setMinimalOrder,
 	eventLocations,
+	selectedEventType,
+	setSelectedEventType,
+	eventTypes,
 	price,
 	setPrice,
 	resetFilters,
@@ -190,7 +193,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
 								<SelectValue placeholder="Pilih jenis event" />
 							</SelectTrigger>
 							<SelectContent>
-								{eventTypes.map((eventType, index) => (
+								{eventTypes.map((eventType: iSelectOption, index: number) => (
 									<SelectItem key={index} value={eventType.value}>
 										{eventType.label}
 									</SelectItem>
