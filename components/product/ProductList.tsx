@@ -18,7 +18,7 @@ interface iProductListProps {
 
 export const ProductList: React.FC<iProductListProps> = ({ boxStyle, title, queryKey, showAllBtn }) => {
 	const getQuery = async () => {
-		return await axiosData("GET", `/api/products?populate=*&pagination[pageSize]=5&sort[0]=updatedAt%3Adesc`);
+		return await axiosData("GET", "/api/products?populate=*&pagination[pageSize]=5&sort[0]=updatedAt%3Adesc");
 	};
 	const query = useQuery({
 		queryKey: [queryKey],

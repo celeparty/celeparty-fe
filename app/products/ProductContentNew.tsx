@@ -79,7 +79,7 @@ export function ProductContentNew() {
 			if (priceMin) queryString += `&filters[main_price][$gte]=${priceMin.replace(/\D/g, '')}`;
 			if (priceMax) queryString += `&filters[main_price][$lte]=${priceMax.replace(/\D/g, '')}`;
 
-			return axiosData("GET", queryString);
+			return axiosData("GET", `/api/${queryString}`);
 		},
 	});
 

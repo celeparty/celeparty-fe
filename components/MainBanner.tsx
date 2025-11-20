@@ -58,7 +58,7 @@ const settings = {
 
 export default function MainBanner() {
 	const getQuery = async () => {
-		return await axiosData("GET", `/api/banners?populate=*`);
+		return await axiosData("GET", "/api/banners?populate=*");
 	};
 	const query = useQuery({
 		queryKey: ["banner"],

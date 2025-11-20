@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { axiosData } from "@/lib/services";
+import axios from "axios";
 
 export async function GET(request: NextRequest) {
 	try {
@@ -8,13 +8,15 @@ export async function GET(request: NextRequest) {
 		const pageSize = searchParams.get("pagination[pageSize]") || "1000";
 		const fields = searchParams.get("fields") || "";
 		const sort = searchParams.get("sort[0]") || "";
-
-		let url = `/api/products?populate=${populate}&pagination[pageSize]=${pageSize}`;
+		let url = `${process.env.BASE_API}/api/products?populate=${populate}&pagination[pageSize]=${pageSize}`;
 		if (fields) url += `&fields=${fields}`;
 		if (sort) url += `&sort[0]=${sort}`;
-
-		const data = await axiosData("GET", url);
-		return NextResponse.json(data);
+		const response = await axios.get(url, {
+			headers: {
+				Authorization: `Bearer ${process.env.KEY_API}`,
+			},
+		});
+		return NextResponse.json(response.data);
 	} catch (error: any) {
 		console.error("Error fetching products:", error);
 		return NextResponse.json({ success: false, error: error.message }, { status: 500 });
