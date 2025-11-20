@@ -71,6 +71,7 @@ export function ProductContent() {
 
 	const [filterCategories, setFilterCategories] = useState<iEventCategory[]>([]);
 	const [searchInput, setSearchInput] = useState<string>(getSearch || "");
+	const [showFilters, setShowFilters] = useState<boolean>(false);
 
 	// Debounced search handler
 	const handleSearchChange = useCallback(
