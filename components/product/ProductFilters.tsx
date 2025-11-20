@@ -51,7 +51,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
 	const [isExpanded, setIsExpanded] = useState(!isMobile);
 	const [searchTerm, setSearchTerm] = useState("");
 
-	const hasActiveFilters = selectedLocation || eventDate || minimalOrder || price.min || price.max || activeCategory;
+	const hasActiveFilters = selectedLocation || eventDate || minimalOrder || price.min || price.max || activeCategory || selectedEventType;
 
 	const filteredCategories = filterCategories.filter((cat) =>
 		cat.title.toLowerCase().includes(searchTerm.toLowerCase()),

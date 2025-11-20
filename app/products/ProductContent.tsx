@@ -72,6 +72,8 @@ export function ProductContent() {
 	const [filterCategories, setFilterCategories] = useState<iEventCategory[]>([]);
 	const [searchInput, setSearchInput] = useState<string>(getSearch || "");
 	const [showFilters, setShowFilters] = useState<boolean>(false);
+	const [eventTypes, setEventTypes] = useState<iSelectOption[]>([]);
+	const [selectedEventType, setSelectedEventType] = useState<string>("");
 
 	// Debounced search handler
 	const handleSearchChange = useCallback(
@@ -106,6 +108,9 @@ export function ProductContent() {
 			if (minimalOrder && minimalOrder.trim()) {
 				queryString += `&filters[minimal_order][$eq]=${minimalOrder.trim()}`;
 			}
+			if (selectedEventType && selectedEventType.trim()) {
+				queryString += `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType.trim())}`;
+			}
 
 			console.log('API Query:', queryString); // Debug log
 
@@ -125,6 +130,7 @@ export function ProductContent() {
 			selectedLocation,
 			eventDate,
 			minimalOrder,
+			selectedEventType,
 			currentPage,
 			sortBy,
 		],
@@ -160,6 +166,15 @@ export function ProductContent() {
 	const filterCatsQuery = useQuery({
 		queryKey: ["qFilterCats", getType],
 		queryFn: getFilterCatsQuery,
+	});
+
+	const getEventTypesQuery = async () => {
+		return await axiosData("GET", "/api/user-event-types");
+	};
+
+	const eventTypesQuery = useQuery({
+		queryKey: ["qEventTypes"],
+		queryFn: getEventTypesQuery,
 	});
 
 	useEffect(() => {
@@ -309,6 +324,7 @@ export function ProductContent() {
 		if (eventDate) setEventDate("");
 		if (minimalOrder) setMinimalOrder("");
 		if (activeCategory) setActiveCategory("");
+		if (selectedEventType) setSelectedEventType("");
 		setCurrentPage(1); // Reset to first page when filters change
 	};
 
