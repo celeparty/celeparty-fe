@@ -57,6 +57,8 @@ export function ProductContent() {
 	const [price, setPrice] = useState<{ min: any; max: any }>({ min: 0, max: 0 });
 	const [activeCategory, setActiveCategory] = useState<string | null>(null);
 	const [filterCategories, setFilterCategories] = useState<iEventCategory[]>([]);
+	const [eventTypes, setEventTypes] = useState<iSelectOption[]>([]);
+	const [selectedEventType, setSelectedEventType] = useState<string>("");
 
 	const getCombinedQuery = async () => {
 		const formattedDate = eventDate ? format(new Date(eventDate), "yyyy-MM-dd") : null;
