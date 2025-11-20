@@ -31,6 +31,8 @@ interface ProductFiltersProps {
 	handleFilter: (category: string) => void;
 	isFilterCatsAvailable: boolean;
 	isMobile?: boolean;
+	selectedCategory: string;
+	setSelectedCategory: (value: string) => void;
 }
 
 const ProductFilters: React.FC<ProductFiltersProps> = ({
@@ -53,6 +55,8 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
 	handleFilter,
 	isFilterCatsAvailable,
 	isMobile = false,
+	selectedCategory,
+	setSelectedCategory,
 }) => {
 	const [isExpanded, setIsExpanded] = useState(!isMobile);
 	const [searchTerm, setSearchTerm] = useState("");
