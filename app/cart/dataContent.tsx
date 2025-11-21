@@ -3,8 +3,6 @@ import Box from "@/components/Box";
 import { eProductType } from "@/lib/enums/eProduct";
 import { useCart } from "@/lib/store/cart";
 import { formatRupiah } from "@/lib/utils";
-import axios from "axios";
-import { isValid } from "date-fns";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
@@ -33,22 +31,7 @@ export default function CartContent() {
 		};
 	});
 
-	// State untuk form checkout
-	const [form, setForm] = useState({
-		event_date: "",
-		shipping_location: "",
-		loading_date: "",
-		loading_time: "",
-		customer_name: "",
-		telp: "",
-		variant: "",
-	});
-	const [formError, setFormError] = useState("");
 
-	// State untuk edit quantity dan catatan
-	const [editIndex, setEditIndex] = useState<number | null>(null);
-	const [editQuantity, setEditQuantity] = useState(1);
-	const [editNote, setEditNote] = useState("");
 
 	// State untuk recipient details (untuk ticket dengan quantity > 1)
 	const { updateRecipients } = useCart();
@@ -124,223 +107,7 @@ export default function CartContent() {
 			return isValid;
 		});
 
-	const handleCheckout = async () => {
-		if (!isCartValid) {
-			alert("Data transaksi belum lengkap. Silakan lengkapi di halaman produk.");
-			return;
-		}
-		// Gabungkan field yang bisa berbeda antar produk
-		const variants = cart
-			.map((item: any) => item.variant)
-			.filter((v: string) => v && v.trim() !== "")
-			.join(",");
-		const quantities = cart.map((item: any) => item.quantity).join(",");
-		const notes = cart.map((item: any) => item.note).join("; ");
-		// Ambil field yang sama dari produk pertama
-		const c = cart[0] || {};
 
-		try {
-			// Siapkan payload transaksi ke Strapi
-			const transactionPayload = {
-				products: cart.map((item: any) => ({
-					id: item.product_id,
-					title: item.product_name,
-				})),
-				payment_status: "pending",
-				variant: variants,
-				quantity: quantities,
-				shipping_location: c.shipping_location,
-				event_date: c.event_date,
-				loading_date: c.loading_date,
-				loading_time: c.loading_time,
-				customer_name: c.customer_name,
-				telp: userTelp,
-				note: notes,
-				email: userEmail,
-				event_type: c.user_event_type, // Tambahan field event_type
-				vendor_doc_id: c.vendor_id || "", // Tambahkan vendor_id dari cart item
-			};
-
-			// Push data ke Strapi terlebih dahulu
-			const strapiRes = await axios.post("/api/transaction-proxy", {
-				data: transactionPayload,
-			});
-
-			console.log("Transaction Payload:", JSON.stringify(transactionPayload, null, 2));
-			console.log("Cart data:", cart);
-			console.log("Variants:", variants);
-
-			// const order_id =
-			//   strapiRes.data.data.id ||
-			//   `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-			// if (!strapiRes.data.data.order_id) {
-			//   await axios.put(`/api/transaction-proxy/${strapiRes.data.data.id}`, {
-			//     data: { order_id: order_id },
-			//   });
-			// }
-			const order_id = strapiRes.data.data.id || `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-			// Kirim ke Midtrans untuk pembayaran
-			const response = await axios.post(`/api/payment`, {
-				email: userEmail,
-				items: data,
-				order_id: order_id,
-			});
-			const token = response.data.token;
-
-			window.snap.pay(token, {
-				onSuccess: async function (result: any) {
-					try {
-						sessionStorage.setItem(
-							"transaction_summary",
-							JSON.stringify({
-								orderId: strapiRes.data.data.id,
-								products: cart,
-								total: calculateTotal(),
-								...c,
-								order_id: order_id,
-								email: userEmail,
-							}),
-						);
-						setCart([]);
-						window.location.href = "/cart/success";
-					} catch (err: any) {
-						console.error("Error saving transaction summary:", err);
-						alert("Transaksi berhasil, tapi ada masalah dengan penyimpanan data.");
-					}
-				},
-				onError: function (error: any) {
-					console.error("Error pembayaran Midtrans:", error);
-					alert("Pembayaran gagal di Midtrans. Silakan coba lagi.");
-				},
-				onClose: function () {
-					// User menutup popup pembayaran
-				},
-			});
-		} catch (error) {
-			console.error("Error in handleCheckout:", error);
-			alert("Gagal memproses pembayaran. Silakan coba lagi.");
-		}
-	};
-
-	const checkoutTicket = async () => {
-		// Check recipient validation for ticket products
-		const ticketItem = cart[0];
-		if (ticketItem.product_type === "ticket" && ticketItem.quantity >= 1) {
-			const recipientsValid =
-				ticketItem.recipients &&
-				ticketItem.recipients.length === ticketItem.quantity &&
-				ticketItem.recipients.every(
-					(recipient: any) =>
-						recipient.name &&
-						recipient.identity_type &&
-						recipient.identity_number &&
-						recipient.whatsapp_number &&
-						recipient.email &&
-						/^\d+$/.test(recipient.identity_number) &&
-						/^\d+$/.test(recipient.whatsapp_number),
-				);
-
-			if (!recipientsValid) {
-				alert("Silakan lengkapi semua detail penerima tiket sebelum melanjutkan pembayaran.");
-				return;
-			}
-		}
-
-		try {
-			// Ambil data dari cart untuk ticket
-			const ticketItem = cart[0]; // Ambil item pertama karena untuk ticket biasanya hanya 1 item
-
-			// Generate order_id terlebih dahulu
-			const order_id = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-			// Siapkan payload untuk Strapi transaction-tickets
-			const transactionTicketPayload = {
-				data: {
-					product_name: ticketItem.product_name,
-					price: ticketItem.price.toString(),
-					quantity: ticketItem.quantity.toString(),
-					variant: ticketItem.variant || "",
-					customer_name: ticketItem.customer_name || "",
-					telp: userTelp,
-					total_price: (ticketItem.price * ticketItem.quantity).toString(),
-					payment_status: "pending",
-					event_date: ticketItem.event_date || "",
-					event_type: ticketItem.user_event_type || "",
-					note: ticketItem.note || "",
-					order_id: order_id,
-					customer_mail: userEmail,
-					verification: false,
-					vendor_id: ticketItem.vendor_id || "",
-					// Include recipients data always for tickets
-					recipients: ticketItem.recipients,
-				},
-			};
-
-			try {
-				// Push data ke Strapi transaction-tickets terlebih dahulu
-				const strapiRes = await axios.post("/api/transaction-tickets-proxy", transactionTicketPayload);
-
-				try {
-					// Kirim ke Midtrans untuk pembayaran
-					const response = await axios.post(`/api/payment`, {
-						email: userEmail,
-						items: data,
-						order_id: order_id,
-					});
-
-					const token = response.data.token;
-
-					window.snap.pay(token, {
-						onSuccess: async function (result: any) {
-							try {
-								// Simpan summary transaksi ke sessionStorage
-								sessionStorage.setItem(
-									"transaction_summary",
-									JSON.stringify({
-										orderId: strapiRes.data.data.id,
-										products: cart,
-										total: calculateTotal(),
-										customer_name: ticketItem.customer_name,
-										telp: userTelp,
-										order_id: order_id,
-										email: userEmail,
-										recipients: ticketItem.recipients,
-									}),
-								);
-
-								setCart([]);
-								window.location.href = "/cart/success";
-							} catch (err: any) {
-								console.error("Error saving transaction summary:", err);
-								alert("Transaksi berhasil, tapi ada masalah dengan penyimpanan data.");
-							}
-						},
-						onError: function (error: any) {
-							console.error("Error pembayaran Midtrans:", error);
-							alert("Pembayaran gagal di Midtrans. Silakan coba lagi.");
-						},
-						onClose: function () {
-							// User menutup popup pembayaran
-						},
-					});
-				} catch (paymentError: any) {
-					console.error("Error calling payment API:", paymentError);
-					console.error("Payment error response:", paymentError.response?.data);
-					alert(`Error payment API: ${paymentError.response?.data?.error || paymentError.message}`);
-				}
-			} catch (strapiError: any) {
-				console.error("Error calling Strapi:", strapiError);
-				console.error("Strapi error response:", strapiError.response?.data);
-				alert(`Error Strapi: ${strapiError.response?.data?.error || strapiError.message}`);
-			}
-		} catch (error: any) {
-			console.error("Error in checkoutTicket:", error);
-			console.error("Error response:", error.response?.data);
-			alert(`Gagal memproses pembayaran: ${error.response?.data?.error || error.message}`);
-		}
-	};
 
 	return (
 		<div className="wrapper">
@@ -436,9 +203,6 @@ export default function CartContent() {
 											</div>
 										))}
 									</div>
-									{/* Mobile-first layout: Form takes full width, buttons below on mobile */}
-									<div className="flex flex-col lg:flex-row lg:gap-7 gap-3 mt-2 lg:mt-0">
-										<div className="w-full">
 								</Box>
 							);
 						})}
@@ -500,36 +264,6 @@ export default function CartContent() {
 									</div>
 								)}
 
-								{/* Tombol pembayaran */}
-								{selectedCartItems.length > 0 && (
-									<div className="mb-3">
-										{!isSelectionValid ? (
-											<div className="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg text-sm">
-												<strong>Peringatan:</strong> Tidak dapat mencampur produk tiket dan
-												perlengkapan event dalam satu checkout. Pilih hanya produk dengan tipe
-												yang sama.
-											</div>
-										) : selectedCartItems[0]?.product_type !== "ticket" ? (
-											<div
-												className={`bg-c-green text-white text-center py-3 rounded-lg cursor-pointer ${
-													!isCartValid ? "opacity-50 pointer-events-none" : ""
-												}`}
-												onClick={!isCartValid ? undefined : handleCheckout}
-											>
-												Pembayaran ({selectedCartItems.length} item)
-											</div>
-										) : (
-											<div
-												className={`bg-c-green text-white text-center py-3 rounded-lg cursor-pointer ${
-													!isCartValid ? "opacity-50 pointer-events-none" : ""
-												}`}
-												onClick={!isCartValid ? undefined : checkoutTicket}
-											>
-												Pembayaran ({selectedCartItems.length} item)
-											</div>
-										)}
-									</div>
-								)}
 							</div>
 						</Box>
 					</div>
