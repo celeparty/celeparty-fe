@@ -36,6 +36,11 @@ export default function CartContent() {
 	// State untuk recipient details (untuk ticket dengan quantity > 1)
 	const { updateRecipients } = useCart();
 
+	// State untuk edit quantity dan catatan
+	const [editIndex, setEditIndex] = useState<number | null>(null);
+	const [editQuantity, setEditQuantity] = useState(1);
+	const [editNote, setEditNote] = useState("");
+
 	const { data: session } = useSession();
 	const userTelp = session?.user?.phone || "-";
 	const userEmail = session?.user?.email || "";
@@ -163,45 +168,132 @@ export default function CartContent() {
 										</div>
 									</div>
 
-									<div className="mt-2">
-										{cart.map((item: any, idx: number) => (
-											<div
-												key={item.product_id || idx}
-												className="mb-3 border-b pb-2 last:border-b-0 last:pb-0"
-											>
-												<div className="mb-1">
-													<b>Produk:</b> {item.product_name}
+									{/* Action buttons */}
+									<div className="flex gap-2 mt-4 mb-4">
+										<button
+											className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+											onClick={() => {
+												setEditIndex(index);
+												setEditQuantity(item.quantity);
+												setEditNote(item.note || "");
+											}}
+										>
+											Edit
+										</button>
+										<button
+											className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
+											onClick={() => deleteItem(item.product_id)}
+										>
+											<RiDeleteBin6Fill className="inline mr-1" />
+											Hapus
+										</button>
+									</div>
+
+									{/* Edit Modal */}
+									{editIndex === index && (
+										<div className="mt-4 p-4 border rounded bg-gray-50">
+											<h4 className="font-bold mb-3">Edit Item</h4>
+											<div className="mb-3">
+												<label className="block text-sm font-medium mb-1">Quantity:</label>
+												<div className="flex items-center gap-2">
+													<button
+														className="bg-gray-200 px-2 py-1 rounded"
+														onClick={() => setEditQuantity(Math.max(1, editQuantity - 1))}
+													>
+														<FaMinus />
+													</button>
+													<input
+														type="number"
+														value={editQuantity}
+														onChange={(e) => setEditQuantity(parseInt(e.target.value) || 1)}
+														className="w-16 text-center border rounded px-2 py-1"
+														min="1"
+													/>
+													<button
+														className="bg-gray-200 px-2 py-1 rounded"
+														onClick={() => setEditQuantity(editQuantity + 1)}
+													>
+														<FaPlus />
+													</button>
 												</div>
-												<div className="mb-1">
-													<b>Tanggal Acara:</b> {item.event_date}
-												</div>
-												<div className="mb-1">
-													<b>Nama Pemesan:</b> {item.customer_name || "-"}
-												</div>
-												<div className="mb-1">
-													<b>No. Telepon:</b> {userTelp}
-												</div>
-												<div className="mb-1">
-													<b>Varian Produk:</b> {item.variant || "-"}
-												</div>
-												{item.product_type !== "ticket" && (
-													<>
-														<div className="mb-1">
-															<b>Detail Alamat:</b> {item.shipping_location || "-"}
-														</div>
-														<div className="mb-1">
-															<b>Tanggal Acara:</b> {item.event_date || "-"}
-														</div>
-														<div className="mb-1">
-															<b>Tanggal Loading:</b> {item.loading_date || "-"}
-														</div>
-														<div className="mb-1">
-															<b>Jam Loading:</b> {item.loading_time || "-"}
-														</div>
-													</>
-												)}
 											</div>
-										))}
+											<div className="mb-3">
+												<label className="block text-sm font-medium mb-1">Catatan:</label>
+												<textarea
+													value={editNote}
+													onChange={(e) => setEditNote(e.target.value)}
+													className="w-full border rounded px-3 py-2"
+													rows={3}
+													placeholder="Tambahkan catatan..."
+												/>
+											</div>
+											<div className="flex gap-2">
+												<button
+													className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+													onClick={() => {
+														updateQuantity(item.product_id, editQuantity);
+														updateNote(item.product_id, editNote);
+														setEditIndex(null);
+													}}
+												>
+													Simpan
+												</button>
+												<button
+													className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+													onClick={() => setEditIndex(null)}
+												>
+													Batal
+												</button>
+											</div>
+										</div>
+									)}
+
+									{/* Recipient Details for Tickets */}
+									{item.product_type === "ticket" && item.quantity > 1 && (
+										<div className="mt-4">
+											<h4 className="font-bold mb-2">Detail Penerima Tiket</h4>
+											{item.recipients && item.recipients.length === item.quantity ? (
+												<div className="space-y-2">
+													{item.recipients.map((recipient: any, rIdx: number) => (
+														<div key={rIdx} className="p-3 border rounded bg-blue-50">
+															<div className="font-semibold">Penerima {rIdx + 1}:</div>
+															<div className="text-sm">
+																<div><b>Nama:</b> {recipient.name}</div>
+																<div><b>Tipe Identitas:</b> {recipient.identity_type}</div>
+																<div><b>No. Identitas:</b> {recipient.identity_number}</div>
+																<div><b>WhatsApp:</b> {recipient.whatsapp_number}</div>
+																<div><b>Email:</b> {recipient.email}</div>
+															</div>
+														</div>
+													))}
+												</div>
+											) : (
+												<div className="p-3 border rounded bg-yellow-50 text-yellow-800">
+													<strong>Perhatian:</strong> Detail penerima tiket belum lengkap.
+													Silakan lengkapi di halaman produk.
+												</div>
+											)}
+										</div>
+									)}
+
+									{/* Product Details Summary */}
+									<div className="mt-4 p-3 border rounded bg-gray-50">
+										<h5 className="font-semibold mb-2">Detail Produk</h5>
+										<div className="space-y-1 text-sm">
+											<div><b>Produk:</b> {item.product_name}</div>
+											<div><b>Tanggal Acara:</b> {item.event_date || "-"}</div>
+											<div><b>Nama Pemesan:</b> {item.customer_name || "-"}</div>
+											<div><b>No. Telepon:</b> {userTelp}</div>
+											<div><b>Varian Produk:</b> {item.variant || "-"}</div>
+											<div><b>Catatan:</b> {item.note || "-"}</div>
+											{item.product_type !== "ticket" && (
+												<>
+													<div><b>Detail Alamat:</b> {item.shipping_location || "-"}</div>
+													<div><b>Tanggal Loading:</b> {item.loading_date || "-"}</div>
+													<div><b>Jam Loading:</b> {item.loading_time || "-"}</div>
+												</>
+											)}
+										</div>
 									</div>
 								</Box>
 							);
