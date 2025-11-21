@@ -1,18 +1,15 @@
-# TODO: Fix Product Page Issues
+# TODO: Rollback Cart Page Changes
 
-## Issues to Fix:
+## Tasks
 
-1. **Initial Load Error**: Page shows "terjadi kesalahan" on first visit, requires clicking "coba lagi" to load products.
-2. **Search Functionality**: Search input doesn't filter products properly.
-3. **Filter Functionality**: Ensure all filters (location, date, price, category) work correctly.
-4. **Sort Functionality**: Add sorting options (price, date, popularity, etc.).
+- [ ] Remove navigation to order-summary page from cart dataContent.tsx
+- [ ] Move recipient details form back to cart page
+- [ ] Remove or simplify order-summary page
+- [ ] Restore direct payment flow from cart page
+- [ ] Test the rolled back cart functionality
 
-## Steps:
+## Notes
 
-- [ ] Add retry logic to product query to handle initial load failures
-- [ ] Fix search to use searchInput state in API query instead of URL params
-- [ ] Add sort parameters to API query
-- [ ] Add sort UI components (dropdown/button)
-- [ ] Test all filters work with API
-- [ ] Update query dependencies to include sort
-- [ ] Test the complete functionality
+- Revert cart to have recipient details form directly in cart page
+- Remove the intermediate order-summary step
+- Ensure payment flow works directly from cart

@@ -437,6 +437,8 @@ export default function CartContent() {
 										))}
 									</div>
 									{/* Mobile-first layout: Form takes full width, buttons below on mobile */}
+									<div className="flex flex-col lg:flex-row lg:gap-7 gap-3 mt-2 lg:mt-0">
+										<div className="w-full">
 								</Box>
 							);
 						})}
@@ -498,24 +500,34 @@ export default function CartContent() {
 									</div>
 								)}
 
-								{/* Tombol pembayaran lama (untuk backward compatibility) */}
-								{cart[0]?.product_type !== "ticket" ? (
-									<div
-										className={`bg-c-green text-white text-center py-3 mt-5 rounded-lg cursor-pointer ${
-											!isCartValid ? "opacity-50 pointer-events-none" : ""
-										}`}
-										onClick={!isCartValid ? undefined : handleCheckout}
-									>
-										Pembayaran (Semua Item)
-									</div>
-								) : (
-									<div
-										className={`bg-c-green text-white text-center py-3 mt-5 rounded-lg cursor-pointer ${
-											!isCartValid ? "opacity-50 pointer-events-none" : ""
-										}`}
-										onClick={!isCartValid ? undefined : checkoutTicket}
-									>
-										Pembayaran (Semua Item)
+								{/* Tombol pembayaran */}
+								{selectedCartItems.length > 0 && (
+									<div className="mb-3">
+										{!isSelectionValid ? (
+											<div className="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg text-sm">
+												<strong>Peringatan:</strong> Tidak dapat mencampur produk tiket dan
+												perlengkapan event dalam satu checkout. Pilih hanya produk dengan tipe
+												yang sama.
+											</div>
+										) : selectedCartItems[0]?.product_type !== "ticket" ? (
+											<div
+												className={`bg-c-green text-white text-center py-3 rounded-lg cursor-pointer ${
+													!isCartValid ? "opacity-50 pointer-events-none" : ""
+												}`}
+												onClick={!isCartValid ? undefined : handleCheckout}
+											>
+												Pembayaran ({selectedCartItems.length} item)
+											</div>
+										) : (
+											<div
+												className={`bg-c-green text-white text-center py-3 rounded-lg cursor-pointer ${
+													!isCartValid ? "opacity-50 pointer-events-none" : ""
+												}`}
+												onClick={!isCartValid ? undefined : checkoutTicket}
+											>
+												Pembayaran ({selectedCartItems.length} item)
+											</div>
+										)}
 									</div>
 								)}
 							</div>
