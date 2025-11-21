@@ -58,6 +58,16 @@ export default function UserDashboardLayout({
 								iconWidth={30}
 								iconHeight={30}
 								link="/user/profile/bio"
+							/>
+							<ItemMenu
+								title="Pesanan"
+								icon="/images/icon-orders.svg"
+								iconWidth={30}
+								iconHeight={30}
+								link="/user/profile/orders"
+							/>
+						</div>
+					</Box>
 					<div className="w-full">{children}</div>
 				</div>
 			</Basecontent>
