@@ -360,21 +360,46 @@ export default function OrderSummaryPage() {
 							</div>
 						</Box>
 
-						{/* Customer Information */}
-						<Box>
-							<h2 className="text-xl font-semibold mb-4 text-c-blue">Informasi Pelanggan</h2>
-							<div className="space-y-2">
-								<p>
-									<strong>Nama:</strong> {session?.user?.name || "Tidak tersedia"}
-								</p>
-								<p>
-									<strong>Email:</strong> {session?.user?.email || "Tidak tersedia"}
-								</p>
-								<p>
-									<strong>Telepon:</strong> {session?.user?.phone || "Tidak tersedia"}
-								</p>
-							</div>
-						</Box>
+						{/* Customer Information or Recipients Information */}
+						{selectedCartItems.every((item) => item.product_type === "ticket") ? (
+							<Box>
+								<h2 className="text-xl font-semibold mb-4 text-c-blue">Detail Penerima Tiket</h2>
+								<div className="space-y-4">
+									{selectedCartItems.map((item, itemIndex) => (
+										<div key={itemIndex} className="border rounded-lg p-4">
+											<h3 className="font-semibold text-c-blue mb-3">
+												{item.product_name} - {item.quantity} Tiket
+											</h3>
+											<div className="space-y-3">
+												{item.recipients && item.recipients.map((recipient: any, recipientIndex: number) => (
+													<div key={recipientIndex} className="bg-gray-50 p-3 rounded border">
+														<div className="flex items-center gap-2 mb-2">
+															<div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+																{recipientIndex + 1}
+															</div>
+															<h4 className="font-medium">Tiket {recipientIndex + 1}</h4>
+														</div>
+														<div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+															<p><strong>Nama:</strong> {recipient.name}</p>
+															<p><strong>Email:</strong> {recipient.email}</p>
+															<p><strong>No. WhatsApp:</strong> {recipient.whatsapp_number}</p>
+															<p><strong>Tipe Identitas:</strong> {recipient.identity_type}</p>
+															<p className="md:col-span-2"><strong>No. Identitas:</strong> {recipient.identity_number}</p>
+														</div>
+													</div>
+												))}
+											</div>
+										</div>
+									))}
+								</div>
+							</Box>
+						) : (
+							<Box>
+								<h2 className="text-xl font-semibold mb-4 text-c-blue">Informasi Pelanggan</h2>
+								<div className="space-y-2">
+									<p>
+										<strong>Nama:</strong> {session?.user?.name || "Tidak tersedia"}
+									</p>
 					</div>
 
 					{/* Order Summary */}
