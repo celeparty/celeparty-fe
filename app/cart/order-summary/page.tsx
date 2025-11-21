@@ -318,6 +318,12 @@ export default function OrderSummaryPage() {
 				<div className="grid lg:grid-cols-3 gap-6">
 					{/* Order Items */}
 					<div className="lg:col-span-2">
+			<div className="max-w-4xl mx-auto">
+				<h1 className="text-3xl font-bold mb-6 text-c-blue">Ringkasan Pesanan</h1>
+
+				<div className="grid lg:grid-cols-3 gap-6">
+					{/* Order Items */}
+					<div className="lg:col-span-2">
 						<Box className="mb-6">
 							<h2 className="text-xl font-semibold mb-4 text-c-blue">Item yang Dipilih</h2>
 							<div className="space-y-4">
@@ -409,6 +415,8 @@ export default function OrderSummaryPage() {
 								</div>
 							</Box>
 						)}
+
+					</div>
 
 					{/* Order Summary */}
 					<div className="lg:col-span-1">
