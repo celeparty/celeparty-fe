@@ -361,7 +361,7 @@ export default function OrderSummaryPage() {
 						</Box>
 
 						{/* Customer Information or Recipients Information */}
-						{selectedCartItems.every((item) => item.product_type === "ticket") ? (
+						{selectedCartItems.some((item) => item.recipients && item.recipients.length > 0) ? (
 							<Box>
 								<h2 className="text-xl font-semibold mb-4 text-c-blue">Detail Penerima Tiket</h2>
 								<div className="space-y-4">
