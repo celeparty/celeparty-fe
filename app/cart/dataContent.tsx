@@ -248,31 +248,125 @@ export default function CartContent() {
 										</div>
 									)}
 
-									{/* Recipient Details for Tickets */}
-									{item.product_type === "ticket" && item.quantity > 1 && (
-										<div className="mt-4">
-											<h4 className="font-bold mb-2">Detail Penerima Tiket</h4>
-											{item.recipients && item.recipients.length === item.quantity ? (
-												<div className="space-y-2">
-													{item.recipients.map((recipient: any, rIdx: number) => (
-														<div key={rIdx} className="p-3 border rounded bg-blue-50">
-															<div className="font-semibold">Penerima {rIdx + 1}:</div>
-															<div className="text-sm">
-																<div><b>Nama:</b> {recipient.name}</div>
-																<div><b>Tipe Identitas:</b> {recipient.identity_type}</div>
-																<div><b>No. Identitas:</b> {recipient.identity_number}</div>
-																<div><b>WhatsApp:</b> {recipient.whatsapp_number}</div>
-																<div><b>Email:</b> {recipient.email}</div>
+									{/* Recipient Details Form for Tickets */}
+									{item.product_type === "ticket" && item.quantity > 0 && (
+										<div className="mt-4 p-4 border rounded-lg bg-gray-50">
+											<h4 className="font-semibold mb-3 text-c-blue">Detail Penerima Tiket</h4>
+											<div className="space-y-4">
+												{Array.from({ length: item.quantity }, (_, recipientIndex) => {
+													const recipient = item.recipients?.[recipientIndex] || {};
+													return (
+														<div key={recipientIndex} className="border rounded-lg p-3 bg-white">
+															<div className="flex items-center gap-2 mb-3">
+																<div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+																	{recipientIndex + 1}
+																</div>
+																<h5 className="font-medium">Tiket {recipientIndex + 1}</h5>
+															</div>
+															<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+																<div>
+																	<label className="block text-sm font-medium text-gray-700 mb-1">
+																		Nama Lengkap *
+																	</label>
+																	<input
+																		type="text"
+																		value={recipient.name || ""}
+																		onChange={(e) => {
+																			const newRecipients = [...(item.recipients || [])];
+																			if (!newRecipients[recipientIndex]) {
+																				newRecipients[recipientIndex] = {};
+																			}
+																			newRecipients[recipientIndex].name = e.target.value;
+																			updateRecipients(item.product_id, newRecipients);
+																		}}
+																		className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+																		placeholder="Masukkan nama lengkap"
+																	/>
+																</div>
+																<div>
+																	<label className="block text-sm font-medium text-gray-700 mb-1">
+																		Email *
+																	</label>
+																	<input
+																		type="email"
+																		value={recipient.email || ""}
+																		onChange={(e) => {
+																			const newRecipients = [...(item.recipients || [])];
+																			if (!newRecipients[recipientIndex]) {
+																				newRecipients[recipientIndex] = {};
+																			}
+																			newRecipients[recipientIndex].email = e.target.value;
+																			updateRecipients(item.product_id, newRecipients);
+																		}}
+																		className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+																		placeholder="Masukkan email"
+																	/>
+																</div>
+																<div>
+																	<label className="block text-sm font-medium text-gray-700 mb-1">
+																		No. WhatsApp *
+																	</label>
+																	<input
+																		type="tel"
+																		value={recipient.whatsapp_number || ""}
+																		onChange={(e) => {
+																			const newRecipients = [...(item.recipients || [])];
+																			if (!newRecipients[recipientIndex]) {
+																				newRecipients[recipientIndex] = {};
+																			}
+																			newRecipients[recipientIndex].whatsapp_number = e.target.value;
+																			updateRecipients(item.product_id, newRecipients);
+																		}}
+																		className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+																		placeholder="08123456789"
+																	/>
+																</div>
+																<div>
+																	<label className="block text-sm font-medium text-gray-700 mb-1">
+																		Tipe Identitas *
+																	</label>
+																	<select
+																		value={recipient.identity_type || ""}
+																		onChange={(e) => {
+																			const newRecipients = [...(item.recipients || [])];
+																			if (!newRecipients[recipientIndex]) {
+																				newRecipients[recipientIndex] = {};
+																			}
+																			newRecipients[recipientIndex].identity_type = e.target.value;
+																			updateRecipients(item.product_id, newRecipients);
+																		}}
+																		className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+																	>
+																		<option value="">Pilih tipe identitas</option>
+																		<option value="KTP">KTP</option>
+																		<option value="SIM">SIM</option>
+																		<option value="Passport">Passport</option>
+																	</select>
+																</div>
+																<div className="md:col-span-2">
+																	<label className="block text-sm font-medium text-gray-700 mb-1">
+																		No. Identitas *
+																	</label>
+																	<input
+																		type="text"
+																		value={recipient.identity_number || ""}
+																		onChange={(e) => {
+																			const newRecipients = [...(item.recipients || [])];
+																			if (!newRecipients[recipientIndex]) {
+																				newRecipients[recipientIndex] = {};
+																			}
+																			newRecipients[recipientIndex].identity_number = e.target.value;
+																			updateRecipients(item.product_id, newRecipients);
+																		}}
+																		className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+																		placeholder="Masukkan nomor identitas"
+																	/>
+																</div>
 															</div>
 														</div>
-													))}
-												</div>
-											) : (
-												<div className="p-3 border rounded bg-yellow-50 text-yellow-800">
-													<strong>Perhatian:</strong> Detail penerima tiket belum lengkap.
-													Silakan lengkapi di halaman produk.
-												</div>
-											)}
+													);
+												})}
+											</div>
 										</div>
 									)}
 
