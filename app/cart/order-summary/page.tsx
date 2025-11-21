@@ -400,7 +400,15 @@ export default function OrderSummaryPage() {
 									<p>
 										<strong>Nama:</strong> {session?.user?.name || "Tidak tersedia"}
 									</p>
-					</div>
+									<p>
+										<strong>Email:</strong> {session?.user?.email || "Tidak tersedia"}
+									</p>
+									<p>
+										<strong>Telepon:</strong> {session?.user?.phone || "Tidak tersedia"}
+									</p>
+								</div>
+							</Box>
+						)}
 
 					{/* Order Summary */}
 					<div className="lg:col-span-1">
