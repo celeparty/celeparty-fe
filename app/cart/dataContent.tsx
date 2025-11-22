@@ -427,16 +427,22 @@ export default function CartContent() {
 									</div>
 								</div>
 
-								{/* Continue Checkout Button */}
-								{selectedCartItems.length > 0 && (
+								{/* Continue to Order Summary Button */}
+								{cart.length > 0 && (
 									<div className="mb-3">
-										{!isSelectionValid ? (
-											<div className="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg text-sm">
+										{selectedCartItems.length === 0 ? (
+											<div className="bg-yellow-100 border border-yellow-300 text-yellow-700 px-4 py-3 rounded-lg text-sm mb-3">
+												<strong>Perhatian:</strong> Silakan pilih item yang ingin dibeli dengan mencentang checkbox di atas.
+											</div>
+										) : !isSelectionValid ? (
+											<div className="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg text-sm mb-3">
 												<strong>Peringatan:</strong> Tidak dapat mencampur produk tiket dan
 												perlengkapan event dalam satu checkout. Pilih hanya produk dengan tipe
 												yang sama.
 											</div>
-										) : (
+										) : null}
+
+										{selectedCartItems.length > 0 && isSelectionValid && (
 											<button
 												className="w-full bg-blue-600 text-white text-center py-3 rounded-lg hover:bg-blue-700 transition-colors"
 												onClick={() => {
@@ -444,7 +450,7 @@ export default function CartContent() {
 													window.location.href = "/cart/order-summary";
 												}}
 											>
-												Lanjutkan Checkout ({selectedCartItems.length} item)
+												Lanjut ke Order Summary ({selectedCartItems.length} item)
 											</button>
 										)}
 									</div>
