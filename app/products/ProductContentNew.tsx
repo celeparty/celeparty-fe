@@ -63,7 +63,7 @@ export function ProductContentNew() {
 		const productsQuery = useQuery({
 			queryKey: ["products", getType, getSearch, getCategory, selectedCity, selectedCategory, priceMin, priceMax, currentPage],
 			queryFn: async () => {
-				let queryString = `products?populate=*&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}`;
+				let queryString = `populate=*&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}`;
 
 				// Added filter to get only approved state products
 				queryString += `&filters[state][$eq]=approved`;
