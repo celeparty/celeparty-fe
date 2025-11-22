@@ -168,6 +168,26 @@ export default function CartContent() {
 										</div>
 									</div>
 
+									{/* Product Details Summary - Moved below image */}
+									<div className="mt-4 p-3 border rounded bg-gray-50">
+										<h5 className="font-semibold mb-2">Detail Produk</h5>
+										<div className="space-y-1 text-sm">
+											<div><b>Produk:</b> {item.product_name}</div>
+											<div><b>Tanggal Acara:</b> {item.event_date || "-"}</div>
+											<div><b>Nama Pemesan:</b> {item.customer_name || "-"}</div>
+											<div><b>No. Telepon:</b> {userTelp}</div>
+											<div><b>Varian Produk:</b> {item.variant || "-"}</div>
+											<div><b>Catatan:</b> {item.note || "-"}</div>
+											{item.product_type !== "ticket" && (
+												<>
+													<div><b>Detail Alamat:</b> {item.shipping_location || "-"}</div>
+													<div><b>Tanggal Loading:</b> {item.loading_date || "-"}</div>
+													<div><b>Jam Loading:</b> {item.loading_time || "-"}</div>
+												</>
+											)}
+										</div>
+									</div>
+
 									{/* Action buttons */}
 									<div className="flex gap-2 mt-4 mb-4">
 										<button
@@ -255,13 +275,27 @@ export default function CartContent() {
 											<div className="space-y-4">
 												{Array.from({ length: item.quantity }, (_, recipientIndex) => {
 													const recipient = item.recipients?.[recipientIndex] || {};
+													const isValidRecipient =
+														recipient.name &&
+														recipient.email &&
+														recipient.whatsapp_number &&
+														recipient.identity_type &&
+														recipient.identity_number &&
+														/^\d+$/.test(recipient.identity_number) &&
+														/^\d+$/.test(recipient.whatsapp_number);
+
 													return (
 														<div key={recipientIndex} className="border rounded-lg p-3 bg-white">
 															<div className="flex items-center gap-2 mb-3">
-																<div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+																<div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${
+																	isValidRecipient ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+																}`}>
 																	{recipientIndex + 1}
 																</div>
 																<h5 className="font-medium">Tiket {recipientIndex + 1}</h5>
+																{!isValidRecipient && (
+																	<span className="text-red-500 text-sm ml-auto">Belum lengkap</span>
+																)}
 															</div>
 															<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 																<div>
@@ -279,7 +313,9 @@ export default function CartContent() {
 																			newRecipients[recipientIndex].name = e.target.value;
 																			updateRecipients(item.product_id, newRecipients);
 																		}}
-																		className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+																		className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+																			recipient.name ? 'border-gray-300 focus:ring-blue-500' : 'border-red-300 focus:ring-red-500'
+																		}`}
 																		placeholder="Masukkan nama lengkap"
 																	/>
 																</div>
@@ -298,7 +334,9 @@ export default function CartContent() {
 																			newRecipients[recipientIndex].email = e.target.value;
 																			updateRecipients(item.product_id, newRecipients);
 																		}}
-																		className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+																		className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+																			recipient.email ? 'border-gray-300 focus:ring-blue-500' : 'border-red-300 focus:ring-red-500'
+																		}`}
 																		placeholder="Masukkan email"
 																	/>
 																</div>
@@ -317,7 +355,9 @@ export default function CartContent() {
 																			newRecipients[recipientIndex].whatsapp_number = e.target.value;
 																			updateRecipients(item.product_id, newRecipients);
 																		}}
-																		className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+																		className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+																			recipient.whatsapp_number && /^\d+$/.test(recipient.whatsapp_number) ? 'border-gray-300 focus:ring-blue-500' : 'border-red-300 focus:ring-red-500'
+																		}`}
 																		placeholder="08123456789"
 																	/>
 																</div>
@@ -335,7 +375,9 @@ export default function CartContent() {
 																			newRecipients[recipientIndex].identity_type = e.target.value;
 																			updateRecipients(item.product_id, newRecipients);
 																		}}
-																		className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+																		className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+																			recipient.identity_type ? 'border-gray-300 focus:ring-blue-500' : 'border-red-300 focus:ring-red-500'
+																		}`}
 																	>
 																		<option value="">Pilih tipe identitas</option>
 																		<option value="KTP">KTP</option>
@@ -358,7 +400,9 @@ export default function CartContent() {
 																			newRecipients[recipientIndex].identity_number = e.target.value;
 																			updateRecipients(item.product_id, newRecipients);
 																		}}
-																		className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+																		className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+																			recipient.identity_number && /^\d+$/.test(recipient.identity_number) ? 'border-gray-300 focus:ring-blue-500' : 'border-red-300 focus:ring-red-500'
+																		}`}
 																		placeholder="Masukkan nomor identitas"
 																	/>
 																</div>
@@ -370,25 +414,7 @@ export default function CartContent() {
 										</div>
 									)}
 
-									{/* Product Details Summary */}
-									<div className="mt-4 p-3 border rounded bg-gray-50">
-										<h5 className="font-semibold mb-2">Detail Produk</h5>
-										<div className="space-y-1 text-sm">
-											<div><b>Produk:</b> {item.product_name}</div>
-											<div><b>Tanggal Acara:</b> {item.event_date || "-"}</div>
-											<div><b>Nama Pemesan:</b> {item.customer_name || "-"}</div>
-											<div><b>No. Telepon:</b> {userTelp}</div>
-											<div><b>Varian Produk:</b> {item.variant || "-"}</div>
-											<div><b>Catatan:</b> {item.note || "-"}</div>
-											{item.product_type !== "ticket" && (
-												<>
-													<div><b>Detail Alamat:</b> {item.shipping_location || "-"}</div>
-													<div><b>Tanggal Loading:</b> {item.loading_date || "-"}</div>
-													<div><b>Jam Loading:</b> {item.loading_time || "-"}</div>
-												</>
-											)}
-										</div>
-									</div>
+
 								</Box>
 							);
 						})}
@@ -442,7 +468,7 @@ export default function CartContent() {
 											</div>
 										) : null}
 
-										{selectedCartItems.length > 0 && isSelectionValid && (
+										{selectedCartItems.length > 0 && isSelectionValid && isCartValid ? (
 											<button
 												className="w-full bg-blue-600 text-white text-center py-3 rounded-lg hover:bg-blue-700 transition-colors"
 												onClick={() => {
@@ -452,7 +478,11 @@ export default function CartContent() {
 											>
 												Lanjut ke Order Summary ({selectedCartItems.length} item)
 											</button>
-										)}
+										) : selectedCartItems.length > 0 && isSelectionValid && !isCartValid ? (
+											<div className="w-full bg-gray-400 text-white text-center py-3 rounded-lg cursor-not-allowed">
+												Lengkapi Detail Penerima Tiket Terlebih Dahulu
+											</div>
+										) : null}
 									</div>
 								)}
 
