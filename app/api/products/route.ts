@@ -19,6 +19,11 @@ export async function GET(request: NextRequest) {
 			},
 		});
 		console.log(`Backend response status: ${response.status}`);
+		console.log(`Backend response data keys: ${Object.keys(response.data)}`);
+		if (!response.data || !response.data.data || !Array.isArray(response.data.data)) {
+			console.error("Invalid product data format received:", response.data);
+			return NextResponse.json({ success: false, error: "Invalid product data format from backend" }, { status: 500 });
+		}
 		return NextResponse.json(response.data);
 	} catch (error: any) {
 		console.error("Error fetching products:", error.response?.data || error.message || error);
