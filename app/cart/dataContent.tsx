@@ -100,6 +100,7 @@ export default function CartContent() {
 							recipient.identity_number &&
 							recipient.whatsapp_number &&
 							recipient.email &&
+							/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient.email) &&
 							/^\d+$/.test(recipient.identity_number) &&
 							/^\d+$/.test(recipient.whatsapp_number),
 					);
@@ -278,6 +279,7 @@ export default function CartContent() {
 													const isValidRecipient =
 														recipient.name &&
 														recipient.email &&
+														/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient.email) &&
 														recipient.whatsapp_number &&
 														recipient.identity_type &&
 														recipient.identity_number &&
@@ -335,7 +337,7 @@ export default function CartContent() {
 																			updateRecipients(item.product_id, newRecipients);
 																		}}
 																		className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-																			recipient.email ? 'border-gray-300 focus:ring-blue-500' : 'border-red-300 focus:ring-red-500'
+																			recipient.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient.email) ? 'border-gray-300 focus:ring-blue-500' : 'border-red-300 focus:ring-red-500'
 																		}`}
 																		placeholder="Masukkan email"
 																	/>
