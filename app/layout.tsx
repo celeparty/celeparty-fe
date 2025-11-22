@@ -1,3 +1,5 @@
+"use client";
+
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import SessionWrapper from "@/components/SessionWrapper";
@@ -6,7 +8,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
 import { Inter, Quicksand } from "next/font/google";
 import Script from "next/script";
-import "@/public/styles/globals.css";
+import "@/styles/globals.css";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
@@ -22,16 +24,12 @@ const quick = Quicksand({
 export const metadata = {
 	title: {
 		default: "Celeparty",
-		template: "%s | Celeparty", // semua halaman pakai format ini
+		template: "%s | Celeparty",
 	},
 	description: "Event and ticketing providers",
 };
 
-export default function RootLayout({
-	children,
-}: {
-	children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
 	const [queryClient] = useState(() => new QueryClient());
 	const isProduction = process.env.PRODUCTION_MODE === "true";
 	const midtransUrl = isProduction
@@ -46,7 +44,6 @@ export default function RootLayout({
 						<Script src={midtransUrl} data-client-key={process.env.NEXT_PUBLIC_CLIENT_KEY} />
 					</head>
 					<body className="font-inter antialiased bg-c-gray-50 min-h-screen" suppressHydrationWarning={true}>
-						{/* Skip to main content link */}
 						<a
 							href="#main-content"
 							className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-c-blue text-white px-4 py-2 rounded-md z-50 focus:outline-none focus:ring-2 focus:ring-c-blue-light"
@@ -60,9 +57,7 @@ export default function RootLayout({
 						</header>
 
 						<main id="main-content" className="flex-1" role="main">
-							<ErrorBoundary>
-								{children}
-							</ErrorBoundary>
+							<ErrorBoundary>{children}</ErrorBoundary>
 						</main>
 
 						<footer role="contentinfo">
