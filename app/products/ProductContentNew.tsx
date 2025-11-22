@@ -59,29 +59,32 @@ export function ProductContentNew() {
 		staleTime: 5 * 60 * 1000,
 	});
 
-	// Fetch products with filters
-	const productsQuery = useQuery({
-		queryKey: ["products", getType, getSearch, getCategory, selectedCity, selectedCategory, priceMin, priceMax, currentPage],
-		queryFn: async () => {
-			let queryString = `products?populate=*&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}`;
+		// Fetch products with filters
+		const productsQuery = useQuery({
+			queryKey: ["products", getType, getSearch, getCategory, selectedCity, selectedCategory, priceMin, priceMax, currentPage],
+			queryFn: async () => {
+				let queryString = `products?populate=*&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}`;
 
-			if (getType) queryString += `&filters[user_event_type][name][$eq]=${encodeURIComponent(getType)}`;
-			if (getSearch) {
-				const searchFields = ['title', 'description', 'category.title', 'region', 'kabupaten', 'lokasi_event', 'kota_event'];
-				const orConditions = searchFields.map(field => `filters[${field}][$containsi]=${encodeURIComponent(getSearch)}`).join('&');
-				queryString += `&${orConditions}`;
-			}
-			if (getCategory || selectedCategory) {
-				const cat = selectedCategory || getCategory;
-				queryString += `&filters[category][title][$eq]=${encodeURIComponent(cat)}`;
-			}
-			if (selectedCity) queryString += `&filters[region][$eq]=${encodeURIComponent(selectedCity)}`;
-			if (priceMin) queryString += `&filters[main_price][$gte]=${priceMin.replace(/\D/g, '')}`;
-			if (priceMax) queryString += `&filters[main_price][$lte]=${priceMax.replace(/\D/g, '')}`;
+				// Added filter to get only approved state products
+				queryString += `&filters[state][$eq]=approved`;
 
-			return axiosData("GET", `/api/${queryString}`);
-		},
-	});
+				if (getType) queryString += `&filters[user_event_type][name][$eq]=${encodeURIComponent(getType)}`;
+				if (getSearch) {
+					const searchFields = ['title', 'description', 'category.title', 'region', 'kabupaten', 'lokasi_event', 'kota_event'];
+					const orConditions = searchFields.map(field => `filters[${field}][$containsi]=${encodeURIComponent(getSearch)}`).join('&');
+					queryString += `&${orConditions}`;
+				}
+				if (getCategory || selectedCategory) {
+					const cat = selectedCategory || getCategory;
+					queryString += `&filters[category][title][$eq]=${encodeURIComponent(cat)}`;
+				}
+				if (selectedCity) queryString += `&filters[region][$eq]=${encodeURIComponent(selectedCity)}`;
+				if (priceMin) queryString += `&filters[main_price][$gte]=${priceMin.replace(/\D/g, '')}`;
+				if (priceMax) queryString += `&filters[main_price][$lte]=${priceMax.replace(/\D/g, '')}`;
+
+				return axiosData("GET", `/api/${queryString}`);
+			},
+		});
 
 	// Set cities and categories from queries
 	useEffect(() => {
