@@ -3,6 +3,16 @@ import Box from "@/components/Box";
 import { eProductType } from "@/lib/enums/eProduct";
 import { useCart } from "@/lib/store/cart";
 import { formatRupiah } from "@/lib/utils";
+
+function formatDateToDDMMYYYY(dateString: string | undefined) {
+	if (!dateString) return "-";
+	const date = new Date(dateString);
+	if (isNaN(date.getTime())) return "-";
+	const day = String(date.getDate()).padStart(2, "0");
+	const month = String(date.getMonth() + 1).padStart(2, "0");
+	const year = date.getFullYear();
+	return `${day}-${month}-${year}`;
+}
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
@@ -193,10 +203,10 @@ export default function CartContent() {
 											<div><b>Varian Produk:</b> {item.variant || "-"}</div>
 											{item.product_type === "ticket" && (
 												<>
-													<div><b>Tanggal Acara:</b> {item.event_date || "-"}</div>
-													<div><b>Nama Pemesan:</b> {item.customer_name || "-"}</div>
-													<div><b>No. Telepon:</b> {userTelp}</div>
-													<div><b>Catatan:</b> {item.note || "-"}</div>
+											<div><b>Tanggal Acara:</b> {formatDateToDDMMYYYY(item.event_date)}</div>
+											<div><b>Nama Pemesan:</b> {item.customer_name || "-"}</div>
+											<div><b>No. Telepon:</b> {item.telp || "-"}</div>
+											<div><b>Catatan:</b> {item.note || "-"}</div>
 												</>
 											)}
 
@@ -215,6 +225,19 @@ export default function CartContent() {
 					item.customer_name ? "border-gray-300 focus:ring-blue-500" : "border-red-300 focus:ring-red-500"
 				}`}
 				placeholder="Masukkan nama pemesan"
+			/>
+		</div>
+
+		<div className="sm:col-span-1">
+			<label className="block mb-1 font-medium text-gray-700">No Whatsapp Pemesan *</label>
+			<input
+				type="tel"
+				value={item.telp || ""}
+				onChange={(e) => updateProductDetails(item.product_id, { telp: e.target.value })}
+				className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+					item.telp ? "border-gray-300 focus:ring-blue-500" : "border-red-300 focus:ring-red-500"
+				}`}
+				placeholder="Masukkan no Whatsapp"
 			/>
 		</div>
 
@@ -253,6 +276,7 @@ export default function CartContent() {
 					item.loading_date ? "border-gray-300 focus:ring-blue-500" : "border-red-300 focus:ring-red-500"
 				}`}
 			/>
+			<div className="mt-1 text-sm text-gray-600">{formatDateToDDMMYYYY(item.loading_date)}</div>
 		</div>
 
 		<div className="sm:col-span-1">
