@@ -8,7 +8,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
 import { Inter, Quicksand } from "next/font/google";
 import Script from "next/script";
-import "@/styles/globals.css";
+import "@/public/styles/globals.css";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
