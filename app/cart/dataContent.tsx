@@ -108,10 +108,16 @@ export default function CartContent() {
 			}
 
 			// Jika produk bukan ticket, perlu semua field
-			const isValid =
-				basicValidation && item.event_date && item.shipping_location && item.loading_date && item.loading_time;
-			return isValid;
-		});
+		const isValid =
+			basicValidation &&
+			item.telp &&
+			item.event_date &&
+			item.shipping_location &&
+			item.loading_date &&
+			item.loading_time &&
+			item.note;
+		return isValid;
+	});
 
 
 
@@ -184,18 +190,15 @@ export default function CartContent() {
 										<h5 className="font-semibold mb-2">Detail Produk</h5>
 										<div className="space-y-1 text-sm">
 											<div><b>Produk:</b> {item.product_name}</div>
-											<div><b>Tanggal Acara:</b> {item.event_date || "-"}</div>
-											<div><b>Nama Pemesan:</b> {item.customer_name || "-"}</div>
-											<div><b>No. Telepon:</b> {userTelp}</div>
 											<div><b>Varian Produk:</b> {item.variant || "-"}</div>
-											<div><b>Catatan:</b> {item.note || "-"}</div>
-{item.product_type !== "ticket" && (
-	<>
-		<div><b>Detail Alamat:</b> {item.shipping_location || "-"}</div>
-		<div><b>Tanggal Loading:</b> {item.loading_date || "-"}</div>
-		<div><b>Jam Loading:</b> {item.loading_time || "-"}</div>
-	</>
-)}
+											{item.product_type === "ticket" && (
+												<>
+													<div><b>Tanggal Acara:</b> {item.event_date || "-"}</div>
+													<div><b>Nama Pemesan:</b> {item.customer_name || "-"}</div>
+													<div><b>No. Telepon:</b> {userTelp}</div>
+													<div><b>Catatan:</b> {item.note || "-"}</div>
+												</>
+											)}
 
 
 {item.product_type !== "ticket" && (
