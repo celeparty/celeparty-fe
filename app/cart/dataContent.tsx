@@ -17,7 +17,7 @@ declare global {
 }
 
 export default function CartContent() {
-	const { cart, setCart, updateQuantity, updateNote, deleteItem, calculateTotal }: any = useCart();
+	const { cart, setCart, updateQuantity, updateNote, deleteItem, calculateTotal, updateProductDetails }: any = useCart();
 	const [value, setValue] = useState(0);
 	const data = cart.map((item: any) => {
 		return {
