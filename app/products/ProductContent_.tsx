@@ -269,7 +269,7 @@ export function ProductContent() {
                     value={minPrice}
                     onChange={(e) => {
                       const val = e.target.value.replace(/[^0-9]/g, "");
-                      setMinPrice(val ? formatRupiah(val) : "");
+                      setMinPrice(val ? formatRupiah(Number(val)) : "");
                     }}
                     className="flex-1 rounded-md px-3 py-2 text-black"
                   />
@@ -279,7 +279,7 @@ export function ProductContent() {
                     value={maxPrice}
                     onChange={(e) => {
                       const val = e.target.value.replace(/[^0-9]/g, "");
-                      setMaxPrice(val ? formatRupiah(val) : "");
+                      setMaxPrice(val ? formatRupiah(Number(val)) : "");
                     }}
                     className="flex-1 rounded-md px-3 py-2 text-black"
                   />
