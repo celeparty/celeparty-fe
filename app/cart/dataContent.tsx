@@ -189,10 +189,10 @@ export default function CartContent() {
 
 
 {item.product_type !== "ticket" && (
-	<div className="mt-4 p-4 border rounded-lg bg-gray-50 space-y-4">
-		<h4 className="font-semibold mb-3 text-c-blue">Detail Pemesanan</h4>
+	<div className="mt-4 p-4 border rounded-lg bg-gray-50 space-y-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+		<h4 className="col-span-full font-semibold mb-3 text-c-blue">Detail Pemesanan</h4>
 
-		<div>
+		<div className="sm:col-span-1">
 			<label className="block mb-1 font-medium text-gray-700">Nama Pemesan *</label>
 			<input
 				type="text"
@@ -217,7 +217,7 @@ export default function CartContent() {
 			/>
 		</div>
 
-		<div>
+		<div className="sm:col-span-1">
 			<label className="block mb-1 font-medium text-gray-700">Detail Alamat *</label>
 			<input
 				type="text"
@@ -230,7 +230,7 @@ export default function CartContent() {
 			/>
 		</div>
 
-		<div>
+		<div className="sm:col-span-1">
 			<label className="block mb-1 font-medium text-gray-700">Tanggal Loading *</label>
 			<input
 				type="date"
@@ -242,7 +242,7 @@ export default function CartContent() {
 			/>
 		</div>
 
-		<div>
+		<div className="sm:col-span-1">
 			<label className="block mb-1 font-medium text-gray-700">Jam Loading *</label>
 			<input
 				type="time"
@@ -251,6 +251,19 @@ export default function CartContent() {
 				className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
 					item.loading_time ? "border-gray-300 focus:ring-blue-500" : "border-red-300 focus:ring-red-500"
 				}`}
+			/>
+		</div>
+
+		<div className="sm:col-span-1">
+			<label className="block mb-1 font-medium text-gray-700">Catatan *</label>
+			<textarea
+				value={item.note || ""}
+				onChange={(e) => updateProductDetails(item.product_id, { note: e.target.value })}
+				className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+					item.note ? "border-gray-300 focus:ring-blue-500" : "border-red-300 focus:ring-red-500"
+				}`}
+				placeholder="Masukkan catatan"
+				rows={3}
 			/>
 		</div>
 	</div>
