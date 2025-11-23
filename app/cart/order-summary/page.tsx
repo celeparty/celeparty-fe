@@ -393,6 +393,28 @@ export default function OrderSummaryPage() {
 									))}
 								</div>
 							</Box>
+						) : selectedCartItems.some((item) => item.product_type !== "ticket") ? (
+							<Box>
+								<h2 className="text-xl font-semibold mb-4 text-c-blue">Detail Pemesanan Perlengkapan</h2>
+								<div className="space-y-4">
+									{selectedCartItems
+										.filter((item) => item.product_type !== "ticket")
+										.map((item, index) => (
+											<div key={index} className="border rounded-lg p-4">
+												<h3 className="font-semibold text-c-blue mb-3">{item.product_name}</h3>
+												<div className="space-y-2 text-sm">
+													<p><strong>Nama Pemesan:</strong> {item.customer_name || "-"}</p>
+													<p><strong>No WhatsApp:</strong> {item.telp || "-"}</p>
+													<p><strong>Tanggal Acara:</strong> {item.event_date || "-"}</p>
+													<p><strong>Detail Alamat:</strong> {item.shipping_location || "-"}</p>
+													<p><strong>Tanggal Loading:</strong> {item.loading_date || "-"}</p>
+													<p><strong>Jam Loading:</strong> {item.loading_time || "-"}</p>
+													<p><strong>Catatan:</strong> {item.note || "-"}</p>
+												</div>
+											</div>
+										))}
+								</div>
+							</Box>
 						) : (
 							<Box>
 								<h2 className="text-xl font-semibold mb-4 text-c-blue">Informasi Pelanggan</h2>

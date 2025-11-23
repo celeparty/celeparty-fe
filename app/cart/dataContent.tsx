@@ -155,8 +155,18 @@ export default function CartContent() {
 											<div className="flex gap-1">
 												<div className="font-bold">Price: </div> {formatRupiah(item.price)}
 											</div>
-											<div className="flex gap-1">
-												<div className="font-bold">Quantity: </div> {item.quantity}
+											<div className="flex gap-1 items-center">
+												<div className="font-bold">Quantity: </div>
+												<input
+													type="number"
+													min={1}
+													value={item.quantity}
+													onChange={(e) => {
+														const newQuantity = Math.max(1, Number(e.target.value));
+														updateQuantity(item.product_id, newQuantity);
+													}}
+													className="w-16 px-2 py-1 border rounded text-center"
+												/>
 											</div>
 											<div className="flex gap-1">
 												<div className="font-bold">Type: </div>
