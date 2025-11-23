@@ -1,3 +1,4 @@
+
 "use client";
 
 import ErrorNetwork from "@/components/ErrorNetwork";
@@ -9,6 +10,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Download, Eye } from "lucide-react";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
+import { saveAs } from "file-saver";
+import XLSX from "xlsx";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 interface iTicketSummary {
 	id: number;
@@ -100,8 +105,60 @@ export const TicketDashboard: React.FC = () => {
 			}) || [];
 
 		const handleExport = (format: string) => {
-			// Implement export functionality
-			console.log(`Exporting to ${format}`);
+			if (!detailQuery?.data?.data) return;
+
+			const exportData = filteredDetails.map((item: iTicketDetail) => ({
+				"Nama Customer": item.customer_name,
+				"Email": item.customer_email,
+				"Varian": item.variant,
+				"Status Verifikasi": item.verification ? "Terverifikasi" : "Belum Terverifikasi",
+				"Tanggal Pembelian": new Date(item.createdAt).toLocaleDateString(),
+			}));
+
+			switch (format) {
+				case "excel":
+					// XLSX export
+					const worksheet = XLSX.utils.json_to_sheet(exportData);
+					const workbook = XLSX.utils.book_new();
+					XLSX.utils.book_append_sheet(workbook, worksheet, "TicketDetails");
+					const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+					const excelBlob = new Blob([excelBuffer], { type: "application/octet-stream" });
+					saveAs(excelBlob, `ticket-details-${product.title}.xlsx`);
+					break;
+				case "csv":
+					// CSV export
+					const csv = XLSX.utils.sheet_to_csv(XLSX.utils.json_to_sheet(exportData));
+					const csvBlob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+					saveAs(csvBlob, `ticket-details-${product.title}.csv`);
+					break;
+				case "pdf":
+					// PDF export using jsPDF and autotable
+					const doc = new jsPDF();
+					const tableColumn = ["Nama Customer", "Email", "Varian", "Status Verifikasi", "Tanggal Pembelian"];
+					const tableRows: any[] = [];
+
+					exportData.forEach((item: { [key: string]: string }) => {
+						const rowData = [
+							item["Nama Customer"],
+							item.Email,
+							item.Varian,
+							item["Status Verifikasi"],
+							item["Tanggal Pembelian"],
+						];
+						tableRows.push(rowData);
+					});
+
+					doc.text(`${product.title} - Ticket Details`, 14, 15);
+					(doc as any).autoTable({
+						head: [tableColumn],
+						body: tableRows,
+						startY: 20,
+					});
+					doc.save(`ticket-details-${product.title}.pdf`);
+					break;
+				default:
+					console.warn(`Unsupported export format: ${format}`);
+			}
 		};
 
 		return (

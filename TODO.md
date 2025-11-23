@@ -1,20 +1,27 @@
-Task: Add non-ticket product detail form with validation on cart page
+# Todo List for Vendor Ticket Management Feature Enhancement
 
-Steps:
+## Export Functionality for Ticket Dashboard Detail Table
 
-1. Add updateProductDetails method in lib/store/cart.ts for updating customer_name, event_date, shipping_location, loading_date, and loading_time fields.
+- [ ] Research and choose suitable client-side libraries for exporting Excel, PDF, CSV (e.g. SheetJS, jsPDF)
+- [ ] Implement export to Excel functionality for filtered ticket detail data
+- [ ] Implement export to CSV functionality for filtered ticket detail data
+- [ ] Implement export to PDF functionality for filtered ticket detail data
+- [ ] Add export button handlers in components/profile/vendor/TicketDashboard.tsx detail view
 
-2. Update app/cart/dataContent.tsx:
+## Sorting and Filtering Enhancements
 
-   - Add input form fields for these details under each non-ticket product summary.
-   - Hook inputs to the new updateProductDetails method.
-   - Add validation styling for inputs.
-   - Ensure existing validation logic for continue button works.
+- [ ] Assess current filtering and sorting UX on ticket detail table
+- [ ] Improve sorting on columns if needed (implement stable sorting or column click sorting)
+- [ ] Enhance filter UI/logic if needed for better UX
 
-3. Test UI for non-ticket product form and validation correctness.
+## Testing and Validation
 
-4. Verify no changes in ticket product form and validation.
+- [ ] Verify exporting works with current filters and sort applied
+- [ ] Verify exported files are correctly formatted and valid
+- [ ] Test all tabs (Dashboard, Scan, Send) for feature correctness
+- [ ] Validate integration with backend APIs (invoice generation, verification, sending)
 
-5. Code cleanup and commit changes.
+## Possible Dependent Tasks
 
-Proceeding with step 1: add updateProductDetails method in lib/store/cart.ts.
+- [ ] Add utility functions/services for export data transformations if needed
+- [ ] Clean up and refactor related code in TicketDashboard component if necessary
