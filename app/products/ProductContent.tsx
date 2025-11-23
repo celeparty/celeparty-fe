@@ -1,416 +1,594 @@
 "use client";
 import Box from "@/components/Box";
 import ErrorNetwork from "@/components/ErrorNetwork";
-import Skeleton from "@/components/Skeleton";
 import ItemProduct from "@/components/product/ItemProduct";
 import { LocationFilterBar } from "@/components/product/LocationFilterBar";
-import ProductFilters from "@/components/product/ProductFilters";
+import Skeleton from "@/components/Skeleton";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; // Keep for potential future use
-import { PaginationControls } from "@/components/ui/pagination-controls";
+import { Input } from "@/components/ui/input";
 import { iEventCategory } from "@/lib/interfaces/iCategory";
 import { iSelectOption } from "@/lib/interfaces/iCommon";
-import { getLowestVariantPrice } from "@/lib/productUtils";
 import { axiosData } from "@/lib/services";
 import { formatNumberWithDots, formatRupiah } from "@/lib/utils";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import _ from "lodash";
-import { Bookmark, LucideX, LucideXCircle, Filter } from "lucide-react";
-import { useCallback, useMemo } from "react";
+import { Bookmark, LucideX, LucideXCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ItemCategory, ItemInfo } from "./ItemCategory";
+import { PaginationControls } from "@/components/ui/pagination-controls";
+import { getLowestVariantPrice } from "@/lib/productUtils";
 
-// === Helper untuk handle URL gambar ===
-const getImageUrl = (image: any): string => {
-	if (!image) return "/images/noimage.png";
-
-	const url = image?.data?.[0]?.attributes?.url || image?.[0]?.url || image?.url || null;
-
-	if (!url) return "/images/noimage.png";
-
-	// kalau sudah absolute URL
-	if (url.startsWith("http")) return url;
-
-	const baseUrl = process.env.NEXT_PUBLIC_BASE_API || "https://papi.celeparty.com";
-
-	return `${baseUrl}${url}`;
-};
 
 export function ProductContent() {
-	const [sortDesc, setSortDesc] = useState<boolean>(true);
-	const [showOptions, setShowOptions] = useState<boolean>(false);
-	const [statusValue, setStatusValue] = useState<boolean>(true);
-	const [statusSortBy, setStatusSortBy] = useState<boolean>(true);
-	const [sortBy, setSortBy] = useState<string>("updatedAt:desc");
-	const [price, setPrice] = useState<{ min: any; max: any }>({
-		min: 0,
-		max: 0,
-	});
-	const [mainData, setMainData] = useState<any>([]);
-	const [currentPage, setCurrentPage] = useState<number>(1);
-	const [totalPages, setTotalPages] = useState<number>(1);
-	const [pageSize] = useState<number>(15); // Number of items per page
-	const router = useRouter();
-	const params = useSearchParams();
-	const getType = params.get("type") || "";
-	const getSearch = params.get("search");
-	const getCategory = params.get("cat");
-	// Removed cat state, now using selectedCategory
+  const [sortDesc, setSortDesc] = useState<boolean>(true);
+  const [showOptions, setShowOptions] = useState<boolean>(false);
+  const [statusValue, setStatusValue] = useState<boolean>(true);
+  const [statusSortBy, setStatusSortBy] = useState<boolean>(true);
+  const [price, setPrice] = useState<{ min: any; max: any }>({
+    min: 0,
+    max: 0,
+  });
+  const [mainData, setMainData] = useState<any>([]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [pageSize] = useState<number>(15); // Number of items per page
+  const router = useRouter();
+  const params = useSearchParams();
+  const getType = params.get("type") || "";
+  const getSearch = params.get("search");
+  const getCategory = params.get("cat");
+  const [cat, setCat] = useState(`${getCategory ? getCategory : ""}`);
 
-	const [eventDate, setEventDate] = useState<string>("");
-	const [eventLocations, setEventLocations] = useState<iSelectOption[]>([]);
-	const [selectedLocation, setSelectedLocation] = useState<string>("");
-	const [minimalOrder, setMinimalOrder] = useState<string>("");
-	const [selectedCategory, setSelectedCategory] = useState<string>("");
-	const [activeCategory, setActiveCategory] = useState<string | null>(null);
-	// const {activeButton, setActiveButton} = useButtonStore()
-	const [activeButton, setActiveButton] = useState<string | null>(null);
+  const [eventDate, setEventDate] = useState<string>("");
+  const [eventLocations, setEventLocations] = useState<iSelectOption[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<string>("");
+  const [minimalOrder, setMinimalOrder] = useState<string>("");
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  // const {activeButton, setActiveButton} = useButtonStore()
+  const [activeButton, setActiveButton] = useState<string | null>(null);
 
-	const [filterCategories, setFilterCategories] = useState<iEventCategory[]>([]);
-	const [showFilters, setShowFilters] = useState<boolean>(false);
-	const [eventTypes, setEventTypes] = useState<iSelectOption[]>([]);
-	const [selectedEventType, setSelectedEventType] = useState<string>("");
+  const [filterCategories, setFilterCategories] = useState<iEventCategory[]>(
+    []
+  );
 
-	const getCombinedQuery = async () => {
-		try {
-			const formattedDate = eventDate ? format(new Date(eventDate), "yyyy-MM-dd") : null;
+  const getCombinedQuery = async () => {
+    const formattedDate = eventDate
+      ? format(new Date(eventDate), "yyyy-MM-dd")
+      : null;
 
-			let queryString = `/api/products?populate=*&sort=${sortBy}&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}`;
+    return await axiosData(
+      "GET",
+      `/api/products?populate=*&&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}${
+        getType
+          ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(
+              getType
+            )}`
+          : ""
+      }${
+        getSearch
+          ? `&filters[title][$containsi]=${encodeURIComponent(getSearch)}`
+          : ""
+      }${
+        getCategory
+          ? `&filters[category][title][$eq]=${encodeURIComponent(cat)}`
+          : ""
+      }${
+        selectedLocation
+          ? `&filters[region][$eq]=${encodeURIComponent(selectedLocation)}`
+          : ""
+      }${
+        formattedDate
+          ? `&filters[minimal_order_date][$eq]=${formattedDate}`
+          : ""
+      }${minimalOrder ? `&filters[minimal_order][$eq]=${minimalOrder}` : ""}`
+    );
+  };
 
-			if (getType && getType.trim()) {
-				queryString += `&filters[user_event_type][name][$eq]=${encodeURIComponent(getType.trim())}`;
-			}
-			// Search functionality removed - now using filters only
-			if (selectedCategory && selectedCategory.trim()) {
-				queryString += `&filters[category][title][$eq]=${encodeURIComponent(selectedCategory.trim())}`;
-			}
-			if (selectedLocation && selectedLocation.trim()) {
-				queryString += `&filters[region][$eq]=${encodeURIComponent(selectedLocation.trim())}`;
-			}
-			if (formattedDate) {
-				queryString += `&filters[minimal_order_date][$eq]=${formattedDate}`;
-			}
-			if (minimalOrder && minimalOrder.trim()) {
-				queryString += `&filters[minimal_order][$eq]=${minimalOrder.trim()}`;
-			}
-			if (selectedEventType && selectedEventType.trim()) {
-				queryString += `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType.trim())}`;
-			}
-			if (price.min && price.min.trim()) {
-				queryString += `&filters[main_price][$gte]=${price.min.replace(/\D/g, "")}`;
-			}
-			if (price.max && price.max.trim()) {
-				queryString += `&filters[main_price][$lte]=${price.max.replace(/\D/g, "")}`;
-			}
+  const query = useQuery({
+    queryKey: [
+      "qProducts",
+      getType,
+      getSearch,
+      getCategory,
+      selectedLocation,
+      eventDate,
+      minimalOrder,
+      currentPage,
+    ],
+    queryFn: getCombinedQuery,
+  });
 
-			console.log('API Query:', queryString); // Debug log
+  useEffect(() => {
+    if (query.isSuccess) {
+      setMainData(query.data.data);
+      // Set total pages from pagination metadata
+      if (query.data.meta?.pagination) {
+        setTotalPages(query.data.meta.pagination.pageCount);
+      }
+    }
+  }, [query.isSuccess, query.data]);
 
-			return await axiosData("GET", queryString);
-		} catch (error) {
-			console.error('API Error:', error);
-			throw error;
-		}
-	};
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [getType, getSearch, getCategory, selectedLocation, eventDate, minimalOrder]);
+  
+  const getFilterCatsQuery = async () => {
+    return await axiosData(
+      "GET",
+      `/api/user-event-types?populate=*${
+        getType ? `&filters[name]=${encodeURIComponent(getType)}` : ""
+      }`
+    );
+  };
 
-	const query = useQuery({
-		queryKey: [
-			"qProducts",
-			getType,
-			getCategory,
-			selectedLocation,
-			eventDate,
-			minimalOrder,
-			selectedEventType,
-			currentPage,
-			sortBy,
-		],
-		queryFn: getCombinedQuery,
-		refetchOnWindowFocus: false,
-		staleTime: 5 * 60 * 1000, // 5 minutes
-		retry: 2, // Allow 2 retries before showing error
-		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
-	});
+  const filterCatsQuery = useQuery({
+    queryKey: ["qFilterCats", getType],
+    queryFn: getFilterCatsQuery,
+  });
 
-	useEffect(() => {
-		if (query.isSuccess) {
-			setMainData(query.data.data);
-			// Set total pages from pagination metadata
-			if (query.data.meta?.pagination) {
-				setTotalPages(query.data.meta.pagination.pageCount);
-			}
-		}
-	}, [query.isSuccess, query.data]);
+  useEffect(() => {
+    if (filterCatsQuery.isSuccess) {
+      const { data } = filterCatsQuery.data;
+      if (data) {
+        if (data.length === 0) {
+          return setFilterCategories([]);
+        }
+        const { categories } = data[0];
+        setFilterCategories(categories);
+      }
+    }
+  }, [filterCatsQuery.isSuccess, filterCatsQuery.data]);
 
-	// Reset to first page when filters change
-	useEffect(() => {
-		setCurrentPage(1);
-	}, [getType, selectedCategory, selectedLocation, eventDate, minimalOrder, selectedEventType, price.min, price.max]);
+  useEffect(() => {
+    if (price?.min && price?.max) {
+      const dataSort: any = _.filter(dataContent, (item: any) => {
+        return item.main_price >= price.min && item.main_price <= price.max;
+      });
+      setMainData(dataSort);
+    } else if (price?.min && !price?.max) {
+      const dataSort: any = _.filter(dataContent, (item: any) => {
+        return item.main_price >= price.min;
+      });
+      setMainData(dataSort);
+    } else if (!price?.min && price?.max) {
+      const dataSort: any = _.filter(dataContent, (item: any) => {
+        return item.main_price <= price.max;
+      });
+      setMainData(dataSort);
+    } else null;
+  }, [price]);
 
-	const getFilterCatsQuery = async () => {
-		return await axiosData(
-			"GET",
-			`/api/user-event-types?populate=*${getType ? `&filters[name]=${encodeURIComponent(getType)}` : ""}`,
-		);
-	};
+  useEffect(() => {
+    const cleanMin = price?.min
+      ? parseInt(price.min.replace(/\./g, ""), 10)
+      : null;
+    const cleanMax = price?.max
+      ? parseInt(price.max.replace(/\./g, ""), 10)
+      : null;
 
-	const filterCatsQuery = useQuery({
-		queryKey: ["qFilterCats", getType],
-		queryFn: getFilterCatsQuery,
-	});
+    let dataSort: any[] = [];
 
-	const getEventTypesQuery = async () => {
-		return await axiosData("GET", "/api/user-event-types");
-	};
+    if (cleanMin !== null && cleanMax !== null) {
+      dataSort = _.filter(dataContent, (item: any) => {
+        return item.main_price >= cleanMin && item.main_price <= cleanMax;
+      });
+    } else if (cleanMin !== null) {
+      dataSort = _.filter(dataContent, (item: any) => {
+        return item.main_price >= cleanMin;
+      });
+    } else if (cleanMax !== null) {
+      dataSort = _.filter(dataContent, (item: any) => {
+        return item.main_price <= cleanMax;
+      });
+    }
 
-	const eventTypesQuery = useQuery({
-		queryKey: ["qEventTypes"],
-		queryFn: getEventTypesQuery,
-	});
+    if (dataSort.length || cleanMin !== null || cleanMax !== null) {
+      setMainData(dataSort);
+    }
+  }, [price]);
 
-	useEffect(() => {
-		if (filterCatsQuery.isSuccess) {
-			const { data } = filterCatsQuery.data;
-			if (data) {
-				if (data.length === 0) {
-					return setFilterCategories([]);
-				}
-				const { categories } = data[0];
-				setFilterCategories(categories);
-			}
-		}
-	}, [filterCatsQuery.isSuccess, filterCatsQuery.data]);
+  useEffect(() => {
+    if (mainData.length === 0) return;
 
-	// Price filtering is now handled server-side via API filters
+    const uniqueRegions = new Set<string>();
+    mainData.forEach((data: any) => {
+      if (data.region) {
+        uniqueRegions.add(data.region);
+      }
+    });
 
-	useEffect(() => {
-		if (mainData.length === 0) return;
+    const capitalizeFirstLetter = (str: string) => {
+      return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    };
 
-		const uniqueRegions = new Set<string>();
-		mainData.forEach((data: any) => {
-			if (data.region) {
-				uniqueRegions.add(data.region);
-			}
-		});
+    const newLocations = Array.from(uniqueRegions).map((region) => ({
+      label: capitalizeFirstLetter(region),
+      value: region.toLowerCase().replace(/\s+/g, "-"),
+    }));
 
-		const capitalizeFirstLetter = (str: string) => {
-			return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-		};
+    setEventLocations((prevLocations) => {
+      const combined = [...prevLocations, ...newLocations];
+      return combined.filter(
+        (location, index, self) =>
+          index === self.findIndex((t) => t.value === location.value)
+      );
+    });
+  }, [mainData]);
 
-		const newLocations = Array.from(uniqueRegions).map((region) => ({
-			label: capitalizeFirstLetter(region),
-			value: region.toLowerCase().replace(/\s+/g, "-"),
-		}));
+  if (query.isLoading) {
+    return (
+      <div className=" relative flex justify-center ">
+        <Skeleton width="100%" height="150px" spaceBottom={"10px"} />
+      </div>
+    );
+  }
 
-		setEventLocations((prevLocations) => {
-			const combined = [...prevLocations, ...newLocations];
-			return combined.filter(
-				(location, index, self) => index === self.findIndex((t) => t.value === location.value),
-			);
-		});
-	}, [mainData]);
+  if (query.isError) {
+    return <ErrorNetwork />;
+  }
 
-	if (query.isLoading) {
-		return (
-			<div className="flex justify-center py-8">
-				<div className="text-center">
-					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-c-blue mx-auto mb-4"></div>
-					<p>Loading produk...</p>
-				</div>
-			</div>
-		);
-	}
+  const getSort = params.get("sort");
+  const getMin = params.get("min");
+  const getMax = params.get("max");
+  const dataContent = query?.data?.data || [];
 
-	const getSort = params.get("sort");
-	const getMin = params.get("min");
-	const getMax = params.get("max");
-	const dataContent = query?.data?.data || [];
+  const [variantPrice, setVariantPrice] = useState <number | null>(null);
+  //   (
+  //   dataContent?.variant[0]?.price
+  // );
 
-	const [variantPrice, setVariantPrice] = useState<number | null>(null);
-	//   (
-	//   dataContent?.variant[0]?.price
-	// );
+  useEffect(() => {
+    // if (query.isSuccess) {
+    //   const { variant } = dataContent;
+    //   const lowestPrice = getLowestVariantPrice(variant);
+    //   if (lowestPrice) {
+    //     setVariantPrice(lowestPrice);
+    if (query.isSuccess && Array.isArray(dataContent) && dataContent.length > 0) {
+    const firstItem = dataContent[0];
+    const lowestPrice = firstItem?.variant ? getLowestVariantPrice(firstItem.variant) : null;
+    setVariantPrice(lowestPrice);
+      }
+    }, [query.isSuccess, dataContent]);
+  // }, [dataContent]);
 
-	useEffect(() => {
-		// if (query.isSuccess) {
-		//   const { variant } = dataContent;
-		//   const lowestPrice = getLowestVariantPrice(variant);
-		//   if (lowestPrice) {
-		//     setVariantPrice(lowestPrice);
-		if (query.isSuccess && Array.isArray(dataContent) && dataContent.length > 0) {
-			const firstItem = dataContent[0];
-			const lowestPrice = firstItem?.variant ? getLowestVariantPrice(firstItem.variant) : null;
-			setVariantPrice(lowestPrice);
-		}
-	}, [query.isSuccess, dataContent]);
-	// }, [dataContent]);
+  const handleSort = (sort: any) => {
+    const dataSort: any = _.sortBy(dataContent, (item) => {
+      return sort.sortBy === "sold_count"
+        ? item.sold_count
+        : sort.sortBy === "main_price"
+        ? item.main_price
+        : sort.sortBy === "price_min"
+        ? item.price_min
+        : sort.sortBy === "price_max"
+        ? item.price_max
+        : item.updatedAt;
+    });
+    setMainData(dataSort);
+    setCurrentPage(1); // Reset to first page when sorting
+  };
 
-	const handleSort = (sortValue: string) => {
-		setSortBy(sortValue);
-		setCurrentPage(1); // Reset to first page when sorting
-		// No need to manually refetch, query will automatically refetch when sortBy changes
-	};
+  const handleFilter = (category: string) => {
+    const filterCategory: any = _.filter(dataContent, (item) => {
+      if (category === "Lainnya") {
+        return true;
+      } else {
+        return category ? item?.category?.title === category : item;
+      }
+    });
+    setMainData(filterCategory);
+    setCurrentPage(1); // Reset to first page when filtering
+  };
 
-	const handleFilter = (category: string) => {
-		setSelectedCategory(category);
-		setCurrentPage(1); // Reset to first page when filtering
-	};
+  const toggleDropdown = (): void => {
+    setSortDesc(!sortDesc);
+    setShowOptions(!showOptions);
+  };
 
-	const toggleDropdown = (): void => {
-		setSortDesc(!sortDesc);
-		setShowOptions(!showOptions);
-	};
+  const resetFilters = () => {
+    if (selectedLocation) setSelectedLocation("");
+    if (eventDate) setEventDate("");
+    if (minimalOrder) setMinimalOrder("");
+    if (activeCategory) setActiveCategory("");
+    setCurrentPage(1); // Reset to first page when filters change
+  };
 
-	const resetFilters = () => {
-		setSelectedLocation("");
-		setEventDate("");
-		setMinimalOrder("");
-		setSelectedCategory("");
-		setActiveCategory(null);
-		setSelectedEventType("");
-		setPrice({ min: "", max: "" });
-		setCurrentPage(1); // Reset to first page when filters change
-	};
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top when page changes
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
-	const handlePageChange = (page: number) => {
-		setCurrentPage(page);
-		// Scroll to top when page changes
-		window.scrollTo({ top: 0, behavior: "smooth" });
-	};
+  const isFilterCatsAvailable: boolean = filterCategories.length > 0;
 
-	const isFilterCatsAvailable: boolean = filterCategories.length > 0;
+    // ✅ fallback UI
+  if (query.isLoading) {
+    return <div>Loading produk...</div>;
+  }
 
-	if (!dataContent || dataContent.length === 0) {
-		return (
-			<div className="text-center py-8">
-				<p className="text-gray-600">Tidak ada produk untuk kategori ini.</p>
-			</div>
-		);
-	}
+  if (query.isError) {
+    return <div>Terjadi kesalahan jaringan. Silakan coba lagi.</div>;
+  }
 
-	// ✅ kalau semua aman, render produk
+  if (!dataContent || dataContent.length === 0) {
+    return <div>Tidak ada produk untuk kategori ini.</div>;
+  }
 
-return (
-<div className="grid grid-cols-12 gap-6">
-{isFilterCatsAvailable && (
-<div className={`col-span-12 ${showFilters ? "md:col-span-3" : "md:hidden"}`}>
-<ProductFilters
-selectedLocation={selectedLocation}
-setSelectedLocation={setSelectedLocation}
-eventDate={eventDate}
-setEventDate={setEventDate}
-minimalOrder={minimalOrder}
-setMinimalOrder={setMinimalOrder}
-eventLocations={eventLocations}
-selectedEventType={selectedEventType}
-setSelectedEventType={setSelectedEventType}
-eventTypes={eventTypes}
-price={price}
-setPrice={setPrice}
-resetFilters={resetFilters}
-activeCategory={activeCategory}
-setActiveCategory={setActiveCategory}
-filterCategories={filterCategories}
-handleFilter={handleFilter}
-isFilterCatsAvailable={isFilterCatsAvailable}
-isMobile={true}
-selectedCategory={selectedCategory}
-setSelectedCategory={setSelectedCategory}
-/>
-</div>
-)}
-<div className={`col-span-12 ${isFilterCatsAvailable && showFilters ? "md:col-span-9" : "md:col-span-12"}`}>
-<div className="grid grid-cols-12 gap-6">
-{/* Filter Bar - Always visible */}
-<div className="col-span-12">
-<Box className="bg-gradient-to-r from-c-blue to-c-blue-light text-white shadow-lg p-4">
-<div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-<div className="flex items-center gap-4 flex-1">
-<Button
-variant="outline"
-className="bg-white text-c-blue border-white hover:bg-gray-50"
-onClick={() => setShowFilters(!showFilters)}
->
-<Filter className="w-4 h-4 mr-2" />
-{showFilters ? 'Sembunyikan Filter' : 'Tampilkan Filter'}
-</Button>
-</div>
-<div className="flex items-center gap-2">
-<span className="text-sm font-medium">Urutkan:</span>
-<Select value={sortBy} onValueChange={handleSort}>
-<SelectTrigger className="bg-white text-black border-0 w-48">
-<SelectValue placeholder="Pilih urutan" />
-</SelectTrigger>
-<SelectContent>
-<SelectItem value="updatedAt:desc">Terbaru</SelectItem>
-<SelectItem value="updatedAt:asc">Terlama</SelectItem>
-<SelectItem value="title:asc">Nama A-Z</SelectItem>
-<SelectItem value="title:desc">Nama Z-A</SelectItem>
-<SelectItem value="sold_count:desc">Terlaris</SelectItem>
-</SelectContent>
-</Select>
-</div>
-</div>
-</Box>
-</div>
-<div className="col-span-12">
-<Box className="lg:mt-0 px-[10px] lg:px-9">
-<div className="flex flex-wrap -mx-2">
-{mainData?.length > 0 ? (
-mainData?.map((item: any) => (
-<ItemProduct
-url={`/products/${item.documentId}`}
-key={item.id}
-title={item.title}
-image_url={getImageUrl(item.main_image)}
-price={
-item?.variant && item.variant.length > 0
-? formatRupiah(getLowestVariantPrice(item.variant))
-: formatRupiah(item?.main_price || 0)
-}
-rate={item.rate ? `${item.rate}` : "1"}
-sold={item.sold_count}
-location={item.region || null}
-/>
-))
-) : (
-<div className="text-center w-full">Produk Tidak Ditemukan</div>
-)}
-</div>
-
-{mainData?.length > 0 && totalPages > 1 && (
-<div className="mt-8">
-<div className="text-center mb-4 text-sm text-slate-600">
-Halaman {currentPage} dari {totalPages}
-{query.data?.meta?.pagination?.total && (
-<span className="ml-2">({query.data.meta.pagination.total} produk)</span>
-)}
-</div>
-<div className="flex justify-center">
-<PaginationControls
-currentPage={currentPage}
-totalPages={totalPages}
-onPageChange={handlePageChange}
-className="mb-4"
-/>
-</div>
-</div>
-)}
-</Box>
-</div>
-</div>
-</div>
-</div>
-);
+  // ✅ kalau semua aman, render produk
+  
+  return (
+    <div className="grid grid-cols-12 gap-6">
+      {isFilterCatsAvailable && (
+        <>
+          <div className="col-span-12 md:col-span-3">
+            <div className="sidebar">
+              <Box className="bg-c-blue text-white mt-0">
+                <div
+                  className={`relative ${
+                    isFilterCatsAvailable && "mb-7 [&_h4]:mb-3"
+                  }`}
+                >
+                  <h4 className="font-bold">Informasi Acara</h4>
+                  <hr className="mb-4 mt-2" />
+                  <LocationFilterBar
+                    options={eventLocations}
+                    setSelectedLocation={setSelectedLocation}
+                    selectedLocation={selectedLocation}
+                  />
+                </div>
+                {isFilterCatsAvailable && (
+                  <div className="relative mb-7 [&_h4]:mb-3">
+                    <h4 className="font-bold">Pilih Kategori Produk</h4>
+                    <hr className="mb-4" />
+                    <div className="flex flex-col gap-3">
+                      {filterCategories.map((cat, index) => (
+                        <React.Fragment key={index}>
+                          <ItemInfo
+                            icon={Bookmark}
+                            activeClass={`${
+                              activeCategory === cat.title &&
+                              "bg-c-green text-c-white"
+                            }`}
+                            onClick={() => {
+                              const isActive = activeCategory === cat.title;
+                              setActiveCategory(isActive ? null : cat.title);
+                              handleFilter(isActive ? "" : cat.title);
+                            }}
+                          >
+                            <ItemCategory title={cat.title} />
+                          </ItemInfo>
+                        </React.Fragment>
+                      ))}
+                      <ItemInfo
+                        icon={Bookmark}
+                        activeClass={`${
+                          activeCategory === "Lainnya" &&
+                          "bg-c-green text-c-white"
+                        }`}
+                        onClick={() => {
+                          const isActive = activeCategory === "Lainnya";
+                          setActiveCategory(isActive ? null : "Lainnya");
+                          handleFilter(isActive ? "" : "Lainnya");
+                        }}
+                      >
+                        <ItemCategory title={"Lainnya"} />
+                      </ItemInfo>
+                    </div>
+                  </div>
+                )}
+                {(eventDate || selectedLocation || minimalOrder) && (
+                  <>
+                    <div className="py-2 text-right">
+                      <Button variant={"green"} onClick={resetFilters}>
+                        Reset Filter
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </Box>
+            </div>
+          </div>
+        </>
+      )}
+      <div
+        className={`col-span-12 ${
+          isFilterCatsAvailable ? "md:col-span-9" : "md:col-span-12"
+        }`}
+      >
+        <div className="grid grid-cols-12 gap-4">
+          {!isFilterCatsAvailable && (
+            <>
+              <div className="col-span-12 md:col-span-3">
+                <Box className="bg-c-blue text-white mt-0 flex gap-2 items-center lg:px-6">
+                  <div className={!selectedLocation ? "w-full" : "flex-1"}>
+                    <LocationFilterBar
+                      options={eventLocations}
+                      setSelectedLocation={setSelectedLocation}
+                      selectedLocation={selectedLocation}
+                    />
+                  </div>
+                  {selectedLocation && (
+                    <>
+                      <LucideXCircle
+                        className="cursor-pointer"
+                        onClick={resetFilters}
+                      />
+                    </>
+                  )}
+                </Box>
+              </div>
+            </>
+          )}
+          <div
+            className={`col-span-12 ${
+              !isFilterCatsAvailable ? "md:col-span-9" : "md:col-span-12"
+            }`}
+          >
+            <div className="w-full lg:inline-block">
+              <Box className="w-auto py-3 mt-0">
+                <div className="flex lg:flex-row flex-col items-center gap-4 ">
+                  <label className="mr-3 text-[15px] pb-1 lg:pb-0 border-b-2 border-solid border-black lg:border-none">
+                    Urutkan
+                  </label>
+                  <Button
+                    variant={`${
+                      getSort === "updated_at" ? "default" : "outline"
+                    }`}
+                    onClick={() => {
+                      handleSort({ sortBy: "updatedAt" });
+                      setActiveButton("btn1");
+                      setShowOptions(false);
+                    }}
+                    className={`w-full lg:w-auto border-2 border-black border-solid lg:border-none ${
+                      activeButton === "btn1" ? "bg-c-blue text-white" : null
+                    }`}
+                  >
+                    Terbaru
+                  </Button>
+                  <Button
+                    variant={`${
+                      getSort === "sold_count" ? "default" : "outline"
+                    }`}
+                    onClick={() => {
+                      handleSort({ sortBy: "sold_count" });
+                      setActiveButton("btn2");
+                      setShowOptions(false);
+                    }}
+                    className={`w-full lg:w-auto  border-2 border-black border-solid lg:border-none ${
+                      activeButton === "btn2" ? "bg-c-blue text-white" : null
+                    }`}
+                  >
+                    Terlaris
+                  </Button>
+                  <div className="relative flex items-center gap-4">
+                    <div className="lg:order-1 order-2">
+                      <Button
+                        variant={`${
+                          getSort === "price" ? "default" : "outline"
+                        }`}
+                        onClick={() => {
+                          setActiveButton("btn3");
+                          toggleDropdown();
+                          setStatusValue(!statusValue);
+                          setStatusSortBy(!statusSortBy);
+                          handleSort({
+                            sortBy: statusSortBy ? "price_min" : "price_max",
+                          });
+                        }}
+                        className={`flex gap-1 items-center w-full lg:w-auto border-2 border-black border-solid lg:border-none ${
+                          activeButton === "btn3"
+                            ? "bg-c-blue text-white"
+                            : null
+                        }`}
+                      >
+                        {statusValue ? "Harga Temurah" : "Harga Termahal"}{" "}
+                        {sortDesc ? <IoIosArrowUp /> : <IoIosArrowDown />}
+                      </Button>
+                    </div>
+                    {/* <div className="flex lg:flex-row flex-col gap-2 lg:order-2 order-1">
+                      <div className="flex items-center gap-2 w-full lg:w-auto">
+                        Rp{" "}
+                        <Input
+                          className="border-2 border-black border-solid lg:border-none"
+                          placeholder="Harga Minimum"
+                          onChange={(e) => {
+                            const rawValue = e.target.value.replace(/\D/g, ""); // Only digits
+                            const formatted = formatNumberWithDots(rawValue);
+                            setPrice((prev) => ({ ...prev, min: formatted }));
+                          }}
+                          value={price.min > 0 ? price.min : ""}
+                        />
+                      </div>
+                      <div className="flex items-center gap-2 w-full lg:w-auto">
+                        Rp{" "}
+                        <Input
+                          className="border-2 border-black border-solid lg:border-none"
+                          placeholder="Harga Maximum"
+                          onChange={(e) => {
+                            const rawValue = e.target.value.replace(/\D/g, ""); // Only digits
+                            const formatted = formatNumberWithDots(rawValue);
+                            setPrice((prev) => ({ ...prev, max: formatted }));
+                          }}
+                          value={price.max > 0 ? price.max : ""}
+                        />
+                      </div>
+                    </div> */}
+                  </div>
+                </div>
+              </Box>
+            </div>
+          </div>
+          <div className="col-span-12">
+            <Box className="lg:mt-0 px-[10px] lg:px-9">
+              <div className="flex flex-wrap -mx-2">
+                {mainData?.length > 0 ? (
+                  mainData?.map((item: any) => {
+                    return (
+                      <ItemProduct
+                        url={`/products/${item.documentId}`}
+                        key={item.id}
+                        title={item.title}
+                        image_url={
+                          item.main_image
+                            ? process.env.NEXT_PUBLIC_BASE_API + item.main_image[0].url
+                            : "/images/noimage.png"
+                        }
+                        // image_url="/images/noimage.png"
+                        price={getLowestVariantPrice(item.variant) 
+                             ? formatRupiah(getLowestVariantPrice(item.variant)) 
+                             : formatRupiah(item.main_price)}
+                        rate={item.rate ? `${item.rate}` : "1"}
+                        sold={item.sold_count}
+                        location={item.region ? item.region : null}
+                      ></ItemProduct>
+                    );
+                  })
+                ) : (
+                  <div className="text-center w-full">
+                    Product Tidak Ditemukan
+                  </div>
+                )}
+              </div>
+              
+              {/* Pagination Info and Controls */}
+              {mainData?.length > 0 && totalPages > 1 && (
+                <div className="mt-8">
+                  {/* Page Info */}
+                  <div className="text-center mb-4 text-sm text-slate-600">
+                    Halaman {currentPage} dari {totalPages} 
+                    {query.data?.meta?.pagination?.total && (
+                      <span className="ml-2">
+                        ({query.data.meta.pagination.total} produk)
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Pagination Controls */}
+                  <div className="flex justify-center">
+                    <PaginationControls
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={handlePageChange}
+                      className="mb-4"
+                    />
+                  </div>
+                </div>
+              )}
+            </Box>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function SectionProductContent() {
-	return (
-		<Suspense>
-			<ProductContent />
-		</Suspense>
-	);
+  return (
+    <Suspense>
+      <ProductContent />
+    </Suspense>
+  );
 }

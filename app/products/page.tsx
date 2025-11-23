@@ -1,18 +1,18 @@
 import Basecontent from "@/components/Basecontent";
-import React, { Suspense } from "react";
-import ProductContentNew from "./ProductContentNew";
+import React from "react";
+import ProductContent from "./ProductContent_";
 
 export const metadata = {
-	title: "Produk Terbaik Kami",
-	description: "Temukan Tiket Event dan Sewa Peralatan untuk Acara yang Profesional",
+  title: "Produk Terbaik Kami", // hasil akhir = "Beranda | Celeparty"
+  description: "Temukan Tiket Event dan Sewa Peralatan untuk Acara yang Profesional ",
 };
 
 export default function ProductPage() {
 	return (
-		<div className="relative wrapper-main py-8 lg:py-12">
-			<Suspense fallback={<div className="text-center py-8">Memuat produk...</div>}>
-				<ProductContentNew />
-			</Suspense>
+		<div className="relative wrapper-main lg:py-7 py-0 lg:px-9 px-[10px]">
+			<Basecontent>
+				<ProductContent />
+			</Basecontent>
 		</div>
 	);
 }
