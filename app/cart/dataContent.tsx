@@ -179,13 +179,82 @@ export default function CartContent() {
 											<div><b>No. Telepon:</b> {userTelp}</div>
 											<div><b>Varian Produk:</b> {item.variant || "-"}</div>
 											<div><b>Catatan:</b> {item.note || "-"}</div>
-											{item.product_type !== "ticket" && (
-												<>
-													<div><b>Detail Alamat:</b> {item.shipping_location || "-"}</div>
-													<div><b>Tanggal Loading:</b> {item.loading_date || "-"}</div>
-													<div><b>Jam Loading:</b> {item.loading_time || "-"}</div>
-												</>
-											)}
+{item.product_type !== "ticket" && (
+	<>
+		<div><b>Detail Alamat:</b> {item.shipping_location || "-"}</div>
+		<div><b>Tanggal Loading:</b> {item.loading_date || "-"}</div>
+		<div><b>Jam Loading:</b> {item.loading_time || "-"}</div>
+	</>
+)}
+
+
+{item.product_type !== "ticket" && (
+	<div className="mt-4 p-4 border rounded-lg bg-gray-50 space-y-4">
+		<h4 className="font-semibold mb-3 text-c-blue">Detail Pemesanan</h4>
+
+		<div>
+			<label className="block mb-1 font-medium text-gray-700">Nama Pemesan *</label>
+			<input
+				type="text"
+				value={item.customer_name || ""}
+				onChange={(e) => updateProductDetails(item.product_id, { customer_name: e.target.value })}
+				className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+					item.customer_name ? "border-gray-300 focus:ring-blue-500" : "border-red-300 focus:ring-red-500"
+				}`}
+				placeholder="Masukkan nama pemesan"
+			/>
+		</div>
+
+		<div>
+			<label className="block mb-1 font-medium text-gray-700">Tanggal Acara *</label>
+			<input
+				type="date"
+				value={item.event_date || ""}
+				onChange={(e) => updateProductDetails(item.product_id, { event_date: e.target.value })}
+				className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+					item.event_date ? "border-gray-300 focus:ring-blue-500" : "border-red-300 focus:ring-red-500"
+				}`}
+			/>
+		</div>
+
+		<div>
+			<label className="block mb-1 font-medium text-gray-700">Detail Alamat *</label>
+			<input
+				type="text"
+				value={item.shipping_location || ""}
+				onChange={(e) => updateProductDetails(item.product_id, { shipping_location: e.target.value })}
+				className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+					item.shipping_location ? "border-gray-300 focus:ring-blue-500" : "border-red-300 focus:ring-red-500"
+				}`}
+				placeholder="Masukkan detail alamat"
+			/>
+		</div>
+
+		<div>
+			<label className="block mb-1 font-medium text-gray-700">Tanggal Loading *</label>
+			<input
+				type="date"
+				value={item.loading_date || ""}
+				onChange={(e) => updateProductDetails(item.product_id, { loading_date: e.target.value })}
+				className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+					item.loading_date ? "border-gray-300 focus:ring-blue-500" : "border-red-300 focus:ring-red-500"
+				}`}
+			/>
+		</div>
+
+		<div>
+			<label className="block mb-1 font-medium text-gray-700">Jam Loading *</label>
+			<input
+				type="time"
+				value={item.loading_time || ""}
+				onChange={(e) => updateProductDetails(item.product_id, { loading_time: e.target.value })}
+				className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+					item.loading_time ? "border-gray-300 focus:ring-blue-500" : "border-red-300 focus:ring-red-500"
+				}`}
+			/>
+		</div>
+	</div>
+)}
 										</div>
 									</div>
 

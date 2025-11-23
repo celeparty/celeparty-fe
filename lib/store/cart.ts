@@ -8,7 +8,7 @@ interface NotifState {
 	notifCart: (message: string) => void;
 }
 
-export interface CartStore {
+interface CartStore {
 	cart: CartItem[];
 	cartLength: number;
 	selectedItems: (string | number)[]; // Array of selected product_ids
@@ -21,6 +21,16 @@ export interface CartStore {
 	hasMixedProducts: () => boolean; // Check if cart has both tickets and equipment
 	addItem: (item: CartItem) => boolean; // Add item with validation
 	updateRecipients: (productId: string | number, recipients: TicketRecipient[]) => void;
+	updateProductDetails: (
+		productId: string | number,
+		details: {
+			customer_name?: string;
+			event_date?: string;
+			shipping_location?: string;
+			loading_date?: string;
+			loading_time?: string;
+		},
+	) => void;
 	selectItem: (productId: string | number) => void;
 	deselectItem: (productId: string | number) => void;
 	clearSelection: () => void;
@@ -114,6 +124,24 @@ export const useCart = create<CartStore>()(
 					cart: state.cart.map((item) => (item.product_id === productId ? { ...item, recipients } : item)),
 				}));
 			},
+
+			updateProductDetails: (
+				productId: string | number,
+				details: {
+					customer_name?: string;
+					event_date?: string;
+					shipping_location?: string;
+					loading_date?: string;
+					loading_time?: string;
+				},
+			) => {
+				set((state) => ({
+					cart: state.cart.map((item) =>
+						item.product_id === productId ? { ...item, ...details } : item
+					),
+				}));
+			},
+
 			selectItem: (productId) => {
 				set((state) => ({
 					selectedItems: state.selectedItems.includes(productId)
