@@ -40,7 +40,7 @@ const getImageUrl = (image: any): string => {
 };
 
 export function ProductContent() {
-  const [sortDesc, setSortDesc] = useState<boolean>(true);
+  const [sortOption, setSortOption] = useState<string>("updatedAt:desc");
   const [showOptions, setShowOptions] = useState<boolean>(false);
   const [mainData, setMainData] = useState<any>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -61,14 +61,30 @@ export function ProductContent() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [filterCategories, setFilterCategories] = useState<iEventCategory[]>([]);
 
+  // New states for price range filter
+  const [minPrice, setMinPrice] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<string>("");
+
   const getCombinedQuery = async () => {
     const formattedDate = eventDate
       ? format(new Date(eventDate), "yyyy-MM-dd")
       : null;
 
+    // Prepare price range filter strings for API query
+    let priceFilterString = "";
+    if (minPrice) {
+      // Remove non-digit chars
+      const rawMin = minPrice.replace(/\D/g, "");
+      if (rawMin) priceFilterString += `&filters[main_price][$gte]=${rawMin}`;
+    }
+    if (maxPrice) {
+      const rawMax = maxPrice.replace(/\D/g, "");
+      if (rawMax) priceFilterString += `&filters[main_price][$lte]=${rawMax}`;
+    }
+
     return await axiosData(
       "GET",
-      `/api/products?populate=*&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}${
+      `/api/products?populate=*&sort=${sortOption}&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}${
         getType
           ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(getType)}`
           : ""
@@ -86,7 +102,7 @@ export function ProductContent() {
           : ""
       }${formattedDate ? `&filters[minimal_order_date][$eq]=${formattedDate}` : ""}${
         minimalOrder ? `&filters[minimal_order][$eq]=${minimalOrder}` : ""
-      }`
+      }${priceFilterString}`
     );
   };
 
@@ -100,6 +116,9 @@ export function ProductContent() {
       selectedLocation,
       eventDate,
       minimalOrder,
+      minPrice,
+      maxPrice,
+      sortOption,
       currentPage,
     ],
     queryFn: getCombinedQuery,
@@ -116,7 +135,17 @@ export function ProductContent() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [getType, getSearch, getCategory, selectedLocation, eventDate, minimalOrder]);
+  }, [
+    getType,
+    getSearch,
+    getCategory,
+    selectedLocation,
+    eventDate,
+    minimalOrder,
+    minPrice,
+    maxPrice,
+    sortOption,
+  ]);
 
   const getFilterCatsQuery = async () => {
     return await axiosData(
@@ -156,6 +185,9 @@ export function ProductContent() {
     setEventDate("");
     setMinimalOrder("");
     setActiveCategory(null);
+    setMinPrice("");
+    setMaxPrice("");
+    setSortOption("updatedAt:desc");
     setCurrentPage(1);
   };
 
@@ -177,7 +209,8 @@ export function ProductContent() {
       {isFilterCatsAvailable && (
         <div className="col-span-12 md:col-span-3">
           <div className="sidebar">
-            <Box className="bg-c-blue text-white mt-0">
+            <Box variant="bordered" size="lg" className="bg-c-blue text-white mt-0">
+              {/* Filter: Event Info */}
               <div className="relative mb-7 [&_h4]:mb-3">
                 <h4 className="font-bold">Informasi Acara</h4>
                 <hr className="mb-4 mt-2" />
@@ -187,16 +220,18 @@ export function ProductContent() {
                   selectedLocation={selectedLocation}
                 />
               </div>
+
+              {/* Filter: Product Categories */}
               <div className="relative mb-7 [&_h4]:mb-3">
                 <h4 className="font-bold">Pilih Kategori Produk</h4>
                 <hr className="mb-4" />
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3" style={{ maxHeight: "300px", overflowY: "auto" }}>
                   {filterCategories.map((cat, index) => (
                     <ItemInfo
                       key={index}
                       icon={Bookmark}
                       activeClass={`${
-                        activeCategory === cat.title && "bg-c-green text-c-white"
+                        activeCategory === cat.title ? "bg-c-green text-white" : ""
                       }`}
                       onClick={() => {
                         const isActive = activeCategory === cat.title;
@@ -210,8 +245,7 @@ export function ProductContent() {
                   <ItemInfo
                     icon={Bookmark}
                     activeClass={`${
-                      activeCategory === "Lainnya" &&
-                      "bg-c-green text-c-white"
+                      activeCategory === "Lainnya" ? "bg-c-green text-white" : ""
                     }`}
                     onClick={() => {
                       const isActive = activeCategory === "Lainnya";
@@ -223,10 +257,61 @@ export function ProductContent() {
                   </ItemInfo>
                 </div>
               </div>
-              {(eventDate || selectedLocation || minimalOrder) && (
+
+              {/* Filter: Price Range */}
+              <div className="relative mb-7 [&_h4]:mb-3">
+                <h4 className="font-bold">Kisaran Harga (Rp)</h4>
+                <hr className="mb-4" />
+                <div className="flex gap-4">
+                  <input
+                    type="text"
+                    placeholder="Min"
+                    value={minPrice}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, "");
+                      setMinPrice(val ? formatRupiah(val) : "");
+                    }}
+                    className="flex-1 rounded-md px-3 py-2 text-black"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Max"
+                    value={maxPrice}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, "");
+                      setMaxPrice(val ? formatRupiah(val) : "");
+                    }}
+                    className="flex-1 rounded-md px-3 py-2 text-black"
+                  />
+                </div>
+              </div>
+
+              {/* Filter: Sort By */}
+              <div className="relative mb-7 [&_h4]:mb-3">
+                <h4 className="font-bold">Urutkan Berdasarkan</h4>
+                <hr className="mb-4" />
+                <select
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value)}
+                  className="w-full rounded-md px-3 py-2 text-black"
+                >
+                  <option value="updatedAt:desc">Terbaru</option>
+                  <option value="main_price:asc">Harga: Rendah ke Tinggi</option>
+                  <option value="main_price:desc">Harga: Tinggi ke Rendah</option>
+                </select>
+              </div>
+
+              {/* Reset All Filters Button */}
+              {(eventDate ||
+                selectedLocation ||
+                minimalOrder ||
+                activeCategory ||
+                minPrice ||
+                maxPrice ||
+                sortOption !== "updatedAt:desc") && (
                 <div className="py-2 text-right">
                   <Button variant={"green"} onClick={resetFilters}>
-                    Reset Filter
+                    Reset Semua Filter
                   </Button>
                 </div>
               )}
