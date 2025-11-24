@@ -56,9 +56,12 @@ export const TicketDashboard: React.FC = () => {
 	const [showDetail, setShowDetail] = useState(false);
 
 	const getTicketSummary = async () => {
+		if (!session?.user?.documentId) {
+			throw new Error("Vendor ID is missing");
+		}
 		const response = await axiosUser(
 			"GET",
-			`/api/transaction-tickets?filters[vendor_id][$eq]=${session?.user?.documentId}&populate=ticket_details,recipients&sort=createdAt:desc`,
+			`/api/transaction-tickets?filters[vendor_id][$eq]=${encodeURIComponent(session.user.documentId)}&populate=ticket_details,recipients&sort=createdAt:desc`,
 			`${session?.jwt}`,
 		);
 		return response;
