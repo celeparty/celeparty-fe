@@ -117,7 +117,7 @@ export const TicketDashboard: React.FC = () => {
 				"Nama Customer": item.transaction_ticket.customer_name,
 				"Email Customer": item.transaction_ticket.customer_mail,
 				"Tanggal Acara": item.transaction_ticket.event_date,
-				"Tanggal Pembelian": new Date(item.transaction_ticket.createdAt).toLocaleDateString(),
+			"Tanggal Pembelian": item.transaction_ticket.createdAt ? new Date(item.transaction_ticket.createdAt).toLocaleDateString() : "-",
 				"Status Pembayaran": item.transaction_ticket.payment_status,
 				"Total Harga": item.transaction_ticket.total_price,
 			}));
@@ -241,7 +241,7 @@ export const TicketDashboard: React.FC = () => {
 						className="border rounded px-3 py-2"
 					>
 						<option value="all">Semua Varian</option>
-						{[...new Set(product.ticket_details.map((t) => t.transaction_ticket.variant))].map((variant) => (
+						{Array.from(new Set(product.ticket_details.map((t) => t.transaction_ticket.variant))).map((variant) => (
 							<option key={variant} value={variant}>
 								{variant}
 							</option>
@@ -307,7 +307,7 @@ export const TicketDashboard: React.FC = () => {
 									<TableCell>{item.transaction_ticket.customer_name}</TableCell>
 									<TableCell>{item.transaction_ticket.customer_mail}</TableCell>
 									<TableCell>{item.transaction_ticket.event_date}</TableCell>
-									<TableCell>{new Date(item.transaction_ticket.createdAt).toLocaleDateString()}</TableCell>
+								<TableCell>{item.transaction_ticket.createdAt ? new Date(item.transaction_ticket.createdAt).toLocaleDateString() : "-"}</TableCell>
 									<TableCell>{item.transaction_ticket.payment_status}</TableCell>
 									<TableCell>{item.transaction_ticket.total_price}</TableCell>
 								</TableRow>
