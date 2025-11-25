@@ -324,6 +324,19 @@ const TicketDashboardTab: React.FC<TicketDashboardTabProps> = ({ vendorDocumentI
       return response;
     } catch (error: any) {
       console.error("Failed to fetch ticket summary:", error.response || error.message || error);
+
+      // For debugging, try alternative API request without filter
+      try {
+        const altResponse = await axiosUser(
+          "GET",
+          `/api/transaction-tickets?populate=ticket_details,recipients&sort=createdAt:desc`,
+          jwtToken,
+        );
+        console.log("Alternative fetch without filter succeeded:", altResponse);
+      } catch (altError) {
+        console.error("Alternative fetch without filter also failed:", altError.response || altError.message || altError);
+      }
+
       throw error;
     }
   };
@@ -339,7 +352,14 @@ const TicketDashboardTab: React.FC<TicketDashboardTabProps> = ({ vendorDocumentI
   }
 
   if (query.isError) {
-    return <ErrorNetwork style="mt-0" />;
+    // Show detailed error message
+    const errorMessage = query.error?.response?.data?.message || "Unknown error occurred";
+    return (
+      <div className="mt-4 p-4 bg-red-100 text-red-700 rounded">
+        <h4 className="font-bold">Error loading ticket data</h4>
+        <p>{errorMessage}</p>
+      </div>
+    );
   }
 
   const ticketData: iTicketSummary[] = query?.data?.data || [];
