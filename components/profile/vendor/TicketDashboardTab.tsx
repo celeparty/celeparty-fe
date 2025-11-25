@@ -54,7 +54,7 @@ interface TicketDashboardTabProps {
   jwtToken: string;
 }
 
-const TicketDashboardTab: React.FC<TicketDashboardTabProps> = ({ vendorDocumentId, jwtToken }) => {
+export const TicketDashboardTab: React.FC<TicketDashboardTabProps> = ({ vendorDocumentId, jwtToken }) => {
   const [selectedProduct, setSelectedProduct] = useState<iTicketSummary | null>(null);
   const [showDetail, setShowDetail] = useState(false);
 
@@ -411,6 +411,5 @@ const TicketDashboardTab: React.FC<TicketDashboardTabProps> = ({ vendorDocumentI
       </Table>
     </div>
   );
-};
 
 export default TicketDashboardTab;
