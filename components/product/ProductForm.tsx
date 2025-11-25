@@ -19,6 +19,9 @@ import { ProductItemInput } from "./ProductItemInput";
 import { ProductVariantItem } from "./ProductVariant";
 import { SchemaProduct } from "./SchemaProduct";
 
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+
 const MAX_IMAGES = 5;
 
 interface iProductFormProps {
@@ -379,41 +382,42 @@ export const ProductForm: React.FC<iProductFormProps> = ({
 					{errors.title && <p className="text-red-500 text-[10px]">{`${errors.title.message}`}</p>}
 				</ProductItemInput>
 
-				{/*         <ProductItemInput label="Harga Produk (Rp)" required>
-          <input
-            className="border border-gray-300 rounded-md py-2 px-5 w-full"
-            placeholder="Harga Produk (Rp)"
-            {...register("main_price", {
-              required: true,
-              onChange: (e) => {
-                const rawValue = e.target.value.replace(/\D/g, ""); // Only digits
-                const formatted = formatNumberWithDots(rawValue);
-                if (formatted) {
-                  setValue("main_price", formatted);
-                }
-              },
-            })}
-          />
-          {errors.main_price && (
-            <p className="text-red-500 text-[10px]">{`${errors.main_price.message}`}</p>
-          )}
-        </ProductItemInput> */}
-
 				<ProductItemInput label="Deskripsi Produk" required>
-					<textarea
-						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
-						placeholder="Deskripsi Produk"
-						{...register("description", {
-							required: true,
-							onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-								const value = e.target.value;
-								setValue("description", value);
-							},
-						})}
+					<Controller
+						name="description"
+						control={control}
+						rules={{ required: true }}
+						render={({ field }) => (
+							<CKEditor
+								editor={ClassicEditor}
+								data={field.value}
+								onChange={(_, editor) => {
+									const data = editor.getData();
+									field.onChange(data);
+								}}
+							/>
+						)}
 					/>
 					{errors.description && (
 						<p className="text-red-500 text-[10px]">{`${errors.description.message}`}</p>
 					)}
+				</ProductItemInput>
+
+				<ProductItemInput label="Terms and Conditions (Optional)" required={false}>
+					<Controller
+						name="terms_conditions"
+						control={control}
+						render={({ field }) => (
+							<CKEditor
+								editor={ClassicEditor}
+								data={field.value}
+								onChange={(_, editor) => {
+									const data = editor.getData();
+									field.onChange(data);
+								}}
+							/>
+						)}
+					/>
 				</ProductItemInput>
 				{/* <ProductItemInput label="Harga Minimal Produk (Rp)" required>
           <input

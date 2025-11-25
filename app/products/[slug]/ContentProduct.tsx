@@ -16,6 +16,13 @@ import SideBar from "./SideBar";
 import { ProductImageSlider } from "@/components/product/ProductImageSlider";
 import { getLowestVariantPrice } from "@/lib/productUtils";
 
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+
 export default function ContentProduct(props: any) {
   const [selectedVariantId, setSelectedVariantId] = useState<number | null>(
     null
@@ -162,14 +169,26 @@ export default function ContentProduct(props: any) {
                 </div>
               )}
               <div className="lg:mt-5 mt-[10px] text-[12px]">
-                <h4>Deskripsi</h4>
-                <div className="whitespace-pre-line">
-                  {dataContent?.description ? (
-                    parse(`${dataContent?.description}`)
-                  ) : (
-                    <>Deskripsi Tidak Tersedia</>
-                  )}
-                </div>
+                <Tabs defaultValue="description" className="w-full">
+                  <TabsList>
+                    <TabsTrigger value="description">Deskripsi</TabsTrigger>
+                    <TabsTrigger value="terms_conditions">Terms and Conditions</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="description" className="whitespace-pre-line">
+                    {dataContent?.description ? (
+                      parse(`${dataContent?.description}`)
+                    ) : (
+                      <>Deskripsi Tidak Tersedia</>
+                    )}
+                  </TabsContent>
+                  <TabsContent value="terms_conditions" className="whitespace-pre-line">
+                    {dataContent?.terms_conditions ? (
+                      parse(`${dataContent?.terms_conditions}`)
+                    ) : (
+                      <>Tidak ada Terms and Conditions</>
+                    )}
+                  </TabsContent>
+                </Tabs>
                 <div className="wa-button mt-4 mb-4">
                   <Button
                     onClick={() => {
