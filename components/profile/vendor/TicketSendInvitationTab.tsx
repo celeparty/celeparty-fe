@@ -304,4 +304,4 @@ const TicketSendInvitationTab: React.FC<TicketSendInvitationTabProps> = ({ vendo
   );
 };
 
-export { TicketSendInvitationTab };
+export default TicketSendInvitationTab;
