@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { TicketDashboardTab } from "./TicketDashboardTab";
 import TicketScanTab from "./TicketScanTab";
-import { TicketSendInvitationTab } from "./TicketSendInvitationTab";
+import TicketSendInvitationTab from "./TicketSendInvitationTab";
 
 interface ManagementTicketProps {
   vendorDocumentId: string;
