@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { axiosUser } from "@/lib/services";
@@ -38,17 +38,18 @@ interface TicketSendInvitationTabProps {
   jwtToken: string;
 }
 
-const TicketSendInvitationTab: React.FC<TicketSendInvitationTabProps> = ({ vendorDocumentId, jwtToken }) => {
-  const [products, setProducts] = useState<iProduct[]>([]);
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
-  const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
-  const [quantity, setQuantity] = useState<number>(1);
-  const [recipientName, setRecipientName] = useState("");
-  const [recipientEmail, setRecipientEmail] = useState("");
-  const [recipientPhone, setRecipientPhone] = useState("");
-  const [password, setPassword] = useState("");
 
-  useEffect(() => {
+const TicketSendInvitationTab: React.FC<TicketSendInvitationTabProps> = ({ vendorDocumentId, jwtToken }) => {
+  const [products, setProducts] = React.useState<iProduct[]>([]);
+  const [selectedProductId, setSelectedProductId] = React.useState<number | null>(null);
+  const [selectedVariantId, setSelectedVariantId] = React.useState<number | null>(null);
+  const [quantity, setQuantity] = React.useState<number>(1);
+  const [recipientName, setRecipientName] = React.useState("");
+  const [recipientEmail, setRecipientEmail] = React.useState("");
+  const [recipientPhone, setRecipientPhone] = React.useState("");
+  const [password, setPassword] = React.useState("");
+
+  React.useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await axiosUser(
@@ -70,7 +71,7 @@ const TicketSendInvitationTab: React.FC<TicketSendInvitationTabProps> = ({ vendo
     try {
       const response = await axiosUser(
         "GET",
-        \`/api/transaction-tickets?filters[vendor_id][$eq]=\${encodeURIComponent(vendorDocumentId)}&filters[payment_status][$eq]=bypass&sort=createdAt:desc\`,
+        \`/api/transaction-tickets?filters[vendor_id][$eq]=${encodeURIComponent(vendorDocumentId)}&filters[payment_status][$eq]=bypass&sort=createdAt:desc\`,
         jwtToken,
       );
       return response;
@@ -304,4 +305,4 @@ const TicketSendInvitationTab: React.FC<TicketSendInvitationTabProps> = ({ vendo
   );
 };
 
-export default TicketSendInvitationTab;
+export { TicketSendInvitationTab };

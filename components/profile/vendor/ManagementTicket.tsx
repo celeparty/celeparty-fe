@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { TicketDashboardTab } from "./TicketDashboardTab";
+import { TicketDashboard } from "./TicketDashboard";
 import TicketScanTab from "./TicketScanTab";
-import TicketSendInvitationTab from "./TicketSendInvitationTab";
+import { TicketSendInvitationTab } from "./TicketSendInvitationTab";
 
 interface ManagementTicketProps {
   vendorDocumentId: string;
@@ -17,7 +17,7 @@ const ManagementTicket: React.FC<ManagementTicketProps> = ({ vendorDocumentId, j
     { key: "sendInvitation", label: "Kirim Undangan Tiket" },
   ];
 
-  const [activeTab, setActiveTab] = useState<string>(tabs[0].key);
+  const [activeTab, setActiveTab] = React.useState<string>(tabs[0].key);
 
   return (
     <div className="w-full max-w-7xl mx-auto p-4">
@@ -43,7 +43,7 @@ const ManagementTicket: React.FC<ManagementTicketProps> = ({ vendorDocumentId, j
       </div>
       <div>
         {activeTab === "dashboard" && (
-          <TicketDashboardTab vendorDocumentId={vendorDocumentId} jwtToken={jwtToken} />
+          <TicketDashboard />
         )}
         {activeTab === "scan" && <TicketScanTab />}
         {activeTab === "sendInvitation" && <TicketSendInvitationTab vendorDocumentId={vendorDocumentId} jwtToken={jwtToken} />}
