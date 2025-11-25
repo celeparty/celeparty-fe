@@ -54,7 +54,7 @@ const TicketSendInvitationTab: React.FC<TicketSendInvitationTabProps> = ({ vendo
       try {
         const response = await axiosUser(
           "GET",
-          \`/api/products?vendor_id=\${encodeURIComponent(vendorDocumentId)}&populate=variants\`,
+          `/api/products?vendor_id=${encodeURIComponent(vendorDocumentId)}&populate=variants`,
           jwtToken,
         );
         setProducts(response?.data?.data || []);
@@ -71,7 +71,7 @@ const TicketSendInvitationTab: React.FC<TicketSendInvitationTabProps> = ({ vendo
     try {
       const response = await axiosUser(
         "GET",
-        \`/api/transaction-tickets?filters[vendor_id][$eq]=${encodeURIComponent(vendorDocumentId)}&filters[payment_status][$eq]=bypass&sort=createdAt:desc\`,
+        `/api/transaction-tickets?filters[vendor_id][$eq]=${encodeURIComponent(vendorDocumentId)}&filters[payment_status][$eq]=bypass&sort=createdAt:desc`,
         jwtToken,
       );
       return response;
@@ -261,8 +261,8 @@ const TicketSendInvitationTab: React.FC<TicketSendInvitationTabProps> = ({ vendo
           />
         </div>
 
-        <Button type="submit" disabled={sendTicketsMutation.isLoading}>
-          {sendTicketsMutation.isLoading ? "Mengirim..." : "Kirim Tiket"}
+        <Button type="submit" disabled={sendTicketsMutation.isPending}>
+          {sendTicketsMutation.isPending ? "Mengirim..." : "Kirim Tiket"}
         </Button>
       </form>
 
