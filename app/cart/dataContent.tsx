@@ -28,6 +28,10 @@ declare global {
 
 export default function CartContent() {
 	const { cart, setCart, updateQuantity, updateNote, deleteItem, calculateTotal, updateProductDetails }: any = useCart();
+
+	// Debug log the product_type of items in cart
+	console.log("CartContent: cart items product_type values:", cart.map((item: any) => ({ product_name: item.product_name, product_type: item.product_type })));
+
 	const [value, setValue] = useState(0);
 	const data = cart.map((item: any) => {
 		return {

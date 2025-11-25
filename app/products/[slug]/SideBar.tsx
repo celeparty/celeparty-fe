@@ -65,6 +65,9 @@ export default function SideBar({
   }, [session]);
 
   const addCart = () => {
+    console.log("SideBar addCart dataProducts.user_event_type:", dataProducts.user_event_type);
+    console.log("SideBar addCart productTypeName:", productTypeName);
+    
     notifCart(`${dataProducts.title} berhasil dimasukan ke keranjang`);
     let variantName = "";
     if (
