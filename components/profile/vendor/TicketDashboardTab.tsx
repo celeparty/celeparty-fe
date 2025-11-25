@@ -314,13 +314,19 @@ const TicketDashboardTab: React.FC<TicketDashboardTabProps> = ({ vendorDocumentI
       throw new Error("Vendor ID is missing");
     }
     try {
-      const response = await axiosUser(
-        "GET",
-        `/api/transaction-tickets?filters[vendor_id][$eq]=${encodeURIComponent(
-          vendorDocumentId,
-        )}&populate=ticket_details,recipients&sort=createdAt:desc`,
-        jwtToken,
-      );
+      const params = new URLSearchParams();
+      const filters = {
+        "filters[vendor_id][$eq]": vendorDocumentId,
+      };
+      for (const key in filters) {
+        params.append(key, filters[key]);
+      }
+      params.append("populate", "ticket_details,recipients");
+      params.append("sort", "createdAt:desc");
+
+      const url = `/api/transaction-tickets?${params.toString()}`;
+
+      const response = await axiosUser("GET", url, jwtToken);
       console.log("Ticket summary API response:", response);
       return response;
     } catch (error: any) {
