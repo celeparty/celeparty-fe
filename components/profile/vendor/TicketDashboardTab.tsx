@@ -315,11 +315,13 @@ const TicketDashboardTab: React.FC<TicketDashboardTabProps> = ({ vendorDocumentI
     }
     try {
       const params = new URLSearchParams();
-      const filters = {
+      const filters: Record<string, string> = {
         "filters[vendor_id][$eq]": vendorDocumentId,
       };
       for (const key in filters) {
-        params.append(key, filters[key]);
+        if (Object.prototype.hasOwnProperty.call(filters, key)) {
+          params.append(key, filters[key]);
+        }
       }
       params.append("populate", "ticket_details,recipients");
       params.append("sort", "createdAt:desc");
