@@ -313,14 +313,19 @@ const TicketDashboardTab: React.FC<TicketDashboardTabProps> = ({ vendorDocumentI
     if (!vendorDocumentId) {
       throw new Error("Vendor ID is missing");
     }
-    const response = await axiosUser(
-      "GET",
-      `/api/transaction-tickets?filters[vendor_id][$eq]=${encodeURIComponent(
-        vendorDocumentId,
-      )}&populate=ticket_details,recipients&sort=createdAt:desc`,
-      jwtToken,
-    );
-    return response;
+    try {
+      const response = await axiosUser(
+        "GET",
+        `/api/transaction-tickets?filters[vendor_id][$eq]=${encodeURIComponent(
+          vendorDocumentId,
+        )}&populate=ticket_details,recipients&sort=createdAt:desc`,
+        jwtToken,
+      );
+      return response;
+    } catch (error: any) {
+      console.error("Failed to fetch ticket summary:", error.response || error.message || error);
+      throw error;
+    }
   };
 
   const query = useQuery({
