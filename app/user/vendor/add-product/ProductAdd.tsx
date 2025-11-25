@@ -1,8 +1,12 @@
 "use client";
 import Box from "@/components/Box";
-import { ProductForm } from "@/components/product/ProductForm";
 import { iProductImage, iProductReq, iProductVariant } from "@/lib/interfaces/iProduct";
+import dynamic from "next/dynamic";
 import React from "react";
+
+const ProductForm = dynamic(() => import("@/components/product/ProductForm").then(mod => mod.ProductForm), {
+	ssr: false,
+});
 
 export default function ProductAdd() {
 	const defaultFormData: iProductReq = {
