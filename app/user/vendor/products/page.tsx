@@ -90,7 +90,10 @@ export default function Products() {
 	};
 
 	const handleDeleteProduct = async (documentId: string) => {
-		const isConfirmed = window.confirm("Are you sure you want to remove this product?");
+		let isConfirmed = true;
+		if (typeof window !== "undefined") {
+			isConfirmed = window.confirm("Are you sure you want to remove this product?");
+		}
 		if (!isConfirmed) return;
 
 		try {
