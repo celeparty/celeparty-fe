@@ -94,6 +94,7 @@ export default function SideBar({
       customer_name: customerName,
       telp: telp,
       variant: variantName,
+      product_type: productTypeName === eProductType.ticket ? eProductType.ticket : eProductType.equipment,
       user_event_type:
         dataProducts.user_event_type?.name ||
         dataProducts.user_event_type?.id ||
