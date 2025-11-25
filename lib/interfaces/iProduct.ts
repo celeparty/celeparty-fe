@@ -16,6 +16,7 @@ export interface iProductReq {
 	main_price: string | number;
 	main_image: iProductImage[];
 	description: string;
+	terms_conditions?: string;
 	rate: number;
 	kabupaten: string;
 	price_min: string | number;
