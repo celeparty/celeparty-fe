@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { TicketDashboardTab } from "./TicketDashboardTab";
-import { TicketScanTab } from "./TicketScanTab";
+import TicketScanTab from "./TicketScanTab";
 import { TicketSendInvitationTab } from "./TicketSendInvitationTab";
 
 interface ManagementTicketProps {
@@ -45,12 +45,8 @@ const ManagementTicket: React.FC<ManagementTicketProps> = ({ vendorDocumentId, j
         {activeTab === "dashboard" && (
           <TicketDashboardTab vendorDocumentId={vendorDocumentId} jwtToken={jwtToken} />
         )}
-        {activeTab === "scan" && (
-          <TicketScanTab vendorDocumentId={vendorDocumentId} jwtToken={jwtToken} />
-        )}
-        {activeTab === "sendInvitation" && (
-          <TicketSendInvitationTab vendorDocumentId={vendorDocumentId} jwtToken={jwtToken} />
-        )}
+        {activeTab === "scan" && <TicketScanTab />}
+        {activeTab === "sendInvitation" && <TicketSendInvitationTab vendorDocumentId={vendorDocumentId} jwtToken={jwtToken} />}
       </div>
     </div>
   );
