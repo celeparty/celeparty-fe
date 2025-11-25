@@ -3,7 +3,7 @@ import axios from "axios";
 
 export async function GET(request: NextRequest) {
 	try {
-		const { searchParams } = new URL(request.url);
+		const searchParams = request.nextUrl.searchParams;
 		// Build full query string from all parameters
 		const paramsArray: string[] = [];
 		searchParams.forEach((value, key) => {
