@@ -321,6 +321,7 @@ const TicketDashboardTab: React.FC<TicketDashboardTabProps> = ({ vendorDocumentI
         )}&populate=ticket_details,recipients&sort=createdAt:desc`,
         jwtToken,
       );
+      console.log("Ticket summary API response:", response);
       return response;
     } catch (error: any) {
       console.error("Failed to fetch ticket summary:", error.response || error.message || error);
