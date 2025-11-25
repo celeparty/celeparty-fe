@@ -333,8 +333,15 @@ const TicketDashboardTab: React.FC<TicketDashboardTabProps> = ({ vendorDocumentI
           jwtToken,
         );
         console.log("Alternative fetch without filter succeeded:", altResponse);
-      } catch (altError) {
-        console.error("Alternative fetch without filter also failed:", altError.response || altError.message || altError);
+      } catch (altErrorUnknown: unknown) {
+        if (typeof altErrorUnknown === "object" && altErrorUnknown !== null && "response" in altErrorUnknown) {
+          // @ts-ignore
+          console.error("Alternative fetch without filter also failed:", altErrorUnknown.response);
+        } else if (altErrorUnknown instanceof Error) {
+          console.error("Alternative fetch without filter also failed:", altErrorUnknown.message);
+        } else {
+          console.error("Alternative fetch without filter also failed:", altErrorUnknown);
+        }
       }
 
       throw error;
