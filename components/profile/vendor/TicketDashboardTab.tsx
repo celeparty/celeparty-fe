@@ -360,7 +360,17 @@ const TicketDashboardTab: React.FC<TicketDashboardTabProps> = ({ vendorDocumentI
 
   if (query.isError) {
     // Show detailed error message
-    const errorMessage = query.error?.response?.data?.message || "Unknown error occurred";
+    let errorMessage = "Unknown error occurred";
+    const error = query.error;
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (typeof error === "object" && error !== null) {
+      try {
+        errorMessage = JSON.stringify(error);
+      } catch {
+        // ignore stringify errors
+      }
+    }
     return (
       <div className="mt-4 p-4 bg-red-100 text-red-700 rounded">
         <h4 className="font-bold">Error loading ticket data</h4>
