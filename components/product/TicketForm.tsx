@@ -447,7 +447,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 								: null;
 
 							return (
-								<DPInput
+								<DatePickerInput
 									textLabel="Pilih Batas Waktu Pemesanan"
 									value={dateValue}
 									onChange={(date) => {
