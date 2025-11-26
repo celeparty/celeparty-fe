@@ -59,6 +59,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 	const formMethods = useForm<iTicketFormReq>({
 		defaultValues: {
 			...formDefaultData,
+			terms_conditions: formDefaultData?.terms_conditions || "",
 		},
 	});
 
