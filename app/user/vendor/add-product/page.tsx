@@ -6,6 +6,8 @@ import { AiFillCustomerService } from "react-icons/ai";
 import ProductAdd from "./ProductAdd";
 import TicketAdd from "./TicketAdd";
 
+export const dynamic = 'force-dynamic';
+
 export default function AddProductPage() {
 	const [productType, setProductType] = useState<string>("product");
 	return (
