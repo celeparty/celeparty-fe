@@ -90,6 +90,7 @@ export interface iTicketFormReq {
 	documentId?: string;
 	title: string;
 	description: string;
+	terms_conditions?: string;
 	main_price: number;
 	minimal_order: number;
 	minimal_order_date: string;

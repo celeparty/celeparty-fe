@@ -21,6 +21,12 @@ import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { DatePickerInput } from "../form-components/DatePicker";
+import dynamic from "next/dynamic";
+
+const CKEditor = dynamic(() => import("@ckeditor/ckeditor5-react").then(mod => mod.CKEditor), {
+	ssr: false,
+});
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 const MAX_IMAGES = 5;
 
@@ -264,6 +270,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 					connect: [{ id: 16 }],
 				},
 				variant: variants,
+				terms_conditions: data.terms_conditions,
 			},
 		};
 
@@ -398,7 +405,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 								: null;
 
 							return (
-								<DPInput
+								<DatePickerInput
 									textLabel="Pilih Tanggal Acara"
 									value={dateValue}
 									onChange={(date) => {
