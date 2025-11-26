@@ -423,7 +423,84 @@ export const ProductForm = ({
 					/>
 				</ProductItemInput>
 
-				{/* ... Rest of the component unchanged */}
+				<ProductItemInput label="Harga Utama" required>
+					<input
+						type="number"
+						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
+						placeholder="Harga Utama"
+						{...register("main_price", {
+							required: true,
+							valueAsNumber: true,
+							onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+								const value = +e.target.value;
+								setValue("main_price", value);
+							},
+						})}
+					/>
+					{errors.main_price && <p className="text-red-500 text-[10px]">{`${errors.main_price.message}`}</p>}
+				</ProductItemInput>
+
+				<ProductItemInput label="Harga Minimum" required>
+					<input
+						type="number"
+						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
+						placeholder="Harga Minimum"
+						{...register("price_min", {
+							required: true,
+							valueAsNumber: true,
+							onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+								const value = +e.target.value;
+								setValue("price_min", value);
+							},
+						})}
+					/>
+					{errors.price_min && <p className="text-red-500 text-[10px]">{`${errors.price_min.message}`}</p>}
+				</ProductItemInput>
+
+				<ProductItemInput label="Harga Maksimum" required>
+					<input
+						type="number"
+						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
+						placeholder="Harga Maksimum"
+						{...register("price_max", {
+							required: true,
+							valueAsNumber: true,
+							onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+								const value = +e.target.value;
+								setValue("price_max", value);
+							},
+						})}
+					/>
+					{errors.price_max && <p className="text-red-500 text-[10px]">{`${errors.price_max.message}`}</p>}
+				</ProductItemInput>
+
+				<SubTitle title="Tambah Variant Produk" className="mb-3" />
+				<div className="item-input">
+					<Button type="button" variant={"default"} onClick={addVariant}>
+						Tambah Variant
+					</Button>
+					<div className="py-2">
+						{variantFields.map((field, index) => (
+							<ProductVariantItem
+								key={index}
+								index={index}
+								register={register}
+								control={control}
+								onRemove={() => removeVariant(index)}
+							/>
+						))}
+					</div>
+				</div>
+
+				<div className="flex justify-center">
+					<button
+						disabled={!watch("title") || !watch("main_price")}
+						type="submit"
+						className="border border-gray-300 rounded-[30px] py-4 px-7 min-w-[250px] hover:bg-slate-300 cursor-pointer bg-c-green text-white shadow text-[14px] lg:text-[16px]"
+					>
+						Simpan Produk
+					</button>
+				</div>
 			</form>
 		</>
 	);

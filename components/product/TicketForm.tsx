@@ -249,7 +249,6 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 			quota: v.quota,
 			purchase_deadline: v.purchase_deadline,
 		}));
-		const lowestPrice = getLowestVariantPrice(variants);
 		let payload: any = {
 			data: {
 				...data,
@@ -257,7 +256,6 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 				event_date: formatYearDate(data.event_date) ?? "",
 				minimal_order_date: formatYearDate(data.maximal_order_date) ?? "",
 				maximal_order_date: formatYearDate(data.maximal_order_date) ?? "",
-				// main_price: formatMoneyReq(lowestPrice),
 				users_permissions_user: {
 					connect: [{ id: session?.user?.id ? Number(session.user.id) : undefined }],
 				},
@@ -352,32 +350,54 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 					{errors.title && <p className="text-red-500 text-[10px]">{`${errors.title.message}`}</p>}
 				</ProductItemInput>
 				<ProductItemInput label="Deskripsi Produk" required>
-					<textarea
-						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
-						placeholder="Deskripsi Produk"
-						{...register("description", {
-							required: true,
-							onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-								const value = e.target.value;
-								setValue("description", value);
-							},
-						})}
+					<Controller
+						name="description"
+						control={control}
+						rules={{ required: true }}
+						render={({ field }) => (
+							<CKEditor
+								editor={ClassicEditor}
+								data={field.value}
+								onChange={(_, editor) => {
+									const data = editor.getData();
+									field.onChange(data);
+								}}
+							/>
+						)}
 					/>
 					{errors.description && (
 						<p className="text-red-500 text-[10px]">{`${errors.description.message}`}</p>
 					)}
 				</ProductItemInput>
+
+				<ProductItemInput label="Terms and Conditions (Optional)" required={false}>
+					<Controller
+						name="terms_conditions"
+						control={control}
+						render={({ field }) => (
+							<CKEditor
+								editor={ClassicEditor}
+								data={field.value}
+								onChange={(_, editor) => {
+									const data = editor.getData();
+									field.onChange(data);
+								}}
+							/>
+						)}
+					/>
+				</ProductItemInput>
+
 				<ProductItemInput label="Tanggal Acara" required>
 					<Controller
 						name="event_date"
 						control={control}
 						render={({ field }) => {
 							const dateValue = field.value
-								? parse(field.value, "yyyy-MM-dd", new Date()) // string -> Date
+								? parse(field.value, "yyyy-MM-dd", new Date())
 								: null;
 
 							return (
-								<DatePickerInput
+								<DPInput
 									textLabel="Pilih Tanggal Acara"
 									value={dateValue}
 									onChange={(date) => {
@@ -415,11 +435,11 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 						control={control}
 						render={({ field }) => {
 							const dateValue = field.value
-								? parse(field.value, "yyyy-MM-dd", new Date()) // string -> Date
+								? parse(field.value, "yyyy-MM-dd", new Date())
 								: null;
 
 							return (
-								<DatePickerInput
+								<DPInput
 									textLabel="Pilih Batas Waktu Pemesanan"
 									value={dateValue}
 									onChange={(date) => {
@@ -433,9 +453,6 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 							);
 						}}
 					/>
-					{/*           {errors.main_price && (
-            <p className="text-red-500 text-[10px]">{`${errors.main_price.message}`}</p>
-          )} */}
 				</ProductItemInput>
 				<ProductItemInput label="Kota Acara" required>
 					<input
@@ -451,52 +468,6 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 					/>
 					{errors.kota_event && <p className="text-red-500 text-[10px]">{`${errors.kota_event.message}`}</p>}
 				</ProductItemInput>
-				{/* <ProductItemInput required label="Provinsi Pelayanan">
-          <Controller
-            name="provinsi_event"
-            control={control}
-            render={({ field }) => (
-              <>
-                <SelectInput
-                  label="Provinsi"
-                  onChange={(id) => {
-                    let selectedProvince = provinceOptions.find(
-                      (pv) => pv.value === id
-                    );
-                    if (selectedProvince) {
-                      setSelectedProvince(selectedProvince.label);
-                    }
-                  }}
-                  value={field.value || ""}
-                  options={provinceOptions}
-                />
-              </>
-            )}
-          />
-        </ProductItemInput>
-        <ProductItemInput required label="Kota Event">
-          <Controller
-            name="kota_event"
-            control={control}
-            render={({ field }) => (
-              <>
-                <SelectInput
-                  label="Kota"
-                  onChange={(id) => {
-                    let selectedCity = subregionOptions.find(
-                      (pv) => pv.value === id
-                    );
-                    if (selectedCity) {
-                      setValue("kota_event", selectedCity.label);
-                    }
-                  }}
-                  value={field.value || ""}
-                  options={provinceOptions}
-                />
-              </>
-            )}
-          />
-        </ProductItemInput> */}
 				<ProductItemInput label="Lokasi Acara" required>
 					<input
 						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
