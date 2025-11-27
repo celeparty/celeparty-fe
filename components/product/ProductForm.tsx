@@ -88,6 +88,20 @@ export const ProductForm = ({
 
 	const escrowChecked = watch("escrow");
 
+	// Watch all required fields for live validation
+	const watchedFields = watch([
+		"title",
+		"description",
+		"main_price",
+		"price_min",
+		"price_max",
+		"minimal_order",
+		"minimal_order_date",
+		"kabupaten"
+	]);
+
+	const isFormValid = watchedFields.every(field => field && field.toString().trim() !== "") && (hideCategory || stateCategory.status);
+
 
 	const convertAndSetEditImages = async (): Promise<void> => {
 		if (!formDefaultData?.main_image) return;
@@ -319,12 +333,32 @@ export const ProductForm = ({
 	const dataCategory = query?.data?.data;
 	return (
 		<>
+			{/* Form Validation Status */}
+			{!isFormValid && (
+				<div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+					<p className="text-yellow-800 text-sm font-medium mb-2">
+						Silakan lengkapi semua field yang wajib diisi:
+					</p>
+					<ul className="text-yellow-700 text-xs space-y-1">
+						{!watch("title") && <li>• Nama Produk</li>}
+						{!watch("description") && <li>• Deskripsi Produk</li>}
+						{!watch("main_price") && <li>• Harga Utama</li>}
+						{!watch("price_min") && <li>• Harga Minimum</li>}
+						{!watch("price_max") && <li>• Harga Maksimum</li>}
+						{!watch("minimal_order") && <li>• Minimal Order</li>}
+						{!watch("minimal_order_date") && <li>• Tanggal Minimal Order</li>}
+						{!watch("kabupaten") && <li>• Kabupaten</li>}
+						{!hideCategory && !stateCategory.status && <li>• Kategori Produk</li>}
+					</ul>
+				</div>
+			)}
+
 			<form onSubmit={handleSubmit(onSubmit)}>
 				<SubTitle title="Pilih Foto Produk" className="mb-3" />
-				<div className="image-upload-container flex flex-wrap gap-2 mb-5">
+				<div className="image-upload-container grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 mb-5">
 					{mainImageFields.map((field, index) => (
 						<React.Fragment key={index}>
-							<div className="image-item  w-[20%]">
+							<div className="image-item">
 								<FileUploader
 									key={field.id}
 									image={field}
@@ -347,7 +381,7 @@ export const ProductForm = ({
 				{!hideCategory && (
 					<>
 						<SubTitle title="Pilih Kategori Produk" className="mb-3" />
-						<div className="flex flex-wrap gap-2 mb-5">
+						<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 mb-5">
 							{dataCategory?.map((item: any, i: number) => {
 								const isActive = stateCategory.value === item.id;
 								return (
@@ -359,15 +393,18 @@ export const ProductForm = ({
 											});
 										}}
 										key={item.id}
-										className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-5 py-1 ${
+										className={`cursor-pointer hover:bg-c-green hover:text-white hover:border-c-green rounded-3xl border border-solid border-c-gray px-3 py-2 text-center transition-colors duration-200 ${
 											isActive ? "bg-c-green text-white border-c-green" : "text-c-black"
-										} text-[14px] lg:text-[16px]`}
+										} text-[12px] sm:text-[14px] lg:text-[16px]`}
 									>
 										{item.title}
 									</div>
 								);
 							})}
 						</div>
+						{!stateCategory.status && (
+							<p className="text-red-500 text-[12px] mb-3">Kategori produk harus dipilih</p>
+						)}
 					</>
 				)}
 				<ProductItemInput label="Nama Produk" required>
@@ -472,6 +509,53 @@ export const ProductForm = ({
 						})}
 					/>
 					{errors.price_max && <p className="text-red-500 text-[10px]">{`${errors.price_max.message}`}</p>}
+				</ProductItemInput>
+
+				<ProductItemInput label="Minimal Order" required>
+					<input
+						type="number"
+						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
+						placeholder="Minimal Order"
+						{...register("minimal_order", {
+							required: true,
+							valueAsNumber: true,
+							onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+								const value = +e.target.value;
+								setValue("minimal_order", value);
+							},
+						})}
+					/>
+					{errors.minimal_order && <p className="text-red-500 text-[10px]">{`${errors.minimal_order.message}`}</p>}
+				</ProductItemInput>
+
+				<ProductItemInput label="Tanggal Minimal Order" required>
+					<input
+						type="date"
+						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
+						{...register("minimal_order_date", {
+							required: true,
+							onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+								const value = e.target.value;
+								setValue("minimal_order_date", value);
+							},
+						})}
+					/>
+					{errors.minimal_order_date && <p className="text-red-500 text-[10px]">{`${errors.minimal_order_date.message}`}</p>}
+				</ProductItemInput>
+
+				<ProductItemInput label="Kabupaten" required>
+					<input
+						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
+						placeholder="Kabupaten"
+						{...register("kabupaten", {
+							required: true,
+							onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+								const value = e.target.value;
+								setValue("kabupaten", value);
+							},
+						})}
+					/>
+					{errors.kabupaten && <p className="text-red-500 text-[10px]">{`${errors.kabupaten.message}`}</p>}
 				</ProductItemInput>
 
 				<SubTitle title="Tambah Variant Produk" className="mb-3" />

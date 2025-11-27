@@ -6,4 +6,7 @@ export const SchemaProduct = z.object({
 	description: z.string().min(1, { message: "Deskripsi harus diisi" }),
 	price_min: z.string().min(1, { message: "Harga harus diisi" }),
 	price_max: z.string().min(1, { message: "Harga harus diisi" }),
+	minimal_order: z.number().min(1, { message: "Minimal order harus diisi" }),
+	minimal_order_date: z.string().min(1, { message: "Tanggal minimal order harus diisi" }),
+	kabupaten: z.string().min(1, { message: "Kabupaten harus diisi" }),
 });
