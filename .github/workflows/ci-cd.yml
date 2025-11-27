@@ -21,7 +21,7 @@ jobs:
           check-latest: true
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build
         run: npm run build
@@ -50,7 +50,7 @@ jobs:
             git reset --hard origin/master
 
             echo "📦 Installing dependencies..."
-            npm ci
+            npm install
 
             echo "⚒️ Building app..."
             npm run build
