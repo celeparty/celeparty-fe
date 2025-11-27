@@ -1,15 +1,29 @@
 "use client";
 import Box from "@/components/Box";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AiFillCustomerService } from "react-icons/ai";
-import ProductAdd from "./ProductAdd";
-import TicketAdd from "./TicketAdd";
+import dynamic from "next/dynamic";
 
-export const dynamic = 'force-dynamic';
+const ProductAdd = dynamic(() => import("./ProductAdd"), { ssr: false });
+const TicketAdd = dynamic(() => import("./TicketAdd"), { ssr: false });
 
 export default function AddProductPage() {
 	const [productType, setProductType] = useState<string>("product");
+	const [isClient, setIsClient] = useState(false);
+
+	useEffect(() => {
+		setIsClient(true);
+	}, []);
+
+	if (!isClient) {
+		return (
+			<div className="flex justify-center items-center min-h-screen">
+				<div>Loading...</div>
+			</div>
+		);
+	}
+
 	return (
 		<>
 			{/* Tab Product & Ticket */}
