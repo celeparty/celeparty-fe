@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const path = require('path');
+
 const nextConfig = {
 	env: {
 		URL_BASE: process.env.URL_BASE,
@@ -15,6 +17,10 @@ const nextConfig = {
 	},
 	output: "standalone",
 	reactStrictMode: true,
+	webpack: (config) => {
+		config.resolve.alias['@'] = path.resolve(__dirname);
+		return config;
+	},
 	images: {
 		remotePatterns: [
 			{
