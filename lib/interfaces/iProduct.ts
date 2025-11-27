@@ -13,14 +13,11 @@ export interface iProductReq {
 	title: string;
 	minimal_order: number;
 	minimal_order_date: string;
-	main_price: string | number;
 	main_image: iProductImage[];
 	description: string;
 	terms_conditions?: string;
 	rate: number;
 	kabupaten: string;
-	price_min: string | number;
-	price_max: string | number;
 	category: {
 		connect: number;
 	} | null;

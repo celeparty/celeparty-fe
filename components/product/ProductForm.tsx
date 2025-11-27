@@ -342,9 +342,6 @@ export const ProductForm = ({
 					<ul className="text-yellow-700 text-xs space-y-1">
 						{!watch("title") && <li>• Nama Produk</li>}
 						{!watch("description") && <li>• Deskripsi Produk</li>}
-						{!watch("main_price") && <li>• Harga Utama</li>}
-						{!watch("price_min") && <li>• Harga Minimum</li>}
-						{!watch("price_max") && <li>• Harga Maksimum</li>}
 						{!watch("minimal_order") && <li>• Minimal Order</li>}
 						{!watch("minimal_order_date") && <li>• Tanggal Minimal Order</li>}
 						{!watch("kabupaten") && <li>• Kabupaten</li>}
@@ -460,22 +457,7 @@ export const ProductForm = ({
 					/>
 				</ProductItemInput>
 
-				<ProductItemInput label="Harga Utama" required>
-					<input
-						type="number"
-						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
-						placeholder="Harga Utama"
-						{...register("main_price", {
-							required: true,
-							valueAsNumber: true,
-							onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-								const value = +e.target.value;
-								setValue("main_price", value);
-							},
-						})}
-					/>
-					{errors.main_price && <p className="text-red-500 text-[10px]">{`${errors.main_price.message}`}</p>}
-				</ProductItemInput>
+
 
 				<ProductItemInput label="Harga Minimum" required>
 					<input
@@ -494,22 +476,7 @@ export const ProductForm = ({
 					{errors.price_min && <p className="text-red-500 text-[10px]">{`${errors.price_min.message}`}</p>}
 				</ProductItemInput>
 
-				<ProductItemInput label="Harga Maksimum" required>
-					<input
-						type="number"
-						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
-						placeholder="Harga Maksimum"
-						{...register("price_max", {
-							required: true,
-							valueAsNumber: true,
-							onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-								const value = +e.target.value;
-								setValue("price_max", value);
-							},
-						})}
-					/>
-					{errors.price_max && <p className="text-red-500 text-[10px]">{`${errors.price_max.message}`}</p>}
-				</ProductItemInput>
+
 
 				<ProductItemInput label="Minimal Order" required>
 					<input
@@ -578,7 +545,7 @@ export const ProductForm = ({
 
 				<div className="flex justify-center">
 					<button
-						disabled={!watch("title") || !watch("main_price")}
+						disabled={!watch("title")}
 						type="submit"
 						className="border border-gray-300 rounded-[30px] py-4 px-7 min-w-[250px] hover:bg-slate-300 cursor-pointer bg-c-green text-white shadow text-[14px] lg:text-[16px]"
 					>
