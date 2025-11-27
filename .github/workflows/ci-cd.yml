@@ -19,14 +19,14 @@ jobs:
         with:
           node-version: "20.9.0"
           check-latest: true
-          cache: "yarn"
-          cache-dependency-path: "**/yarn.lock"
+          cache: "npm"
+          cache-dependency-path: "**/package-lock.json"
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
       - name: Build
-        run: yarn build
+        run: npm run build
 
   # ========================
   # 2. CD Job (deploy ke server)
@@ -52,10 +52,10 @@ jobs:
             git reset --hard origin/master
 
             echo "📦 Installing dependencies..."
-            yarn install --frozen-lockfile
+            npm ci
 
             echo "⚒️ Building app..."
-            yarn build
+            npm run build
 
             echo "🚀 Restarting app with pm2..."
-            pm2 restart celeparty.com || pm2 start yarn --name "celeparty.com" -- start
+            pm2 restart celeparty.com || pm2 start npm --name "celeparty.com" -- run start
