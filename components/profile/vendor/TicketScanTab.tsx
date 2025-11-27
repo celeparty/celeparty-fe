@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { axiosUser } from "@/lib/services";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { BrowserMultiFormatReader } from "@zxing/library";
+import { BrowserMultiFormatReader, NotFoundException } from "@zxing/library";
 import { Camera, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Skeleton from "@/components/Skeleton";
@@ -34,6 +34,7 @@ interface iTicketDetail {
 
 const TicketScanTab: React.FC = () => {
   const [isScanning, setIsScanning] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(false);
   const [scanResult, setScanResult] = useState<string>("");
   const [ticketDetail, setTicketDetail] = useState<iTicketDetail | null>(null);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
@@ -96,43 +97,75 @@ const TicketScanTab: React.FC = () => {
     },
   });
 
-  const startScanning = async () => {
+  const startScanning = useCallback(async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-      });
+      // Check if camera is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        toast.error("Kamera tidak didukung di browser ini");
+        return;
+      }
+
+      // Request camera access with specific constraints
+      const constraints = {
+        video: {
+          facingMode: "environment", // Use back camera on mobile
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
         setIsScanning(true);
+
+        // Reset any previous scanning
+        if (codeReader.current) {
+          codeReader.current.reset();
+        }
+
         codeReader.current.decodeFromVideoDevice(null, videoRef.current, (result, err) => {
           if (result) {
             const scannedText = result.getText();
+            console.log("QR Code detected:", scannedText);
             setScanResult(scannedText);
             getTicketDetail.mutate(scannedText);
             stopScanning();
           }
-          if (err && err.name !== "NotFoundException") {
+          if (err && !(err instanceof NotFoundException)) {
             console.error("Scanning error:", err);
+            // Don't show error for NotFoundException as it's normal when no QR code is visible
           }
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Camera error:", error);
-      toast.error("Tidak dapat mengakses kamera");
+      if (error.name === "NotAllowedError") {
+        toast.error("Akses kamera ditolak. Harap izinkan akses kamera.");
+      } else if (error.name === "NotFoundError") {
+        toast.error("Tidak ada kamera yang ditemukan.");
+      } else if (error.name === "NotReadableError") {
+        toast.error("Kamera sedang digunakan oleh aplikasi lain.");
+      } else {
+        toast.error("Gagal mengakses kamera. Silakan coba lagi.");
+      }
     }
-  };
+  }, []);
 
-  const stopScanning = () => {
+  const stopScanning = useCallback(() => {
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
       stream.getTracks().forEach((track) => track.stop());
-      setIsScanning(false);
+      videoRef.current.srcObject = null;
     }
+    setIsScanning(false);
+    setIsInitializing(false);
     if (codeReader.current) {
       codeReader.current.reset();
     }
-  };
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -167,10 +200,11 @@ const TicketScanTab: React.FC = () => {
         <div className="text-center mb-4">
           <Button
             onClick={isScanning ? stopScanning : startScanning}
+            disabled={isInitializing}
             className="flex items-center gap-2 mx-auto"
           >
             <Camera className="h-5 w-5" />
-            {isScanning ? "Stop Scan" : "Mulai Scan"}
+            {isInitializing ? "Memuat Kamera..." : isScanning ? "Stop Scan" : "Mulai Scan"}
           </Button>
         </div>
 

@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { axiosUser } from "@/lib/services";
 import { useQuery } from "@tanstack/react-query";
-import { Eye } from "lucide-react";
+import { Eye, AlertCircle } from "lucide-react";
 import { useSession } from "next-auth/react";
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { toast } from "react-hot-toast";
 
 interface iTicketDetail {
 	id: number;
@@ -55,22 +56,29 @@ export const TicketDashboard: React.FC = () => {
 	const [selectedProduct, setSelectedProduct] = useState<iTicketSummary | null>(null);
 	const [showDetail, setShowDetail] = useState(false);
 
-	const getTicketSummary = async () => {
+	const getTicketSummary = useCallback(async () => {
 		if (!session?.user?.documentId) {
 			throw new Error("Vendor ID is missing");
 		}
-		const response = await axiosUser(
-			"GET",
-			`/api/transaction-tickets?filters[vendor_id][$eq]=${encodeURIComponent(session.user.documentId)}&populate=ticket_details,recipients&sort=createdAt:desc`,
-			`${session?.jwt}`,
-		);
-		return response;
-	};
+		try {
+			const response = await axiosUser(
+				"GET",
+				`/api/transaction-tickets?filters[vendor_id][$eq]=${encodeURIComponent(session.user.documentId)}&populate=ticket_details,recipients&sort=createdAt:desc`,
+				`${session?.jwt}`,
+			);
+			return response;
+		} catch (error: any) {
+			console.error("Error fetching ticket summary:", error);
+			throw new Error(error?.response?.data?.error?.message || "Failed to fetch ticket data");
+		}
+	}, [session?.user?.documentId, session?.jwt]);
 
 	const query = useQuery({
-		queryKey: ["ticketSummary"],
+		queryKey: ["ticketSummary", session?.user?.documentId],
 		queryFn: getTicketSummary,
-		enabled: !!session?.jwt,
+		enabled: !!session?.jwt && !!session?.user?.documentId,
+		staleTime: 5 * 60 * 1000, // 5 minutes
+		retry: 2,
 	});
 
 	if (query.isLoading) {
@@ -83,10 +91,10 @@ export const TicketDashboard: React.FC = () => {
 
 	const ticketData: iTicketSummary[] = query?.data?.data || [];
 
-	const handleViewDetail = (product: iTicketSummary) => {
+	const handleViewDetail = useCallback((product: iTicketSummary) => {
 		setSelectedProduct(product);
 		setShowDetail(true);
-	};
+	}, []);
 
 	const TicketDetailView = ({ product }: { product: iTicketSummary }) => {
 		const [filterVariant, setFilterVariant] = useState<string>("all");
@@ -104,95 +112,113 @@ export const TicketDashboard: React.FC = () => {
 				return variantMatch && statusMatch;
 			}) || [];
 
-		const handleExport = (format: string) => {
-			if (!product.ticket_details) return;
+		const handleExport = useCallback(async (format: string) => {
+			try {
+				if (!filteredDetails.length) {
+					toast.error("Tidak ada data untuk diekspor");
+					return;
+				}
 
-			const exportData = filteredDetails.map((item: iTicketDetail) => ({
-				"Nama Penerima": item.recipient_name,
-				"Email Penerima": item.recipient_email,
-				"Tipe Identitas": item.identity_type,
-				"No. Identitas": item.identity_number,
-				"No. Whatsapp": item.whatsapp_number,
-				"Barcode": item.barcode,
-				"Status Tiket": item.status,
-				"Nama Produk": item.transaction_ticket.product_name,
-				"Varian": item.transaction_ticket.variant,
-				"Nama Customer": item.transaction_ticket.customer_name,
-				"Email Customer": item.transaction_ticket.customer_mail,
-				"Tanggal Acara": item.transaction_ticket.event_date,
-			"Tanggal Pembelian": item.transaction_ticket.createdAt ? new Date(item.transaction_ticket.createdAt).toLocaleDateString() : "-",
-				"Status Pembayaran": item.transaction_ticket.payment_status,
-				"Total Harga": item.transaction_ticket.total_price,
-			}));
+				const exportData = filteredDetails.map((item: iTicketDetail) => ({
+					"Nama Penerima": item.recipient_name || "-",
+					"Email Penerima": item.recipient_email || "-",
+					"Tipe Identitas": item.identity_type || "-",
+					"No. Identitas": item.identity_number || "-",
+					"No. Whatsapp": item.whatsapp_number || "-",
+					"Barcode": item.barcode || "-",
+					"Status Tiket": item.status || "-",
+					"Nama Produk": item.transaction_ticket.product_name || "-",
+					"Varian": item.transaction_ticket.variant || "-",
+					"Nama Customer": item.transaction_ticket.customer_name || "-",
+					"Email Customer": item.transaction_ticket.customer_mail || "-",
+					"Tanggal Acara": item.transaction_ticket.event_date || "-",
+					"Tanggal Pembelian": item.transaction_ticket.createdAt ? new Date(item.transaction_ticket.createdAt).toLocaleDateString() : "-",
+					"Status Pembayaran": item.transaction_ticket.payment_status || "-",
+					"Total Harga": item.transaction_ticket.total_price || "-",
+				}));
 
-			switch (format) {
-				case "excel":
-					const worksheet = XLSX.utils.json_to_sheet(exportData);
-					const workbook = XLSX.utils.book_new();
-					XLSX.utils.book_append_sheet(workbook, worksheet, "TicketDetails");
-					const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-					const excelBlob = new Blob([excelBuffer], { type: "application/octet-stream" });
-					saveAs(excelBlob, `ticket-details-${product.product_name}.xlsx`);
-					break;
-				case "csv":
-					const csv = XLSX.utils.sheet_to_csv(XLSX.utils.json_to_sheet(exportData));
-					const csvBlob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-					saveAs(csvBlob, `ticket-details-${product.product_name}.csv`);
-					break;
-				case "pdf":
-					const doc = new jsPDF();
-					const tableColumn = [
-						"Nama Penerima",
-						"Email Penerima",
-						"Tipe Identitas",
-						"No. Identitas",
-						"No. Whatsapp",
-						"Barcode",
-						"Status Tiket",
-						"Nama Produk",
-						"Varian",
-						"Nama Customer",
-						"Email Customer",
-						"Tanggal Acara",
-						"Tanggal Pembelian",
-						"Status Pembayaran",
-						"Total Harga",
-					];
-					const tableRows: any[] = [];
+				const fileName = `ticket-details-${product.product_name}-${new Date().toISOString().split('T')[0]}`;
 
-					exportData.forEach((item: { [key: string]: string }) => {
-						const rowData = [
-							item["Nama Penerima"],
-							item["Email Penerima"],
-							item["Tipe Identitas"],
-							item["No. Identitas"],
-							item["No. Whatsapp"],
-							item["Barcode"],
-							item["Status Tiket"],
-							item["Nama Produk"],
-							item["Varian"],
-							item["Nama Customer"],
-							item["Email Customer"],
-							item["Tanggal Acara"],
-							item["Tanggal Pembelian"],
-							item["Status Pembayaran"],
-							item["Total Harga"],
+				switch (format) {
+					case "excel":
+						const worksheet = XLSX.utils.json_to_sheet(exportData);
+						const workbook = XLSX.utils.book_new();
+						XLSX.utils.book_append_sheet(workbook, worksheet, "TicketDetails");
+						const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+						const excelBlob = new Blob([excelBuffer], { type: "application/octet-stream" });
+						saveAs(excelBlob, `${fileName}.xlsx`);
+						toast.success("File Excel berhasil diekspor");
+						break;
+					case "csv":
+						const csv = XLSX.utils.sheet_to_csv(XLSX.utils.json_to_sheet(exportData));
+						const csvBlob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+						saveAs(csvBlob, `${fileName}.csv`);
+						toast.success("File CSV berhasil diekspor");
+						break;
+					case "pdf":
+						const doc = new jsPDF();
+						const tableColumn = [
+							"Nama Penerima", "Email Penerima", "Tipe Identitas", "No. Identitas",
+							"No. Whatsapp", "Barcode", "Status Tiket", "Nama Produk", "Varian",
+							"Nama Customer", "Email Customer", "Tanggal Acara", "Tanggal Pembelian",
+							"Status Pembayaran", "Total Harga",
 						];
-						tableRows.push(rowData);
-					});
+						const tableRows: any[] = [];
 
-					doc.text(`${product.product_name} - Ticket Details`, 14, 15);
-					(doc as any).autoTable({
-						head: [tableColumn],
-						body: tableRows,
-						startY: 20,
-					});
-					doc.save(`ticket-details-${product.product_name}.pdf`);
-					break;
-				default:
-					console.warn(`Unsupported export format: ${format}`);
+						exportData.forEach((item: { [key: string]: string }) => {
+							const rowData = [
+								item["Nama Penerima"], item["Email Penerima"], item["Tipe Identitas"],
+								item["No. Identitas"], item["No. Whatsapp"], item["Barcode"],
+								item["Status Tiket"], item["Nama Produk"], item["Varian"],
+								item["Nama Customer"], item["Email Customer"], item["Tanggal Acara"],
+								item["Tanggal Pembelian"], item["Status Pembayaran"], item["Total Harga"],
+							];
+							tableRows.push(rowData);
+						});
+
+						doc.text(`${product.product_name} - Ticket Details`, 14, 15);
+						(doc as any).autoTable({
+							head: [tableColumn],
+							body: tableRows,
+							startY: 20,
+							styles: { fontSize: 8 },
+							headStyles: { fillColor: [41, 128, 185] },
+						});
+						doc.save(`${fileName}.pdf`);
+						toast.success("File PDF berhasil diekspor");
+						break;
+					default:
+						toast.error(`Format ekspor tidak didukung: ${format}`);
+				}
+			} catch (error) {
+				console.error("Export error:", error);
+				toast.error("Gagal mengekspor data");
 			}
-		};
+		}, [filteredDetails, product.product_name]);
+
+		const summaryData = useMemo(() => {
+			if (!product.ticket_details?.length) return null;
+
+			const totalTickets = product.quantity ? parseInt(product.quantity) : 0;
+			const totalUsed = product.ticket_details.filter((t) => t.status === "used").length;
+			const totalActive = product.ticket_details.filter((t) => t.status === "active").length;
+			const totalCancelled = product.ticket_details.filter((t) => t.status === "cancelled").length;
+			const totalRemaining = totalTickets - totalUsed;
+			const percentSold = totalTickets > 0 ? ((totalUsed / totalTickets) * 100).toFixed(2) : "0";
+			const price = product.price ? parseInt(product.price) : 0;
+			const netIncome = price * totalUsed;
+
+			return {
+				totalTickets,
+				totalUsed,
+				totalRemaining,
+				percentSold,
+				totalActive,
+				totalCancelled,
+				price,
+				netIncome,
+			};
+		}, [product.ticket_details, product.quantity, product.price]);
 
 		return (
 			<div className="mt-6">
@@ -205,34 +231,23 @@ export const TicketDashboard: React.FC = () => {
 
 				{/* Summary Cards */}
 				<div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-					{product.ticket_details?.length ? (
-						<>
-							{(() => {
-								const totalTickets = product.quantity ? parseInt(product.quantity) : 0;
-								const totalUsed = product.ticket_details.filter((t) => t.status === "used").length;
-								const totalActive = product.ticket_details.filter((t) => t.status === "active").length;
-								const totalCancelled = product.ticket_details.filter((t) => t.status === "cancelled").length;
-								const totalRemaining = totalTickets - totalUsed;
-								const percentSold = totalTickets > 0 ? ((totalUsed / totalTickets) * 100).toFixed(2) : "0";
-								const price = product.price ? parseInt(product.price) : 0;
-								const netIncome = price * totalUsed;
-								return (
-									<div className="bg-gray-50 p-4 rounded-lg">
-										<h6 className="font-semibold">Summary</h6>
-										<p>Total Tiket: {totalTickets}</p>
-										<p>Terjual: {totalUsed}</p>
-										<p>Sisa: {totalRemaining}</p>
-										<p>Persentase Terjual: {percentSold} %</p>
-										<p>Total Aktif: {totalActive}</p>
-										<p>Total Batal: {totalCancelled}</p>
-										<p>Harga Jual: Rp {price.toLocaleString()}</p>
-										<p>Income Bersih: Rp {netIncome.toLocaleString()}</p>
-									</div>
-								);
-							})()}
-						</>
+					{summaryData ? (
+						<div className="bg-gray-50 p-4 rounded-lg">
+							<h6 className="font-semibold">Summary</h6>
+							<p>Total Tiket: {summaryData.totalTickets}</p>
+							<p>Terjual: {summaryData.totalUsed}</p>
+							<p>Sisa: {summaryData.totalRemaining}</p>
+							<p>Persentase Terjual: {summaryData.percentSold} %</p>
+							<p>Total Aktif: {summaryData.totalActive}</p>
+							<p>Total Batal: {summaryData.totalCancelled}</p>
+							<p>Harga Jual: Rp {summaryData.price.toLocaleString()}</p>
+							<p>Income Bersih: Rp {summaryData.netIncome.toLocaleString()}</p>
+						</div>
 					) : (
-						<p>Tidak ada data tiket tersedia.</p>
+						<div className="bg-gray-50 p-4 rounded-lg flex items-center gap-2">
+							<AlertCircle className="h-5 w-5 text-yellow-500" />
+							<p>Tidak ada data tiket tersedia.</p>
+						</div>
 					)}
 				</div>
 

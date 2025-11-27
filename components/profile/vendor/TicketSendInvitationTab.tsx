@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { axiosUser } from "@/lib/services";
@@ -51,6 +51,7 @@ const TicketSendInvitationTab: React.FC<TicketSendInvitationTabProps> = ({ vendo
 
   React.useEffect(() => {
     const fetchProducts = async () => {
+      setIsLoadingProducts(true);
       try {
         const response = await axiosUser(
           "GET",
@@ -60,6 +61,9 @@ const TicketSendInvitationTab: React.FC<TicketSendInvitationTabProps> = ({ vendo
         setProducts(response?.data?.data || []);
       } catch (error) {
         console.error("Failed to load products", error);
+        toast.error("Gagal memuat produk");
+      } finally {
+        setIsLoadingProducts(false);
       }
     };
     if (vendorDocumentId && jwtToken) {
@@ -86,18 +90,57 @@ const TicketSendInvitationTab: React.FC<TicketSendInvitationTabProps> = ({ vendo
     enabled: !!vendorDocumentId && !!jwtToken,
   });
 
+  // Form validation functions
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validateForm = () => {
+    if (!selectedProductId) {
+      toast.error("Silakan pilih produk tiket");
+      return false;
+    }
+    if (!selectedVariantId) {
+      toast.error("Silakan pilih varian tiket");
+      return false;
+    }
+    if (quantity < 1) {
+      toast.error("Jumlah tiket minimal 1");
+      return false;
+    }
+    if (!recipientName.trim()) {
+      toast.error("Nama penerima tidak boleh kosong");
+      return false;
+    }
+    if (!recipientEmail.trim()) {
+      toast.error("Email penerima tidak boleh kosong");
+      return false;
+    }
+    if (!validateEmail(recipientEmail)) {
+      toast.error("Format email tidak valid");
+      return false;
+    }
+    if (!password.trim()) {
+      toast.error("Password tidak boleh kosong");
+      return false;
+    }
+    return true;
+  };
+
   const sendTicketsMutation = useMutation({
     mutationFn: async () => {
-      if (!selectedProductId || !selectedVariantId) throw new Error("Please select product and variant");
-      if (!recipientEmail || !recipientName || !password) throw new Error("Please fill all required fields");
+      if (!validateForm()) {
+        throw new Error("Validation failed");
+      }
 
       const payload = {
         product_id: selectedProductId,
         variant_id: selectedVariantId,
         quantity,
-        recipient_email: recipientEmail,
-        recipient_name: recipientName,
-        recipient_phone: recipientPhone,
+        recipient_email: recipientEmail.trim(),
+        recipient_name: recipientName.trim(),
+        recipient_phone: recipientPhone.trim(),
         password,
       };
 
@@ -112,6 +155,9 @@ const TicketSendInvitationTab: React.FC<TicketSendInvitationTabProps> = ({ vendo
     onSuccess: () => {
       toast.success("Tiket berhasil dikirim");
       sentTicketsQuery.refetch();
+      // Reset form
+      setSelectedProductId(null);
+      setSelectedVariantId(null);
       setQuantity(1);
       setRecipientName("");
       setRecipientEmail("");
@@ -119,7 +165,9 @@ const TicketSendInvitationTab: React.FC<TicketSendInvitationTabProps> = ({ vendo
       setPassword("");
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.error?.message || "Gagal mengirim tiket");
+      if (error.message !== "Validation failed") {
+        toast.error(error?.response?.data?.error?.message || "Gagal mengirim tiket");
+      }
     },
   });
 
@@ -157,8 +205,11 @@ const TicketSendInvitationTab: React.FC<TicketSendInvitationTabProps> = ({ vendo
               setSelectedVariantId(null);
             }}
             required
+            disabled={isLoadingProducts}
           >
-            <option value="">-- Pilih Produk --</option>
+            <option value="">
+              {isLoadingProducts ? "Memuat produk..." : "-- Pilih Produk --"}
+            </option>
             {products.map((product) => (
               <option key={product.id} value={product.id}>
                 {product.product_name}
