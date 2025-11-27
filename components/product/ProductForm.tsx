@@ -19,6 +19,8 @@ import { FileUploader } from "./FileUploader";
 import { ProductItemInput } from "./ProductItemInput";
 import { ProductVariantItem } from "./ProductVariant";
 import { SchemaProduct } from "./SchemaProduct";
+import { SearchableSelectInput } from "../form-components/SearchableSelectInput";
+import { indonesianRegions } from "@/lib/static/indonesian-regions";
 
 const CKEditor = dynamic(() => import("@ckeditor/ckeditor5-react").then(mod => mod.CKEditor), {
 	ssr: false,
@@ -92,9 +94,6 @@ export const ProductForm = ({
 	const watchedFields = watch([
 		"title",
 		"description",
-		"main_price",
-		"price_min",
-		"price_max",
 		"minimal_order",
 		"minimal_order_date",
 		"kabupaten"
@@ -257,9 +256,6 @@ export const ProductForm = ({
 						id: String(session?.user.id),
 					},
 				},
-				main_price: formatMoneyReq(data.main_price),
-				price_min: formatMoneyReq(data.price_min),
-				price_max: formatMoneyReq(data.price_max),
 				variant: variants,
 				escrow: escrowChecked,
 				rate: 5,
@@ -344,7 +340,7 @@ export const ProductForm = ({
 						{!watch("description") && <li>• Deskripsi Produk</li>}
 						{!watch("minimal_order") && <li>• Minimal Order</li>}
 						{!watch("minimal_order_date") && <li>• Tanggal Minimal Order</li>}
-						{!watch("kabupaten") && <li>• Kabupaten</li>}
+						{!watch("kabupaten") && <li>• Kota/Kabupaten</li>}
 						{!hideCategory && !stateCategory.status && <li>• Kategori Produk</li>}
 					</ul>
 				</div>
@@ -459,22 +455,7 @@ export const ProductForm = ({
 
 
 
-				<ProductItemInput label="Harga Minimum" required>
-					<input
-						type="number"
-						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
-						placeholder="Harga Minimum"
-						{...register("price_min", {
-							required: true,
-							valueAsNumber: true,
-							onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-								const value = +e.target.value;
-								setValue("price_min", value);
-							},
-						})}
-					/>
-					{errors.price_min && <p className="text-red-500 text-[10px]">{`${errors.price_min.message}`}</p>}
-				</ProductItemInput>
+
 
 
 
