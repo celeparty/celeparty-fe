@@ -8,19 +8,17 @@ export default function TicketAdd() {
 	const initialState: iTicketFormReq = {
 		title: "",
 		description: "",
-		main_price: 0,
 		minimal_order: 0,
 		minimal_order_date: "",
-		maximal_order_date: "",
 		main_image: [{} as iProductImage],
-		price_min: 0,
-		price_max: 0,
 		users_permissions_user: null,
 		variant: [],
 		lokasi_event: "",
 		event_date: "",
 		kota_event: "",
 		waktu_event: "",
+		end_date: "",
+		end_time: "",
 		documentId: "",
 	};
 

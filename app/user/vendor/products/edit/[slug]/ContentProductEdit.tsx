@@ -18,7 +18,6 @@ export default function ContentProductEdit(props: any) {
 	const [defaultProductFormData, setDefaultProductFormData] = useState<iProductReq>({
 		title: "",
 		description: "",
-		main_price: "0",
 		minimal_order: 0,
 		main_image: [
 			{
@@ -27,8 +26,6 @@ export default function ContentProductEdit(props: any) {
 				mime: "",
 			},
 		],
-		price_min: "0",
-		price_max: "0",
 		category: null,
 		kabupaten: "",
 		rate: 0,
@@ -46,10 +43,7 @@ export default function ContentProductEdit(props: any) {
 
 	const [title, setTitle] = useState<string>("");
 	const [rate, setRate] = useState<number>(0);
-	const [main_price, setMainPrice] = useState<string>("0");
 	const [minimal_order, setMinimalOrder] = useState<number>(0);
-	const [price_max, setPriceMax] = useState<string>("0");
-	const [price_min, setPriceMin] = useState<string>("0");
 	const [kabupaten, setKabupaten] = useState<string>("");
 	const [description, setDescription] = useState<string>("");
 	const router = useRouter();
@@ -77,11 +71,8 @@ export default function ContentProductEdit(props: any) {
 				const formData: iProductReq = {
 					title: dataContent.title,
 					description: dataContent.description,
-					main_price: formatPriceValue(dataContent.main_price),
 					minimal_order: dataContent.minimal_order,
 					main_image: dataContent.main_image,
-					price_min: formatPriceValue(dataContent.price_min),
-					price_max: formatPriceValue(dataContent.price_max),
 					kabupaten: dataContent.kabupaten,
 					category: { connect: dataContent.category?.id },
 					rate: dataContent.rate,
@@ -101,18 +92,16 @@ export default function ContentProductEdit(props: any) {
 				const ticketFormData: iTicketFormReq = {
 					title: dataContent.title,
 					description: dataContent.description,
-					main_price: 0,
 					minimal_order: 0,
 					main_image: dataContent.main_image,
-					price_min: 0,
-					price_max: 0,
 					users_permissions_user: null,
 					variant: dataContent.variant,
 					event_date: dataContent.event_date,
 					kota_event: dataContent.kota_event,
 					waktu_event: dataContent.waktu_event,
 					minimal_order_date: dataContent.minimal_order_date,
-					maximal_order_date: "",
+					end_date: dataContent.end_date || "",
+					end_time: dataContent.end_time || "",
 					lokasi_event: dataContent.lokasi_event,
 					documentId: dataContent.documentId,
 				};
@@ -125,19 +114,12 @@ export default function ContentProductEdit(props: any) {
 		e.preventDefault();
 
 		try {
-			let formattedMainPrice = parseInt(String(main_price).replace(/\./g, ""));
-			let formattedPriceMin = parseInt(String(price_min).replace(/\./g, ""));
-			let formattedPriceMax = parseInt(String(price_max).replace(/\./g, ""));
-
 			const updatedData: iUpdateProduct = {
 				title,
 				rate,
 				minimal_order,
 				kabupaten,
 				description,
-				main_price: formattedMainPrice,
-				price_min: formattedPriceMin,
-				price_max: formattedPriceMax,
 			};
 
 			const res = await axiosData("PUT", `/api/products/${props.slug}`, {

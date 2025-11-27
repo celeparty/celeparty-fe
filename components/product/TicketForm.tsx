@@ -21,6 +21,8 @@ import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { DatePickerInput } from "../form-components/DatePicker";
+import { SearchableSelectInput } from "../form-components/SearchableSelectInput";
+import { indonesianRegions } from "@/lib/static/indonesian-regions";
 import dynamic from "next/dynamic";
 
 const CKEditor = dynamic(() => import("@ckeditor/ckeditor5-react").then(mod => mod.CKEditor), {
@@ -261,8 +263,8 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 				...data,
 				main_image: images,
 				event_date: formatYearDate(data.event_date) ?? "",
-				minimal_order_date: formatYearDate(data.maximal_order_date) ?? "",
-				maximal_order_date: formatYearDate(data.maximal_order_date) ?? "",
+				end_date: formatYearDate(data.end_date) ?? "",
+				end_time: data.end_time,
 				users_permissions_user: {
 					connect: [{ id: session?.user?.id ? Number(session.user.id) : undefined }],
 				},
@@ -437,9 +439,9 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 						<p className="text-red-500 text-[10px]">{`${errors.waktu_event.message}`}</p>
 					)}
 				</ProductItemInput>
-				<ProductItemInput label="Batas Waktu Pemesanan" required>
+				<ProductItemInput label="Tanggal Selesai" required>
 					<Controller
-						name="maximal_order_date"
+						name="end_date"
 						control={control}
 						render={({ field }) => {
 							const dateValue = field.value
@@ -448,7 +450,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 
 							return (
 								<DatePickerInput
-									textLabel="Pilih Batas Waktu Pemesanan"
+									textLabel="Pilih Tanggal Selesai"
 									value={dateValue}
 									onChange={(date) => {
 										if (date instanceof Date && isDateValid(date)) {
@@ -461,18 +463,40 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 							);
 						}}
 					/>
+					{errors.end_date && <p className="text-red-500 text-[10px]">{`${errors.end_date.message}`}</p>}
 				</ProductItemInput>
-				<ProductItemInput label="Kota Acara" required>
+				<ProductItemInput label="Jam Selesai" required>
 					<input
 						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
-						placeholder="Kota Acara"
-						{...register("kota_event", {
+						type="time"
+						{...register("end_time", {
 							required: true,
 							onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
 								const value = e.target.value;
-								setValue("kota_event", value);
+								setValue("end_time", value);
 							},
 						})}
+					/>
+					{errors.end_time && (
+						<p className="text-red-500 text-[10px]">{`${errors.end_time.message}`}</p>
+					)}
+				</ProductItemInput>
+				<ProductItemInput label="Kota Acara" required>
+					<Controller
+						name="kota_event"
+						control={control}
+						rules={{ required: true }}
+						render={({ field }) => (
+							<SearchableSelectInput
+								label="Kota Acara"
+								options={indonesianRegions.map((region) => ({ label: region.label, value: region.value }))}
+								value={field.value}
+								onChange={(value) => field.onChange(value)}
+								placeholder="Pilih Kota Acara"
+								required
+								showLabel={false}
+							/>
+						)}
 					/>
 					{errors.kota_event && <p className="text-red-500 text-[10px]">{`${errors.kota_event.message}`}</p>}
 				</ProductItemInput>

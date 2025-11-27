@@ -476,20 +476,7 @@ export const ProductForm = ({
 					{errors.minimal_order && <p className="text-red-500 text-[10px]">{`${errors.minimal_order.message}`}</p>}
 				</ProductItemInput>
 
-				<ProductItemInput label="Tanggal Minimal Order" required>
-					<input
-						type="date"
-						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
-						{...register("minimal_order_date", {
-							required: true,
-							onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-								const value = e.target.value;
-								setValue("minimal_order_date", value);
-							},
-						})}
-					/>
-					{errors.minimal_order_date && <p className="text-red-500 text-[10px]">{`${errors.minimal_order_date.message}`}</p>}
-				</ProductItemInput>
+
 
 				<ProductItemInput label="Kabupaten" required>
 					<input

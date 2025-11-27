@@ -8,6 +8,7 @@ interface iSearchableSelectInputProps {
 	value: string;
 	placeholder?: string;
 	required?: boolean;
+	showLabel?: boolean;
 }
 
 export const SearchableSelectInput: React.FC<iSearchableSelectInputProps> = ({
@@ -17,6 +18,7 @@ export const SearchableSelectInput: React.FC<iSearchableSelectInputProps> = ({
 	value,
 	placeholder,
 	required = false,
+	showLabel = true,
 }) => {
 	const selectedOption = options.find((option) => option.value === value) || null;
 
@@ -54,10 +56,12 @@ export const SearchableSelectInput: React.FC<iSearchableSelectInputProps> = ({
 
 	return (
 		<div className="mb-4">
-			<label className="block text-sm font-medium text-gray-700 mb-1">
-				{label}
-				{required && <span className="text-red-500 ml-1">*</span>}
-			</label>
+			{showLabel && (
+				<label className="block text-sm font-medium text-gray-700 mb-1">
+					{label}
+					{required && <span className="text-red-500 ml-1">*</span>}
+				</label>
+			)}
 			<Select
 				value={selectedOption}
 				onChange={(selected) => onChange(selected?.value || "")}

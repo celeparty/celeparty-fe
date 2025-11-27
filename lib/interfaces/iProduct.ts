@@ -58,6 +58,8 @@ export interface iProductRes extends Omit<iProductReq, "users_permissions_user" 
 	kota_event: string;
 	waktu_event: string;
 	lokasi_event: string;
+	end_date?: string;
+	end_time?: string;
 }
 
 export interface iProductVariant {
@@ -85,17 +87,15 @@ export interface iTicketFormReq {
 	title: string;
 	description: string;
 	terms_conditions?: string;
-	main_price: number;
 	minimal_order: number;
 	minimal_order_date: string;
 	main_image: iProductImage[];
-	price_min: number;
-	price_max: number;
 	users_permissions_user: number | null;
 	variant: iTicketVariant[];
 	event_date: string;
 	waktu_event: string;
 	lokasi_event: string;
 	kota_event: string;
-	maximal_order_date: string;
+	end_date: string;
+	end_time: string;
 }
