@@ -49,8 +49,13 @@ jobs:
             git fetch origin master
             git reset --hard origin/master
 
+            echo "🧹 Cleaning up disk space..."
+            rm -rf node_modules .next .cache
+            npm cache clean --force
+            yarn cache clean --all 2>/dev/null || true
+
             echo "📦 Installing dependencies..."
-            npm install
+            npm install --legacy-peer-deps
 
             echo "⚒️ Building app..."
             npm run build
