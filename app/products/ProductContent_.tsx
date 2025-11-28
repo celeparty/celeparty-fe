@@ -61,6 +61,10 @@ export function ProductContent() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [filterCategories, setFilterCategories] = useState<iEventCategory[]>([]);
 
+  // New states for event type filter
+  const [selectedEventType, setSelectedEventType] = useState<string>(getType);
+  const [eventTypes, setEventTypes] = useState<iSelectOption[]>([]);
+
   // New states for price range filter
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
@@ -85,8 +89,8 @@ export function ProductContent() {
     return await axiosData(
       "GET",
       `/api/products?populate=*&sort=${sortOption}&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}${
-        getType
-          ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(getType)}`
+        selectedEventType
+          ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}`
           : ""
       }${
         getSearch
@@ -136,7 +140,7 @@ export function ProductContent() {
   useEffect(() => {
     setCurrentPage(1);
   }, [
-    getType,
+    selectedEventType,
     getSearch,
     getCategory,
     selectedLocation,
@@ -161,6 +165,15 @@ export function ProductContent() {
     queryFn: getFilterCatsQuery,
   });
 
+  const getEventTypesQuery = async () => {
+    return await axiosData("GET", "/api/user-event-types");
+  };
+
+  const eventTypesQuery = useQuery({
+    queryKey: ["qEventTypes"],
+    queryFn: getEventTypesQuery,
+  });
+
   useEffect(() => {
     if (filterCatsQuery.isSuccess) {
       const data = filterCatsQuery.data?.data || [];
@@ -168,6 +181,17 @@ export function ProductContent() {
       setFilterCategories(categories);
     }
   }, [filterCatsQuery.isSuccess, filterCatsQuery.data]);
+
+  useEffect(() => {
+    if (eventTypesQuery.isSuccess) {
+      const data = eventTypesQuery.data?.data || [];
+      const options = data.map((item: any) => ({
+        label: item.name,
+        value: item.name,
+      }));
+      setEventTypes(options);
+    }
+  }, [eventTypesQuery.isSuccess, eventTypesQuery.data]);
 
   const dataContent = query?.data?.data || [];
 
@@ -210,6 +234,24 @@ export function ProductContent() {
         <div className="col-span-12 md:col-span-3">
           <div className="sidebar">
             <Box variant="bordered" size="lg" className="bg-c-blue text-white mt-0">
+              {/* Filter: Event Type */}
+              <div className="relative mb-7 [&_h4]:mb-3">
+                <h4 className="font-bold">Jenis Event</h4>
+                <hr className="mb-4 mt-2" />
+                <select
+                  value={selectedEventType}
+                  onChange={(e) => setSelectedEventType(e.target.value)}
+                  className="w-full rounded-md px-3 py-2 text-black"
+                >
+                  <option value="">Semua Jenis Event</option>
+                  {eventTypes.map((eventType, index) => (
+                    <option key={index} value={eventType.value}>
+                      {eventType.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               {/* Filter: Event Info */}
               <div className="relative mb-7 [&_h4]:mb-3">
                 <h4 className="font-bold">Informasi Acara</h4>
@@ -302,7 +344,8 @@ export function ProductContent() {
               </div>
 
               {/* Reset All Filters Button */}
-              {(eventDate ||
+              {(selectedEventType ||
+                eventDate ||
                 selectedLocation ||
                 minimalOrder ||
                 activeCategory ||
