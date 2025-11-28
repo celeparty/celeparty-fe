@@ -112,7 +112,7 @@ export function ProductContent() {
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [getType, getSearch, getCategory, selectedLocation, eventDate, minimalOrder]);
+  }, [getType, getSearch, getCategory, selectedLocation, eventDate]);
   
   const getFilterCatsQuery = async () => {
     return await axiosData(
