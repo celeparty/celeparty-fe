@@ -24,6 +24,8 @@ import { DatePickerInput } from "../form-components/DatePicker";
 import { SearchableSelectInput } from "../form-components/SearchableSelectInput";
 import { indonesianRegions } from "@/lib/static/indonesian-regions";
 import dynamic from "next/dynamic";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { SchemaTicket } from "./SchemaTicket";
 
 const CKEditor = dynamic(() => import("@ckeditor/ckeditor5-react").then(mod => mod.CKEditor), {
 	ssr: false,
@@ -66,6 +68,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 	const { toast } = useToast();
 
 	const formMethods = useForm<iTicketFormReq>({
+		resolver: zodResolver(SchemaTicket),
 		defaultValues: {
 			...formDefaultData,
 			terms_conditions: formDefaultData?.terms_conditions || "",
@@ -79,6 +82,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 		getValues,
 		control,
 		reset,
+		watch,
 		formState: { errors, isValid },
 	} = formMethods;
 
@@ -99,6 +103,22 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 		control,
 		name: "variant",
 	});
+
+	// Watch all required fields for live validation
+	const watchedFields = watch([
+		"title",
+		"description",
+		"minimal_order",
+		"minimal_order_date",
+		"event_date",
+		"waktu_event",
+		"end_date",
+		"end_time",
+		"kota_event",
+		"lokasi_event"
+	]);
+
+	const isFormValid = watchedFields.every(field => field && field.toString().trim() !== "");
 
 	const addVariant = () => {
 		appendVariant({
@@ -334,6 +354,27 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 
 	return (
 		<div className="relative">
+			{/* Form Validation Status */}
+			{!isFormValid && (
+				<div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+					<p className="text-yellow-800 text-sm font-medium mb-2">
+						Silakan lengkapi semua field yang wajib diisi:
+					</p>
+					<ul className="text-yellow-700 text-xs space-y-1">
+						{!watch("title") && <li>• Nama Tiket</li>}
+						{!watch("description") && <li>• Deskripsi Produk</li>}
+						{!watch("minimal_order") && <li>• Minimal Order</li>}
+						{!watch("minimal_order_date") && <li>• Tanggal Minimal Order</li>}
+						{!watch("event_date") && <li>• Tanggal Acara</li>}
+						{!watch("waktu_event") && <li>• Waktu Acara</li>}
+						{!watch("end_date") && <li>• Tanggal Selesai</li>}
+						{!watch("end_time") && <li>• Jam Selesai</li>}
+						{!watch("kota_event") && <li>• Kota Acara</li>}
+						{!watch("lokasi_event") && <li>• Lokasi Acara</li>}
+					</ul>
+				</div>
+			)}
+
 			<form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 				<div className="image-upload-container flex flex-wrap gap-2 mb-5">
 					{mainImageFields.map((field, index) => (
