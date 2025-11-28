@@ -13,6 +13,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AiFillCustomerService } from "react-icons/ai";
+import { useSession } from "next-auth/react";
 
 export default function ContentProductEdit(props: any) {
 	const [defaultProductFormData, setDefaultProductFormData] = useState<iProductReq>({
@@ -122,7 +123,7 @@ export default function ContentProductEdit(props: any) {
 				description,
 			};
 
-			const res = await axiosData("PUT", `/api/products/${props.slug}`, {
+			const res = await axiosUser("PUT", `/api/products/${props.slug}`, session?.jwt || "", {
 				data: updatedData,
 			});
 
