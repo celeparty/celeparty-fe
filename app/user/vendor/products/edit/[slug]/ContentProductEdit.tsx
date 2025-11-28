@@ -158,7 +158,7 @@ export default function ContentProductEdit(props: any) {
 			<Box className="mt-0">
 				{isTicketType ? (
 					<>
-						<TicketForm isEdit={true} formDefaultData={defaultTicketFormData}></TicketForm>
+				<TicketForm isEdit={true} formDefaultData={defaultTicketFormData} slug={props.slug}></TicketForm>
 					</>
 				) : (
 					<>

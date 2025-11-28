@@ -35,9 +35,10 @@ const MAX_IMAGES = 5;
 interface iTicketFormProps {
 	formDefaultData: iTicketFormReq;
 	isEdit: boolean;
+	slug?: string;
 }
 
-export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData }) => {
+export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData, slug }) => {
 	// TODO: USe when request with selector
 	// const [subregionOptions, setSubregionOptions] = useState<iSelectOption[]>([]);
 	// const [selectedProvince, setSelectedProvince] = useState<string>("");
@@ -288,12 +289,16 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 			});
 			let response: any;
 			delete payload.data.documentId;
-			delete payload.data.user_event_type;
+			// Only delete user_event_type for non-ticket products
+			if (!isEdit) {
+				delete payload.data.user_event_type;
+			}
 
 			if (isEdit) {
+				const productSlug = slug || formDefaultData.documentId;
 				response = await axiosUser(
 					"PUT",
-					`/api/products/${formDefaultData.documentId}`,
+					`/api/products/${productSlug}`,
 					`${session && session?.jwt}`,
 					payload,
 				);
@@ -311,9 +316,15 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 				window.location.href = "/user/vendor/products";
 			}
 		} catch (error: any) {
+			console.error("Ticket submission error:", error);
+			const errorMessage = error?.response?.data?.error?.message ||
+				error?.response?.data?.message ||
+				error?.message ||
+				"Terjadi kesalahan yang tidak diketahui";
+
 			toast({
 				title: "Gagal",
-				description: `Gagal ${isEdit ? "edit" : "menambahkan"} tiket!`,
+				description: `Gagal ${isEdit ? "edit" : "menambahkan"} tiket: ${errorMessage}`,
 				className: eAlertType.FAILED,
 			});
 		} finally {
