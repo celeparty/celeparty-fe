@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { eAlertType } from "@/lib/enums/eAlert";
 import { eProductType } from "@/lib/enums/eProduct";
 import { iProductReq, iProductRes, iTicketFormReq, iTicketVariant, iUpdateProduct } from "@/lib/interfaces/iProduct";
-import { axiosData } from "@/lib/services";
+import { axiosData, axiosUser } from "@/lib/services";
 import { formatNumberWithDots } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
@@ -49,6 +49,7 @@ export default function ContentProductEdit(props: any) {
 	const [description, setDescription] = useState<string>("");
 	const router = useRouter();
 	const { toast } = useToast();
+	const { data: session } = useSession();
 
 	const [isTicketType, setIsTicketType] = useState<boolean>(false);
 
