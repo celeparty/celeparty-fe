@@ -5,7 +5,7 @@ import { TicketForm } from "@/components/product/TicketForm";
 import { useToast } from "@/hooks/use-toast";
 import { eAlertType } from "@/lib/enums/eAlert";
 import { eProductType } from "@/lib/enums/eProduct";
-import { iProductReq, iProductRes, iTicketFormReq, iUpdateProduct } from "@/lib/interfaces/iProduct";
+import { iProductReq, iProductRes, iTicketFormReq, iTicketVariant, iUpdateProduct } from "@/lib/interfaces/iProduct";
 import { axiosData } from "@/lib/services";
 import { formatNumberWithDots } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -95,7 +95,7 @@ export default function ContentProductEdit(props: any) {
 					minimal_order: 0,
 					main_image: dataContent.main_image,
 					users_permissions_user: null,
-					variant: dataContent.variant,
+					variant: dataContent.variant as iTicketVariant[],
 					event_date: dataContent.event_date,
 					kota_event: dataContent.kota_event,
 					waktu_event: dataContent.waktu_event,
