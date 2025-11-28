@@ -78,7 +78,7 @@ export default function ContentProductEdit(props: any) {
 					description: dataContent.description,
 					main_image: dataContent.main_image,
 					variant: dataContent.variant as iTicketVariant[],
-					event_date: dataContent.event_date,
+					event_date: dataContent.event_date || "",
 					kota_event: dataContent.kota_event,
 					waktu_event: dataContent.waktu_event,
 					end_date: dataContent.end_date || "",
