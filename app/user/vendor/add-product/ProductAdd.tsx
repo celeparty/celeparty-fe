@@ -12,19 +12,11 @@ export default function ProductAdd() {
 	const defaultFormData: iProductReq = {
 		title: "",
 		description: "",
-		minimal_order: 0,
 		main_image: [{} as iProductImage],
 		category: {
-			connect: 0,
+			connect: [{ id: 0 }],
 		},
 		kabupaten: "",
-		rate: 0,
-		minimal_order_date: "",
-		users_permissions_user: {
-			connect: {
-				id: "",
-			},
-		},
 		variant: [{} as iProductVariant],
 		escrow: false,
 	};

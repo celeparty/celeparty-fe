@@ -1,101 +1,81 @@
 export interface iUpdateProduct {
 	title: string;
 	rate: number;
-	minimal_order: number;
 	kabupaten: string;
 	description: string;
-}
-
-export interface iProductReq {
-	title: string;
-	minimal_order: number;
-	minimal_order_date: string;
-	main_image: iProductImage[];
-	description: string;
-	terms_conditions?: string;
-	rate: number;
-	kabupaten: string;
-	category: {
-		connect: number;
-	} | null;
-	users_permissions_user: {
-		connect: {
-			id: string;
-		};
-	};
-	documentId?: string; // For Edit Product
-	variant: iProductVariant[];
-	escrow: boolean;
-}
-
-export interface iUserPermissions {
-	id: string;
 }
 
 export interface iProductImage {
 	id: string;
-	url?: string;
-	mime?: string;
-	file?: File | null;
-}
-
-export interface iProdCatRes {
-	id: number;
-	documentId: string;
-	title: string;
-}
-
-export interface iProductRes extends Omit<iProductReq, "users_permissions_user" | "main_image" | "category"> {
-	users_permissions_user: iUserPermissions;
-	main_image: iProductImage[];
-	category: iProdCatRes;
-	documentId: string;
-	user_event_type: {
-		id: number;
-		name: string;
-	};
-	event_date: string;
-	kota_event: string;
-	waktu_event: string;
-	lokasi_event: string;
-	end_date?: string;
-	end_time?: string;
+	url: string;
+	mime: string;
+	file?: File;
 }
 
 export interface iProductVariant {
 	name: string;
+	price: number;
 	quota: string;
-	price: string | number;
-	purchase_deadline?: string;
 }
 
-export interface iProductVariantFormValues {
+export interface iProductReq {
+	title: string;
+	description: string;
+	main_image: iProductImage[];
+	terms_conditions?: string;
+	category: {
+		connect: { id: number }[];
+	};
+	kabupaten: string;
 	variant: iProductVariant[];
+	escrow?: boolean;
 }
 
-export interface iTicketVariant extends Omit<iProductVariant, "purchase_deadline"> {
+export interface iProductRes {
+	id: number;
+	documentId: string;
+	title: string;
+	description: string;
+	main_image: iProductImage[];
+	kabupaten: string;
+	category: any;
+	rate: number;
+	users_permissions_user: any;
+	variant: iProductVariant[];
+	escrow: boolean;
+	user_event_type: any;
+	event_date?: string;
+	kota_event?: string;
+	waktu_event?: string;
+	end_date?: string;
+	end_time?: string;
+	lokasi_event?: string;
+}
+
+export interface iTicketFormReq {
+	title: string;
+	description: string;
+	event_date: string;
+	waktu_event: string;
+	end_date: string;
+	end_time: string;
+	kota_event: string;
+	lokasi_event: string;
+	main_image: iProductImage[];
+	terms_conditions?: string;
+	variant: iTicketVariant[];
+}
+
+export interface iTicketVariant {
+	name: string;
+	price: number;
+	quota: string;
 	purchase_deadline: string;
 }
 
 export interface iTicketImage {
 	id: string;
-	url?: string;
+	url: string;
+	mime: string;
 	file?: File;
-}
-export interface iTicketFormReq {
-	documentId?: string;
-	title: string;
-	description: string;
-	terms_conditions?: string;
-	minimal_order: number;
-	minimal_order_date: string;
-	main_image: iProductImage[];
-	users_permissions_user: number | null;
-	variant: iTicketVariant[];
-	event_date: string;
-	waktu_event: string;
-	lokasi_event: string;
-	kota_event: string;
-	end_date: string;
-	end_time: string;
 }

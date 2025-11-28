@@ -19,7 +19,6 @@ export default function ContentProductEdit(props: any) {
 	const [defaultProductFormData, setDefaultProductFormData] = useState<iProductReq>({
 		title: "",
 		description: "",
-		minimal_order: 0,
 		main_image: [
 			{
 				id: "",
@@ -27,15 +26,8 @@ export default function ContentProductEdit(props: any) {
 				mime: "",
 			},
 		],
-		category: null,
+		category: { connect: [{ id: 0 }] },
 		kabupaten: "",
-		rate: 0,
-		minimal_order_date: "",
-		users_permissions_user: {
-			connect: {
-				id: "",
-			},
-		},
 		variant: [],
 		escrow: false,
 	});
@@ -44,7 +36,6 @@ export default function ContentProductEdit(props: any) {
 
 	const [title, setTitle] = useState<string>("");
 	const [rate, setRate] = useState<number>(0);
-	const [minimal_order, setMinimalOrder] = useState<number>(0);
 	const [kabupaten, setKabupaten] = useState<string>("");
 	const [description, setDescription] = useState<string>("");
 	const router = useRouter();
@@ -73,18 +64,9 @@ export default function ContentProductEdit(props: any) {
 				const formData: iProductReq = {
 					title: dataContent.title,
 					description: dataContent.description,
-					minimal_order: dataContent.minimal_order,
 					main_image: dataContent.main_image,
 					kabupaten: dataContent.kabupaten,
 					category: { connect: dataContent.category?.id },
-					rate: dataContent.rate,
-					minimal_order_date: dataContent.minimal_order_date,
-					users_permissions_user: {
-						connect: {
-							id: dataContent.users_permissions_user.id,
-						},
-					},
-					documentId: dataContent.documentId,
 					variant: dataContent.variant,
 					escrow: dataContent.escrow,
 				};
@@ -94,18 +76,14 @@ export default function ContentProductEdit(props: any) {
 				const ticketFormData: iTicketFormReq = {
 					title: dataContent.title,
 					description: dataContent.description,
-					minimal_order: 0,
 					main_image: dataContent.main_image,
-					users_permissions_user: null,
 					variant: dataContent.variant as iTicketVariant[],
 					event_date: dataContent.event_date,
 					kota_event: dataContent.kota_event,
 					waktu_event: dataContent.waktu_event,
-					minimal_order_date: dataContent.minimal_order_date,
 					end_date: dataContent.end_date || "",
 					end_time: dataContent.end_time || "",
 					lokasi_event: dataContent.lokasi_event,
-					documentId: dataContent.documentId,
 				};
 				setDefaultTicketFormData(ticketFormData);
 			}
@@ -119,7 +97,6 @@ export default function ContentProductEdit(props: any) {
 			const updatedData: iUpdateProduct = {
 				title,
 				rate,
-				minimal_order,
 				kabupaten,
 				description,
 			};

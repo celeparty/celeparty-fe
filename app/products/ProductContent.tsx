@@ -45,7 +45,6 @@ export function ProductContent() {
   const [eventDate, setEventDate] = useState<string>("");
   const [eventLocations, setEventLocations] = useState<iSelectOption[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<string>("");
-  const [minimalOrder, setMinimalOrder] = useState<string>("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   // const {activeButton, setActiveButton} = useButtonStore()
   const [activeButton, setActiveButton] = useState<string | null>(null);
@@ -83,7 +82,7 @@ export function ProductContent() {
         formattedDate
           ? `&filters[minimal_order_date][$eq]=${formattedDate}`
           : ""
-      }${minimalOrder ? `&filters[minimal_order][$eq]=${minimalOrder}` : ""}`
+      }`
     );
   };
 
@@ -95,7 +94,6 @@ export function ProductContent() {
       getCategory,
       selectedLocation,
       eventDate,
-      minimalOrder,
       currentPage,
     ],
     queryFn: getCombinedQuery,
@@ -291,7 +289,6 @@ export function ProductContent() {
   const resetFilters = () => {
     if (selectedLocation) setSelectedLocation("");
     if (eventDate) setEventDate("");
-    if (minimalOrder) setMinimalOrder("");
     if (activeCategory) setActiveCategory("");
     setCurrentPage(1); // Reset to first page when filters change
   };
@@ -379,7 +376,7 @@ export function ProductContent() {
                     </div>
                   </div>
                 )}
-                {(eventDate || selectedLocation || minimalOrder) && (
+                {(eventDate || selectedLocation) && (
                   <>
                     <div className="py-2 text-right">
                       <Button variant={"green"} onClick={resetFilters}>

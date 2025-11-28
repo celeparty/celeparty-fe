@@ -94,8 +94,6 @@ export const ProductForm = ({
 	const watchedFields = watch([
 		"title",
 		"description",
-		"minimal_order",
-		"minimal_order_date",
 		"kabupaten"
 	]);
 
@@ -336,8 +334,6 @@ export const ProductForm = ({
 					<ul className="text-yellow-700 text-xs space-y-1">
 						{!watch("title") && <li>• Nama Produk</li>}
 						{!watch("description") && <li>• Deskripsi Produk</li>}
-						{!watch("minimal_order") && <li>• Minimal Order</li>}
-						{!watch("minimal_order_date") && <li>• Tanggal Minimal Order</li>}
 						{!watch("kabupaten") && <li>• Kota/Kabupaten</li>}
 						{!hideCategory && !stateCategory.status && <li>• Kategori Produk</li>}
 					</ul>
@@ -457,22 +453,7 @@ export const ProductForm = ({
 
 
 
-				<ProductItemInput label="Minimal Order" required>
-					<input
-						type="number"
-						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
-						placeholder="Minimal Order"
-						{...register("minimal_order", {
-							required: true,
-							valueAsNumber: true,
-							onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-								const value = +e.target.value;
-								setValue("minimal_order", value);
-							},
-						})}
-					/>
-					{errors.minimal_order && <p className="text-red-500 text-[10px]">{`${errors.minimal_order.message}`}</p>}
-				</ProductItemInput>
+
 
 
 

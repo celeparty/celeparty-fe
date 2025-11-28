@@ -57,7 +57,6 @@ export function ProductContent() {
   const [eventDate, setEventDate] = useState<string>("");
   const [eventLocations, setEventLocations] = useState<iSelectOption[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<string>("");
-  const [minimalOrder, setMinimalOrder] = useState<string>("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [filterCategories, setFilterCategories] = useState<iEventCategory[]>([]);
 
@@ -104,9 +103,7 @@ export function ProductContent() {
         selectedLocation
           ? `&filters[region][$eq]=${encodeURIComponent(selectedLocation)}`
           : ""
-      }${formattedDate ? `&filters[minimal_order_date][$eq]=${formattedDate}` : ""}${
-        minimalOrder ? `&filters[minimal_order][$eq]=${minimalOrder}` : ""
-      }${priceFilterString}`
+      }${formattedDate ? `&filters[minimal_order_date][$eq]=${formattedDate}` : ""}${priceFilterString}`
     );
   };
 
@@ -119,7 +116,6 @@ export function ProductContent() {
       getCategory,
       selectedLocation,
       eventDate,
-      minimalOrder,
       minPrice,
       maxPrice,
       sortOption,
@@ -145,7 +141,6 @@ export function ProductContent() {
     getCategory,
     selectedLocation,
     eventDate,
-    minimalOrder,
     minPrice,
     maxPrice,
     sortOption,
@@ -207,7 +202,6 @@ export function ProductContent() {
   const resetFilters = () => {
     setSelectedLocation("");
     setEventDate("");
-    setMinimalOrder("");
     setActiveCategory(null);
     setMinPrice("");
     setMaxPrice("");
@@ -347,7 +341,6 @@ export function ProductContent() {
               {(selectedEventType ||
                 eventDate ||
                 selectedLocation ||
-                minimalOrder ||
                 activeCategory ||
                 minPrice ||
                 maxPrice ||

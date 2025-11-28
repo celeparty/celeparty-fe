@@ -16,8 +16,6 @@ interface ProductFiltersProps {
 	setSelectedLocation: (value: string) => void;
 	eventDate: string;
 	setEventDate: (value: string) => void;
-	minimalOrder: string;
-	setMinimalOrder: (value: string) => void;
 	eventLocations: iSelectOption[];
 	selectedEventType: string;
 	setSelectedEventType: (value: string) => void;
@@ -40,8 +38,6 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
 	setSelectedLocation,
 	eventDate,
 	setEventDate,
-	minimalOrder,
-	setMinimalOrder,
 	eventLocations,
 	selectedEventType,
 	setSelectedEventType,
@@ -61,7 +57,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
 	const [isExpanded, setIsExpanded] = useState(!isMobile);
 	const [searchTerm, setSearchTerm] = useState("");
 
-	const hasActiveFilters = selectedLocation || eventDate || minimalOrder || price.min || price.max || activeCategory || selectedEventType;
+	const hasActiveFilters = selectedLocation || eventDate || price.min || price.max || activeCategory || selectedEventType;
 
 	const filteredCategories = filterCategories.filter((cat) =>
 		cat.title.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -77,7 +73,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
 		setPrice({ min: "", max: "" });
 	};
 
-	const activeFiltersCount = [selectedLocation, eventDate, minimalOrder, price.min, price.max, activeCategory].filter(
+	const activeFiltersCount = [selectedLocation, eventDate, price.min, price.max, activeCategory].filter(
 		Boolean,
 	).length;
 
@@ -206,19 +202,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
 						</Select>
 					</div>
 
-					<Separator className="bg-white/20" />
 
-					{/* Minimal Order Filter */}
-					<div className="space-y-3">
-						<label className="text-sm font-semibold">Minimal Order</label>
-					<Input
-						type="number"
-						value={minimalOrder}
-						onChange={(e) => setMinimalOrder(e.target.value)}
-						className="bg-white text-black border-0 h-10 rounded-lg"
-						placeholder="Masukkan jumlah minimal"
-					/>
-					</div>
 
 					<Separator className="bg-white/20" />
 

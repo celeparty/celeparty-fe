@@ -108,8 +108,6 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 	const watchedFields = watch([
 		"title",
 		"description",
-		"minimal_order",
-		"minimal_order_date",
 		"event_date",
 		"waktu_event",
 		"end_date",
@@ -363,8 +361,6 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 					<ul className="text-yellow-700 text-xs space-y-1">
 						{!watch("title") && <li>• Nama Tiket</li>}
 						{!watch("description") && <li>• Deskripsi Produk</li>}
-						{!watch("minimal_order") && <li>• Minimal Order</li>}
-						{!watch("minimal_order_date") && <li>• Tanggal Minimal Order</li>}
 						{!watch("event_date") && <li>• Tanggal Acara</li>}
 						{!watch("waktu_event") && <li>• Waktu Acara</li>}
 						{!watch("end_date") && <li>• Tanggal Selesai</li>}
