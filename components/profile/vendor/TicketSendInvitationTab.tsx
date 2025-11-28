@@ -41,6 +41,7 @@ interface TicketSendInvitationTabProps {
 
 const TicketSendInvitationTab: React.FC<TicketSendInvitationTabProps> = ({ vendorDocumentId, jwtToken }) => {
   const [products, setProducts] = React.useState<iProduct[]>([]);
+  const [isLoadingProducts, setIsLoadingProducts] = React.useState<boolean>(false);
   const [selectedProductId, setSelectedProductId] = React.useState<number | null>(null);
   const [selectedVariantId, setSelectedVariantId] = React.useState<number | null>(null);
   const [quantity, setQuantity] = React.useState<number>(1);
