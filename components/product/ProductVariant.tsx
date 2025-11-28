@@ -65,22 +65,7 @@ export const ProductVariantItem = ({ index, register, onRemove, errors, control 
 					)}
 				</div>
 
-				<div className="input-group md:col-span-6">
-					<label className="block text-sm font-medium mb-1">
-						Deadline{" "}
-						<span className="text-xs">
-							(Opsional - jika melewati tanggal yang ditetapkan produk akan terhapus otomatis)
-						</span>
-					</label>
-					<input
-						type="date"
-						{...register(getFieldName("purchase_deadline"))}
-						className="w-full p-2 border rounded"
-					/>
-					{errors?.variant?.[index]?.purchase_deadline && (
-						<p className="text-red-500 text-xs mt-1">{errors.variant[index].purchase_deadline.message}</p>
-					)}
-				</div>
+
 			</div>
 
 			<button type="button" onClick={onRemove} className="mt-2 text-red-600 text-sm hover:text-red-800">

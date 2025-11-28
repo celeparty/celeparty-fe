@@ -66,7 +66,7 @@ export interface iProductVariant {
 	name: string;
 	quota: string;
 	price: string | number;
-	purchase_deadline: string;
+	purchase_deadline?: string;
 }
 
 export interface iProductVariantFormValues {

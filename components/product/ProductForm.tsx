@@ -171,7 +171,6 @@ export const ProductForm = ({
 			name: "",
 			price: 0,
 			quota: "",
-			purchase_deadline: "",
 		});
 	};
 
@@ -245,7 +244,6 @@ export const ProductForm = ({
 				name: v.name,
 				price: formatMoneyReq(v.price),
 				quota: v.quota,
-				purchase_deadline: formatYearDate(v.purchase_deadline) || "",
 			}));
 			let updatedData: iProductReq = {
 				...data,
@@ -485,6 +483,7 @@ export const ProductForm = ({
 						rules={{ required: true }}
 						render={({ field }) => (
 							<SearchableSelectInput
+								label="Kota/Kabupaten"
 								options={indonesianRegions}
 								value={field.value}
 								onChange={(value) => {
@@ -492,6 +491,7 @@ export const ProductForm = ({
 									setValue("kabupaten", value);
 								}}
 								placeholder="Pilih Kota/Kabupaten"
+								showLabel={false}
 							/>
 						)}
 					/>
