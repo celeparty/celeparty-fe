@@ -3,6 +3,7 @@ import Box from "@/components/Box";
 import ErrorNetwork from "@/components/ErrorNetwork";
 import ItemProduct from "@/components/product/ItemProduct";
 import { LocationFilterBar } from "@/components/product/LocationFilterBar";
+import ProductFilter from "@/components/product/ProductFilter";
 import { Button } from "@/components/ui/button";
 import { iEventCategory } from "@/lib/interfaces/iCategory";
 import { iSelectOption } from "@/lib/interfaces/iCommon";
@@ -46,6 +47,7 @@ export function ProductContent() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [pageSize] = useState<number>(15);
+  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
 
   const router = useRouter();
   const params = useSearchParams();
@@ -216,6 +218,16 @@ export function ProductContent() {
 
   const isFilterCatsAvailable: boolean = filterCategories.length > 0;
 
+  // Check if any filter is active
+  const hasActiveFilters: boolean =
+    !!selectedEventType ||
+    !!eventDate ||
+    !!selectedLocation ||
+    !!activeCategory ||
+    !!minPrice ||
+    !!maxPrice ||
+    sortOption !== "updatedAt:desc";
+
   if (query.isLoading) return <div>Loading produk...</div>;
   if (query.isError) return <ErrorNetwork />;
   if (!dataContent || dataContent.length === 0) {
@@ -224,136 +236,32 @@ export function ProductContent() {
 
   return (
     <div className="grid grid-cols-12 gap-6">
+      {/* Product Filter Sidebar */}
       {isFilterCatsAvailable && (
-        <div className="col-span-12 md:col-span-3">
-          <div className="sidebar">
-            <Box variant="bordered" size="lg" className="bg-c-blue text-white mt-0">
-              {/* Filter: Event Type */}
-              <div className="relative mb-7 [&_h4]:mb-3">
-                <h4 className="font-bold">Jenis Event</h4>
-                <hr className="mb-4 mt-2" />
-                <select
-                  value={selectedEventType}
-                  onChange={(e) => setSelectedEventType(e.target.value)}
-                  className="w-full rounded-md px-3 py-2 text-black"
-                >
-                  <option value="">Semua Jenis Event</option>
-                  {eventTypes.map((eventType, index) => (
-                    <option key={index} value={eventType.value}>
-                      {eventType.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Filter: Event Info */}
-              <div className="relative mb-7 [&_h4]:mb-3">
-                <h4 className="font-bold">Informasi Acara</h4>
-                <hr className="mb-4 mt-2" />
-                <LocationFilterBar
-                  options={eventLocations}
-                  setSelectedLocation={setSelectedLocation}
-                  selectedLocation={selectedLocation}
-                />
-              </div>
-
-              {/* Filter: Product Categories */}
-              <div className="relative mb-7 [&_h4]:mb-3">
-                <h4 className="font-bold">Pilih Kategori Produk</h4>
-                <hr className="mb-4" />
-                <div className="flex flex-col gap-3" style={{ maxHeight: "300px", overflowY: "auto" }}>
-                  {filterCategories.map((cat, index) => (
-                    <ItemInfo
-                      key={index}
-                      icon={Bookmark}
-                      activeClass={`${
-                        activeCategory === cat.title ? "bg-c-green text-white" : ""
-                      }`}
-                      onClick={() => {
-                        const isActive = activeCategory === cat.title;
-                        setActiveCategory(isActive ? null : cat.title);
-                        handleFilter(isActive ? "" : cat.title);
-                      }}
-                    >
-                      <ItemCategory title={cat.title} />
-                    </ItemInfo>
-                  ))}
-                  <ItemInfo
-                    icon={Bookmark}
-                    activeClass={`${
-                      activeCategory === "Lainnya" ? "bg-c-green text-white" : ""
-                    }`}
-                    onClick={() => {
-                      const isActive = activeCategory === "Lainnya";
-                      setActiveCategory(isActive ? null : "Lainnya");
-                      handleFilter(isActive ? "" : "Lainnya");
-                    }}
-                  >
-                    <ItemCategory title={"Lainnya"} />
-                  </ItemInfo>
-                </div>
-              </div>
-
-              {/* Filter: Price Range */}
-              <div className="relative mb-7 [&_h4]:mb-3">
-                <h4 className="font-bold">Kisaran Harga (Rp)</h4>
-                <hr className="mb-4" />
-                <div className="flex gap-4">
-                  <input
-                    type="text"
-                    placeholder="Min"
-                    value={minPrice}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/[^0-9]/g, "");
-                      setMinPrice(val ? formatRupiah(Number(val)) : "");
-                    }}
-                    className="flex-1 rounded-md px-3 py-2 text-black"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Max"
-                    value={maxPrice}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/[^0-9]/g, "");
-                      setMaxPrice(val ? formatRupiah(Number(val)) : "");
-                    }}
-                    className="flex-1 rounded-md px-3 py-2 text-black"
-                  />
-                </div>
-              </div>
-
-              {/* Filter: Sort By */}
-              <div className="relative mb-7 [&_h4]:mb-3">
-                <h4 className="font-bold">Urutkan Berdasarkan</h4>
-                <hr className="mb-4" />
-                <select
-                  value={sortOption}
-                  onChange={(e) => setSortOption(e.target.value)}
-                  className="w-full rounded-md px-3 py-2 text-black"
-                >
-                  <option value="updatedAt:desc">Terbaru</option>
-                  <option value="main_price:asc">Harga: Rendah ke Tinggi</option>
-                  <option value="main_price:desc">Harga: Tinggi ke Rendah</option>
-                </select>
-              </div>
-
-              {/* Reset All Filters Button */}
-              {(selectedEventType ||
-                eventDate ||
-                selectedLocation ||
-                activeCategory ||
-                minPrice ||
-                maxPrice ||
-                sortOption !== "updatedAt:desc") && (
-                <div className="py-2 text-right">
-                  <Button variant={"green"} onClick={resetFilters}>
-                    Reset Semua Filter
-                  </Button>
-                </div>
-              )}
-            </Box>
-          </div>
-        </div>
+        <ProductFilter
+          eventTypes={eventTypes}
+          selectedEventType={selectedEventType}
+          onEventTypeChange={setSelectedEventType}
+          locations={eventLocations}
+          selectedLocation={selectedLocation}
+          onLocationChange={setSelectedLocation}
+          categories={filterCategories}
+          activeCategory={activeCategory}
+          onCategoryChange={(cat) => {
+            setActiveCategory(cat);
+            handleFilter(cat ? cat : "");
+          }}
+          minPrice={minPrice}
+          maxPrice={maxPrice}
+          onMinPriceChange={setMinPrice}
+          onMaxPriceChange={setMaxPrice}
+          sortOption={sortOption}
+          onSortChange={setSortOption}
+          onResetFilters={resetFilters}
+          hasActiveFilters={hasActiveFilters}
+          isOpen={isFilterOpen}
+          onToggle={() => setIsFilterOpen(!isFilterOpen)}
+        />
       )}
       <div
         className={`col-span-12 ${
