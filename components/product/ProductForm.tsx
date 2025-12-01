@@ -177,7 +177,7 @@ export const ProductForm = ({
 			reset(formDefaultData);
 			setStateCategory({
 				status: true,
-				value: formDefaultData.category?.connect ?? null,
+				value: formDefaultData.category?.connect?.[0]?.id ?? null,
 			});
 
 			if (formDefaultData && formDefaultData.main_image) {
@@ -246,7 +246,7 @@ export const ProductForm = ({
 			let updatedData: iProductReq = {
 				...data,
 				main_image,
-				category: stateCategory.value ? { connect: parseInt(`${stateCategory.value}`) - 1 } : null,
+				category: stateCategory.value ? { connect: [{ id: stateCategory.value }] } : { connect: [] },
 				users_permissions_user: {
 					connect: {
 						id: String(session?.user.id),

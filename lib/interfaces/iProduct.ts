@@ -29,6 +29,11 @@ export interface iProductReq {
 	kabupaten: string;
 	variant: iProductVariant[];
 	escrow?: boolean;
+	users_permissions_user?: {
+		connect: {
+			id: string;
+		};
+	};
 }
 
 export interface iProductRes {
@@ -45,11 +50,11 @@ export interface iProductRes {
 	escrow: boolean;
 	user_event_type: any;
 	event_date?: string;
-	kota_event?: string;
-	waktu_event?: string;
+	kota_event: string;
+	waktu_event: string;
 	end_date?: string;
 	end_time?: string;
-	lokasi_event?: string;
+	lokasi_event: string;
 }
 
 export interface iTicketFormReq {
