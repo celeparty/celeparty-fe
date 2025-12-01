@@ -277,22 +277,24 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 			quota: v.quota,
 			purchase_deadline: v.purchase_deadline,
 		}));
-		let payload: any = {
-			data: {
-				...data,
-				main_image: images,
-				event_date: formatYearDate(data.event_date),
-				end_date: formatYearDate(data.end_date),
-				end_time: data.end_time,
-				users_permissions_user: {
-					connect: [{ id: session?.user?.id ? Number(session.user.id) : undefined }],
-				},
-				user_event_type: {
-					connect: [{ id: 16 }],
-				},
-				variant: variants,
-				terms_conditions: data.terms_conditions,
+		let payloadData: any = {
+			...data,
+			main_image: images,
+			event_date: formatYearDate(data.event_date),
+			end_date: formatYearDate(data.end_date) || null,
+			end_time: data.end_time,
+			users_permissions_user: {
+				connect: [{ id: session?.user?.id ? Number(session.user.id) : undefined }],
 			},
+			user_event_type: {
+				connect: [{ id: 16 }],
+			},
+			variant: variants,
+			terms_conditions: data.terms_conditions,
+		};
+
+		let payload: any = {
+			data: payloadData,
 		};
 
 		try {
