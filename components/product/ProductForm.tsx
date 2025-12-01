@@ -290,9 +290,44 @@ export const ProductForm = ({
 			}
 		} catch (error: any) {
 			console.error(error);
+			
+			// Parse error message dengan mapping ke bahasa Indonesia
+			let errorDescription = "Terjadi kesalahan yang tidak diketahui";
+			const rawMessage = error?.response?.data?.error?.message || 
+				error?.response?.data?.message || 
+				error?.message || 
+				"";
+
+			// Mapping error spesifik
+			if (rawMessage.includes("title")) {
+				errorDescription = "Nama produk harus diisi minimal 3 karakter.";
+			} else if (rawMessage.includes("description")) {
+				errorDescription = "Deskripsi produk harus diisi.";
+			} else if (rawMessage.includes("category")) {
+				errorDescription = "Kategori produk harus dipilih.";
+			} else if (rawMessage.includes("kabupaten")) {
+				errorDescription = "Kota/Kabupaten harus dipilih.";
+			} else if (rawMessage.includes("variant")) {
+				errorDescription = "Variant produk tidak valid. Pastikan sudah menambahkan variant dan harga variant.";
+			} else if (rawMessage.includes("main_image") || rawMessage.includes("image")) {
+				errorDescription = "Gambar produk tidak valid. Pastikan sudah menambahkan minimal 1 gambar.";
+			} else if (rawMessage.includes("Unauthorized") || rawMessage.includes("401")) {
+				errorDescription = "Sesi Anda telah berakhir. Silakan login kembali.";
+			} else if (rawMessage.includes("Forbidden") || rawMessage.includes("403")) {
+				errorDescription = "Anda tidak memiliki izin untuk melakukan aksi ini.";
+			} else if (rawMessage.includes("Not Found") || rawMessage.includes("404")) {
+				errorDescription = "Data produk tidak ditemukan. Silakan refresh halaman dan coba lagi.";
+			} else if (rawMessage.includes("Conflict") || rawMessage.includes("409")) {
+				errorDescription = "Produk dengan nama ini sudah ada. Silakan gunakan nama produk yang berbeda.";
+			} else if (rawMessage.includes("invalid")) {
+				errorDescription = `Data produk tidak valid: ${rawMessage}`;
+			} else if (rawMessage.length > 0) {
+				errorDescription = `Gagal menyimpan produk: ${rawMessage}`;
+			}
+
 			toast({
-				title: "Gagal",
-				description: `Gagal ${isEdit ? "edit" : "menambahkan"} produk!`,
+				title: "Gagal Menyimpan Produk",
+				description: errorDescription,
 				className: eAlertType.FAILED,
 			});
 		}

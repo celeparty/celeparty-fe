@@ -281,7 +281,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 			...data,
 			main_image: images,
 			event_date: formatYearDate(data.event_date),
-			end_date: formatYearDate(data.end_date) || null,
+			end_date: formatYearDate(data.end_date),
 			end_time: data.end_time,
 			users_permissions_user: {
 				connect: [{ id: session?.user?.id ? Number(session.user.id) : undefined }],
@@ -298,15 +298,35 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 		};
 
 		try {
+			// Whitelist approach: hanya hapus field yang truly tidak perlu
+			const fieldsToKeep = [
+				"title",
+				"description",
+				"event_date",
+				"end_date",
+				"waktu_event",
+				"end_time",
+				"kota_event",
+				"lokasi_event",
+				"main_image",
+				"users_permissions_user",
+				"user_event_type",
+				"variant",
+				"terms_conditions",
+			];
+
 			Object.keys(payload.data).forEach((k) => {
+				// Hanya hapus jika bukan field yang harus dipertahankan dan empty
 				if (
-					payload.data[k] === undefined ||
-					payload.data[k] === null ||
-					(Array.isArray(payload.data[k]) && payload.data[k].length === 0)
+					!fieldsToKeep.includes(k) &&
+					(payload.data[k] === undefined ||
+						payload.data[k] === null ||
+						(Array.isArray(payload.data[k]) && payload.data[k].length === 0))
 				) {
 					delete payload.data[k];
 				}
 			});
+
 			let response: any;
 			delete payload.data.documentId;
 			// Only delete user_event_type for non-ticket products
@@ -337,14 +357,43 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 			}
 		} catch (error: any) {
 			console.error("Ticket submission error:", error);
-			const errorMessage = error?.response?.data?.error?.message ||
-				error?.response?.data?.message ||
-				error?.message ||
-				"Terjadi kesalahan yang tidak diketahui";
+			
+			// Parse error message dengan mapping ke bahasa Indonesia
+			let errorDescription = "Terjadi kesalahan yang tidak diketahui";
+			const apiError = error?.response?.data?.error;
+			const rawMessage = error?.response?.data?.error?.message || 
+				error?.response?.data?.message || 
+				error?.message || 
+				"";
+
+			// Mapping error spesifik
+			if (rawMessage.includes("invalid key") || rawMessage.includes("end_date")) {
+				errorDescription = "Format tanggal selesai tidak valid. Pastikan semua tanggal telah diisi dengan benar.";
+			} else if (rawMessage.includes("event_date")) {
+				errorDescription = "Format tanggal acara tidak valid. Pastikan tanggal telah diisi dengan benar.";
+			} else if (rawMessage.includes("waktu_event") || rawMessage.includes("end_time")) {
+				errorDescription = "Format waktu tidak valid. Pastikan jam telah diisi dengan format yang benar (HH:MM).";
+			} else if (rawMessage.includes("title")) {
+				errorDescription = "Nama tiket harus diisi minimal 3 karakter.";
+			} else if (rawMessage.includes("description")) {
+				errorDescription = "Deskripsi tiket harus diisi.";
+			} else if (rawMessage.includes("variant")) {
+				errorDescription = "Variant tiket tidak valid. Pastikan sudah menambahkan variant dan harga variant.";
+			} else if (rawMessage.includes("main_image")) {
+				errorDescription = "Gambar tiket tidak valid. Pastikan sudah menambahkan minimal 1 gambar.";
+			} else if (rawMessage.includes("Unauthorized") || rawMessage.includes("401")) {
+				errorDescription = "Sesi Anda telah berakhir. Silakan login kembali.";
+			} else if (rawMessage.includes("Forbidden") || rawMessage.includes("403")) {
+				errorDescription = "Anda tidak memiliki izin untuk melakukan aksi ini.";
+			} else if (rawMessage.includes("Not Found") || rawMessage.includes("404")) {
+				errorDescription = "Data tiket tidak ditemukan. Silakan refresh halaman dan coba lagi.";
+			} else if (rawMessage.length > 0) {
+				errorDescription = `Gagal menyimpan tiket: ${rawMessage}`;
+			}
 
 			toast({
-				title: "Gagal",
-				description: `Gagal ${isEdit ? "edit" : "menambahkan"} tiket: ${errorMessage}`,
+				title: "Gagal Menyimpan Tiket",
+				description: errorDescription,
 				className: eAlertType.FAILED,
 			});
 		} finally {
