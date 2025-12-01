@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useToast } from "@/hooks/use-toast";
 import { formatYearDate } from "@/lib/dateUtils";
 import { eAlertType } from "@/lib/enums/eAlert";
-import { iProductImage, iProductReq, iProductVariant } from "@/lib/interfaces/iProduct";
+import { iProductImage, iProductReq, iProductRes, iProductVariant } from "@/lib/interfaces/iProduct";
 import { axiosUser } from "@/lib/services";
 import { fetchAndConvertToFile, formatMoneyReq, formatNumberWithDots } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,7 +30,7 @@ import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 const MAX_IMAGES = 5;
 
 interface iProductFormProps {
-	formDefaultData: iProductReq;
+	formDefaultData: iProductReq | iProductRes;
 	isEdit: boolean;
 	hideCategory?: boolean;
 	forceUserEventType?: string;
@@ -252,9 +252,8 @@ export const ProductForm = ({
 						id: String(session?.user.id),
 					},
 				},
-				variant: variants,
-				escrow: escrowChecked,
-				rate: 5,
+                                variant: variants,
+                                escrow: escrowChecked,
 			};
 			// Inject user_event_type if forced
 			if (forceUserEventType) {
@@ -267,7 +266,7 @@ export const ProductForm = ({
 					stateCategory.value !== null &&
 					(await axiosUser(
 						"PUT",
-						`/api/products/${formDefaultData.documentId}`,
+						`/api/products/${(formDefaultData as iProductRes).documentId}`,
 						`${session && session?.jwt}`,
 						{
 							data: updatedData,

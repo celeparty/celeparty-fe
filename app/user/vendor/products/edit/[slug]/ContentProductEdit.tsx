@@ -9,6 +9,7 @@ import {
   iProductReq,
   iProductRes,
   iTicketFormReq,
+  iTicketVariant,
   iUpdateProduct,
 } from "@/lib/interfaces/iProduct";
 import { axiosData } from "@/lib/services";
@@ -31,11 +32,8 @@ export default function ContentProductEdit(props: any) {
           mime: "",
         },
       ],
-      price_min: "0",
-      price_max: "0",
       category: { connect: [] },
       kabupaten: "",
-
       users_permissions_user: {
         connect: {
           id: "",
@@ -80,13 +78,11 @@ export default function ContentProductEdit(props: any) {
           main_image: dataContent.main_image,
           kabupaten: dataContent.kabupaten,
           category: { connect: dataContent.category?.id },
-          rate: dataContent.rate,
           users_permissions_user: {
             connect: {
               id: dataContent.users_permissions_user.id,
             },
           },
-          documentId: dataContent.documentId,
           variant: dataContent.variant,
           escrow: dataContent.escrow,
         };
@@ -96,20 +92,14 @@ export default function ContentProductEdit(props: any) {
         const ticketFormData: iTicketFormReq = {
           title: dataContent.title,
           description: dataContent.description,
-          main_price: 0,
-          minimal_order: 0,
+          event_date: dataContent.event_date || "",
+          waktu_event: dataContent.waktu_event || "",
+          end_date: dataContent.end_date || "",
+          end_time: dataContent.end_time || "",
+          kota_event: dataContent.kota_event || "",
+          lokasi_event: dataContent.lokasi_event || "",
           main_image: dataContent.main_image,
-          price_min: 0,
-          price_max: 0,
-          users_permissions_user: null,
-          variant: dataContent.variant,
-          event_date: dataContent.event_date,
-          kota_event: dataContent.kota_event,
-          waktu_event: dataContent.waktu_event,
-          minimal_order_date: dataContent.minimal_order_date,
-          maximal_order_date: "",
-          lokasi_event: dataContent.lokasi_event,
-          documentId: dataContent.documentId,
+          variant: dataContent.variant as iTicketVariant[],
         };
         setDefaultTicketFormData(ticketFormData);
       }
