@@ -1,9 +1,9 @@
 "use client";
 
 import Box from "@/components/Box";
-import { TicketDashboard } from "@/components/profile/vendor/TicketDashboard";
-import { TicketScan } from "@/components/profile/vendor/TicketScan";
-import { TicketSend } from "@/components/profile/vendor/TicketSend";
+import { TicketDashboard } from "@/components/profile/vendor/ticket-management/TicketDashboard";
+import { TicketScan } from "@/components/profile/vendor/ticket-management/TicketScan";
+import { TicketSend } from "@/components/profile/vendor/ticket-management/TicketSend";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import React, { useState } from "react";
 
