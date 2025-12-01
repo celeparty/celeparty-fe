@@ -5,7 +5,7 @@ interface iSearchableSelectInputProps {
 	label: string;
 	options: { label: string; value: string }[];
 	onChange: (value: string) => void;
-	value: string;
+	value: string | undefined;
 	placeholder?: string;
 	required?: boolean;
 	showLabel?: boolean;

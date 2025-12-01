@@ -211,7 +211,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 
 	const handleAddImage = () => {
 		if (mainImageFields.length < MAX_IMAGES) {
-			appendMainImage({ id: "" });
+                        appendMainImage({ id: "", url: "", mime: "" });
 		}
 	};
 
@@ -313,7 +313,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 			}
 
 			if (isEdit) {
-				const productSlug = slug || formDefaultData.documentId;
+				const productSlug = slug || (formDefaultData as any).documentId;
 				response = await axiosUser(
 					"PUT",
 					`/api/products/${productSlug}`,
