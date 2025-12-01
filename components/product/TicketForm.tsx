@@ -281,8 +281,8 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 			data: {
 				...data,
 				main_image: images,
-				event_date: formatYearDate(data.event_date) ?? "",
-				end_date: formatYearDate(data.end_date) ?? "",
+				event_date: formatYearDate(data.event_date),
+				end_date: formatYearDate(data.end_date),
 				end_time: data.end_time,
 				users_permissions_user: {
 					connect: [{ id: session?.user?.id ? Number(session.user.id) : undefined }],
