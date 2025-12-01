@@ -395,7 +395,6 @@ export const TicketSend: React.FC = () => {
 										)
 									}
 									required
-									colSpan={2}
 									className="md:col-span-2"
 								/>
 							</div>

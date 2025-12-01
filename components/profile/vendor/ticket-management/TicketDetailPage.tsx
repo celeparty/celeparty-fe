@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Download, Filter } from "lucide-react";
-import { Skeleton } from "@/components/Skeleton";
+import Skeleton from "@/components/Skeleton";
 import { formatNumberWithDots } from "@/lib/utils";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -67,23 +67,23 @@ export const TicketDetailPage: React.FC<iTicketDetailPageProps> = ({ product }) 
 
 		// Filter by variant
 		if (filterVariant !== "all") {
-			data = data.filter((t) => t.variant_name === filterVariant);
+			data = data.filter((t: iTicketDetail) => t.variant_name === filterVariant);
 		}
 
 		// Filter by status
 		if (filterStatus !== "all") {
-			data = data.filter((t) => t.verification_status === filterStatus);
+			data = data.filter((t: iTicketDetail) => t.verification_status === filterStatus);
 		}
 
 		// Filter by recipient name
 		if (searchRecipient) {
-			data = data.filter((t) =>
+			data = data.filter((t: iTicketDetail) =>
 				t.recipient_name.toLowerCase().includes(searchRecipient.toLowerCase())
 			);
 		}
 
 		// Sort
-		data.sort((a, b) => {
+		data.sort((a: iTicketDetail, b: iTicketDetail) => {
 			let compareValue = 0;
 
 			if (sortBy === "date") {
@@ -104,13 +104,17 @@ export const TicketDetailPage: React.FC<iTicketDetailPageProps> = ({ product }) 
 
 	// Get unique variants for filter
 	const uniqueVariants = useMemo(() => {
-		return [...new Set(detailQuery.data?.map((t) => t.variant_name) || [])];
+		const variants = new Set<string>();
+		detailQuery.data?.forEach((t: iTicketDetail) => {
+			variants.add(t.variant_name);
+		});
+		return Array.from(variants);
 	}, [detailQuery.data]);
 
 	// Export handlers
 	const handleExportExcel = () => {
 		const worksheet = XLSX.utils.json_to_sheet(
-			filteredData.map((t) => ({
+			filteredData.map((t: iTicketDetail) => ({
 				"Kode Tiket": t.ticket_code,
 				"Nama Penerima": t.recipient_name,
 				"Email": t.recipient_email,
@@ -135,7 +139,7 @@ export const TicketDetailPage: React.FC<iTicketDetailPageProps> = ({ product }) 
 
 	const handleExportPDF = () => {
 		const doc = new jsPDF();
-		const tableData = filteredData.map((t) => [
+		const tableData = filteredData.map((t: iTicketDetail) => [
 			t.ticket_code,
 			t.recipient_name,
 			t.recipient_email,
@@ -177,7 +181,7 @@ export const TicketDetailPage: React.FC<iTicketDetailPageProps> = ({ product }) 
 			"Tanggal Beli",
 			"Tanggal Verifikasi",
 		];
-		const rows = filteredData.map((t) => [
+		const rows = filteredData.map((t: iTicketDetail) => [
 			t.ticket_code,
 			t.recipient_name,
 			t.recipient_email,
@@ -190,7 +194,7 @@ export const TicketDetailPage: React.FC<iTicketDetailPageProps> = ({ product }) 
 
 		const csv = [
 			headers.join(","),
-			...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+			...rows.map((row: any) => row.map((cell: any) => `"${cell}"`).join(",")),
 		].join("\n");
 
 		const blob = new Blob([csv], { type: "text/csv" });
@@ -229,7 +233,7 @@ export const TicketDetailPage: React.FC<iTicketDetailPageProps> = ({ product }) 
 				<div className="bg-yellow-50 p-4 rounded-lg">
 					<p className="text-sm text-gray-600">Terverifikasi</p>
 					<p className="text-2xl font-bold text-yellow-600">
-						{filteredData.filter((t) => t.verification_status === "verified").length}
+						{filteredData.filter((t: iTicketDetail) => t.verification_status === "verified").length}
 					</p>
 				</div>
 				<div className="bg-purple-50 p-4 rounded-lg">
@@ -344,9 +348,9 @@ export const TicketDetailPage: React.FC<iTicketDetailPageProps> = ({ product }) 
 						</tr>
 					</thead>
 					<tbody>
-						{filteredData.length > 0 ? (
-							filteredData.map((ticket) => (
-								<tr
+					{filteredData.length > 0 ? (
+						filteredData.map((ticket: iTicketDetail) => (
+							<tr
 									key={ticket.id}
 									className="border-b border-gray-200 hover:bg-gray-50"
 								>

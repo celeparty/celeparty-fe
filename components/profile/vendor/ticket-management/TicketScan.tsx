@@ -100,7 +100,7 @@ export const TicketScan: React.FC = () => {
                   canvasRef.current.height
                 );
                 const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
-                
+
                 if (qrCode) {
                   const uniqueToken = qrCode.data; // atau parse dari JSON
                   // Send to API
@@ -295,9 +295,9 @@ export const TicketScan: React.FC = () => {
 							</tr>
 						</thead>
 						<tbody>
-							{historyQuery.data && historyQuery.data.length > 0 ? (
-								historyQuery.data.map((item, idx) => (
-									<tr
+						{historyQuery.data && historyQuery.data.length > 0 ? (
+							historyQuery.data.map((item: any, idx: number) => (
+								<tr
 										key={idx}
 										className="border-b border-gray-200 hover:bg-gray-50"
 									>

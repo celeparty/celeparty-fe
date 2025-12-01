@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { axiosUser } from "@/lib/services";
 import { iTicketSummary, iVariantSummary } from "@/lib/interfaces/iTicketManagement";
-import { Skeleton } from "@/components/Skeleton";
+import Skeleton from "@/components/Skeleton";
 import { TicketSummaryTable } from "./TicketSummaryTable";
 import { TicketDetailPage } from "./TicketDetailPage";
 import { Button } from "@/components/ui/button";

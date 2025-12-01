@@ -449,9 +449,9 @@ export const ProductForm = ({
 						control={control}
 						rules={{ required: true }}
 						render={({ field }) => (
-							<CKEditor
-								editor={ClassicEditor}
-								data={field.value}
+						<CKEditor
+							editor={ClassicEditor as any}
+							data={field.value}
 								onChange={(_, editor) => {
 									const data = editor.getData();
 									field.onChange(data);
@@ -469,9 +469,9 @@ export const ProductForm = ({
 						name="terms_conditions"
 						control={control}
 						render={({ field }) => (
-							<CKEditor
-								editor={ClassicEditor}
-								data={field.value}
+						<CKEditor
+							editor={ClassicEditor as any}
+							data={field.value}
 								onChange={(_, editor) => {
 									const data = editor.getData();
 									field.onChange(data);
