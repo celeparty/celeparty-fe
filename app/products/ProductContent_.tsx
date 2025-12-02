@@ -183,16 +183,11 @@ export function ProductContent() {
   ]);
 
   const getFilterCatsQuery = async () => {
-    return await axiosData(
-      "GET",
-      `/api/user-event-types?populate=*${
-        getType ? `&filters[name]=${encodeURIComponent(getType)}` : ""
-      }`
-    );
+    return await axiosData("GET", "/api/user-event-types?populate=*");
   };
 
   const filterCatsQuery = useQuery({
-    queryKey: ["qFilterCats", getType],
+    queryKey: ["qFilterCats"],
     queryFn: getFilterCatsQuery,
   });
 
@@ -208,8 +203,24 @@ export function ProductContent() {
   useEffect(() => {
     if (filterCatsQuery.isSuccess) {
       const data = filterCatsQuery.data?.data || [];
-      const categories = data?.[0]?.categories || [];
-      setFilterCategories(categories);
+      
+      // Get categories from ALL event types, not just the first one
+      const allCategories = new Map<string, any>();
+      
+      data.forEach((eventType: any) => {
+        const categories = eventType.categories || [];
+        categories.forEach((cat: any) => {
+          // Use title as unique key to avoid duplicates
+          if (!allCategories.has(cat.title)) {
+            allCategories.set(cat.title, cat);
+          }
+        });
+      });
+      
+      // Convert back to array
+      const categoriesArray = Array.from(allCategories.values());
+      console.log("Loaded Categories:", categoriesArray);
+      setFilterCategories(categoriesArray);
     }
   }, [filterCatsQuery.isSuccess, filterCatsQuery.data]);
 

@@ -152,7 +152,13 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 
 	useEffect(() => {
 		if (formDefaultData) {
-			reset(formDefaultData);
+			// Normalize dates to YYYY-MM-DD format for input
+			const normalizedData: iTicketFormReq = {
+				...formDefaultData,
+				event_date: formDefaultData.event_date ? (formatYearDate(formDefaultData.event_date) || "") : "",
+				end_date: formDefaultData.end_date ? (formatYearDate(formDefaultData.end_date) || "") : "",
+			};
+			reset(normalizedData);
 			if (formDefaultData && formDefaultData.main_image) {
 				convertAndSetEditImages();
 			}
@@ -277,12 +283,27 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 			quota: v.quota,
 			purchase_deadline: v.purchase_deadline,
 		}));
+		
+		// Ensure dates are in correct format
+		const eventDate = formatYearDate(data.event_date);
+		const endDate = formatYearDate(data.end_date);
+		
+		if (!eventDate || !endDate) {
+			toast({
+				title: "Error",
+				description: "Format tanggal tidak valid. Pastikan tanggal acara dan tanggal selesai telah diisi dengan benar.",
+				className: eAlertType.FAILED,
+			});
+			setLoading(false);
+			return;
+		}
+		
 		let payloadData: any = {
 			...data,
 			main_image: images,
-			event_date: formatYearDate(data.event_date),
-			end_date: formatYearDate(data.end_date),
-			end_time: data.end_time,
+			event_date: eventDate,
+			end_date: endDate,
+			end_time: data.end_time || "",
 			users_permissions_user: {
 				connect: [{ id: session?.user?.id ? Number(session.user.id) : undefined }],
 			},
