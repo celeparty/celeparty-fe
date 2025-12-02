@@ -53,7 +53,13 @@ export const TicketSend: React.FC = () => {
 				"/api/tickets",
 				session.jwt
 			);
-			return response?.data || [];
+			console.log("Vendor Tickets Response:", response);
+			
+			// Handle both wrapped and unwrapped responses
+			const data = response?.data || response || [];
+			console.log("Vendor Tickets Data:", data);
+			
+			return Array.isArray(data) ? data : [];
 		} catch (error) {
 			console.error("Error fetching tickets:", error);
 			return [];
@@ -242,26 +248,32 @@ export const TicketSend: React.FC = () => {
 				<h3 className="text-lg font-semibold mb-4">Form Kirim Tiket Undangan</h3>
 
 				<div className="space-y-4 mb-6">
-					{/* Pilih Produk Tiket */}
-					<div>
-						<label className="block text-sm font-medium mb-2">
-							Pilih Produk Tiket <span className="text-red-500">*</span>
-						</label>
+				{/* Pilih Produk Tiket */}
+				<div>
+					<label className="block text-sm font-medium mb-2">
+						Pilih Produk Tiket <span className="text-red-500">*</span>
+					</label>
+					{productsQuery.isLoading ? (
+						<div className="text-sm text-gray-500">Loading produk...</div>
+					) : productsQuery.isError ? (
+						<div className="text-sm text-red-500">Error memuat produk</div>
+					) : !productsQuery.data || productsQuery.data.length === 0 ? (
+						<div className="text-sm text-gray-500">Tidak ada produk tiket</div>
+					) : (
 						<Select value={selectedProduct} onValueChange={setSelectedProduct}>
 							<SelectTrigger>
 								<SelectValue placeholder="Pilih Produk Tiket" />
 							</SelectTrigger>
 							<SelectContent>
 								{productsQuery.data?.map((product: any) => (
-									<SelectItem key={product.documentId} value={product.documentId}>
+									<SelectItem key={product.documentId || product.id} value={product.documentId || product.id}>
 										{product.title}
 									</SelectItem>
 								))}
 							</SelectContent>
 						</Select>
-					</div>
-
-					{/* Pilih Varian */}
+					)}
+				</div>					{/* Pilih Varian */}
 					<div>
 						<label className="block text-sm font-medium mb-2">
 							Pilih Varian Tiket <span className="text-red-500">*</span>

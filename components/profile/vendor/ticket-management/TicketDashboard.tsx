@@ -25,24 +25,61 @@ export const TicketDashboard: React.FC = () => {
 				session.jwt
 			);
 			
+			// Debug log
+			console.log("Ticket Summary Response:", response);
+			
 			// Transform API response to match iTicketSummary interface
-			// Backend returns variants as object {variantName: stats}, convert to array
-			const summaryData = response?.data || [];
+			// Backend returns: { success: true, data: [...] }
+			let summaryData = response?.data || [];
+			
+			// Handle if response is wrapped in success object
+			if (response?.success && Array.isArray(response?.data)) {
+				summaryData = response.data;
+			} else if (Array.isArray(response)) {
+				summaryData = response;
+			}
+			
+			console.log("Transformed Summary Data:", summaryData);
+			
 			return summaryData.map((ticket: any) => {
-				const variants = Array.isArray(ticket.variants)
-					? ticket.variants
-					: Object.entries(ticket.variants || {}).map(([variantName, stats]: [string, any]) => ({
-							variant_id: variantName,
-							variant_name: variantName,
-							price: stats.price || 0,
-							quota: stats.quota || stats.total || 0,
-							sold: stats.sold || stats.total || 0,
-							verified: stats.verified || 0,
-							remaining: (stats.quota || stats.total || 0) - (stats.sold || stats.total || 0),
-							soldPercentage: stats.soldPercentage || ((stats.sold || 0) / (stats.quota || stats.total || 1)) * 100,
-							netIncome: stats.netIncome || 0,
-							systemFeePercentage: stats.systemFeePercentage || 10,
-						}));
+				// Get variants from ticket.variant array (these are components with name, price, quota, etc)
+				const ticketVariants = Array.isArray(ticket.variant) ? ticket.variant : [];
+				const variantStats = ticket.variants || {}; // This is the stats object from backend
+				
+				// Map variant components to iVariantSummary format
+				const variants = ticketVariants.map((variant: any) => {
+					const variantName = variant.name || "Default";
+					const stats = variantStats[variantName] || {};
+					
+					return {
+						variant_id: variant.id || variantName,
+						variant_name: variantName,
+						price: variant.price || 0,
+						quota: variant.quota || stats.total || 0,
+						sold: stats.total || 0, // Backend doesn't separate sold count, use total
+						verified: stats.verified || 0,
+						remaining: (variant.quota || stats.total || 0) - (stats.total || 0),
+						soldPercentage: variant.quota ? ((stats.total || 0) / variant.quota) * 100 : 0,
+						netIncome: stats.revenue || 0,
+						systemFeePercentage: 10, // Default system fee percentage
+					};
+				});
+				
+				// If no variants, create default variant from ticket stats
+				if (variants.length === 0) {
+					variants.push({
+						variant_id: "default",
+						variant_name: "Default",
+						price: ticket.totalSold ? 0 : 0,
+						quota: ticket.totalTickets || 0,
+						sold: ticket.totalSold || 0,
+						verified: ticket.verifiedTickets || 0,
+						remaining: (ticket.totalTickets || 0) - (ticket.totalSold || 0),
+						soldPercentage: ticket.totalTickets ? ((ticket.totalSold || 0) / ticket.totalTickets) * 100 : 0,
+						netIncome: 0,
+						systemFeePercentage: 10,
+					});
+				}
 				
 				return {
 					product_id: ticket.id,

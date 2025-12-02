@@ -295,8 +295,6 @@ export function ProductContent() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const isFilterCatsAvailable: boolean = filterCategories.length > 0;
-
   // Check if any filter is active
   const hasActiveFilters: boolean =
     !!selectedEventType ||
@@ -316,36 +314,34 @@ export function ProductContent() {
   return (
     <div className="grid grid-cols-12 gap-6">
       {/* Product Filter Sidebar */}
-      {isFilterCatsAvailable && (
-        <ProductFilter
-          eventTypes={eventTypes}
-          selectedEventType={selectedEventType}
-          onEventTypeChange={setSelectedEventType}
-          locations={eventLocations}
-          selectedLocation={selectedLocation}
-          onLocationChange={setSelectedLocation}
-          categories={filterCategories}
-          activeCategory={activeCategory}
-          onCategoryChange={(cat) => {
-            setActiveCategory(cat);
-            handleFilter(cat ? cat : "");
-          }}
-          minPrice={minPrice}
-          maxPrice={maxPrice}
-          onMinPriceChange={setMinPrice}
-          onMaxPriceChange={setMaxPrice}
-          sortOption={sortOption}
-          onSortChange={setSortOption}
-          onResetFilters={resetFilters}
-          onApplyFilters={handleApplyFilters}
-          hasActiveFilters={hasActiveFilters}
-          isOpen={isFilterOpen}
-          onToggle={() => setIsFilterOpen(!isFilterOpen)}
-        />
-      )}
+      <ProductFilter
+        eventTypes={eventTypes}
+        selectedEventType={selectedEventType}
+        onEventTypeChange={setSelectedEventType}
+        locations={eventLocations}
+        selectedLocation={selectedLocation}
+        onLocationChange={setSelectedLocation}
+        categories={filterCategories}
+        activeCategory={activeCategory}
+        onCategoryChange={(cat) => {
+          setActiveCategory(cat);
+          handleFilter(cat ? cat : "");
+        }}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        onMinPriceChange={setMinPrice}
+        onMaxPriceChange={setMaxPrice}
+        sortOption={sortOption}
+        onSortChange={setSortOption}
+        onResetFilters={resetFilters}
+        onApplyFilters={handleApplyFilters}
+        hasActiveFilters={hasActiveFilters}
+        isOpen={isFilterOpen}
+        onToggle={() => setIsFilterOpen(!isFilterOpen)}
+      />
       <div
         className={`col-span-12 ${
-          isFilterCatsAvailable ? "md:col-span-9" : "md:col-span-12"
+          isFilterOpen ? "md:col-span-9" : "md:col-span-12"
         }`}
       >
         <div className="grid grid-cols-12 gap-4">
