@@ -36,7 +36,6 @@ export const generateTicketPDF = async (
 			useCORS: true,
 			allowTaint: true,
 			backgroundColor: '#ffffff',
-			quality: quality / 100,
 		});
 
 		// Get canvas dimensions

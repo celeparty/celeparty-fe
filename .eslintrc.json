@@ -1,3 +1,8 @@
 ﻿{
-  "extends": ["next/typescript"]
+  "extends": ["next/core-web-vitals"],
+  "rules": {
+    "react/no-unescaped-entities": "warn",
+    "react-hooks/rules-of-hooks": "warn",
+    "react-hooks/exhaustive-deps": "warn"
+  }
 }

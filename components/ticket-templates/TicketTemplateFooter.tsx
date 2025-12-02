@@ -5,14 +5,14 @@
 
 import React from 'react';
 import { iTicketTemplateContext } from './interfaces';
-import { formatDate } from '@/lib/dateUtils';
+import { formatDate } from '@/lib/utils';
 
 export const TicketTemplateFooter: React.FC<iTicketTemplateContext> = ({
 	data,
 	config,
 	className = '',
 }) => {
-	const formattedDate = formatDate(data.generated_date);
+	const formattedDate = formatDate(data.generated_date instanceof Date ? data.generated_date.toISOString() : String(data.generated_date));
 
 	return (
 		<div className={`w-full ${className}`}>

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { iTicketTemplateContext } from './interfaces';
-import { formatDate } from '@/lib/dateUtils';
+import { formatDate } from '@/lib/utils';
 
 export const TicketTemplateBody: React.FC<iTicketTemplateContext> = ({
 	data,
@@ -67,18 +67,16 @@ export const TicketTemplateBody: React.FC<iTicketTemplateContext> = ({
 					</div>
 
 					{/* Event Date */}
-					{data.event_date && (
-						<div className="flex justify-between border-b border-gray-300 pb-2">
-							<span style={{ fontSize: '12px', color: '#787878', fontFamily: 'Lato' }}>
-								Tanggal Event:
-							</span>
-							<span style={{ fontSize: '12px', color: '#000000', fontFamily: 'Lato' }}>
-								{formatDate(new Date(data.event_date))}
-							</span>
-						</div>
-					)}
-
-					{/* Event Location */}
+				{data.event_date && (
+					<div className="flex justify-between border-b border-gray-300 pb-2">
+						<span style={{ fontSize: '12px', color: '#787878', fontFamily: 'Lato' }}>
+							Tanggal Event:
+						</span>
+						<span style={{ fontSize: '12px', color: '#000000', fontFamily: 'Lato' }}>
+							{formatDate(String(data.event_date))}
+						</span>
+					</div>
+				)}					{/* Event Location */}
 					{data.event_location && (
 						<div className="flex justify-between pb-2">
 							<span style={{ fontSize: '12px', color: '#787878', fontFamily: 'Lato' }}>
