@@ -50,7 +50,7 @@ export const TicketSend: React.FC = () => {
 		try {
 			const response = await axiosUser(
 				"GET",
-				"/api/products?filters[user_event_type][name][$eq]=ticket",
+				"/api/tickets",
 				session.jwt
 			);
 			return response?.data || [];
@@ -94,7 +94,7 @@ export const TicketSend: React.FC = () => {
 	const variants = useMemo(() => {
 		if (!selectedProduct) return [];
 		const product = productsQuery.data?.find(
-			(p: any) => p.documentId === selectedProduct
+			(p: any) => p.documentId === selectedProduct || p.id === selectedProduct
 		);
 		return product?.variant || [];
 	}, [selectedProduct, productsQuery.data]);
@@ -271,8 +271,8 @@ export const TicketSend: React.FC = () => {
 								<SelectValue placeholder="Pilih Varian Tiket" />
 							</SelectTrigger>
 							<SelectContent>
-								{variants.map((variant: any, idx: number) => (
-									<SelectItem key={idx} value={variant.name}>
+								{variants.map((variant: any) => (
+									<SelectItem key={variant.id || variant.documentId || variant.name} value={variant.id || variant.documentId || variant.name}>
 										{variant.name}
 									</SelectItem>
 								))}

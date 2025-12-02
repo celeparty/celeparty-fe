@@ -24,7 +24,35 @@ export const TicketDashboard: React.FC = () => {
 				"/api/tickets/summary",
 				session.jwt
 			);
-			return response?.data || [];
+			
+			// Transform API response to match iTicketSummary interface
+			// Backend returns variants as object {variantName: stats}, convert to array
+			const summaryData = response?.data || [];
+			return summaryData.map((ticket: any) => {
+				const variants = Array.isArray(ticket.variants)
+					? ticket.variants
+					: Object.entries(ticket.variants || {}).map(([variantName, stats]: [string, any]) => ({
+							variant_id: variantName,
+							variant_name: variantName,
+							price: stats.price || 0,
+							quota: stats.quota || stats.total || 0,
+							sold: stats.sold || stats.total || 0,
+							verified: stats.verified || 0,
+							remaining: (stats.quota || stats.total || 0) - (stats.sold || stats.total || 0),
+							soldPercentage: stats.soldPercentage || ((stats.sold || 0) / (stats.quota || stats.total || 1)) * 100,
+							netIncome: stats.netIncome || 0,
+							systemFeePercentage: stats.systemFeePercentage || 10,
+						}));
+				
+				return {
+					product_id: ticket.id,
+					product_title: ticket.title,
+					product_image: ticket.product_image || "",
+					variants: variants,
+					totalRevenue: variants.reduce((sum: number, v: any) => sum + (v.netIncome || 0), 0),
+					totalTicketsSold: variants.reduce((sum: number, v: any) => sum + (v.sold || 0), 0),
+				};
+			});
 		} catch (error) {
 			console.error("Error fetching ticket summary:", error);
 			return [];

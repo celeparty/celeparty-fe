@@ -47,7 +47,7 @@ export function ProductContent() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [pageSize] = useState<number>(15);
-  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
+  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(true); // Default visible
 
   const router = useRouter();
   const params = useSearchParams();
@@ -69,6 +69,9 @@ export function ProductContent() {
   // New states for price range filter
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
+  
+  // New state for apply filter
+  const [applyFilters, setApplyFilters] = useState<boolean>(false);
 
   const getCombinedQuery = async () => {
     const formattedDate = eventDate
@@ -87,9 +90,18 @@ export function ProductContent() {
       if (rawMax) priceFilterString += `&filters[main_price][$lte]=${rawMax}`;
     }
 
+    // Use custom sort logic based on variant prices if sorting by price
+    let sortParam = sortOption;
+    
+    // For now we'll keep main_price sorting, but this will be handled client-side
+    // with variant price calculation
+    if (sortOption === "main_price:asc" || sortOption === "main_price:desc") {
+      sortParam = sortOption;
+    }
+
     return await axiosData(
       "GET",
-      `/api/products?populate=*&sort=${sortOption}&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}${
+      `/api/products?populate=*&sort=${sortParam}&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}${
         selectedEventType
           ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}`
           : ""
@@ -113,7 +125,7 @@ export function ProductContent() {
   const query = useQuery({
     queryKey: [
       "qProducts",
-      getType,
+      selectedEventType,
       getSearch,
       getCategory,
       selectedLocation,
@@ -128,12 +140,34 @@ export function ProductContent() {
 
   useEffect(() => {
     if (query.isSuccess) {
-      setMainData(query.data?.data || []);
+      let data = query.data?.data || [];
+      
+      // Apply client-side sorting based on variant prices if needed
+      if (sortOption === "main_price:asc" || sortOption === "main_price:desc") {
+        data = [...data].sort((a, b) => {
+          const priceA =
+            a?.variant && a.variant.length > 0
+              ? getLowestVariantPrice(a.variant)
+              : a?.main_price || 0;
+          const priceB =
+            b?.variant && b.variant.length > 0
+              ? getLowestVariantPrice(b.variant)
+              : b?.main_price || 0;
+
+          if (sortOption === "main_price:asc") {
+            return priceA - priceB;
+          } else {
+            return priceB - priceA;
+          }
+        });
+      }
+
+      setMainData(data);
       if (query.data?.meta?.pagination) {
         setTotalPages(query.data.meta.pagination.pageCount);
       }
     }
-  }, [query.isSuccess, query.data]);
+  }, [query.isSuccess, query.data, sortOption]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -190,6 +224,45 @@ export function ProductContent() {
     }
   }, [eventTypesQuery.isSuccess, eventTypesQuery.data]);
 
+  // Fetch locations based on selected event type
+  useEffect(() => {
+    const fetchLocations = async () => {
+      if (!selectedEventType) {
+        setEventLocations([]);
+        return;
+      }
+
+      try {
+        // Get event type details to check if it's a ticket or service
+        const eventTypeDetails = await axiosData(
+          "GET",
+          `/api/user-event-types?filters[name][$eq]=${encodeURIComponent(selectedEventType)}&populate=*`
+        );
+
+        const eventTypeData = eventTypeDetails.data?.[0];
+        if (!eventTypeData) return;
+
+        // Determine which cities to use
+        const citiesField = eventTypeData.is_ticket ? "event_cities" : "service_cities";
+        const cities = eventTypeData[citiesField] || [];
+
+        // Convert cities array to options format
+        const cityOptions = cities.map((city: any) => ({
+          label: typeof city === "string" ? city : city.name || city,
+          value: typeof city === "string" ? city : city.name || city,
+        }));
+
+        setEventLocations(cityOptions);
+        setSelectedLocation(""); // Reset selected location when event type changes
+      } catch (error) {
+        console.error("Error fetching locations:", error);
+        setEventLocations([]);
+      }
+    };
+
+    fetchLocations();
+  }, [selectedEventType]);
+
   const dataContent = query?.data?.data || [];
 
   const handleFilter = (category: string) => {
@@ -209,6 +282,12 @@ export function ProductContent() {
     setMaxPrice("");
     setSortOption("updatedAt:desc");
     setCurrentPage(1);
+  };
+
+  const handleApplyFilters = () => {
+    // Trigger the query to refetch with current filters
+    setCurrentPage(1);
+    query.refetch();
   };
 
   const handlePageChange = (page: number) => {
@@ -258,6 +337,7 @@ export function ProductContent() {
           sortOption={sortOption}
           onSortChange={setSortOption}
           onResetFilters={resetFilters}
+          onApplyFilters={handleApplyFilters}
           hasActiveFilters={hasActiveFilters}
           isOpen={isFilterOpen}
           onToggle={() => setIsFilterOpen(!isFilterOpen)}

@@ -52,6 +52,9 @@ interface ProductFilterProps {
   // Mobile toggle
   isOpen?: boolean;
   onToggle?: () => void;
+
+  // Apply filters
+  onApplyFilters?: () => void;
 }
 
 export const ProductFilter: React.FC<ProductFilterProps> = ({
@@ -74,6 +77,7 @@ export const ProductFilter: React.FC<ProductFilterProps> = ({
   hasActiveFilters,
   isOpen = true,
   onToggle,
+  onApplyFilters,
 }) => {
   const [expandedSections, setExpandedSections] = useState<{
     [key: string]: boolean;
@@ -267,6 +271,15 @@ export const ProductFilter: React.FC<ProductFilterProps> = ({
                   <option value="main_price:desc">📈 Harga: Tinggi ke Rendah</option>
                 </select>
               </FilterSection>
+
+              {/* Submit Filter Button */}
+              <button
+                onClick={onApplyFilters}
+                className="w-full bg-gradient-to-r from-c-blue to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition duration-300 shadow-md hover:shadow-lg mb-4"
+              >
+                <Zap size={18} />
+                Terapkan Filter
+              </button>
 
               {/* Reset Button */}
               {hasActiveFilters && (

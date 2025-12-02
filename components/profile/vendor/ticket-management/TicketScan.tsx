@@ -8,7 +8,7 @@ import { iTicketVerificationHistory } from "@/lib/interfaces/iTicketManagement";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { eAlertType } from "@/lib/enums/eAlert";
-import { Camera, Square, RotateCcw } from "lucide-react";
+import { Camera, RotateCcw } from "lucide-react";
 import Skeleton from "@/components/Skeleton";
 import jsQR from "jsqr";
 
@@ -25,6 +25,7 @@ export const TicketScan: React.FC = () => {
 	const [verificationHistory, setVerificationHistory] = useState<
 		iTicketVerificationHistory[]
 	>([]);
+	const scanFrameRef = useRef<number | null>(null);
 
 	// Fetch verification history
 	const getVerificationHistory = async () => {
@@ -59,6 +60,8 @@ export const TicketScan: React.FC = () => {
 			if (videoRef.current) {
 				videoRef.current.srcObject = stream;
 				setIsCameraActive(true);
+				// Start continuous QR scanning
+				scanQRContinuous();
 			}
 		} catch (error) {
 			console.error("Error accessing camera:", error);
@@ -70,71 +73,84 @@ export const TicketScan: React.FC = () => {
 		}
 	};
 
-	// Stop camera
-	const stopCamera = () => {
-		if (videoRef.current?.srcObject) {
-			const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-			tracks.forEach((track) => track.stop());
-			setIsCameraActive(false);
-			setScannedTicket(null);
-		}
+	// Continuous QR code scanning
+	const scanQRContinuous = () => {
+		if (!videoRef.current || !canvasRef.current) return;
+		
+		const canvas = canvasRef.current;
+		const video = videoRef.current;
+		const context = canvas.getContext("2d");
+		
+		if (!context) return;
+		
+		const scan = () => {
+			if (!isCameraActive || video.readyState !== video.HAVE_ENOUGH_DATA) {
+				scanFrameRef.current = requestAnimationFrame(scan);
+				return;
+			}
+			
+			canvas.width = video.videoWidth;
+			canvas.height = video.videoHeight;
+			context.drawImage(video, 0, 0, canvas.width, canvas.height);
+			
+			try {
+				const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+				const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
+				
+				if (qrCode) {
+					// QR code detected
+					const uniqueToken = qrCode.data;
+					handleQRDetected(uniqueToken);
+				}
+			} catch (err) {
+				console.warn("QR scan error:", err);
+			}
+			
+			scanFrameRef.current = requestAnimationFrame(scan);
+		};
+		
+		scanFrameRef.current = requestAnimationFrame(scan);
 	};
 
-	// Capture dan scan QR code
-	const captureQRCode = async () => {
-		if (!canvasRef.current || !videoRef.current) return;
-
-		const context = canvasRef.current.getContext("2d");
-		if (!context) return;
-
-		canvasRef.current.width = videoRef.current.videoWidth;
-		canvasRef.current.height = videoRef.current.videoHeight;
-		context.drawImage(videoRef.current, 0, 0);
-
-		// TODO: Integrate dengan QR code scanner library (misal: jsQR atau zxing)
-		// Untuk saat ini, kami menggunakan simulasi
-		const imageData = context.getImageData(
-                  0,
-                  0,
-                  canvasRef.current.width,
-                  canvasRef.current.height
-                );
-                const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
-
-                if (qrCode) {
-                  const uniqueToken = qrCode.data; // atau parse dari JSON
-                  // Send to API
-                }
-
+	// Handle detected QR code
+	const handleQRDetected = async (uniqueToken: string) => {
 		try {
-			// Simulasi scan QR code - ganti dengan actual QR scanner logic
-			toast({
-				title: "Scan Berhasil",
-				description: "QR code telah terbaca. Tunggu data tiket dimuat...",
-				className: eAlertType.SUCCESS,
-			});
-
-			// Fetch ticket data berdasarkan QR code
+			// Fetch ticket data berdasarkan QR code token
 			const response = await axiosUser(
 				"POST",
 				"/api/tickets/scan",
 				session?.jwt || "",
 				{
-					// qr_data: decryptedData // dari hasil scan QR
+					encodedToken: uniqueToken,
 				}
 			);
 
 			if (response?.data) {
 				setScannedTicket(response.data);
+				// Play success sound atau notification
+				toast({
+					title: "QR Terdeteksi",
+					description: `Tiket ${response.data.ticket_code} siap untuk diverifikasi`,
+					className: eAlertType.SUCCESS,
+				});
 			}
 		} catch (error) {
 			console.error("Error scanning QR code:", error);
-			toast({
-				title: "Error",
-				description: "Gagal membaca QR code. Silakan coba lagi.",
-				className: eAlertType.FAILED,
-			});
 		}
+	};
+
+	// Stop camera
+	const stopCamera = () => {
+		if (videoRef.current?.srcObject) {
+			const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+			tracks.forEach((track) => track.stop());
+		}
+		if (scanFrameRef.current) {
+			cancelAnimationFrame(scanFrameRef.current);
+			scanFrameRef.current = null;
+		}
+		setIsCameraActive(false);
+		setScannedTicket(null);
 	};
 
 	// Verifikasi tiket
@@ -196,30 +212,28 @@ export const TicketScan: React.FC = () => {
 					</Button>
 				) : (
 					<div className="space-y-4">
-						<video
-							ref={videoRef}
-							autoPlay
-							playsInline
-							className="w-full rounded-lg border border-gray-300"
-						/>
-						<canvas ref={canvasRef} className="hidden" />
-						<div className="flex gap-2">
-							<Button
-								onClick={captureQRCode}
-								variant="default"
-								className="flex-1 flex items-center justify-center gap-2"
-							>
-								<Square className="w-4 h-4" />
-								Capture QR Code
-							</Button>
-							<Button
-								onClick={stopCamera}
-								variant="outline"
-								className="flex-1"
-							>
-								Tutup Kamera
-							</Button>
+						<div className="relative">
+							<video
+								ref={videoRef}
+								autoPlay
+								playsInline
+								className="w-full rounded-lg border border-gray-300"
+							/>
+							<canvas ref={canvasRef} className="hidden" />
+							<div className="absolute inset-0 rounded-lg border-2 border-dashed border-red-500 pointer-events-none flex items-center justify-center">
+								<div className="text-center text-white bg-black bg-opacity-50 px-4 py-2 rounded">
+									<p className="text-sm font-semibold">Arahkan QR Code ke Kamera</p>
+									<p className="text-xs">Scanning otomatis...</p>
+								</div>
+							</div>
 						</div>
+						<Button
+							onClick={stopCamera}
+							variant="outline"
+							className="w-full"
+						>
+							Tutup Kamera
+						</Button>
 					</div>
 				)}
 			</div>
