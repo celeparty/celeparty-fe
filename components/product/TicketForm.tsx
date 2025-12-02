@@ -522,9 +522,17 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 						name="event_date"
 						control={control}
 						render={({ field }) => {
-							const dateValue = field.value
-								? parse(field.value, "yyyy-MM-dd", new Date())
-								: null;
+							let dateValue: Date | null = null;
+							
+							// Only parse if value is non-empty and matches YYYY-MM-DD format
+							if (field.value && typeof field.value === 'string' && field.value.trim().length > 0) {
+								if (/^\d{4}-\d{2}-\d{2}$/.test(field.value)) {
+									const parsed = parse(field.value, "yyyy-MM-dd", new Date());
+									if (isDateValid(parsed)) {
+										dateValue = parsed;
+									}
+								}
+							}
 
 							return (
 								<DatePickerInput
@@ -564,9 +572,17 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 						name="end_date"
 						control={control}
 						render={({ field }) => {
-							const dateValue = field.value
-								? parse(field.value, "yyyy-MM-dd", new Date())
-								: null;
+							let dateValue: Date | null = null;
+							
+							// Only parse if value is non-empty and matches YYYY-MM-DD format
+							if (field.value && typeof field.value === 'string' && field.value.trim().length > 0) {
+								if (/^\d{4}-\d{2}-\d{2}$/.test(field.value)) {
+									const parsed = parse(field.value, "yyyy-MM-dd", new Date());
+									if (isDateValid(parsed)) {
+										dateValue = parsed;
+									}
+								}
+							}
 
 							return (
 								<DatePickerInput
