@@ -372,6 +372,12 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 			data: payloadData,
 		};
 
+		// DEBUG: Log payload sebelum cleanup dan submit
+		console.log("===== TICKET FORM DEBUG =====");
+		console.log("Normalized dates:", { eventDate, endDate });
+		console.log("Raw form data:", data);
+		console.log("Payload sebelum cleanup:", JSON.stringify(payload, null, 2));
+
 		try {
 			// Whitelist approach: hanya hapus field yang truly tidak perlu
 			const fieldsToKeep = [
@@ -409,6 +415,9 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 				delete payload.data.user_event_type;
 			}
 
+			// DEBUG: Log final payload before API call
+			console.log("Payload siap dikirim:", JSON.stringify(payload, null, 2));
+
 			if (isEdit) {
 				const productSlug = slug || (formDefaultData as any).documentId;
 				response = await axiosUser(
@@ -422,6 +431,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 			}
 
 			if (response) {
+				console.log("API Response Success:", response);
 				toast({
 					title: "Sukses",
 					description: `Sukses ${isEdit ? "edit" : "menambahkan"} tiket!`,
@@ -431,8 +441,10 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 				window.location.href = "/user/vendor/products";
 			}
 		} catch (error: any) {
-			console.error("Ticket submission error:", error);
-			console.error("Full error response:", error?.response?.data);
+			console.error("===== TICKET SUBMISSION ERROR =====");
+			console.error("Error object:", error);
+			console.error("Error response data:", error?.response?.data);
+			console.error("Error status:", error?.response?.status);
 			
 			// Parse error message dengan mapping ke bahasa Indonesia
 			let errorDescription = "Terjadi kesalahan yang tidak diketahui";
