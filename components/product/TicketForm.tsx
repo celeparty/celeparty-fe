@@ -284,14 +284,48 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 			purchase_deadline: v.purchase_deadline,
 		}));
 		
-		// Ensure dates are in correct format
+		// Ensure dates are in correct format (YYYY-MM-DD for Strapi date type)
 		const eventDate = formatYearDate(data.event_date);
 		const endDate = formatYearDate(data.end_date);
 		
-		if (!eventDate || !endDate) {
+		// Validate dates - must be YYYY-MM-DD format
+		if (!eventDate || !endDate || !/^\d{4}-\d{2}-\d{2}$/.test(eventDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
 			toast({
 				title: "Error",
-				description: "Format tanggal tidak valid. Pastikan tanggal acara dan tanggal selesai telah diisi dengan benar.",
+				description: "Format tanggal tidak valid. Pastikan tanggal acara dan tanggal selesai telah diisi dengan format yang benar (YYYY-MM-DD).",
+				className: eAlertType.FAILED,
+			});
+			setLoading(false);
+			return;
+		}
+		
+		// Validate end_date is not before event_date
+		if (new Date(endDate) < new Date(eventDate)) {
+			toast({
+				title: "Error",
+				description: "Tanggal selesai tidak boleh lebih awal dari tanggal acara.",
+				className: eAlertType.FAILED,
+			});
+			setLoading(false);
+			return;
+		}
+
+		// Validate time formats (HH:MM)
+		const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+		if (!timeRegex.test(data.waktu_event || "")) {
+			toast({
+				title: "Error",
+				description: "Format waktu acara tidak valid. Gunakan format HH:MM (contoh: 14:30)",
+				className: eAlertType.FAILED,
+			});
+			setLoading(false);
+			return;
+		}
+
+		if (!timeRegex.test(data.end_time || "")) {
+			toast({
+				title: "Error",
+				description: "Format jam selesai tidak valid. Gunakan format HH:MM (contoh: 17:00)",
 				className: eAlertType.FAILED,
 			});
 			setLoading(false);
@@ -378,18 +412,31 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 			}
 		} catch (error: any) {
 			console.error("Ticket submission error:", error);
+			console.error("Full error response:", error?.response?.data);
 			
 			// Parse error message dengan mapping ke bahasa Indonesia
 			let errorDescription = "Terjadi kesalahan yang tidak diketahui";
 			const apiError = error?.response?.data?.error;
-			const rawMessage = error?.response?.data?.error?.message || 
-				error?.response?.data?.message || 
-				error?.message || 
-				"";
+			const errorData = error?.response?.data?.error?.details || error?.response?.data?.error || error?.response?.data || {};
+			const rawMessage = (apiError?.message || error?.response?.data?.message || error?.message || "").toLowerCase();
 
-			// Mapping error spesifik
-			if (rawMessage.includes("invalid key") || rawMessage.includes("end_date")) {
-				errorDescription = "Format tanggal selesai tidak valid. Pastikan semua tanggal telah diisi dengan benar.";
+			console.log("Parsed error data:", { apiError, errorData, rawMessage });
+
+			// Mapping error spesifik berdasarkan field validation
+			if (errorData?.errors) {
+				// Jika ada validation errors dari Strapi
+				const errors = errorData.errors;
+				if (errors[0]?.path?.includes("end_date")) {
+					errorDescription = "Format tanggal selesai tidak valid. Pastikan tanggal selesai telah diisi dengan format yang benar (YYYY-MM-DD) dan tidak lebih awal dari tanggal acara.";
+				} else if (errors[0]?.path?.includes("event_date")) {
+					errorDescription = "Format tanggal acara tidak valid. Pastikan tanggal acara telah diisi dengan format yang benar (YYYY-MM-DD).";
+				} else if (errors[0]?.path?.includes("end_time") || errors[0]?.path?.includes("waktu_event")) {
+					errorDescription = "Format waktu tidak valid. Pastikan jam telah diisi dengan format yang benar (HH:MM).";
+				} else {
+					errorDescription = `Validasi gagal pada field: ${errors[0]?.path?.[0] || "tidak diketahui"}. Pesan: ${errors[0]?.message || ""}`;
+				}
+			} else if (rawMessage.includes("invalid") || rawMessage.includes("end_date")) {
+				errorDescription = "Format tanggal selesai tidak valid. Pastikan semua tanggal telah diisi dengan benar dan tidak lebih awal dari tanggal acara.";
 			} else if (rawMessage.includes("event_date")) {
 				errorDescription = "Format tanggal acara tidak valid. Pastikan tanggal telah diisi dengan benar.";
 			} else if (rawMessage.includes("waktu_event") || rawMessage.includes("end_time")) {
@@ -402,11 +449,11 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 				errorDescription = "Variant tiket tidak valid. Pastikan sudah menambahkan variant dan harga variant.";
 			} else if (rawMessage.includes("main_image")) {
 				errorDescription = "Gambar tiket tidak valid. Pastikan sudah menambahkan minimal 1 gambar.";
-			} else if (rawMessage.includes("Unauthorized") || rawMessage.includes("401")) {
+			} else if (rawMessage.includes("unauthorized") || rawMessage.includes("401")) {
 				errorDescription = "Sesi Anda telah berakhir. Silakan login kembali.";
-			} else if (rawMessage.includes("Forbidden") || rawMessage.includes("403")) {
+			} else if (rawMessage.includes("forbidden") || rawMessage.includes("403")) {
 				errorDescription = "Anda tidak memiliki izin untuk melakukan aksi ini.";
-			} else if (rawMessage.includes("Not Found") || rawMessage.includes("404")) {
+			} else if (rawMessage.includes("not found") || rawMessage.includes("404")) {
 				errorDescription = "Data tiket tidak ditemukan. Silakan refresh halaman dan coba lagi.";
 			} else if (rawMessage.length > 0) {
 				errorDescription = `Gagal menyimpan tiket: ${rawMessage}`;
