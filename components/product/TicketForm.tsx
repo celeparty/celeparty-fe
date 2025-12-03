@@ -16,7 +16,7 @@ import {
 import { getLowestVariantPrice } from "@/lib/productUtils";
 import { axiosUser } from "@/lib/services";
 import { fetchAndConvertToFile, formatMoneyReq } from "@/lib/utils";
-import { format, isValid as isDateValid, parse } from "date-fns";
+import { format, isValid as isDateValid, parse, parseISO } from "date-fns";
 import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
@@ -284,23 +284,43 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 			purchase_deadline: v.purchase_deadline,
 		}));
 		
-		// Ensure dates are in correct format (YYYY-MM-DD for Strapi date type)
-		const eventDate = formatYearDate(data.event_date);
-		const endDate = formatYearDate(data.end_date);
-		
-		// Validate dates - must be YYYY-MM-DD format
-		if (!eventDate || !endDate || !/^\d{4}-\d{2}-\d{2}$/.test(eventDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
+		// Normalize and ensure dates are in correct format (YYYY-MM-DD for Strapi date type)
+		const normalizeToYMD = (val: any): string | null => {
+			if (!val && val !== 0) return null;
+			if (val instanceof Date && isDateValid(val)) return format(val, "yyyy-MM-dd");
+			const s = String(val).trim();
+			if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+			// Try ISO parse
+			try {
+				const iso = parseISO(s);
+				if (isDateValid(iso)) return format(iso, "yyyy-MM-dd");
+			} catch (e) {
+				// ignore
+			}
+			// Fallback to Date constructor
+			const d = new Date(s);
+			if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+			return null;
+		};
+
+		const eventDate = normalizeToYMD(data.event_date);
+		const endDate = normalizeToYMD(data.end_date);
+
+		// Validate dates - must be valid YMD
+		if (!eventDate || !endDate) {
 			toast({
 				title: "Error",
-				description: "Format tanggal tidak valid. Pastikan tanggal acara dan tanggal selesai telah diisi dengan format yang benar (YYYY-MM-DD).",
+				description: "Format tanggal tidak valid. Pastikan tanggal acara dan tanggal selesai telah diisi dengan format yang benar (YYYY-MM-DD atau ISO).",
 				className: eAlertType.FAILED,
 			});
 			setLoading(false);
 			return;
 		}
-		
+
 		// Validate end_date is not before event_date
-		if (new Date(endDate) < new Date(eventDate)) {
+		const evDateObj = new Date(eventDate + "T00:00:00Z");
+		const endDateObj = new Date(endDate + "T00:00:00Z");
+		if (endDateObj < evDateObj) {
 			toast({
 				title: "Error",
 				description: "Tanggal selesai tidak boleh lebih awal dari tanggal acara.",
