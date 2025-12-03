@@ -55,11 +55,27 @@ export const TicketSend: React.FC = () => {
 			);
 			console.log("Vendor Tickets Response:", response);
 			
-			// Handle both wrapped and unwrapped responses
-			const data = response?.data || response || [];
+			// Handle multiple response formats
+			let data: any[] = [];
+			
+			if (response?.success && Array.isArray(response?.data)) {
+				data = response.data;
+			} else if (Array.isArray(response?.data)) {
+				data = response.data;
+			} else if (Array.isArray(response)) {
+				data = response;
+			}
+			
 			console.log("Vendor Tickets Data:", data);
 			
-			return Array.isArray(data) ? data : [];
+			// Filter only ticket products
+			const ticketProducts = Array.isArray(data) ? data.filter((item: any) => {
+				const eventType = item.event_type || item.eventType || '';
+				const productType = item.product_type || item.productType || '';
+				return eventType.toLowerCase().includes('ticket') || productType.toLowerCase().includes('ticket') || item.variant;
+			}) : [];
+			
+			return ticketProducts.length > 0 ? ticketProducts : data;
 		} catch (error) {
 			console.error("Error fetching tickets:", error);
 			return [];
@@ -98,11 +114,23 @@ export const TicketSend: React.FC = () => {
 
 	// Get variants for selected product
 	const variants = useMemo(() => {
-		if (!selectedProduct) return [];
+		if (!selectedProduct || !productsQuery.data) return [];
+		
 		const product = productsQuery.data?.find(
 			(p: any) => p.documentId === selectedProduct || p.id === selectedProduct
 		);
-		return product?.variant || [];
+		
+		if (!product) return [];
+		
+		// Get variants from product
+		const productVariants = Array.isArray(product.variant) ? product.variant : [];
+		
+		// Map variants to display format
+		return productVariants.map((v: any) => ({
+			...v,
+			id: v.id || v.documentId,
+			documentId: v.documentId || v.id,
+		}));
 	}, [selectedProduct, productsQuery.data]);
 
 	// Handle recipient change
@@ -248,48 +276,69 @@ export const TicketSend: React.FC = () => {
 				<h3 className="text-lg font-semibold mb-4">Form Kirim Tiket Undangan</h3>
 
 				<div className="space-y-4 mb-6">
-				{/* Pilih Produk Tiket */}
-				<div>
-					<label className="block text-sm font-medium mb-2">
-						Pilih Produk Tiket <span className="text-red-500">*</span>
-					</label>
-					{productsQuery.isLoading ? (
-						<div className="text-sm text-gray-500">Loading produk...</div>
-					) : productsQuery.isError ? (
-						<div className="text-sm text-red-500">Error memuat produk</div>
-					) : !productsQuery.data || productsQuery.data.length === 0 ? (
-						<div className="text-sm text-gray-500">Tidak ada produk tiket</div>
-					) : (
-						<Select value={selectedProduct} onValueChange={setSelectedProduct}>
-							<SelectTrigger>
-								<SelectValue placeholder="Pilih Produk Tiket" />
-							</SelectTrigger>
-							<SelectContent>
-								{productsQuery.data?.map((product: any) => (
-									<SelectItem key={product.documentId || product.id} value={product.documentId || product.id}>
-										{product.title}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					)}
-				</div>					{/* Pilih Varian */}
+					{/* Pilih Produk Tiket */}
+					<div>
+						<label className="block text-sm font-medium mb-2">
+							Pilih Produk Tiket <span className="text-red-500">*</span>
+						</label>
+						{productsQuery.isLoading ? (
+							<div className="text-sm text-gray-500 bg-gray-50 p-3 rounded border border-gray-200">Loading produk...</div>
+						) : productsQuery.isError ? (
+							<div className="text-sm text-red-500 bg-red-50 p-3 rounded border border-red-200">Error memuat produk</div>
+						) : !productsQuery.data || productsQuery.data.length === 0 ? (
+							<div className="text-sm text-gray-500 bg-gray-50 p-3 rounded border border-gray-200">
+								Tidak ada produk tiket. Silakan buat produk tiket terlebih dahulu.
+							</div>
+						) : (
+							<Select value={selectedProduct} onValueChange={(value) => {
+								setSelectedProduct(value);
+								setSelectedVariant(""); // Reset variant when product changes
+							}}>
+								<SelectTrigger className="bg-white">
+									<SelectValue placeholder="Pilih Produk Tiket" />
+								</SelectTrigger>
+								<SelectContent>
+									{productsQuery.data?.map((product: any) => (
+										<SelectItem 
+											key={product.documentId || product.id} 
+											value={product.documentId || product.id}
+										>
+											{product.title || product.name || "Produk Tanpa Nama"}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						)}
+					</div>					{/* Pilih Varian */}
 					<div>
 						<label className="block text-sm font-medium mb-2">
 							Pilih Varian Tiket <span className="text-red-500">*</span>
 						</label>
-						<Select value={selectedVariant} onValueChange={setSelectedVariant}>
-							<SelectTrigger>
-								<SelectValue placeholder="Pilih Varian Tiket" />
-							</SelectTrigger>
-							<SelectContent>
-								{variants.map((variant: any) => (
-									<SelectItem key={variant.id || variant.documentId || variant.name} value={variant.id || variant.documentId || variant.name}>
-										{variant.name}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
+						{!selectedProduct ? (
+							<div className="text-sm text-gray-500 bg-gray-50 p-3 rounded border border-gray-200">
+								Pilih produk tiket terlebih dahulu
+							</div>
+						) : variants.length === 0 ? (
+							<div className="text-sm text-gray-500 bg-gray-50 p-3 rounded border border-gray-200">
+								Tidak ada varian untuk produk ini
+							</div>
+						) : (
+							<Select value={selectedVariant} onValueChange={setSelectedVariant}>
+								<SelectTrigger className="bg-white">
+									<SelectValue placeholder="Pilih Varian Tiket" />
+								</SelectTrigger>
+								<SelectContent>
+									{variants.map((variant: any) => (
+										<SelectItem 
+											key={variant.id || variant.documentId || variant.name} 
+											value={variant.id || variant.documentId || variant.name}
+										>
+											{variant.name} {variant.price ? `- Rp ${variant.price.toLocaleString('id-ID')}` : ''}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						)}
 					</div>
 
 					{/* Jumlah Tiket */}

@@ -17,7 +17,7 @@ export const TicketDashboard: React.FC = () => {
 
 	// Fetch ticket summary
 	const getTicketSummary = async () => {
-		if (!session?.jwt) return null;
+		if (!session?.jwt) return [];
 		try {
 			const response = await axiosUser(
 				"GET",
@@ -28,63 +28,70 @@ export const TicketDashboard: React.FC = () => {
 			// Debug log
 			console.log("Ticket Summary Response:", response);
 			
-			// Transform API response to match iTicketSummary interface
-			// Backend returns: { success: true, data: [...] }
-			let summaryData = response?.data || [];
+			// Extract data from response
+			let summaryData: any[] = [];
 			
-			// Handle if response is wrapped in success object
 			if (response?.success && Array.isArray(response?.data)) {
+				summaryData = response.data;
+			} else if (Array.isArray(response?.data)) {
 				summaryData = response.data;
 			} else if (Array.isArray(response)) {
 				summaryData = response;
 			}
 			
+			if (!Array.isArray(summaryData) || summaryData.length === 0) {
+				console.warn("No ticket data available");
+				return [];
+			}
+			
 			console.log("Transformed Summary Data:", summaryData);
 			
 			return summaryData.map((ticket: any) => {
-				// Get variants from ticket.variant array (these are components with name, price, quota, etc)
+				// Get variants from ticket.variant array
 				const ticketVariants = Array.isArray(ticket.variant) ? ticket.variant : [];
-				const variantStats = ticket.variants || {}; // This is the stats object from backend
 				
 				// Map variant components to iVariantSummary format
 				const variants = ticketVariants.map((variant: any) => {
 					const variantName = variant.name || "Default";
-					const stats = variantStats[variantName] || {};
+					const quota = parseInt(variant.quota) || 0;
+					const sold = parseInt(variant.sold) || 0;
+					const verified = parseInt(variant.verified) || 0;
+					const price = parseFloat(variant.price) || 0;
 					
 					return {
-						variant_id: variant.id || variantName,
+						variant_id: variant.id || variant.documentId || variantName,
 						variant_name: variantName,
-						price: variant.price || 0,
-						quota: variant.quota || stats.total || 0,
-						sold: stats.total || 0, // Backend doesn't separate sold count, use total
-						verified: stats.verified || 0,
-						remaining: (variant.quota || stats.total || 0) - (stats.total || 0),
-						soldPercentage: variant.quota ? ((stats.total || 0) / variant.quota) * 100 : 0,
-						netIncome: stats.revenue || 0,
-						systemFeePercentage: 10, // Default system fee percentage
+						price: price,
+						quota: quota,
+						sold: sold,
+						verified: verified,
+						remaining: Math.max(0, quota - sold),
+						soldPercentage: quota > 0 ? (sold / quota) * 100 : 0,
+						netIncome: price * sold * 0.9, // Assume 10% system fee
+						systemFeePercentage: 10,
 					};
 				});
 				
-				// If no variants, create default variant from ticket stats
+				// If no variants, create default placeholder
 				if (variants.length === 0) {
 					variants.push({
 						variant_id: "default",
-						variant_name: "Default",
-						price: ticket.totalSold ? 0 : 0,
-						quota: ticket.totalTickets || 0,
-						sold: ticket.totalSold || 0,
-						verified: ticket.verifiedTickets || 0,
-						remaining: (ticket.totalTickets || 0) - (ticket.totalSold || 0),
-						soldPercentage: ticket.totalTickets ? ((ticket.totalSold || 0) / ticket.totalTickets) * 100 : 0,
+						variant_name: "Standar",
+						price: 0,
+						quota: 0,
+						sold: 0,
+						verified: 0,
+						remaining: 0,
+						soldPercentage: 0,
 						netIncome: 0,
 						systemFeePercentage: 10,
 					});
 				}
 				
 				return {
-					product_id: ticket.id,
-					product_title: ticket.title,
-					product_image: ticket.product_image || "",
+					product_id: ticket.id || ticket.documentId,
+					product_title: ticket.title || ticket.name || "Tiket Tanpa Nama",
+					product_image: ticket.image?.url || ticket.product_image || "",
 					variants: variants,
 					totalRevenue: variants.reduce((sum: number, v: any) => sum + (v.netIncome || 0), 0),
 					totalTicketsSold: variants.reduce((sum: number, v: any) => sum + (v.sold || 0), 0),
@@ -112,6 +119,26 @@ export const TicketDashboard: React.FC = () => {
 		);
 	}
 
+	if (summaryQuery.isError) {
+		return (
+			<div className="bg-red-50 border border-red-200 rounded-lg p-4">
+				<p className="text-red-600 font-semibold">Error memuat data tiket</p>
+				<p className="text-sm text-red-500 mt-1">Silakan refresh halaman atau hubungi support</p>
+			</div>
+		);
+	}
+
+	const ticketData = summaryQuery.data || [];
+	
+	if (ticketData.length === 0) {
+		return (
+			<div className="bg-blue-50 border border-blue-200 rounded-lg p-8 text-center">
+				<p className="text-blue-600 font-semibold">Belum ada tiket</p>
+				<p className="text-sm text-blue-500 mt-1">Anda belum memiliki produk tiket. Silakan tambahkan produk tiket terlebih dahulu di menu produk.</p>
+			</div>
+		);
+	}
+
 	if (selectedProduct) {
 		return (
 			<div>
@@ -133,7 +160,7 @@ export const TicketDashboard: React.FC = () => {
 		<div>
 			<h3 className="text-lg font-semibold mb-4">Ringkasan Penjualan Tiket</h3>
 			<TicketSummaryTable
-				data={summaryQuery.data || []}
+				data={ticketData}
 				onDetailClick={setSelectedProduct}
 			/>
 		</div>

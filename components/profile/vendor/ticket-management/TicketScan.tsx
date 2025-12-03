@@ -212,19 +212,27 @@ export const TicketScan: React.FC = () => {
 					</Button>
 				) : (
 					<div className="space-y-4">
-						<div className="relative">
+						<div className="bg-black rounded-lg overflow-hidden aspect-video flex items-center justify-center relative">
 							<video
 								ref={videoRef}
 								autoPlay
 								playsInline
-								className="w-full rounded-lg border border-gray-300"
+								muted
+								className="w-full h-full object-cover"
+								style={{ transform: 'rotateY(0deg)' }}
 							/>
 							<canvas ref={canvasRef} className="hidden" />
-							<div className="absolute inset-0 rounded-lg border-2 border-dashed border-red-500 pointer-events-none flex items-center justify-center">
-								<div className="text-center text-white bg-black bg-opacity-50 px-4 py-2 rounded">
-									<p className="text-sm font-semibold">Arahkan QR Code ke Kamera</p>
-									<p className="text-xs">Scanning otomatis...</p>
-								</div>
+							
+							{/* Overlay targeting reticle */}
+							<div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+								<div className="w-48 h-48 border-2 border-red-500 rounded-lg"></div>
+								<div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-red-500/10"></div>
+							</div>
+							
+							{/* Scanning status text */}
+							<div className="absolute bottom-4 left-4 right-4 bg-black bg-opacity-60 text-white px-3 py-2 rounded-lg text-center">
+								<p className="text-sm font-semibold">Arahkan QR Code ke Kamera</p>
+								<p className="text-xs text-gray-300">Scanning otomatis...</p>
 							</div>
 						</div>
 						<Button
