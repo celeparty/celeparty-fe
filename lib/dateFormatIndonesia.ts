@@ -171,6 +171,16 @@ export const formatDateWithDayIndonesia = (date: Date | string | null | undefine
 };
 
 /**
+ * Format plain time string to include WIB: "14:30" -> "14:30 WIB"
+ * @param timeString - Time string in format HH:MM or HH:MM:SS
+ * @returns Formatted string like "14:30 WIB"
+ */
+export const formatTimeWithWIB = (timeString: string | null | undefined): string => {
+  if (!timeString) return "";
+  return formatTimeIndonesia(timeString);
+};
+
+/**
  * Get duration between two dates in readable format
  * @param startDate - Start date
  * @param endDate - End date

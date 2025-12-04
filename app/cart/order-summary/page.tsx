@@ -2,6 +2,7 @@
 import Box from "@/components/Box";
 import { useCart } from "@/lib/store/cart";
 import { formatRupiah } from "@/lib/utils";
+import { formatDateIndonesia, formatTimeWithWIB } from "@/lib/dateFormatIndonesia";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -353,10 +354,10 @@ export default function OrderSummaryPage() {
 												<>
 													{item.event_date && <p className="text-sm text-c-gray-600">Tanggal Acara: {item.event_date}</p>}
 													{item.waktu_event && <p className="text-sm text-c-gray-600">Jam Acara: {item.waktu_event}</p>}
-													{item.end_date && item.end_date !== item.event_date && (
-														<p className="text-sm text-c-gray-600">Tanggal Selesai: {item.end_date}</p>
-													)}
-													{item.end_time && <p className="text-sm text-c-gray-600">Jam Selesai: {item.end_time}</p>}
+												{item.end_date && item.end_date !== item.event_date && (
+													<p className="text-sm text-c-gray-600">Tanggal Selesai: {formatDateIndonesia(item.end_date)}</p>
+												)}
+												{item.end_time && <p className="text-sm text-c-gray-600">Jam Selesai: {formatTimeWithWIB(item.end_time)}</p>}
 													{item.kota_event && <p className="text-sm text-c-gray-600">Kota: {item.kota_event}</p>}
 													{item.lokasi_event && <p className="text-sm text-c-gray-600">Lokasi: {item.lokasi_event}</p>}
 												</>
@@ -419,8 +420,8 @@ export default function OrderSummaryPage() {
 													<p><strong>No WhatsApp:</strong> {item.telp || "-"}</p>
 													<p><strong>Tanggal Acara:</strong> {item.event_date || "-"}</p>
 													<p><strong>Detail Alamat:</strong> {item.shipping_location || "-"}</p>
-													<p><strong>Tanggal Loading:</strong> {item.loading_date || "-"}</p>
-													<p><strong>Jam Loading:</strong> {item.loading_time || "-"}</p>
+												<p><strong>Tanggal Loading:</strong> {formatDateIndonesia(item.loading_date) || "-"}</p>
+												<p><strong>Jam Loading:</strong> {formatTimeWithWIB(item.loading_time) || "-"}</p>
 													<p><strong>Catatan:</strong> {item.note || "-"}</p>
 												</div>
 											</div>

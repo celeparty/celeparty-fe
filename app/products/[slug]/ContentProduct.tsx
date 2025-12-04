@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { whatsAppNumber } from "@/lib/appSettings";
 import { axiosData } from "@/lib/services";
 import { formatRupiah } from "@/lib/utils";
+import { formatTimeWithWIB } from "@/lib/dateFormatIndonesia";
 import { useQuery } from "@tanstack/react-query";
 import parse from "html-react-parser";
 import Image from "next/image";
@@ -168,11 +169,11 @@ export default function ContentProduct(props: any) {
                   <h4 className="font-semibold mb-2 text-c-blue">ℹ️ Informasi Acara</h4>
                   <div className="space-y-1 text-sm">
                     <div><b>Tanggal Acara:</b> {dataContent?.event_date}</div>
-                    {dataContent?.waktu_event && <div><b>Jam Acara:</b> {dataContent?.waktu_event}</div>}
+                    {dataContent?.waktu_event && <div><b>Jam Acara:</b> {formatTimeWithWIB(dataContent?.waktu_event)}</div>}
                     {dataContent?.end_date && dataContent.end_date !== dataContent.event_date && (
                       <div><b>Tanggal Selesai:</b> {dataContent?.end_date}</div>
                     )}
-                    {dataContent?.end_time && <div><b>Jam Selesai:</b> {dataContent?.end_time}</div>}
+                    {dataContent?.end_time && <div><b>Jam Selesai:</b> {formatTimeWithWIB(dataContent?.end_time)}</div>}
                     {dataContent?.kota_event && <div><b>Kota Acara:</b> {dataContent?.kota_event}</div>}
                     {dataContent?.lokasi_event && <div><b>Lokasi Acara:</b> {dataContent?.lokasi_event}</div>}
                   </div>
