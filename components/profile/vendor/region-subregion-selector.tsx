@@ -11,10 +11,32 @@ interface RegionSubregionSelectorProps {
 }
 
 const RegionSubregionSelector: React.FC<RegionSubregionSelectorProps> = ({ index, provinceOptions }) => {
-	const { control, watch, setValue } = useFormContext();
+	const { control, watch, setValue, formState: { errors } } = useFormContext();
 	const [subregionOptions, setSubregionOptions] = useState<iSelectOption[]>([]);
+	const [duplicateError, setDuplicateError] = useState<string>("");
 
 	const regionValue = watch(`serviceLocation.${index}.id`);
+	const subregionValue = watch(`serviceLocation.${index}.idSubRegion`);
+	const allServiceLocations = watch("serviceLocation") || [];
+
+	// Check for duplicate cities
+	useEffect(() => {
+		const currentSubregion = allServiceLocations[index]?.subregion;
+		if (!currentSubregion) {
+			setDuplicateError("");
+			return;
+		}
+
+		const hasDuplicate = allServiceLocations.some((loc: any, idx: number) => 
+			idx !== index && loc?.subregion === currentSubregion
+		);
+
+		if (hasDuplicate) {
+			setDuplicateError(`Kota "${currentSubregion}" sudah dipilih sebelumnya`);
+		} else {
+			setDuplicateError("");
+		}
+	}, [allServiceLocations, index, subregionValue]);
 
 	useEffect(() => {
 		const fetchSubregion = async () => {
@@ -36,64 +58,72 @@ const RegionSubregionSelector: React.FC<RegionSubregionSelectorProps> = ({ index
 	}, [regionValue]);
 
 	return (
-		<div className="flex gap-2 w-full">
-			<div className="w-[50%] mb-2">
-				<Controller
-					name={`serviceLocation.${index}.id`}
-					control={control}
-					render={({ field }) => (
-						<>
+		<div className="w-full">
+			<div className="flex gap-2 w-full">
+				<div className="w-[50%] mb-2">
+					<Controller
+						name={`serviceLocation.${index}.id`}
+						control={control}
+						render={({ field }) => (
+							<>
+								<SelectInput
+									label="Provinsi"
+									onChange={(id) => {
+										let selectedProvince = provinceOptions.find((pv) => pv.value === id);
+										if (selectedProvince) {
+											let updatedValue: iServiceLocation = {
+												id,
+												region: selectedProvince?.label || "",
+												subregion: field.value?.subregion || "",
+												idSubRegion: field.value?.idSubRegion || "",
+											};
+											field.onChange(updatedValue);
+											setValue(`serviceLocation.${index}.id`, id);
+											setValue(`serviceLocation.${index}.region`, selectedProvince?.label);
+										}
+									}}
+									value={field.value || ""}
+									options={provinceOptions}
+								/>
+							</>
+						)}
+					/>
+				</div>
+
+				<div className="w-[50%] mb-2">
+					<Controller
+						name={`serviceLocation.${index}.idSubRegion`}
+						control={control}
+						render={({ field }) => (
 							<SelectInput
-								label="Provinsi"
+								label="Kabupaten/Kota"
 								onChange={(id) => {
-									let selectedProvince = provinceOptions.find((pv) => pv.value === id);
-									if (selectedProvince) {
+									let selectedRegion = subregionOptions.find((sr) => sr.value === id);
+									if (selectedRegion) {
 										let updatedValue: iServiceLocation = {
-											id,
-											region: selectedProvince?.label || "",
-											subregion: field.value?.subregion || "",
-											idSubRegion: field.value?.idSubRegion || "",
+											idSubRegion: id,
+											subregion: selectedRegion.label,
+											region: field.value?.region || "",
+											id: field.value?.id || "",
 										};
 										field.onChange(updatedValue);
-										setValue(`serviceLocation.${index}.id`, id);
-										setValue(`serviceLocation.${index}.region`, selectedProvince?.label);
+										setValue(`serviceLocation.${index}.idSubRegion`, id);
+										setValue(`serviceLocation.${index}.subregion`, selectedRegion?.label);
 									}
 								}}
 								value={field.value || ""}
-								options={provinceOptions}
+								options={subregionOptions}
 							/>
-						</>
-					)}
-				/>
+						)}
+					/>
+				</div>
 			</div>
-
-			<div className="w-[50%] mb-2">
-				<Controller
-					name={`serviceLocation.${index}.idSubRegion`}
-					control={control}
-					render={({ field }) => (
-						<SelectInput
-							label="Kabupaten"
-							onChange={(id) => {
-								let selectedRegion = subregionOptions.find((sr) => sr.value === id);
-								if (selectedRegion) {
-									let updatedValue: iServiceLocation = {
-										idSubRegion: id,
-										subregion: selectedRegion.label,
-										region: field.value?.region || "",
-										id: field.value?.id || "",
-									};
-									field.onChange(updatedValue);
-									setValue(`serviceLocation.${index}.idSubRegion`, id);
-									setValue(`serviceLocation.${index}.subregion`, selectedRegion?.label);
-								}
-							}}
-							value={field.value || ""}
-							options={subregionOptions}
-						/>
-					)}
-				/>
-			</div>
+			{duplicateError && (
+				<div className="text-red-500 text-sm mt-1 mb-2 flex items-center gap-1">
+					<span>⚠️</span>
+					<span>{duplicateError}</span>
+				</div>
+			)}
 		</div>
 	);
 };
