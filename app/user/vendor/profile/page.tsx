@@ -335,6 +335,8 @@ export default function ProfilePage() {
 									placeholder="Masukkan alamat lengkap usaha"
 									{...register("address", { required: true })}
 								/>
+							</div>
+
 							{/* Section 3: Lokasi Pelayanan */}
 							<div className="border rounded-lg p-6 bg-white">
 								<h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
