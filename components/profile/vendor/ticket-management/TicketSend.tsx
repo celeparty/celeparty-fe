@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { eAlertType } from "@/lib/enums/eAlert";
+import { formatDateIndonesia } from "@/lib/dateFormatIndonesia";
 import { Plus, Trash2, Lock } from "lucide-react";
 import Skeleton from "@/components/Skeleton";
 
@@ -550,10 +551,7 @@ export const TicketSend: React.FC = () => {
 										className="border-b border-gray-200 hover:bg-gray-50"
 									>
 										<td className="px-3 py-2">
-											{new Date(item.send_date).toLocaleDateString("id-ID", {
-												hour: "2-digit",
-												minute: "2-digit",
-											})}
+											{formatDateIndonesia(item.send_date)}
 										</td>
 										<td className="px-3 py-2">{item.product_title}</td>
 										<td className="px-3 py-2">{item.variant_name}</td>

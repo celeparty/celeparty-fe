@@ -8,6 +8,7 @@ import { iTicketVerificationHistory } from "@/lib/interfaces/iTicketManagement";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { eAlertType } from "@/lib/enums/eAlert";
+import { formatDateIndonesia } from "@/lib/dateFormatIndonesia";
 import { Camera, RotateCcw } from "lucide-react";
 import Skeleton from "@/components/Skeleton";
 import jsQR from "jsqr";
@@ -327,9 +328,7 @@ export const TicketScan: React.FC = () => {
 										<td className="px-3 py-2">{item.recipient_name}</td>
 										<td className="px-3 py-2">{item.variant_name}</td>
 										<td className="px-3 py-2">
-											{new Date(
-												`${item.verification_date}T${item.verification_time}`
-											).toLocaleString("id-ID")}
+											{formatDateIndonesia(`${item.verification_date}T${item.verification_time}`)} {item.verification_time}
 										</td>
 									</tr>
 								))

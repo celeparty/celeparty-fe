@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Download, Filter } from "lucide-react";
 import Skeleton from "@/components/Skeleton";
 import { formatNumberWithDots } from "@/lib/utils";
+import { formatDateIndonesia } from "@/lib/dateFormatIndonesia";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -374,11 +375,11 @@ export const TicketDetailPage: React.FC<iTicketDetailPageProps> = ({ product }) 
 										</span>
 									</td>
 									<td className="px-4 py-3 text-sm">
-										{new Date(ticket.purchase_date).toLocaleDateString("id-ID")}
+										{formatDateIndonesia(ticket.purchase_date)}
 									</td>
 									<td className="px-4 py-3 text-sm">
 										{ticket.verification_date
-											? new Date(ticket.verification_date).toLocaleDateString("id-ID")
+											? formatDateIndonesia(ticket.verification_date)
 											: "-"}
 									</td>
 								</tr>
