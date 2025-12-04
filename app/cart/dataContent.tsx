@@ -3,16 +3,8 @@ import Box from "@/components/Box";
 import { eProductType } from "@/lib/enums/eProduct";
 import { useCart } from "@/lib/store/cart";
 import { formatRupiah } from "@/lib/utils";
+import { formatDateIndonesia } from "@/lib/dateFormatIndonesia";
 
-function formatDateToDDMMYYYY(dateString: string | undefined) {
-	if (!dateString) return "-";
-	const date = new Date(dateString);
-	if (isNaN(date.getTime())) return "-";
-	const day = String(date.getDate()).padStart(2, "0");
-	const month = String(date.getMonth() + 1).padStart(2, "0");
-	const year = date.getFullYear();
-	return `${day}-${month}-${year}`;
-}
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
@@ -205,23 +197,21 @@ export default function CartContent() {
 										<div className="space-y-1 text-sm">
 											<div><b>Produk:</b> {item.product_name}</div>
 											<div><b>Varian Produk:</b> {item.variant || "-"}</div>
-											{item.product_type === "ticket" && (
-												<>
-													<div><b>Tanggal Acara:</b> {formatDateToDDMMYYYY(item.event_date)}</div>
-													{item.waktu_event && <div><b>Jam Acara:</b> {item.waktu_event}</div>}
-													{item.end_date && item.end_date !== item.event_date && (
-														<div><b>Tanggal Selesai:</b> {formatDateToDDMMYYYY(item.end_date)}</div>
-													)}
-													{item.end_time && <div><b>Jam Selesai:</b> {item.end_time}</div>}
-													{item.kota_event && <div><b>Kota Acara:</b> {item.kota_event}</div>}
-													{item.lokasi_event && <div><b>Lokasi Acara:</b> {item.lokasi_event}</div>}
-													<div><b>Nama Pemesan:</b> {item.customer_name || "-"}</div>
-													<div><b>No. Telepon:</b> {item.telp || "-"}</div>
-													<div><b>Catatan:</b> {item.note || "-"}</div>
-												</>
-											)}
-
-
+										{item.product_type === "ticket" && (
+											<>
+												<div><b>Tanggal Acara:</b> {formatDateIndonesia(item.event_date)}</div>
+												{item.waktu_event && <div><b>Jam Acara:</b> {item.waktu_event}</div>}
+												{item.end_date && item.end_date !== item.event_date && (
+													<div><b>Tanggal Selesai:</b> {formatDateIndonesia(item.end_date)}</div>
+												)}
+												{item.end_time && <div><b>Jam Selesai:</b> {item.end_time}</div>}
+												{item.kota_event && <div><b>Kota Acara:</b> {item.kota_event}</div>}
+												{item.lokasi_event && <div><b>Lokasi Acara:</b> {item.lokasi_event}</div>}
+												<div><b>Nama Pemesan:</b> {item.customer_name || "-"}</div>
+												<div><b>No. Telepon:</b> {item.telp || "-"}</div>
+												<div><b>Catatan:</b> {item.note || "-"}</div>
+											</>
+										)}
 {item.product_type !== "ticket" && (
 	<div className="mt-4 p-4 border rounded-lg bg-gray-50 space-y-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 		<h4 className="col-span-full font-semibold mb-3 text-c-blue">Detail Pemesanan</h4>
@@ -287,7 +277,7 @@ export default function CartContent() {
 					item.loading_date ? "border-gray-300 focus:ring-blue-500" : "border-red-300 focus:ring-red-500"
 				}`}
 			/>
-			<div className="mt-1 text-sm text-gray-600">{formatDateToDDMMYYYY(item.loading_date)}</div>
+			<div className="mt-1 text-sm text-gray-600">{formatDateIndonesia(item.loading_date)}</div>
 		</div>
 
 		<div className="sm:col-span-1">

@@ -64,7 +64,14 @@ export const sanitizeVendorData = (formData: iMerchantProfile) => {
 export const formatDate = (isoString: string) => {
 	try {
 		const date = parseISO(isoString);
-		return format(date, "dd-MM-yyyy");
+		// Use Indonesian date format
+		const day = String(date.getDate()).padStart(2, "0");
+		const monthIndex = date.getMonth();
+		const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", 
+		                "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+		const month = months[monthIndex];
+		const year = date.getFullYear();
+		return `${day} - ${month} - ${year}`;
 	} catch {
 		return ""; // Return empty string if parsing fails
 	}
