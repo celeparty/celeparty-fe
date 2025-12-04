@@ -58,32 +58,29 @@ export function ProductContent() {
       ? format(new Date(eventDate), "yyyy-MM-dd")
       : null;
 
-    return await axiosData(
-      "GET",
-      `/api/products?populate=*&&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}${
-        getType
-          ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(
-              getType
-            )}`
-          : ""
-      }${
-        getSearch
-          ? `&filters[title][$containsi]=${encodeURIComponent(getSearch)}`
-          : ""
-      }${
-        getCategory
-          ? `&filters[category][title][$eq]=${encodeURIComponent(cat)}`
-          : ""
-      }${
-        selectedLocation
-          ? `&filters[region][$eq]=${encodeURIComponent(selectedLocation)}`
-          : ""
-      }${
-        formattedDate
-          ? `&filters[minimal_order_date][$eq]=${formattedDate}`
-          : ""
-      }`
-    );
+    // Build the filter for location - we'll filter by kota_event for tickets and kabupaten for others
+    // Since Strapi doesn't support simple OR, we fetch all and filter on the frontend
+    const baseUrl = `/api/products?populate=*&&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}${
+      getType
+        ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(
+            getType
+          )}`
+        : ""
+    }${
+      getSearch
+        ? `&filters[title][$containsi]=${encodeURIComponent(getSearch)}`
+        : ""
+    }${
+      getCategory
+        ? `&filters[category][title][$eq]=${encodeURIComponent(cat)}`
+        : ""
+    }${
+      formattedDate
+        ? `&filters[minimal_order_date][$eq]=${formattedDate}`
+        : ""
+    }`;
+
+    return await axiosData("GET", baseUrl);
   };
 
   const query = useQuery({
@@ -101,13 +98,28 @@ export function ProductContent() {
 
   useEffect(() => {
     if (query.isSuccess) {
-      setMainData(query.data.data);
+      let data = query.data.data;
+      
+      // Apply location filter on the frontend
+      if (selectedLocation) {
+        data = data.filter((item: any) => {
+          let locationValue = "";
+          if (item.user_event_type?.name === "Tiket" || item.user_event_type?.name === "ticket") {
+            locationValue = item.kota_event;
+          } else {
+            locationValue = item.kabupaten || item.region;
+          }
+          return locationValue?.toLowerCase().replace(/\s+/g, "-") === selectedLocation.toLowerCase().replace(/\s+/g, "-");
+        });
+      }
+      
+      setMainData(data);
       // Set total pages from pagination metadata
       if (query.data.meta?.pagination) {
         setTotalPages(query.data.meta.pagination.pageCount);
       }
     }
-  }, [query.isSuccess, query.data]);
+  }, [query.isSuccess, query.data, selectedLocation]);
 
   // Reset to first page when filters change
   useEffect(() => {
@@ -192,10 +204,18 @@ export function ProductContent() {
   useEffect(() => {
     if (mainData.length === 0) return;
 
-    const uniqueRegions = new Set<string>();
+    const uniqueLocations = new Set<string>();
     mainData.forEach((data: any) => {
-      if (data.region) {
-        uniqueRegions.add(data.region);
+      // Use kota_event for ticket products, kabupaten for non-ticket products
+      let locationValue = "";
+      if (data.user_event_type?.name === "Tiket" || data.user_event_type?.name === "ticket") {
+        locationValue = data.kota_event;
+      } else {
+        locationValue = data.kabupaten || data.region;
+      }
+      
+      if (locationValue) {
+        uniqueLocations.add(locationValue);
       }
     });
 
@@ -203,9 +223,9 @@ export function ProductContent() {
       return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
     };
 
-    const newLocations = Array.from(uniqueRegions).map((region) => ({
-      label: capitalizeFirstLetter(region),
-      value: region.toLowerCase().replace(/\s+/g, "-"),
+    const newLocations = Array.from(uniqueLocations).map((location) => ({
+      label: capitalizeFirstLetter(location),
+      value: location.toLowerCase().replace(/\s+/g, "-"),
     }));
 
     setEventLocations((prevLocations) => {

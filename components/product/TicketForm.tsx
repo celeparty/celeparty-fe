@@ -286,25 +286,58 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 		
 		// Normalize and ensure dates are in correct format (YYYY-MM-DD for Strapi date type)
 		const normalizeToYMD = (val: any): string | null => {
-			if (!val && val !== 0) return null;
-			if (val instanceof Date && isDateValid(val)) return format(val, "yyyy-MM-dd");
+			if (val === null || val === undefined || val === "") return null;
+			
+			// If already a valid YYYY-MM-DD string, return as-is
 			const s = String(val).trim();
-			if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-			// Try ISO parse
-			try {
-				const iso = parseISO(s);
-				if (isDateValid(iso)) return format(iso, "yyyy-MM-dd");
-			} catch (e) {
-				// ignore
+			if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+				// Validate that it's a real date
+				const testDate = new Date(s + "T00:00:00Z");
+				if (!isNaN(testDate.getTime())) {
+					return s;
+				}
 			}
-			// Fallback to Date constructor
+			
+			// If Date object
+			if (val instanceof Date) {
+				if (isDateValid(val)) {
+					return format(val, "yyyy-MM-dd");
+				}
+				return null;
+			}
+			
+			// Try ISO string parse
+			if (typeof s === "string" && s.includes("T")) {
+				try {
+					const iso = parseISO(s);
+					if (isDateValid(iso)) return format(iso, "yyyy-MM-dd");
+				} catch (e) {
+					// ignore
+				}
+			}
+			
+			// Fallback: try Date constructor
 			const d = new Date(s);
-			if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+			if (!isNaN(d.getTime())) {
+				return d.toISOString().slice(0, 10);
+			}
+			
 			return null;
 		};
 
+		// DEBUG: Log raw dates before normalization
+		console.log("Raw dates from form:", { 
+			event_date: data.event_date, 
+			end_date: data.end_date,
+			event_date_type: typeof data.event_date,
+			end_date_type: typeof data.end_date,
+		});
+
 		const eventDate = normalizeToYMD(data.event_date);
 		const endDate = normalizeToYMD(data.end_date);
+
+		// DEBUG: Log normalized dates
+		console.log("Normalized dates:", { eventDate, endDate });
 
 		// Validate dates - must be valid YMD
 		if (!eventDate || !endDate) {

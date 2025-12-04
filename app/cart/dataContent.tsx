@@ -207,10 +207,17 @@ export default function CartContent() {
 											<div><b>Varian Produk:</b> {item.variant || "-"}</div>
 											{item.product_type === "ticket" && (
 												<>
-											<div><b>Tanggal Acara:</b> {formatDateToDDMMYYYY(item.event_date)}</div>
-											<div><b>Nama Pemesan:</b> {item.customer_name || "-"}</div>
-											<div><b>No. Telepon:</b> {item.telp || "-"}</div>
-											<div><b>Catatan:</b> {item.note || "-"}</div>
+													<div><b>Tanggal Acara:</b> {formatDateToDDMMYYYY(item.event_date)}</div>
+													{item.waktu_event && <div><b>Jam Acara:</b> {item.waktu_event}</div>}
+													{item.end_date && item.end_date !== item.event_date && (
+														<div><b>Tanggal Selesai:</b> {formatDateToDDMMYYYY(item.end_date)}</div>
+													)}
+													{item.end_time && <div><b>Jam Selesai:</b> {item.end_time}</div>}
+													{item.kota_event && <div><b>Kota Acara:</b> {item.kota_event}</div>}
+													{item.lokasi_event && <div><b>Lokasi Acara:</b> {item.lokasi_event}</div>}
+													<div><b>Nama Pemesan:</b> {item.customer_name || "-"}</div>
+													<div><b>No. Telepon:</b> {item.telp || "-"}</div>
+													<div><b>Catatan:</b> {item.note || "-"}</div>
 												</>
 											)}
 

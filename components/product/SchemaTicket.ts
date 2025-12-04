@@ -9,4 +9,5 @@ export const SchemaTicket = z.object({
 	end_time: z.string().min(1, { message: "Jam selesai harus diisi" }),
 	kota_event: z.string().min(1, { message: "Kota acara harus diisi" }),
 	lokasi_event: z.string().min(1, { message: "Lokasi acara harus diisi" }),
+	terms_conditions: z.string().optional().default(""),
 });

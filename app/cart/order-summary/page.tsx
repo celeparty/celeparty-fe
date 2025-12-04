@@ -349,6 +349,18 @@ export default function OrderSummaryPage() {
 											{item.variant && (
 												<p className="text-sm text-c-gray-600">Varian: {item.variant}</p>
 											)}
+											{item.product_type === "ticket" && (
+												<>
+													{item.event_date && <p className="text-sm text-c-gray-600">Tanggal Acara: {item.event_date}</p>}
+													{item.waktu_event && <p className="text-sm text-c-gray-600">Jam Acara: {item.waktu_event}</p>}
+													{item.end_date && item.end_date !== item.event_date && (
+														<p className="text-sm text-c-gray-600">Tanggal Selesai: {item.end_date}</p>
+													)}
+													{item.end_time && <p className="text-sm text-c-gray-600">Jam Selesai: {item.end_time}</p>}
+													{item.kota_event && <p className="text-sm text-c-gray-600">Kota: {item.kota_event}</p>}
+													{item.lokasi_event && <p className="text-sm text-c-gray-600">Lokasi: {item.lokasi_event}</p>}
+												</>
+											)}
 										</div>
 										<div className="text-right">
 											<p className="font-semibold text-c-orange">

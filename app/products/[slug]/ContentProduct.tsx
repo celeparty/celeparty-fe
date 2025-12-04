@@ -164,8 +164,18 @@ export default function ContentProduct(props: any) {
                 </div>
               )}
               {dataContent?.event_date && (
-                <div className="lg:mt-5 mt-[10px] ">
-                  <b>Tanggal Acara:</b> {dataContent?.event_date}
+                <div className="lg:mt-5 mt-[10px] border rounded-lg p-4 bg-blue-50">
+                  <h4 className="font-semibold mb-2 text-c-blue">ℹ️ Informasi Acara</h4>
+                  <div className="space-y-1 text-sm">
+                    <div><b>Tanggal Acara:</b> {dataContent?.event_date}</div>
+                    {dataContent?.waktu_event && <div><b>Jam Acara:</b> {dataContent?.waktu_event}</div>}
+                    {dataContent?.end_date && dataContent.end_date !== dataContent.event_date && (
+                      <div><b>Tanggal Selesai:</b> {dataContent?.end_date}</div>
+                    )}
+                    {dataContent?.end_time && <div><b>Jam Selesai:</b> {dataContent?.end_time}</div>}
+                    {dataContent?.kota_event && <div><b>Kota Acara:</b> {dataContent?.kota_event}</div>}
+                    {dataContent?.lokasi_event && <div><b>Lokasi Acara:</b> {dataContent?.lokasi_event}</div>}
+                  </div>
                 </div>
               )}
               <div className="lg:mt-5 mt-[10px] text-[12px]">

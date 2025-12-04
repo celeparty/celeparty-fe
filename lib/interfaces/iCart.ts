@@ -8,6 +8,11 @@ export interface CartItem {
 	loading_date?: string;
 	loading_time?: string;
 	event_date?: string;
+	end_date?: string; // Ticket end date
+	waktu_event?: string; // Ticket event time
+	end_time?: string; // Ticket end time
+	kota_event?: string; // Ticket event city
+	lokasi_event?: string; // Ticket event location
 	shipping_location?: string;
 	customer_name?: string;
 	telp?: string;

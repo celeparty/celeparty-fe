@@ -93,6 +93,12 @@ export default function SideBar({
         productTypeName === eProductType.ticket
           ? dataProducts.event_date || ""
           : eventDate,
+      // Additional ticket fields
+      end_date: productTypeName === eProductType.ticket ? (dataProducts.end_date || "") : undefined,
+      waktu_event: productTypeName === eProductType.ticket ? (dataProducts.waktu_event || "") : undefined,
+      end_time: productTypeName === eProductType.ticket ? (dataProducts.end_time || "") : undefined,
+      kota_event: productTypeName === eProductType.ticket ? (dataProducts.kota_event || "") : undefined,
+      lokasi_event: productTypeName === eProductType.ticket ? (dataProducts.lokasi_event || "") : undefined,
       shipping_location: shippingAddress,
       customer_name: customerName,
       telp: telp,
