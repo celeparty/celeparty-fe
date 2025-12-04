@@ -16,11 +16,14 @@ import { axiosData } from "@/lib/services";
 import { formatNumberWithDots } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AiFillCustomerService } from "react-icons/ai";
 
 export default function ContentProductEdit(props: any) {
+  const searchParams = useSearchParams();
+  const productType = searchParams.get('type') || 'product'; // Get type from URL query param
+  
   const [defaultProductFormData, setDefaultProductFormData] =
     useState<iProductReq>({
       title: "",
@@ -53,13 +56,14 @@ export default function ContentProductEdit(props: any) {
   const router = useRouter();
   const { toast } = useToast();
 
-  const [isTicketType, setIsTicketType] = useState<boolean>(false);
+  const [isTicketType, setIsTicketType] = useState<boolean>(productType === 'ticket');
 
   const getQuery = async () => {
-    return await axiosData("GET", `/api/products/${props.slug}?populate=*`);
+    const endpoint = productType === 'ticket' ? `/api/tickets/${props.slug}?populate=*` : `/api/products/${props.slug}?populate=*`;
+    return await axiosData("GET", endpoint);
   };
   const query = useQuery({
-    queryKey: ["qProductDetail"],
+    queryKey: ["qProductDetail", props.slug, productType],
     queryFn: getQuery,
   });
 
@@ -67,11 +71,27 @@ export default function ContentProductEdit(props: any) {
 
   useEffect(() => {
     if (dataContent) {
-      const { user_event_type } = dataContent;
-      const { name: productTypeName } = user_event_type || {};
-      setIsTicketType(productTypeName === eProductType.ticket ? true : false);
-
-      if (productTypeName !== eProductType.ticket) {
+      if (productType === 'ticket') {
+        // Handle ticket type
+        const ticketFormData: iTicketFormReq = {
+          title: dataContent.title,
+          description: dataContent.description,
+          event_date: dataContent.event_date || "",
+          waktu_event: dataContent.waktu_event || "",
+          end_date: dataContent.end_date || "",
+          end_time: dataContent.end_time || "",
+          kota_event: dataContent.kota_event || "",
+          lokasi_event: dataContent.lokasi_event || "",
+          main_image: dataContent.main_image,
+          variant: dataContent.variant as iTicketVariant[],
+          terms_conditions: (dataContent as any).terms_conditions || "",
+        };
+        setDefaultTicketFormData(ticketFormData);
+        setIsTicketType(true);
+      } else {
+        // Handle product type
+        const { user_event_type } = dataContent;
+        
         const formData: iProductReq = {
           title: dataContent.title,
           description: dataContent.description,
@@ -88,23 +108,10 @@ export default function ContentProductEdit(props: any) {
         };
 
         setDefaultProductFormData(formData);
-      } else {
-        const ticketFormData: iTicketFormReq = {
-          title: dataContent.title,
-          description: dataContent.description,
-          event_date: dataContent.event_date || "",
-          waktu_event: dataContent.waktu_event || "",
-          end_date: dataContent.end_date || "",
-          end_time: dataContent.end_time || "",
-          kota_event: dataContent.kota_event || "",
-          lokasi_event: dataContent.lokasi_event || "",
-          main_image: dataContent.main_image,
-          variant: dataContent.variant as iTicketVariant[],
-        };
-        setDefaultTicketFormData(ticketFormData);
+        setIsTicketType(false);
       }
     }
-  }, [dataContent]);
+  }, [dataContent, productType]);
 
 
 
@@ -125,6 +132,7 @@ export default function ContentProductEdit(props: any) {
             <TicketForm
               isEdit={true}
               formDefaultData={defaultTicketFormData}
+              slug={props.slug}
             ></TicketForm>
           </>
         ) : (

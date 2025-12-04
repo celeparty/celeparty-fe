@@ -45,19 +45,46 @@ export default function Products() {
 	const [myData, setMyData] = useState<any>([]);
 	const [selectProduct, setSelectProduct] = useState<any>(null);
 	const { userMe }: any = useUser();
-	const getData = () => {
-		axios
-			.get(
-				`${process.env.BASE_API}/api/products?populate=*&filters[users_permissions_user][documentId]=${userMe.user.documentId}`,
-				{
-					headers: {
-						Authorization: `Bearer ${userMe.jwt}`,
+	const getData = async () => {
+		try {
+			// Fetch both products (equipment) and tickets
+			const [productsRes, ticketsRes] = await Promise.all([
+				axios.get(
+					`${process.env.BASE_API}/api/products?populate=*&filters[users_permissions_user][documentId]=${userMe.user.documentId}`,
+					{
+						headers: {
+							Authorization: `Bearer ${userMe.jwt}`,
+						},
 					},
-				},
-			)
-			.then((res) => {
-				setMyData(res?.data?.data);
-			});
+				),
+				axios.get(
+					`${process.env.BASE_API}/api/tickets?populate=*&filters[users_permissions_user][documentId]=${userMe.user.documentId}`,
+					{
+						headers: {
+							Authorization: `Bearer ${userMe.jwt}`,
+						},
+					},
+				),
+			]);
+
+			// Mark tickets with type for differentiation
+			const ticketsData = (ticketsRes?.data?.data || []).map((ticket: any) => ({
+				...ticket,
+				__type: 'ticket',
+			}));
+
+			// Mark products with type for differentiation
+			const productsData = (productsRes?.data?.data || []).map((product: any) => ({
+				...product,
+				__type: 'product',
+			}));
+
+			// Combine both data
+			setMyData([...productsData, ...ticketsData]);
+		} catch (error) {
+			console.error("Error fetching data:", error);
+			setMyData([]);
+		}
 	};
 	useEffect(() => {
 		if (status === "authenticated" && userMe?.user?.documentId) {
@@ -89,7 +116,7 @@ export default function Products() {
 		}
 	};
 
-	const handleDeleteProduct = async (documentId: string) => {
+	const handleDeleteProduct = async (documentId: string, productType: string = 'product') => {
 		let isConfirmed = true;
 		if (typeof window !== "undefined") {
 			isConfirmed = window.confirm("Are you sure you want to remove this product?");
@@ -97,7 +124,8 @@ export default function Products() {
 		if (!isConfirmed) return;
 
 		try {
-			const res = await axios.delete(`${process.env.BASE_API}/api/products/${documentId}`, {
+			const endpoint = productType === 'ticket' ? '/api/tickets' : '/api/products';
+			const res = await axios.delete(`${process.env.BASE_API}${endpoint}/${documentId}`, {
 				headers: {
 					Authorization: `Bearer ${process.env.KEY_API}`,
 				},
@@ -145,7 +173,7 @@ export default function Products() {
 									location={item.region ? item.region : null}
 								>
 									<div className="flex gap-1 justify-end py-2">
-										<Link href={`products/edit/${item.documentId}`}>
+										<Link href={`products/edit/${item.documentId}?type=${item.__type}`}>
 											<button
 												onClick={() => {
 													// setSelectProduct(item)
@@ -157,7 +185,7 @@ export default function Products() {
 												<FiEdit className="text-blue-500" size={18} />
 											</button>
 										</Link>
-										<button onClick={() => handleDeleteProduct(item.documentId)}>
+										<button onClick={() => handleDeleteProduct(item.documentId, item.__type)}>
 											<FaRegTrashAlt className="text-red-500" size={18} />
 										</button>
 									</div>

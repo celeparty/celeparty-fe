@@ -394,9 +394,6 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 			users_permissions_user: {
 				connect: [{ id: session?.user?.id ? Number(session.user.id) : undefined }],
 			},
-			user_event_type: {
-				connect: [{ id: 16 }],
-			},
 			variant: variants,
 			terms_conditions: data.terms_conditions,
 		};
@@ -443,24 +440,20 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 
 			let response: any;
 			delete payload.data.documentId;
-			// Only delete user_event_type for non-ticket products
-			if (!isEdit) {
-				delete payload.data.user_event_type;
-			}
 
 			// DEBUG: Log final payload before API call
 			console.log("Payload siap dikirim:", JSON.stringify(payload, null, 2));
 
 			if (isEdit) {
-				const productSlug = slug || (formDefaultData as any).documentId;
+				const ticketSlug = slug || (formDefaultData as any).documentId;
 				response = await axiosUser(
 					"PUT",
-					`/api/products/${productSlug}`,
+					`/api/tickets/${ticketSlug}`,
 					`${session && session?.jwt}`,
 					payload,
 				);
 			} else {
-				response = await axiosUser("POST", "/api/products?status=draft", process.env.KEY_API || "", payload);
+				response = await axiosUser("POST", "/api/tickets", session?.jwt || "", payload);
 			}
 
 			if (response) {
