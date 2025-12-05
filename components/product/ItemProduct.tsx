@@ -15,12 +15,20 @@ interface iItemProduct {
 	location?: string | boolean;
 	url: string;
 	children?: ReactNode;
+	status?: 'published' | 'unpublished' | null;
 }
 
 export default function ItemProduct(props: iItemProduct) {
 	return (
 		<div className="lg:p-2 lg:w-1/5 w-1/2 p-2  lg:shadow-gray-400 lg:shadow-none">
-			<section className=" rounded-lg shadow-md flex flex-col justify-between h-full p-3">
+			<section className=" rounded-lg shadow-md flex flex-col justify-between h-full p-3 relative">
+				{props.status && (
+					<div className="absolute top-2 right-2 z-10">
+						<span className={`px-2 py-1 text-xs font-bold rounded-full text-white ${props.status === 'published' ? 'bg-green-500' : 'bg-yellow-500'}`}>
+							{props.status === 'published' ? 'Tiket Aktif' : 'Menunggu Persetujuan'}
+						</span>
+					</div>
+				)}
 				<div>
 					<Link href={props.url} aria-label={`Lihat detail produk: ${props.title}`}>
 						<div>

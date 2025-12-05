@@ -57,61 +57,78 @@ export default function ContentProductEdit(props: any) {
   const { toast } = useToast();
 
   const [isTicketType, setIsTicketType] = useState<boolean>(productType === 'ticket');
+  const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
 
   const getQuery = async () => {
     const endpoint = productType === 'ticket' ? `/api/tickets/${props.slug}?populate=*` : `/api/products/${props.slug}?populate=*`;
-    return await axiosData("GET", endpoint);
+    console.log('Fetching from endpoint:', endpoint);
+    const result = await axiosData("GET", endpoint);
+    console.log('Query result:', result);
+    return result;
   };
   const query = useQuery({
     queryKey: ["qProductDetail", props.slug, productType],
     queryFn: getQuery,
+    enabled: !!props.slug,
   });
 
   const dataContent: iProductRes = query?.data?.data;
 
   useEffect(() => {
+    console.log('useEffect triggered - isLoading:', query.isLoading, 'dataContent:', dataContent);
+    
+    if (query.isLoading) {
+      return; // Wait for data to load
+    }
+    
     if (dataContent) {
+      console.log('Processing dataContent:', dataContent);
+      
       if (productType === 'ticket') {
         // Handle ticket type
         const ticketFormData: iTicketFormReq = {
-          title: dataContent.title,
-          description: dataContent.description,
+          title: dataContent.title || "",
+          description: dataContent.description || "",
           event_date: dataContent.event_date || "",
           waktu_event: dataContent.waktu_event || "",
           end_date: dataContent.end_date || "",
           end_time: dataContent.end_time || "",
           kota_event: dataContent.kota_event || "",
           lokasi_event: dataContent.lokasi_event || "",
-          main_image: dataContent.main_image,
-          variant: dataContent.variant as iTicketVariant[],
+          main_image: dataContent.main_image || [],
+          variant: (dataContent.variant as iTicketVariant[]) || [],
           terms_conditions: (dataContent as any).terms_conditions || "",
         };
+        console.log('Setting ticket form data:', ticketFormData);
         setDefaultTicketFormData(ticketFormData);
         setIsTicketType(true);
+        setIsDataLoaded(true);
       } else {
         // Handle product type
         const { user_event_type } = dataContent;
         
         const formData: iProductReq = {
-          title: dataContent.title,
-          description: dataContent.description,
-          main_image: dataContent.main_image,
-          kabupaten: dataContent.kabupaten,
-          category: { connect: dataContent.category?.id },
+          title: dataContent.title || "",
+          description: dataContent.description || "",
+          main_image: dataContent.main_image || [],
+          kabupaten: dataContent.kabupaten || "",
+          category: { connect: dataContent.category?.id || "" },
           users_permissions_user: {
             connect: {
-              id: dataContent.users_permissions_user.id,
+              id: dataContent.users_permissions_user?.id || "",
             },
           },
-          variant: dataContent.variant,
-          escrow: dataContent.escrow,
+          variant: dataContent.variant || [],
+          escrow: dataContent.escrow || false,
         };
 
+        console.log('Setting product form data:', formData);
         setDefaultProductFormData(formData);
         setIsTicketType(false);
+        setIsDataLoaded(true);
       }
     }
-  }, [dataContent, productType]);
+  }, [dataContent, productType, query.isLoading]);
 
 
 
@@ -127,21 +144,35 @@ export default function ContentProductEdit(props: any) {
         Edit {isTicketType ? "Tiket" : "Produk"}
       </h1>
       <Box className="mt-0">
-        {isTicketType ? (
-          <>
-            <TicketForm
-              isEdit={true}
-              formDefaultData={defaultTicketFormData}
-              slug={props.slug}
-            ></TicketForm>
-          </>
+        {query.isLoading ? (
+          <div className="text-center py-8">
+            <p className="text-gray-500">Loading data...</p>
+          </div>
+        ) : query.isError ? (
+          <div className="text-center py-8">
+            <p className="text-red-500">Error loading data. Please try again.</p>
+          </div>
+        ) : isDataLoaded ? (
+          isTicketType ? (
+            <>
+              <TicketForm
+                isEdit={true}
+                formDefaultData={defaultTicketFormData}
+                slug={props.slug}
+              ></TicketForm>
+            </>
+          ) : (
+            <>
+              <ProductForm
+                isEdit={true}
+                formDefaultData={defaultProductFormData}
+              ></ProductForm>
+            </>
+          )
         ) : (
-          <>
-            <ProductForm
-              isEdit={true}
-              formDefaultData={defaultProductFormData}
-            ></ProductForm>
-          </>
+          <div className="text-center py-8">
+            <p className="text-gray-500">No data available</p>
+          </div>
         )}
       </Box>
       <Box>

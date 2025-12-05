@@ -48,9 +48,11 @@ export default function Products() {
 	const getData = async () => {
 		try {
 			// Fetch both products (equipment) and tickets
+			// For products, we only fetch published ones
+			// For tickets, we fetch all (both published and unpublished) so vendor can see status
 			const [productsRes, ticketsRes] = await Promise.all([
 				axios.get(
-					`${process.env.BASE_API}/api/products?populate=*&filters[users_permissions_user][documentId]=${userMe.user.documentId}`,
+					`${process.env.BASE_API}/api/products?populate=*&filters[users_permissions_user][documentId]=${userMe.user.documentId}&filters[publishedAt][$notnull]=true`,
 					{
 						headers: {
 							Authorization: `Bearer ${userMe.jwt}`,
@@ -67,16 +69,18 @@ export default function Products() {
 				),
 			]);
 
-			// Mark tickets with type for differentiation
+			// Mark tickets with type and status for differentiation
 			const ticketsData = (ticketsRes?.data?.data || []).map((ticket: any) => ({
 				...ticket,
 				__type: 'ticket',
+				__status: ticket.publishedAt ? 'published' : 'unpublished',
 			}));
 
 			// Mark products with type for differentiation
 			const productsData = (productsRes?.data?.data || []).map((product: any) => ({
 				...product,
 				__type: 'product',
+				__status: 'published',
 			}));
 
 			// Combine both data
@@ -171,6 +175,7 @@ export default function Products() {
 									rate={item.rate ? `${item.rate}` : "1"}
 									sold={item.sold_count}
 									location={item.region ? item.region : null}
+									status={item.__type === 'ticket' ? item.__status : undefined}
 								>
 									<div className="flex gap-1 justify-end py-2">
 										<Link href={`products/edit/${item.documentId}?type=${item.__type}`}>
