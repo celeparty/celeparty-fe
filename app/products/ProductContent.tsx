@@ -58,29 +58,76 @@ export function ProductContent() {
       ? format(new Date(eventDate), "yyyy-MM-dd")
       : null;
 
-    // Build the filter for location - we'll filter by kota_event for tickets and kabupaten for others
-    // Since Strapi doesn't support simple OR, we fetch all and filter on the frontend
-    const baseUrl = `/api/products?populate=*&&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}${
-      getType
-        ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(
-            getType
-          )}`
-        : ""
-    }${
-      getSearch
-        ? `&filters[title][$containsi]=${encodeURIComponent(getSearch)}`
-        : ""
-    }${
-      getCategory
-        ? `&filters[category][title][$eq]=${encodeURIComponent(cat)}`
-        : ""
-    }${
-      formattedDate
-        ? `&filters[minimal_order_date][$eq]=${formattedDate}`
-        : ""
-    }`;
+    // Build filter string for products
+    let productFilters = "";
+    
+    if (getType) {
+      productFilters += `&filters[user_event_type][name][$eq]=${encodeURIComponent(getType)}`;
+    }
+    if (getSearch) {
+      productFilters += `&filters[title][$containsi]=${encodeURIComponent(getSearch)}`;
+    }
+    if (getCategory) {
+      productFilters += `&filters[category][title][$eq]=${encodeURIComponent(cat)}`;
+    }
+    if (formattedDate) {
+      productFilters += `&filters[minimal_order_date][$eq]=${formattedDate}`;
+    }
 
-    return await axiosData("GET", baseUrl);
+    try {
+      // Fetch both products (equipment) and tickets in parallel
+      const [productsRes, ticketsRes] = await Promise.all([
+        axiosData("GET", `/api/products?populate=*&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${Math.ceil(pageSize * 0.7)}${productFilters}`),
+        axiosData("GET", `/api/tickets?populate=*&filters[publishedAt][$notnull]=true&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${Math.ceil(pageSize * 0.3)}${
+          getSearch ? `&filters[title][$containsi]=${encodeURIComponent(getSearch)}` : ''
+        }${
+          getType && (getType === 'ticket' || getType === 'Tiket') ? '' : `&filters[user_event_type][name][$eq]=${encodeURIComponent(getType || '')}`
+        }`)
+      ]);
+
+      // Combine products and tickets
+      let allProducts = [
+        ...(productsRes?.data || []).map((p: any) => ({ ...p, __productType: 'equipment' })),
+        ...(ticketsRes?.data || []).map((t: any) => ({ ...t, __productType: 'ticket' }))
+      ];
+
+      // Apply location filter
+      if (selectedLocation) {
+        allProducts = allProducts.filter((item: any) => {
+          let locationValue = "";
+          if (item.__productType === 'ticket') {
+            locationValue = item.kota_event;
+          } else {
+            locationValue = item.kabupaten || item.region;
+          }
+          return locationValue?.toLowerCase().replace(/\s+/g, "-") === selectedLocation.toLowerCase().replace(/\s+/g, "-");
+        });
+      }
+
+      // Sort by updatedAt descending
+      allProducts.sort((a: any, b: any) => {
+        const dateA = new Date(a.updatedAt).getTime();
+        const dateB = new Date(b.updatedAt).getTime();
+        return dateB - dateA;
+      });
+
+      // Calculate total pages (approximate)
+      const totalItems = (productsRes?.meta?.pagination?.total || 0) + (ticketsRes?.meta?.pagination?.total || 0);
+      const totalPageCount = Math.ceil(totalItems / pageSize);
+
+      return {
+        data: allProducts.slice(0, pageSize),
+        meta: {
+          pagination: {
+            pageCount: totalPageCount,
+            total: totalItems
+          }
+        }
+      };
+    } catch (error) {
+      console.error('Error fetching products and tickets:', error);
+      return { data: [], meta: { pagination: { pageCount: 0, total: 0 } } };
+    }
   };
 
   const query = useQuery({
@@ -92,8 +139,10 @@ export function ProductContent() {
       selectedLocation,
       eventDate,
       currentPage,
+      pageSize,
     ],
     queryFn: getCombinedQuery,
+    staleTime: 60 * 1000, // 1 minute
   });
 
   useEffect(() => {
@@ -543,9 +592,15 @@ export function ProductContent() {
               <div className="flex flex-wrap -mx-2">
                 {mainData?.length > 0 ? (
                   mainData?.map((item: any) => {
+                    // Determine the correct URL based on product type
+                    const isTicket = item.__productType === 'ticket';
+                    const productUrl = isTicket 
+                      ? `/products/${item.documentId}?type=ticket` 
+                      : `/products/${item.documentId}`;
+                    
                     return (
                       <ItemProduct
-                        url={`/products/${item.documentId}`}
+                        url={productUrl}
                         key={item.id}
                         title={item.title}
                         image_url={
@@ -560,6 +615,7 @@ export function ProductContent() {
                         rate={item.rate ? `${item.rate}` : "1"}
                         sold={item.sold_count}
                         location={item.region ? item.region : null}
+                        status={isTicket ? (item.publishedAt ? 'published' : 'unpublished') : undefined}
                       ></ItemProduct>
                     );
                   })

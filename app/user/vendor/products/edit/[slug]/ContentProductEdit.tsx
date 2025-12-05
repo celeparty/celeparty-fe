@@ -60,11 +60,29 @@ export default function ContentProductEdit(props: any) {
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
 
   const getQuery = async () => {
-    const endpoint = productType === 'ticket' ? `/api/tickets/${props.slug}?populate=*` : `/api/products/${props.slug}?populate=*`;
+    let endpoint = productType === 'ticket' ? `/api/tickets/${props.slug}?populate=*` : `/api/products/${props.slug}?populate=*`;
     console.log('Fetching from endpoint:', endpoint);
-    const result = await axiosData("GET", endpoint);
-    console.log('Query result:', result);
-    return result;
+    
+    try {
+      const result = await axiosData("GET", endpoint);
+      console.log('Query result:', result);
+      return result;
+    } catch (error: any) {
+      // If fetch from products failed and we haven't tried tickets, try tickets as fallback
+      if (productType === 'product') {
+        console.log('Product fetch failed, trying ticket endpoint as fallback...');
+        try {
+          const ticketEndpoint = `/api/tickets/${props.slug}?populate=*`;
+          const ticketResult = await axiosData("GET", ticketEndpoint);
+          console.log('Ticket fallback result:', ticketResult);
+          return ticketResult;
+        } catch (ticketError) {
+          console.error('Both product and ticket fetch failed:', ticketError);
+          throw ticketError;
+        }
+      }
+      throw error;
+    }
   };
   const query = useQuery({
     queryKey: ["qProductDetail", props.slug, productType],
@@ -84,7 +102,17 @@ export default function ContentProductEdit(props: any) {
     if (dataContent) {
       console.log('Processing dataContent:', dataContent);
       
-      if (productType === 'ticket') {
+      // Auto-detect product type from data structure if not specified
+      let actualProductType = productType;
+      if (productType === 'product' && dataContent.event_date) {
+        // Has event_date = likely ticket
+        actualProductType = 'ticket';
+      } else if (productType === 'product' && dataContent.kota_event) {
+        // Has kota_event = likely ticket
+        actualProductType = 'ticket';
+      }
+      
+      if (actualProductType === 'ticket') {
         // Handle ticket type
         const ticketFormData: iTicketFormReq = {
           title: dataContent.title || "",
