@@ -49,35 +49,43 @@ export const TicketSend: React.FC = () => {
 	const getVendorTickets = async () => {
 		if (!session?.jwt) return [];
 		try {
-			const response = await axiosUser(
-				"GET",
-				"/api/tickets?populate=*",
-				session.jwt
-			);
-			console.log("Vendor Tickets Response:", response);
+			// Use the frontend API proxy route instead of direct axiosUser call
+			// This ensures consistent behavior with the rest of the app
+			const url = new URL(`${window.location.origin}/api/tickets?populate=*&sort[0]=createdAt%3Adesc`);
 			
-			// Handle multiple response formats
-			let data: any[] = [];
+			const response = await fetch(url.toString(), {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${session.jwt}`,
+					'Content-Type': 'application/json',
+				},
+			});
+
+			if (!response.ok) {
+				console.error('Error response from tickets API:', response.statusText);
+				return [];
+			}
+
+			const data = await response.json();
+			console.log("Vendor Tickets Response:", data);
 			
-			if (response?.success && Array.isArray(response?.data)) {
-				data = response.data;
-			} else if (Array.isArray(response?.data)) {
-				data = response.data;
-			} else if (Array.isArray(response)) {
-				data = response;
+			// Handle Strapi response structure
+			let ticketsData: any[] = [];
+			
+			if (Array.isArray(data?.data)) {
+				ticketsData = data.data;
+			} else if (Array.isArray(data)) {
+				ticketsData = data;
 			}
 			
-			console.log("Vendor Tickets Data:", data);
+			console.log("Vendor Tickets Raw Data:", ticketsData);
+			if (ticketsData[0]) {
+				console.log("First ticket structure:", ticketsData[0]);
+				console.log("First ticket variant:", ticketsData[0].variant);
+			}
 			
-			// Filter only ticket products that have variants
-			const ticketProducts = Array.isArray(data) ? data.filter((item: any) => {
-				// Ensure we have variant array
-				const hasVariants = Array.isArray(item.variant) && item.variant.length > 0;
-				return hasVariants;
-			}) : [];
-			
-			console.log("Filtered Ticket Products:", ticketProducts);
-			return ticketProducts.length > 0 ? ticketProducts : data;
+			// Return all tickets - don't filter out, let UI handle empty variants
+			return ticketsData;
 		} catch (error) {
 			console.error("Error fetching tickets:", error);
 			return [];
@@ -116,29 +124,54 @@ export const TicketSend: React.FC = () => {
 
 	// Get variants for selected product
 	const variants = useMemo(() => {
-		if (!selectedProduct || !productsQuery.data) {
-			console.log('Variants: Missing selectedProduct or productsQuery.data', { selectedProduct, dataLength: productsQuery.data?.length });
+		console.log('Computing variants...', {
+			selectedProduct,
+			productsQueryDataLength: productsQuery.data?.length,
+		});
+
+		if (!selectedProduct || !productsQuery.data || productsQuery.data.length === 0) {
+			console.log('Early return: Missing selectedProduct or productsQuery.data');
 			return [];
 		}
 		
-		const product = productsQuery.data?.find(
+		console.log('Looking for product with ID:', selectedProduct);
+		console.log('Available products:', productsQuery.data.map((p: any) => ({
+			id: p.id,
+			documentId: p.documentId,
+			title: p.title,
+			variantCount: Array.isArray(p.variant) ? p.variant.length : 0,
+		})));
+		
+		const product = productsQuery.data.find(
 			(p: any) => p.documentId === selectedProduct || p.id === selectedProduct
 		);
 		
-		console.log('Found product:', { selectedProduct, product, variant: product?.variant });
+		console.log('Found product:', {
+			selectedProduct,
+			found: !!product,
+			productTitle: product?.title,
+			variantArray: product?.variant,
+			variantCount: Array.isArray(product?.variant) ? product.variant.length : 0,
+		});
 		
-		if (!product) return [];
+		if (!product) {
+			console.warn('Product not found with ID:', selectedProduct);
+			return [];
+		}
 		
 		// Get variants from product
 		const productVariants = Array.isArray(product.variant) ? product.variant : [];
-		console.log('Product variants:', productVariants);
+		console.log('Product variants to display:', productVariants);
 		
 		// Map variants to display format
-		return productVariants.map((v: any) => ({
+		const mappedVariants = productVariants.map((v: any) => ({
 			...v,
 			id: v.id || v.documentId,
 			documentId: v.documentId || v.id,
 		}));
+		
+		console.log('Mapped variants:', mappedVariants);
+		return mappedVariants;
 	}, [selectedProduct, productsQuery.data]);
 
 	// Handle recipient change

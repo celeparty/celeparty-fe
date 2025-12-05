@@ -169,15 +169,24 @@ export default function ProfilePage() {
 		}
 
 		setIsSubmitting(true);
-		const updatedFormData = sanitizeVendorData(formData);
 		try {
-			console.log("Submitting vendor profile with data:", updatedFormData);
+			console.log("Submitting vendor profile with data:", formData);
 			
 			// Use documentId if available, otherwise fall back to id
 			const userId = formData.documentId || formData.id;
+			console.log("User ID to update:", userId, "From documentId:", formData.documentId, "From id:", formData.id);
+			
 			if (!userId) {
-				throw new Error("User ID not found");
+				throw new Error("User ID not found in form data");
 			}
+			
+			// Sanitize data but preserve id/documentId for Strapi
+			const updatedFormData = {
+				...sanitizeVendorData(formData),
+				id: formData.id, // Keep id for Strapi
+			};
+			
+			console.log("Sanitized data to submit:", updatedFormData);
 			
 			const response = await axiosUser(
 				"PUT",
