@@ -52,6 +52,7 @@ export function ProductContent() {
   const [filterCategories, setFilterCategories] = useState<iEventCategory[]>(
     []
   );
+  const [variantPrice, setVariantPrice] = useState<number | null>(null);
 
   const getCombinedQuery = async () => {
     const formattedDate = eventDate
@@ -286,6 +287,14 @@ export function ProductContent() {
     });
   }, [mainData]);
 
+  useEffect(() => {
+    if (query.isSuccess && Array.isArray(mainData) && mainData.length > 0) {
+      const firstItem = mainData[0];
+      const lowestPrice = firstItem?.variant ? getLowestVariantPrice(firstItem.variant) : null;
+      setVariantPrice(lowestPrice);
+    }
+  }, [query.isSuccess, mainData]);
+
   if (query.isLoading) {
     return (
       <div className=" relative flex justify-center ">
@@ -302,25 +311,6 @@ export function ProductContent() {
   const getMin = params.get("min");
   const getMax = params.get("max");
   const dataContent = query?.data?.data || [];
-
-  const [variantPrice, setVariantPrice] = useState <number | null>(null);
-  //   (
-  //   dataContent?.variant[0]?.price
-  // );
-
-  useEffect(() => {
-    // if (query.isSuccess) {
-    //   const { variant } = dataContent;
-    //   const lowestPrice = getLowestVariantPrice(variant);
-    //   if (lowestPrice) {
-    //     setVariantPrice(lowestPrice);
-    if (query.isSuccess && Array.isArray(dataContent) && dataContent.length > 0) {
-    const firstItem = dataContent[0];
-    const lowestPrice = firstItem?.variant ? getLowestVariantPrice(firstItem.variant) : null;
-    setVariantPrice(lowestPrice);
-      }
-    }, [query.isSuccess, dataContent]);
-  // }, [dataContent]);
 
   const handleSort = (sort: any) => {
     const dataSort: any = _.sortBy(dataContent, (item) => {
