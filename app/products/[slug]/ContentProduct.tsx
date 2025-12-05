@@ -29,12 +29,16 @@ export default function ContentProduct(props: any) {
     null
   );
   const [imgUrls, setImgUrls] = useState<string[]>([]);
+  const isTicket = props.type === 'ticket';
 
   const getQuery = async () => {
-    return await axiosData("GET", `/api/products/${props.slug}?populate=*`);
+    const endpoint = isTicket 
+      ? `/api/tickets/${props.slug}?populate=*` 
+      : `/api/products/${props.slug}?populate=*`;
+    return await axiosData("GET", endpoint);
   };
   const query = useQuery({
-    queryKey: ["qProductDetail"],
+    queryKey: ["qProductDetail", props.slug, props.type],
     queryFn: getQuery,
   });
 

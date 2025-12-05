@@ -18,11 +18,41 @@ interface iProductListProps {
 
 export const ProductList: React.FC<iProductListProps> = ({ boxStyle, title, queryKey, showAllBtn }) => {
 	const getQuery = async () => {
-		return await axiosData("GET", "/api/products?populate=*&pagination[pageSize]=5&sort[0]=updatedAt%3Adesc");
+		try {
+			// Fetch both products and tickets in parallel
+			const [productsRes, ticketsRes] = await Promise.all([
+				axiosData("GET", "/api/products?populate=*&pagination[pageSize]=5&sort[0]=updatedAt%3Adesc"),
+				axiosData("GET", "/api/tickets?populate=*&filters[publishedAt][$notnull]=true&pagination[pageSize]=5&sort[0]=updatedAt%3Adesc")
+			]);
+			
+			// Merge products and tickets data
+			const products = productsRes?.data || [];
+			const tickets = ticketsRes?.data || [];
+			
+			// Mark items with type for ProductListBox to handle correctly
+			const allItems = [
+				...products.map((p: any) => ({ ...p, __type: 'product' })),
+				...tickets.map((t: any) => ({ ...t, __type: 'ticket' }))
+			];
+			
+			// Sort by updatedAt descending and take top 5
+			allItems.sort((a: any, b: any) => {
+				const dateA = new Date(a.updatedAt).getTime();
+				const dateB = new Date(b.updatedAt).getTime();
+				return dateB - dateA;
+			});
+			
+			return { data: allItems.slice(0, 5) };
+		} catch (error) {
+			console.error("Error fetching products and tickets:", error);
+			// Fallback to just products if error
+			return await axiosData("GET", "/api/products?populate=*&pagination[pageSize]=5&sort[0]=updatedAt%3Adesc");
+		}
 	};
 	const query = useQuery({
 		queryKey: [queryKey],
 		queryFn: getQuery,
+		staleTime: 60 * 1000, // 1 minute
 	});
 	if (query.isLoading) {
 		return (

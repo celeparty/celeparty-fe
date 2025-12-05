@@ -51,7 +51,7 @@ export const TicketSend: React.FC = () => {
 		try {
 			const response = await axiosUser(
 				"GET",
-				"/api/tickets",
+				"/api/tickets?populate=*",
 				session.jwt
 			);
 			console.log("Vendor Tickets Response:", response);
@@ -69,13 +69,14 @@ export const TicketSend: React.FC = () => {
 			
 			console.log("Vendor Tickets Data:", data);
 			
-			// Filter only ticket products
+			// Filter only ticket products that have variants
 			const ticketProducts = Array.isArray(data) ? data.filter((item: any) => {
-				const eventType = item.event_type || item.eventType || '';
-				const productType = item.product_type || item.productType || '';
-				return eventType.toLowerCase().includes('ticket') || productType.toLowerCase().includes('ticket') || item.variant;
+				// Ensure we have variant array
+				const hasVariants = Array.isArray(item.variant) && item.variant.length > 0;
+				return hasVariants;
 			}) : [];
 			
+			console.log("Filtered Ticket Products:", ticketProducts);
 			return ticketProducts.length > 0 ? ticketProducts : data;
 		} catch (error) {
 			console.error("Error fetching tickets:", error);
@@ -115,16 +116,22 @@ export const TicketSend: React.FC = () => {
 
 	// Get variants for selected product
 	const variants = useMemo(() => {
-		if (!selectedProduct || !productsQuery.data) return [];
+		if (!selectedProduct || !productsQuery.data) {
+			console.log('Variants: Missing selectedProduct or productsQuery.data', { selectedProduct, dataLength: productsQuery.data?.length });
+			return [];
+		}
 		
 		const product = productsQuery.data?.find(
 			(p: any) => p.documentId === selectedProduct || p.id === selectedProduct
 		);
 		
+		console.log('Found product:', { selectedProduct, product, variant: product?.variant });
+		
 		if (!product) return [];
 		
 		// Get variants from product
 		const productVariants = Array.isArray(product.variant) ? product.variant : [];
+		console.log('Product variants:', productVariants);
 		
 		// Map variants to display format
 		return productVariants.map((v: any) => ({

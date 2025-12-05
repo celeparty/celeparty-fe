@@ -11,14 +11,16 @@ import Basecontent from "@/components/Basecontent";
 
 export default async function ProductDetail({
 	params,
+	searchParams,
 }: {
 	params: { slug: string };
+	searchParams: { type?: string };
 }) {
 
 	return (
 		<div className="relative wrapper-big py-7">
 			<Basecontent>
-				<ContentProduct slug={`${params.slug}`}/>
+				<ContentProduct slug={`${params.slug}`} type={searchParams?.type}/>
 			</Basecontent>
 		</div>
 	);

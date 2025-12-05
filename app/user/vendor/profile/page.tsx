@@ -173,9 +173,15 @@ export default function ProfilePage() {
 		try {
 			console.log("Submitting vendor profile with data:", updatedFormData);
 			
+			// Use documentId if available, otherwise fall back to id
+			const userId = formData.documentId || formData.id;
+			if (!userId) {
+				throw new Error("User ID not found");
+			}
+			
 			const response = await axiosUser(
 				"PUT",
-				`/api/users/${formData.id}`,
+				`/api/users/${userId}`,
 				`${session && session?.jwt}`,
 				updatedFormData,
 			);
