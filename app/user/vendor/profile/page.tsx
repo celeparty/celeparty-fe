@@ -171,6 +171,8 @@ export default function ProfilePage() {
 		setIsSubmitting(true);
 		const updatedFormData = sanitizeVendorData(formData);
 		try {
+			console.log("Submitting vendor profile with data:", updatedFormData);
+			
 			const response = await axiosUser(
 				"PUT",
 				`/api/users/${formData.id}`,
@@ -178,7 +180,9 @@ export default function ProfilePage() {
 				updatedFormData,
 			);
 
-			if (response) {
+			console.log("Profile update response:", response);
+
+			if (response && (response.status === 200 || response.status === 201 || response.data)) {
 				setNotif(true);
 				toast({
 					title: "Sukses",
@@ -186,12 +190,22 @@ export default function ProfilePage() {
 					className: eAlertType.SUCCESS,
 				});
 				setTimeout(() => setNotif(false), 3000);
+			} else if (!response) {
+				console.error("Empty response from profile update");
+				toast({
+					title: "Gagal",
+					description: "Tidak ada respons dari server. Coba lagi.",
+					className: eAlertType.FAILED,
+				});
 			}
-		} catch (error) {
-			console.error(error);
+		} catch (error: any) {
+			console.error("Profile update error:", error);
+			console.error("Error response:", error?.response?.data);
+			
+			const errorMessage = error?.response?.data?.message || error?.message || "Update profile gagal!";
 			toast({
 				title: "Gagal",
-				description: "Update profile gagal!",
+				description: errorMessage,
 				className: eAlertType.FAILED,
 			});
 		} finally {

@@ -391,9 +391,6 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 			event_date: eventDate,
 			end_date: endDate,
 			end_time: data.end_time || "",
-			users_permissions_user: {
-				connect: [{ id: session?.user?.id ? Number(session.user.id) : undefined }],
-			},
 			variant: variants,
 			terms_conditions: data.terms_conditions,
 		};
@@ -420,8 +417,6 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 				"kota_event",
 				"lokasi_event",
 				"main_image",
-				"users_permissions_user",
-				"user_event_type",
 				"variant",
 				"terms_conditions",
 			];
