@@ -99,11 +99,83 @@ export function ProductContent() {
       sortParam = sortOption;
     }
 
+    // Build base query parameters
+    let baseParams = `populate=*&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}&sort[0]=${sortParam}`;
+
+    // Add search filter
+    if (getSearch) {
+      baseParams += `&filters[title][$containsi]=${encodeURIComponent(getSearch)}`;
+    }
+
+    // Add category filter
+    if (getCategory) {
+      baseParams += `&filters[category][title][$eq]=${encodeURIComponent(getCategory)}`;
+    }
+
+    // Add location filter
+    if (selectedLocation) {
+      baseParams += `&filters[kota_event][$eq]=${encodeURIComponent(selectedLocation)}`;
+    }
+
+    // Add event date filter (for tickets)
+    if (formattedDate) {
+      baseParams += `&filters[event_date][$gte]=${formattedDate}`;
+    }
+
+    // Add price filters
+    baseParams += priceFilterString;
+
+    // Add event type filter
+    if (selectedEventType) {
+      baseParams += `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}`;
+    }
+
     try {
-      // Fetch both products and tickets in parallel without pagination
+      // Fetch both products and tickets in parallel
+      const [productsRes, ticketsRes] = await Promise.all([
+        axiosData("GET", `/api/products?${baseParams}&filters[state][$eq]=approved`),
+        axiosData("GET", `/api/tickets?${baseParams}&filters[publishedAt][$notnull]=true`)
+      ]);
+
+      // Extract data arrays
+      const products = productsRes?.data || [];
+      const tickets = ticketsRes?.data || [];
+
+      // Mark items with type for proper handling
+      const allItems = [
+        ...products.map((p: any) => ({ ...p, __productType: 'equipment' })),
+        ...tickets.map((t: any) => ({ ...t, __productType: 'ticket' }))
+      ];
+
+      // Sort by updatedAt descending (most recent first)
+      allItems.sort((a: any, b: any) => {
+        const dateA = new Date(a.updatedAt).getTime();
+        const dateB = new Date(b.updatedAt).getTime();
+        return dateB - dateA;
+      });
+
+      // Calculate pagination info for combined results
+      const totalItems = (productsRes?.meta?.pagination?.total || 0) + (ticketsRes?.meta?.pagination?.total || 0);
+      const totalPages = Math.ceil(totalItems / pageSize);
+
+      return {
+        data: allItems,
+        meta: {
+          pagination: {
+            page: currentPage,
+            pageSize: pageSize,
+            pageCount: totalPages,
+            total: totalItems
+          }
+        }
+      };
+    } catch (error) {
+      console.error("Error fetching products and tickets:", error);
+      // Fallback to just products if error
+      return await axiosData("GET", `/api/products?${baseParams}&filters[state][$eq]=approved`);
+    }
   };
 
-  
   const query = useQuery({
     queryKey: [
       "qProducts",
