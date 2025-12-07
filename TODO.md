@@ -1,13 +1,11 @@
-# Ticket Product Integration Fix
+# Update Products Page to Show Both Products and Tickets
 
-## Issues to Fix:
+## Tasks
 
-- [ ] Products page doesn't show ticket products (only shows equipment products)
-- [ ] Ensure transaction flow uses ticket table for tickets
-- [ ] Remove any remaining ticket category logic from products
-
-## Steps:
-
-1. Update app/products/ProductContent\_.tsx to fetch both products and tickets
-2. Verify transaction/cart logic handles tickets correctly
-3. Test all flows work end-to-end
+- [ ] Update getCombinedQuery in app/products/ProductContent\_.tsx to fetch both products and tickets
+- [ ] Apply type-specific filters (products: region/minimal_order_date/category, tickets: kota_event/event_date)
+- [ ] Merge results and apply client-side sorting/pagination
+- [ ] Handle category filter (only for products)
+- [ ] Test tickets appear on products page
+- [ ] Verify filtering works for both types
+- [ ] Check pagination and sorting

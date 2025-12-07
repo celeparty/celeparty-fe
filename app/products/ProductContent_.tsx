@@ -92,33 +92,103 @@ export function ProductContent() {
 
     // Use custom sort logic based on variant prices if sorting by price
     let sortParam = sortOption;
-    
+
     // For now we'll keep main_price sorting, but this will be handled client-side
     // with variant price calculation
     if (sortOption === "main_price:asc" || sortOption === "main_price:desc") {
       sortParam = sortOption;
     }
 
-    return await axiosData(
-      "GET",
-      `/api/products?populate=*&sort=${sortParam}&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}${
-        selectedEventType
-          ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}`
-          : ""
-      }${
-        getSearch
-          ? `&filters[title][$containsi]=${encodeURIComponent(getSearch)}`
-          : ""
-      }${
-        getCategory
-          ? `&filters[category][title][$eq]=${encodeURIComponent(cat)}`
-          : ""
-      }${
-        selectedLocation
-          ? `&filters[region][$eq]=${encodeURIComponent(selectedLocation)}`
-          : ""
-      }${formattedDate ? `&filters[minimal_order_date][$eq]=${formattedDate}` : ""}${priceFilterString}`
-    );
+    try {
+      // Fetch both products and tickets in parallel
+      const [productsRes, ticketsRes] = await Promise.all([
+        // Products query - apply filters for products
+        axiosData(
+          "GET",
+          `/api/products?populate=*&sort=${sortParam}&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}&filters[state][$eq]=approved${
+            selectedEventType
+              ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}`
+              : ""
+          }${
+            getSearch
+              ? `&filters[title][$containsi]=${encodeURIComponent(getSearch)}`
+              : ""
+          }${
+            getCategory
+              ? `&filters[category][title][$eq]=${encodeURIComponent(cat)}`
+              : ""
+          }${
+            selectedLocation
+              ? `&filters[region][$eq]=${encodeURIComponent(selectedLocation)}`
+              : ""
+          }${formattedDate ? `&filters[minimal_order_date][$eq]=${formattedDate}` : ""}${priceFilterString}`
+        ),
+        // Tickets query - apply filters for tickets
+        axiosData(
+          "GET",
+          `/api/tickets?populate=*&sort=${sortParam}&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}&filters[state][$eq]=approved&filters[publishedAt][$notnull]=true${
+            selectedEventType
+              ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}`
+              : ""
+          }${
+            getSearch
+              ? `&filters[title][$containsi]=${encodeURIComponent(getSearch)}`
+              : ""
+          }${
+            selectedLocation
+              ? `&filters[kota_event][$eq]=${encodeURIComponent(selectedLocation)}`
+              : ""
+          }${formattedDate ? `&filters[event_date][$eq]=${formattedDate}` : ""}${priceFilterString}`
+        )
+      ]);
+
+      // Get data from responses
+      const products = productsRes?.data || [];
+      const tickets = ticketsRes?.data || [];
+
+      // Mark items with type for proper handling
+      const allItems = [
+        ...products.map((p: any) => ({ ...p, __type: 'product' })),
+        ...tickets.map((t: any) => ({ ...t, __type: 'ticket' }))
+      ];
+
+      // For combined results, we need to handle pagination differently
+      // Since we're merging results, we'll return all items and handle pagination client-side
+      return {
+        data: allItems,
+        meta: {
+          pagination: {
+            page: currentPage,
+            pageSize: pageSize,
+            total: allItems.length,
+            pageCount: Math.ceil(allItems.length / pageSize)
+          }
+        }
+      };
+    } catch (error) {
+      console.error("Error fetching products and tickets:", error);
+      // Fallback to just products if error
+      return await axiosData(
+        "GET",
+        `/api/products?populate=*&sort=${sortParam}&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}&filters[state][$eq]=approved${
+          selectedEventType
+            ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}`
+            : ""
+        }${
+          getSearch
+            ? `&filters[title][$containsi]=${encodeURIComponent(getSearch)}`
+            : ""
+        }${
+          getCategory
+            ? `&filters[category][title][$eq]=${encodeURIComponent(cat)}`
+            : ""
+        }${
+          selectedLocation
+            ? `&filters[region][$eq]=${encodeURIComponent(selectedLocation)}`
+            : ""
+        }${formattedDate ? `&filters[minimal_order_date][$eq]=${formattedDate}` : ""}${priceFilterString}`
+      );
+    }
   };
 
   
@@ -362,7 +432,7 @@ export function ProductContent() {
                 {mainData?.length > 0 ? (
                   mainData?.map((item: any) => (
                     <ItemProduct
-                      url={`/products/${item.documentId}`}
+                      url={`/products/${item.documentId}${item.__type === 'ticket' ? '?type=ticket' : ''}`}
                       key={item.id}
                       title={item.title}
                       image_url={getImageUrl(item.main_image)}
@@ -373,7 +443,7 @@ export function ProductContent() {
                       }
                       rate={item.rate ? `${item.rate}` : "1"}
                       sold={item.sold_count}
-                      location={item.region || null}
+                      location={item.__type === 'ticket' ? item.kota_event : item.region || null}
                     />
                   ))
                 ) : (

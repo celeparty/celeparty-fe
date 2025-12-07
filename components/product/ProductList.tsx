@@ -22,7 +22,7 @@ export const ProductList: React.FC<iProductListProps> = ({ boxStyle, title, quer
 			// Fetch both products and tickets in parallel
 			const [productsRes, ticketsRes] = await Promise.all([
 				axiosData("GET", "/api/products?populate=*&filters[state][$eq]=approved&pagination[pageSize]=5&sort[0]=updatedAt%3Adesc"),
-				axiosData("GET", "/api/tickets?populate=*&filters[state][$eq]=approved&pagination[pageSize]=5&sort[0]=updatedAt%3Adesc")
+				axiosData("GET", "/api/tickets?populate=*&filters[state][$eq]=approved&filters[publishedAt][$notnull]=true&pagination[pageSize]=5&sort[0]=updatedAt%3Adesc")
 			]);
 
 			// Merge products and tickets data
