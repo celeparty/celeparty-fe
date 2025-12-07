@@ -7,25 +7,34 @@
 ## 📋 Issues Resolved
 
 ### Issue #1: Ticket Products Not Showing on Home Page
+
 **Problem**: Ticket products showing "Tiket Aktif" in vendor dashboard but not appearing on home page  
 **Root Cause**: `ProductList` component only fetched products (equipment), not tickets  
-**Solution**: 
+**Solution**:
+
 - Modified `ProductList.tsx` to fetch both products AND published tickets
 - Merged data from both endpoints with sorting by `updatedAt`
 - Limited to top 5 items per request
 
 **Code Changes**:
+
 ```typescript
 // ProductList.tsx - lines 20-45
 const getQuery = async () => {
   const [productsRes, ticketsRes] = await Promise.all([
-    axiosData("GET", "/api/products?populate=*&pagination[pageSize]=5&sort[0]=updatedAt%3Adesc"),
-    axiosData("GET", "/api/tickets?populate=*&filters[publishedAt][$notnull]=true&pagination[pageSize]=5&sort[0]=updatedAt%3Adesc")
+    axiosData(
+      "GET",
+      "/api/products?populate=*&pagination[pageSize]=5&sort[0]=updatedAt%3Adesc"
+    ),
+    axiosData(
+      "GET",
+      "/api/tickets?populate=*&filters[publishedAt][$notnull]=true&pagination[pageSize]=5&sort[0]=updatedAt%3Adesc"
+    ),
   ]);
-  
+
   const allItems = [
-    ...products.map(p => ({ ...p, __type: 'product' })),
-    ...tickets.map(t => ({ ...t, __type: 'ticket' }))
+    ...products.map((p) => ({ ...p, __type: "product" })),
+    ...tickets.map((t) => ({ ...t, __type: "ticket" })),
   ];
   return { data: allItems.slice(0, 5) };
 };
@@ -36,23 +45,26 @@ const getQuery = async () => {
 ---
 
 ### Issue #2: Cannot Open Ticket Product Detail Page
+
 **Problem**: Users couldn't click through to view ticket product details  
 **Root Cause**: Detail page routing only handled products, not tickets  
 **Solution**:
+
 - Updated `ProductListBox.tsx` to generate URLs with `type=ticket` query param
 - Updated `app/products/[slug]/page.tsx` to accept `searchParams.type`
 - Modified `ContentProduct.tsx` to fetch from `/api/tickets/{slug}` when type=ticket
 
 **Code Changes**:
+
 ```typescript
 // ProductListBox.tsx - line 14
-const url = isTicket 
-  ? `/products/${item.documentId}?type=ticket` 
+const url = isTicket
+  ? `/products/${item.documentId}?type=ticket`
   : `/products/${item.documentId}`;
 
 // ContentProduct.tsx - line 34
-const endpoint = isTicket 
-  ? `/api/tickets/${props.slug}?populate=*` 
+const endpoint = isTicket
+  ? `/api/tickets/${props.slug}?populate=*`
   : `/api/products/${props.slug}?populate=*`;
 ```
 
@@ -61,9 +73,11 @@ const endpoint = isTicket
 ---
 
 ### Issue #3: Cannot Open Ticket Product Edit Page
+
 **Problem**: Vendor couldn't edit ticket products from dashboard  
 **Root Cause**: Edit links didn't include type parameter to differentiate between product/ticket  
 **Solution**:
+
 - Type parameter already implemented in vendor products dashboard (`app/user/vendor/products/page.tsx`)
 - Edit link at line 222: `products/edit/${item.documentId}?type=${item.__type}`
 - `ContentProductEdit` already handles type parameter from searchParams
@@ -73,32 +87,35 @@ const endpoint = isTicket
 ---
 
 ### Issue #4: Vendor Profile Changes Not Saving
+
 **Problem**: When vendor submitted profile changes, they weren't saved to database  
-**Root Cause**: 
+**Root Cause**:
+
 - Form submission used `formData.id` which might not be properly populated
 - `sanitizeVendorData()` removed the id field from submission data
 
 **Solution**:
+
 ```typescript
 // app/user/vendor/profile/page.tsx - lines 165-185
 const onSubmit: SubmitHandler<iMerchantProfile> = async (formData) => {
   const userId = formData.documentId || formData.id; // Use documentId first
-  
+
   if (!userId) {
     throw new Error("User ID not found in form data");
   }
-  
+
   // Preserve id after sanitization for Strapi
   const updatedFormData = {
     ...sanitizeVendorData(formData),
     id: formData.id, // Keep id for Strapi
   };
-  
+
   const response = await axiosUser(
     "PUT",
     `/api/users/${userId}`,
     session?.jwt,
-    updatedFormData,
+    updatedFormData
   );
 };
 ```
@@ -108,13 +125,16 @@ const onSubmit: SubmitHandler<iMerchantProfile> = async (formData) => {
 ---
 
 ### Issue #5: Ticket Variants Not Displaying in Management Page
+
 **Problem**: In "Kirim Undangan Tiket" tab, ticket products detected but variants field empty  
-**Root Cause**: 
+**Root Cause**:
+
 - API query didn't include `populate=*` parameter for variant relationship
 - Used `axiosUser` directly instead of proxy API route
 - Variant data structure not properly handled
 
 **Solution**:
+
 ```typescript
 // TicketSend.tsx - lines 49-100
 const getVendorTickets = async () => {
@@ -123,11 +143,11 @@ const getVendorTickets = async () => {
     `${window.location.origin}/api/tickets?populate=*&sort[0]=createdAt%3Adesc`,
     {
       headers: {
-        'Authorization': `Bearer ${session.jwt}`,
+        Authorization: `Bearer ${session.jwt}`,
       },
     }
   );
-  
+
   const data = await response.json();
   return data?.data || data; // Handle Strapi response structure
 };
@@ -137,11 +157,11 @@ const variants = useMemo(() => {
   const product = productsQuery.data?.find(
     (p: any) => p.documentId === selectedProduct || p.id === selectedProduct
   );
-  
-  const productVariants = Array.isArray(product?.variant) 
-    ? product.variant 
+
+  const productVariants = Array.isArray(product?.variant)
+    ? product.variant
     : [];
-  
+
   return productVariants.map((v: any) => ({
     ...v,
     id: v.id || v.documentId,
@@ -156,14 +176,14 @@ const variants = useMemo(() => {
 
 ## 📁 Files Modified
 
-| File | Changes | Lines |
-|------|---------|-------|
-| `components/product/ProductList.tsx` | Merge products and tickets, add populate | +25, -5 |
-| `components/product/ProductListBox.tsx` | Generate type-aware URLs | +10, -5 |
-| `app/products/[slug]/page.tsx` | Accept searchParams | +2, -1 |
-| `app/products/[slug]/ContentProduct.tsx` | Route to correct endpoint | +6, -2 |
-| `app/user/vendor/profile/page.tsx` | Preserve id in form submission | +18, -10 |
-| `components/profile/vendor/ticket-management/TicketSend.tsx` | Use proxy API, improve logging | +52, -30 |
+| File                                                         | Changes                                  | Lines    |
+| ------------------------------------------------------------ | ---------------------------------------- | -------- |
+| `components/product/ProductList.tsx`                         | Merge products and tickets, add populate | +25, -5  |
+| `components/product/ProductListBox.tsx`                      | Generate type-aware URLs                 | +10, -5  |
+| `app/products/[slug]/page.tsx`                               | Accept searchParams                      | +2, -1   |
+| `app/products/[slug]/ContentProduct.tsx`                     | Route to correct endpoint                | +6, -2   |
+| `app/user/vendor/profile/page.tsx`                           | Preserve id in form submission           | +18, -10 |
+| `components/profile/vendor/ticket-management/TicketSend.tsx` | Use proxy API, improve logging           | +52, -30 |
 
 **Total Changes**: 6 files, ~150 lines modified/added
 
@@ -174,18 +194,21 @@ const variants = useMemo(() => {
 After deployment, verify:
 
 ### Test #1: Home Page Ticket Display
+
 - [ ] Navigate to home page
 - [ ] Scroll to "Untuk Anda" section
 - [ ] Verify both equipment AND tickets display
 - [ ] Verify ticket count ≤ 5 items
 
 ### Test #2: Ticket Detail Page
+
 - [ ] Click on a ticket product card on home page
 - [ ] Verify detail page loads correctly
 - [ ] Verify all product info displays (title, price, variants, etc.)
 - [ ] Verify UI looks identical to regular product details
 
 ### Test #3: Vendor Dashboard Ticket Links
+
 - [ ] Login as vendor
 - [ ] Go to Produk Saya (vendor products dashboard)
 - [ ] Verify tickets appear with "Tiket Aktif" status badge
@@ -195,6 +218,7 @@ After deployment, verify:
 - [ ] Verify changes are reflected immediately
 
 ### Test #4: Vendor Profile Save
+
 - [ ] Login as vendor
 - [ ] Go to Profil Vendor
 - [ ] Make changes to profile (e.g., phone number, company name)
@@ -204,6 +228,7 @@ After deployment, verify:
 - [ ] Check browser console for any errors
 
 ### Test #5: Ticket Management Variants
+
 - [ ] Login as vendor
 - [ ] Go to Management Tiket → Kirim Undangan Tiket tab
 - [ ] Select a ticket product
@@ -219,11 +244,13 @@ After deployment, verify:
 ### Console Logging Locations
 
 **ProductList.tsx** (lines 22-45):
+
 ```
 No logging - but data structure includes __type field for tracking
 ```
 
 **TicketSend.tsx** (lines 69-100):
+
 ```
 - "Vendor Tickets Response:" - Shows raw API response
 - "Vendor Tickets Raw Data:" - Shows processed tickets array
@@ -232,6 +259,7 @@ No logging - but data structure includes __type field for tracking
 ```
 
 **TicketSend.tsx** (lines 117-160):
+
 ```
 - "Computing variants..." - Tracks when variant calc starts
 - "Looking for product with ID:" - Shows search query
@@ -244,14 +272,17 @@ No logging - but data structure includes __type field for tracking
 ### Common Issues & Solutions
 
 **Issue**: "Tidak ada produk tiket" (No ticket products)
+
 - **Cause**: Tickets fetch failed or no tickets created
 - **Debug**: Check console for fetch errors, verify tickets exist in Strapi
 
 **Issue**: "Tidak ada varian untuk produk ini" (No variants)
+
 - **Cause**: Ticket has no variants or variant relationship not populated
 - **Debug**: Check "Product variants to display:" log, verify variant data in Strapi
 
 **Issue**: Profile save fails with "User ID not found"
+
 - **Cause**: Form data missing id/documentId
 - **Debug**: Check "User ID to update" console log, verify form.reset() called correctly
 
@@ -291,4 +322,3 @@ No logging - but data structure includes __type field for tracking
 **Commit Hash**: e439251  
 **Branch**: master  
 **Ready for**: Production Deployment
-

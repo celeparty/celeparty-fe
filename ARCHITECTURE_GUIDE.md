@@ -200,10 +200,10 @@ type ItemProduct = {
   documentId: string;
   title: string;
   description: string;
-  
+
   // NEW: Type marker added by ProductContent
-  __productType: 'equipment' | 'ticket';
-}
+  __productType: "equipment" | "ticket";
+};
 ```
 
 ### Type Detection Fields
@@ -213,8 +213,8 @@ type ItemProduct = {
 interface IProduct {
   documentId: string;
   title: string;
-  kabupaten: string;        // Location (used for filtering)
-  category: ICategory;       // Equipment category
+  kabupaten: string; // Location (used for filtering)
+  category: ICategory; // Equipment category
   users_permissions_user: IUser;
   // NO event_date or kota_event
 }
@@ -223,11 +223,11 @@ interface IProduct {
 interface ITicket {
   documentId: string;
   title: string;
-  event_date: string;        // 🔍 Detection: Auto-detect as ticket
-  kota_event: string;        // 🔍 Detection: Auto-detect as ticket
+  event_date: string; // 🔍 Detection: Auto-detect as ticket
+  kota_event: string; // 🔍 Detection: Auto-detect as ticket
   waktu_event: string;
   lokasi_event: string;
-  publishedAt: string;       // ✅ Must be set to appear
+  publishedAt: string; // ✅ Must be set to appear
   // Has event_date and kota_event → definitely ticket
 }
 ```
@@ -238,17 +238,17 @@ interface ITicket {
 interface CartItem {
   product_id: string | number;
   product_name: string;
-  product_type: 'ticket' | 'equipment';  // ✅ Key differentiator
+  product_type: "ticket" | "equipment"; // ✅ Key differentiator
   quantity: number;
   variant_id: string;
   price: number;
-  
+
   // Only for tickets
   event_date?: string;
   waktu_event?: string;
   kota_event?: string;
   lokasi_event?: string;
-  
+
   // Only for equipment
   kabupaten?: string;
   category?: string;
@@ -306,6 +306,7 @@ App Layout
 ## 🔀 Query Strategy
 
 ### Before Implementation
+
 ```
 ProductContent fetches:
   GET /api/products?populate=*
@@ -315,6 +316,7 @@ ProductContent fetches:
 ```
 
 ### After Implementation
+
 ```
 ProductContent fetches:
   ├─ GET /api/products?populate=*&pagination[pageSize]=~10
@@ -322,7 +324,7 @@ ProductContent fetches:
   │
   └─ GET /api/tickets?populate=*&filters[publishedAt][$notnull]=true&pagination[pageSize]=~5
      └─ Result: ~5 Ticket products
-     
+
 Total items: ~15 (mixed equipment + tickets)
 ✅ Tickets included
 ✅ Tickets visible with type=ticket marker
@@ -385,7 +387,7 @@ function detectProductType(data, urlType):
 ```
 Before:
   Time: 1 request × 150ms = 150ms total
-  
+
 After:
   Time: max(200ms, 180ms) = 200ms (parallel)
   Improvement: ~25% faster (parallel vs sequential)
@@ -397,7 +399,7 @@ After:
 Before:
   Requests: 1 × GET /api/products
   Data size: ~500KB
-  
+
 After:
   Requests: 2 × (GET /api/products + GET /api/tickets)
   Data size: ~600KB (30% more, but for better content mix)
@@ -412,7 +414,7 @@ Cache Key: ["qProductDetail", slug, productType]
 Example:
   ["qProductDetail", "ticket-123", "ticket"]
   ["qProductDetail", "equipment-456", "product"]
-  
+
 Benefit:
   - Different cache entries per type
   - No cross-type contamination
@@ -427,10 +429,10 @@ Benefit:
 Edit Page Error Handling:
 
 try {
-  endpoint = productType === 'ticket' 
-    ? /api/tickets/[slug] 
+  endpoint = productType === 'ticket'
+    ? /api/tickets/[slug]
     : /api/products/[slug]
-  
+
   result = fetch(endpoint)
 } catch (error) {
   if productType === 'product':

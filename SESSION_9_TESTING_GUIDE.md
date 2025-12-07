@@ -6,6 +6,7 @@
 **Environment**: Local development or staging
 
 ### Prerequisites
+
 - [ ] Frontend running (`npm run dev`)
 - [ ] Backend (Strapi) running
 - [ ] Vendor account created with at least 1 ticket product
@@ -16,6 +17,7 @@
 ## Test Suite 1: Home Page Display
 
 ### Step 1.1: Verify Tickets on Home Page
+
 ```
 1. Navigate to http://localhost:3000
 2. Look for "Untuk Anda" section (should be below banner)
@@ -23,12 +25,14 @@
 4. Look for any item with "Tiket Aktif" status badge
 ```
 
-**Expected Result**: 
+**Expected Result**:
+
 - ✅ See mix of equipment (no badge) and tickets (yellow or green badge)
 - ✅ Up to 5 items shown
 - ✅ All items sorted by most recent first
 
 **If Failed**:
+
 ```
 Check browser console for errors:
 - Look for network requests to /api/products and /api/tickets
@@ -37,6 +41,7 @@ Check browser console for errors:
 ```
 
 ### Step 1.2: Verify URL Structure
+
 ```
 1. Right-click on a product card → Inspect
 2. Find the <a href="..."> tag
@@ -44,7 +49,8 @@ Check browser console for errors:
 4. Tickets: /products/[documentId]?type=ticket
 ```
 
-**Expected Result**: 
+**Expected Result**:
+
 - ✅ Ticket URLs have `?type=ticket` parameter
 - ✅ Product URLs don't have type parameter
 
@@ -53,25 +59,29 @@ Check browser console for errors:
 ## Test Suite 2: Ticket Detail Page
 
 ### Step 2.1: Open Ticket Detail
+
 ```
 1. On home page, click on any ticket card
 2. Wait for page to load
 3. Verify you land on /products/[slug]?type=ticket
 ```
 
-**Expected Result**: 
+**Expected Result**:
+
 - ✅ Detail page loads with ticket information
 - ✅ Title, description, variants visible
 - ✅ No 404 error
 
 **Console Check**:
+
 ```
 Search console for:
-"Query result:" or "Found product:" 
+"Query result:" or "Found product:"
 These log statements indicate proper data fetching
 ```
 
 ### Step 2.2: Verify Detail Content
+
 ```
 1. Check ticket title matches dashboard
 2. Verify variant list shows (if ticket has variants)
@@ -79,7 +89,8 @@ These log statements indicate proper data fetching
 4. Look for any error messages
 ```
 
-**Expected Result**: 
+**Expected Result**:
+
 - ✅ All data displays correctly
 - ✅ Matches dashboard preview
 - ✅ No console errors
@@ -89,18 +100,21 @@ These log statements indicate proper data fetching
 ## Test Suite 3: Vendor Dashboard
 
 ### Step 3.1: Login & Navigate to Products
+
 ```
 1. Login as vendor
 2. Click menu → Produk Saya (or navigate to /user/vendor/products)
 3. Wait for products to load
 ```
 
-**Expected Result**: 
+**Expected Result**:
+
 - ✅ See both equipment and tickets in list
 - ✅ Tickets have status badge (green or yellow)
 - ✅ Equipment don't have status badge
 
 **Console Check**:
+
 ```
 Look for:
 "Fetching products and tickets..."
@@ -109,18 +123,21 @@ Verify ticket count > 0
 ```
 
 ### Step 3.2: Test Edit Button
+
 ```
 1. Find a ticket product in the list
 2. Hover over the card - should see Edit (pencil) icon
 3. Click Edit button
 ```
 
-**Expected Result**: 
+**Expected Result**:
+
 - ✅ Navigate to /user/vendor/products/edit/[slug]?type=ticket
 - ✅ Form loads with ticket data
 - ✅ All fields pre-populated (title, description, variants, etc.)
 
 **If Form Empty**:
+
 ```
 Check console for:
 "useEffect triggered - isLoading: false, dataContent: ..."
@@ -131,13 +148,15 @@ If missing, refresh and try again - React Query may need time to fetch
 ```
 
 ### Step 3.3: Edit and Save Ticket
+
 ```
 1. On edit page, change any field (e.g., title, description)
 2. Scroll down and click Save/Submit button
 3. Wait for success notification
 ```
 
-**Expected Result**: 
+**Expected Result**:
+
 - ✅ Success toast: "Berhasil di update"
 - ✅ Form remains on edit page
 - ✅ Changes reflected when you go back to dashboard
@@ -147,18 +166,21 @@ If missing, refresh and try again - React Query may need time to fetch
 ## Test Suite 4: Vendor Profile
 
 ### Step 4.1: Navigate to Profile
+
 ```
 1. Login as vendor
 2. Click menu → Profil (or navigate to /user/vendor/profile)
 3. Wait for profile form to load
 ```
 
-**Expected Result**: 
+**Expected Result**:
+
 - ✅ Form loads with current vendor data
 - ✅ All fields populated (name, email, phone, etc.)
 - ✅ No "Profil Vendor" title visible if form still loading
 
 ### Step 4.2: Make Profile Changes
+
 ```
 1. Find any editable field (e.g., Phone)
 2. Clear and enter new value
@@ -166,12 +188,14 @@ If missing, refresh and try again - React Query may need time to fetch
 4. Click Submit/Save
 ```
 
-**Expected Result**: 
+**Expected Result**:
+
 - ✅ Green success toast: "Update profile berhasil!"
 - ✅ Toast disappears after 3 seconds
 - ✅ No error messages
 
 **Console Check**:
+
 ```
 Look for:
 "Submitting vendor profile with data: {...}"
@@ -180,17 +204,20 @@ Look for:
 ```
 
 ### Step 4.3: Verify Changes Persisted
+
 ```
 1. Refresh the page (F5)
 2. Wait for profile to reload
 3. Check if your changes are still there
 ```
 
-**Expected Result**: 
+**Expected Result**:
+
 - ✅ Form reloads with your updated values
 - ✅ Changes persisted to database
 
 **If Not Saved**:
+
 ```
 Check error in console:
 "Error response:"
@@ -202,6 +229,7 @@ Look for Strapi error message about validation or permissions
 ## Test Suite 5: Ticket Management Variants
 
 ### Step 5.1: Navigate to Ticket Management
+
 ```
 1. Login as vendor
 2. Go to menu → Management Tiket (or /user/vendor/tickets)
@@ -209,12 +237,14 @@ Look for Strapi error message about validation or permissions
 4. Wait for page to load
 ```
 
-**Expected Result**: 
+**Expected Result**:
+
 - ✅ Form loads with "Pilih Produk Tiket" dropdown
 - ✅ Loading skeleton appears briefly
 - ✅ "Tidak ada produk tiket" OR list of products
 
 **Console Check**:
+
 ```
 Look for:
 "Vendor Tickets Response:"
@@ -224,6 +254,7 @@ Look for:
 ```
 
 ### Step 5.2: Select Product and Verify Variants
+
 ```
 1. Click "Pilih Produk Tiket" dropdown
 2. Select a ticket product
@@ -231,12 +262,14 @@ Look for:
 4. Click "Pilih Varian Tiket" dropdown
 ```
 
-**Expected Result**: 
+**Expected Result**:
+
 - ✅ Variant dropdown shows options
 - ✅ Each variant shows: [Name] - Rp [Price]
 - ✅ At least 1 variant available
 
 **If No Variants**:
+
 ```
 Check console for "Computing variants..." logs:
 - "Looking for product with ID: [ID]"
@@ -247,6 +280,7 @@ If empty, the ticket may not have variants defined in Strapi
 ```
 
 ### Step 5.3: Continue with Ticket Send
+
 ```
 1. Keep variant selected
 2. Enter Jumlah Tiket (e.g., 1)
@@ -254,7 +288,8 @@ If empty, the ticket may not have variants defined in Strapi
 4. Click Send button
 ```
 
-**Expected Result**: 
+**Expected Result**:
+
 - ✅ Form validates and accepts submission
 - ✅ Password modal appears
 - ✅ After submission, history updates
@@ -265,11 +300,13 @@ If empty, the ticket may not have variants defined in Strapi
 
 ### Common Issue #1: Tickets Not Appearing
 
-**Symptoms**: 
+**Symptoms**:
+
 - "Tidak ada produk tiket" on all pages
 - Home page only shows equipment
 
 **Debugging**:
+
 ```bash
 # Check Strapi tickets table
 # In Strapi admin, go to Tickets
@@ -280,6 +317,7 @@ If empty, the ticket may not have variants defined in Strapi
 ```
 
 **Fix**:
+
 ```
 1. Create test ticket in Strapi
 2. Make sure publishedAt is set to current date
@@ -289,20 +327,23 @@ If empty, the ticket may not have variants defined in Strapi
 
 ### Common Issue #2: Variants Empty After Product Select
 
-**Symptoms**: 
+**Symptoms**:
+
 - Select ticket product but no variants show
 - "Tidak ada varian untuk produk ini" message
 
 **Debugging**:
+
 ```javascript
 // In browser console, run:
-console.log("Check Redux/Zustand state:")
+console.log("Check Redux/Zustand state:");
 // Then look at network tab:
 // GET /api/tickets?populate=*
 // Inspect response: Look for variant array in ticket object
 ```
 
 **Fix**:
+
 ```
 1. In Strapi, edit the ticket product
 2. Make sure variants are added to ticket
@@ -312,11 +353,13 @@ console.log("Check Redux/Zustand state:")
 
 ### Common Issue #3: Profile Won't Save
 
-**Symptoms**: 
+**Symptoms**:
+
 - Click Save but nothing happens
 - No success/error toast
 
 **Debugging**:
+
 ```javascript
 // Check console for:
 // "Submitting vendor profile with data:"
@@ -325,6 +368,7 @@ console.log("Check Redux/Zustand state:")
 ```
 
 **Fix**:
+
 ```
 1. Check validation errors (look for red text on form)
 2. Verify JWT token is valid (check localStorage for auth)
@@ -409,4 +453,3 @@ Before merging to production:
 - [ ] Strapi running and responsive
 - [ ] Environment variables correct
 - [ ] Git commit message clear and descriptive
-
