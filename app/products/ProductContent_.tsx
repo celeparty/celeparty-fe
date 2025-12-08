@@ -134,7 +134,7 @@ export function ProductContent() {
       // Fetch both products and tickets in parallel
       const [productsRes, ticketsRes] = await Promise.all([
         axiosData("GET", `/api/products?${baseParams}&filters[state][$eq]=approved`),
-        axiosData("GET", `/api/tickets?${baseParams}&filters[publishedAt][$notnull]=true`)
+        axiosData("GET", `/api/tickets?${baseParams}&filters[state][$eq]=approved`)
       ]);
 
       // Extract data arrays
