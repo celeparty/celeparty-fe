@@ -1,40 +1,30 @@
-# Ticket Visibility Fix - TODO List
+# Ticket Product Issues - Fix Plan
 
-## Issue Identified
+## Issues Identified:
 
-Ticket products were not showing up on the frontend because the ticket schema was missing the `user_event_type` field that the frontend code uses to differentiate between tickets and equipment products.
+1. **Home page & Products page**: Only show approved tickets (correct behavior)
+2. **Vendor products page**: Shows all tickets including pending (correct)
+3. **Management Ticket dashboard**: Currently shows transaction data, should show ticket products
+4. **Edit functionality**: Should work for tickets
+5. **Ticket detail viewing**: Should work for transactions
 
-## Changes Made
+## Current Status:
 
-- ✅ Added `user_event_type` relation field to ticket schema
-- ✅ Added `tickets` inverse relation to user-event-type schema
+- Tickets created with state=pending (confirmed by user)
+- Public pages correctly filter for approved tickets only
+- Vendor pages show all tickets (correct)
+- TicketSendInvitationTab shows vendor's tickets (correct)
 
-## Next Steps
+## Plan:
 
-- [ ] **IMPORTANT**: Restart your Strapi server to apply the schema changes
-- [ ] Test ticket visibility on products page (/products)
-- [ ] Test ticket visibility on home page (/)
-- [ ] Verify ticket filtering works correctly
-- [ ] Test ticket detail pages load properly
-- [ ] Verify vendor dashboard shows tickets correctly
+1. **Fix Management Ticket dashboard** - Show ticket products instead of transactions
+2. **Verify edit functionality** - Ensure tickets can be edited
+3. **Verify ticket detail viewing** - Ensure transaction details work
+4. **Test all ticket visibility** - Confirm correct behavior across all pages
 
-## How to Apply Changes
+## Next Steps:
 
-1. Stop your Strapi server (if running)
-2. Start Strapi server again: `npm run develop` or `yarn develop`
-3. The schema changes will be automatically applied
-4. Test the application to verify tickets are now visible
-
-## Testing Checklist
-
-- [ ] Products page shows both equipment and tickets
-- [ ] Home page shows both equipment and tickets
-- [ ] Ticket detail pages load with correct data
-- [ ] Vendor can edit tickets in dashboard
-- [ ] Ticket management functionality works
-- [ ] Cart and checkout work for tickets
-
-## Database Migration
-
-- [ ] Run Strapi content-type migration if needed
-- [ ] Ensure existing ticket data has proper user_event_type values
+- Update TicketDashboard component to show ticket products
+- Test edit functionality for tickets
+- Test transaction detail viewing
+- Verify all pages work correctly

@@ -10,17 +10,27 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
 
 		const token = authHeader?.replace("Bearer ", "") || process.env.KEY_API;
 
-		const url = `${process.env.BASE_API}/api/tickets/${slug}?populate=*`;
-		console.log(`Proxying ticket GET request to backend: ${url}`);
+		// First, find the ticket by documentId (slug)
+		const findUrl = `${process.env.BASE_API}/api/tickets?filters[documentId][$eq]=${slug}&populate=*`;
+		console.log(`Finding ticket by documentId: ${findUrl}`);
 
-		const response = await axios.get(url, {
+		const findResponse = await axios.get(findUrl, {
 			headers: {
 				Authorization: `Bearer ${token}`,
 			},
 		});
 
-		console.log(`Backend response status: ${response.status}`);
-		return NextResponse.json(response.data);
+		if (!findResponse.data?.data || findResponse.data.data.length === 0) {
+			return NextResponse.json(
+				{ success: false, error: "Ticket not found" },
+				{ status: 404 }
+			);
+		}
+
+		const ticket = findResponse.data.data[0];
+		console.log(`Found ticket with ID: ${ticket.id}, documentId: ${ticket.documentId}`);
+
+		return NextResponse.json({ data: ticket });
 	} catch (error: any) {
 		console.error("Error fetching ticket:", error.response?.data || error.message || error);
 		return NextResponse.json(
