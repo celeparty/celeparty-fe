@@ -15,9 +15,9 @@ export const ProductListBox: React.FC<iProductListProps> = ({ posts }) => {
 		<div className="flex flex-wrap -mx-2">
 			{posts?.map((item: any, i: number) => {
 				// Determine the URL based on item type
-				const isTicket = item.__type === 'ticket';
-				const url = isTicket 
-					? `/products/${item.documentId}?type=ticket` 
+				const isTicket = item.__productType === 'ticket';
+				const url = isTicket
+					? `/products/${item.documentId}?type=ticket`
 					: `/products/${item.documentId}`;
 				
 				return (

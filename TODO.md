@@ -17,6 +17,7 @@
 - [x] Update ProductList.tsx to use **productType instead of **type
 - [x] Update ProductListBox.tsx to use \_\_productType for location display
 - [x] Update ProductContent\_.tsx to use \_\_productType for URL generation
+- [x] Fix ticket type detection in ProductListBox.tsx (was checking item.**type instead of item.**productType)
 - [x] Test implementation on products page
 - [x] Verify tickets appear correctly
 - [x] Verify filtering works for both types
