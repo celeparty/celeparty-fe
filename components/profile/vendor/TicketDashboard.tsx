@@ -42,26 +42,26 @@ interface iTicketProduct {
 export const TicketDashboard: React.FC = () => {
 	const { data: session } = useSession();
 
-	const getTicketSummary = useCallback(async () => {
+	const getTicketProducts = useCallback(async () => {
 		if (!session?.user?.documentId) {
 			throw new Error("Vendor ID is missing");
 		}
 		try {
 			const response = await axiosUser(
 				"GET",
-				`/api/transaction-tickets?filters[vendor_id][$eq]=${encodeURIComponent(session.user.documentId)}&populate=ticket_details,recipients&sort=createdAt:desc`,
+				`/api/tickets?filters[vendor_id][$eq]=${encodeURIComponent(session.user.documentId)}&populate=variant,main_image&sort=createdAt:desc`,
 				`${session?.jwt}`,
 			);
 			return response;
 		} catch (error: any) {
-			console.error("Error fetching ticket summary:", error);
+			console.error("Error fetching ticket products:", error);
 			throw new Error(error?.response?.data?.error?.message || "Failed to fetch ticket data");
 		}
 	}, [session?.user?.documentId, session?.jwt]);
 
 	const query = useQuery({
-		queryKey: ["ticketSummary", session?.user?.documentId],
-		queryFn: getTicketSummary,
+		queryKey: ["ticketProducts", session?.user?.documentId],
+		queryFn: getTicketProducts,
 		enabled: !!session?.jwt && !!session?.user?.documentId,
 		staleTime: 5 * 60 * 1000, // 5 minutes
 		retry: 2,
@@ -75,7 +75,7 @@ export const TicketDashboard: React.FC = () => {
 		return <ErrorNetwork style="mt-0" />;
 	}
 
-	const ticketData: iTicketSummary[] = query?.data?.data || [];
+	const ticketProducts: iTicketProduct[] = query?.data?.data || [];
 
 	return (
 		<div>
