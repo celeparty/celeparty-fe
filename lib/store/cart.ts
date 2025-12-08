@@ -94,14 +94,7 @@ export const useCart = create<CartStore>()(
 				const cart = get().cart;
 				const existingItem = cart.find((cartItem) => cartItem.product_id === item.product_id);
 
-				// Check if adding this item would create mixed products
-				if (cart.length > 0) {
-					const firstItemType = cart[0].product_type;
-					if (firstItemType && item.product_type && firstItemType !== item.product_type) {
-						return false; // Cannot mix ticket and equipment
-					}
-				}
-
+				// Allow mixing different product types (tickets and equipment)
 				if (existingItem) {
 					// Update quantity if item already exists
 					set((state) => ({

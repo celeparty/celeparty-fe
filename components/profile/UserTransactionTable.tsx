@@ -24,7 +24,7 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 
 	const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
 
-	const getQuery = async () => {
+	const getEquipmentQuery = async () => {
 		const response = await axiosUser(
 			"GET",
 			`/api/transactions?filters${
@@ -36,21 +36,76 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 		return response;
 	};
 
-	const query = useQuery({
-		queryKey: ["qUserOrder", activeTab],
-		queryFn: getQuery,
+	const getTicketQuery = async () => {
+		const response = await axiosUser(
+			"GET",
+			`/api/transaction-tickets?filters${
+				isVendor ? `[vendor_id][$eq]=${session?.user?.documentId}` : `[customer_mail][$eq]=${session?.user?.email}`
+			}&sort=createdAt:desc`,
+			`${session && session?.jwt}`,
+		);
+
+		return response;
+	};
+
+	const equipmentQuery = useQuery({
+		queryKey: ["qUserEquipmentOrder", activeTab],
+		queryFn: getEquipmentQuery,
 		staleTime: 5000,
 		enabled: !!session?.jwt,
 		retry: 3,
 	});
 
-	if (query.isLoading) {
+	const ticketQuery = useQuery({
+		queryKey: ["qUserTicketOrder", activeTab],
+		queryFn: getTicketQuery,
+		staleTime: 5000,
+		enabled: !!session?.jwt,
+		retry: 3,
+	});
+
+	if (equipmentQuery.isLoading || ticketQuery.isLoading) {
 		return <Skeleton width="100%" height="150px" />;
 	}
-	if (query.isError) {
+	if (equipmentQuery.isError && ticketQuery.isError) {
 		return <ErrorNetwork style="mt-0" />;
 	}
-	const dataContent: iOrderItem[] = query?.data?.data;
+
+	// Combine and normalize data from both queries
+	const equipmentData = equipmentQuery?.data?.data || [];
+	const ticketData = ticketQuery?.data?.data || [];
+
+	// Normalize ticket data to match equipment data structure
+	const normalizedTicketData = ticketData.map((ticket: any) => ({
+		id: ticket.id,
+		createdAt: ticket.createdAt,
+		payment_status: ticket.payment_status,
+		order_id: ticket.order_id,
+		customer_name: ticket.customer_name,
+		telp: ticket.telp,
+		email: ticket.customer_mail,
+		shipping_location: null, // Tickets don't have shipping
+		event_date: ticket.event_date,
+		loading_date: null, // Tickets don't have loading
+		loading_time: null, // Tickets don't have loading
+		note: ticket.note,
+		quantity: ticket.quantity,
+		products: [{
+			id: ticket.product_id,
+			title: ticket.product_name
+		}],
+		transaction_type: 'ticket'
+	}));
+
+	// Add transaction type to equipment data
+	const normalizedEquipmentData = equipmentData.map((equipment: any) => ({
+		...equipment,
+		transaction_type: 'equipment'
+	}));
+
+	// Combine all transactions and sort by created date
+	const dataContent = [...normalizedTicketData, ...normalizedEquipmentData]
+		.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
 	const toggleRow = (id: number) => {
 		setExpandedRows((prev) => ({
@@ -87,7 +142,7 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 											<TableCell className="font-medium">{formatDate(item.createdAt)}</TableCell>
 											<TableCell>
 												<ul className="list-disc pl-5 space-y-1">
-													{item?.products?.map((prod) => (
+													{item?.products?.map((prod: any) => (
 														<li key={prod.id}>{prod.title}</li>
 													))}
 												</ul>
@@ -135,13 +190,20 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 															<Button
 																size="sm"
 																variant="outline"
-																onClick={() => {
-																	// For equipment transactions, we need to find the transaction-ticket ID
-																	// This is a placeholder - you might need to adjust based on your data structure
-																	const link = document.createElement("a");
-																	link.href = `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/transaction-tickets/generateInvoice/${item.id}`;
-																	link.download = `invoice-${item.order_id || item.id}.pdf`;
-																	link.click();
+																onClick={async () => {
+																	try {
+																		const endpoint = item.transaction_type === 'ticket'
+																			? `/api/transaction-tickets/generateInvoice/${item.id}`
+																			: `/api/transactions/generateInvoice/${item.id}`;
+
+																		const link = document.createElement("a");
+																		link.href = `${process.env.NEXT_PUBLIC_STRAPI_URL}${endpoint}`;
+																		link.download = `invoice-${item.transaction_type}-${item.order_id || item.id}.pdf`;
+																		link.click();
+																	} catch (error) {
+																		console.error("Error downloading invoice:", error);
+																		alert("Gagal mengunduh invoice. Silakan coba lagi.");
+																	}
 																}}
 																className="flex items-center gap-2"
 															>
@@ -204,7 +266,7 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 																<span className="font-semibold">Produk:</span>{" "}
 															</p>
 															<ul className="list-disc pl-5 space-y-1">
-																{item.products?.map((prod) => (
+																{item.products?.map((prod: any) => (
 																	<li key={prod.id}>{prod.title}</li>
 																))}
 															</ul>

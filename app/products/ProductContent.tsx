@@ -79,7 +79,7 @@ export function ProductContent() {
       // Fetch both products (equipment) and tickets in parallel
       const [productsRes, ticketsRes] = await Promise.all([
         axiosData("GET", `/api/products?populate=*&filters[state][$eq]=approved&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${Math.ceil(pageSize * 0.7)}${productFilters}`),
-        axiosData("GET", `/api/tickets?populate=*&filters[publishedAt][$notnull]=true&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${Math.ceil(pageSize * 0.3)}${
+        axiosData("GET", `/api/tickets?populate=*&filters[state][$eq]=approved&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${Math.ceil(pageSize * 0.3)}${
           getSearch ? `&filters[title][$containsi]=${encodeURIComponent(getSearch)}` : ''
         }${
           getType && (getType === 'ticket' || getType === 'Tiket') ? '' : `&filters[user_event_type][name][$eq]=${encodeURIComponent(getType || '')}`

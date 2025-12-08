@@ -50,13 +50,48 @@ export default function SuccessPage() {
 				</div>
 				<div className="mb-4">
 					<Button
-						onClick={() => {
-							// Assuming we have transaction ID in summary, we can generate invoice
-							// For now, we'll use a placeholder - this would need to be integrated with actual transaction ID
-							const link = document.createElement("a");
-							link.href = `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/transaction-tickets/generateInvoice/${summary.transactionId || "1"}`;
-							link.download = `invoice-${summary.orderId}.pdf`;
-							link.click();
+						onClick={async () => {
+							try {
+								// Handle unified invoice generation for mixed transactions
+								const invoicePromises = [];
+
+								// Generate invoices for ticket transactions
+								if (summary.ticketTransactionIds && summary.ticketTransactionIds.length > 0) {
+									summary.ticketTransactionIds.forEach((ticketId: string) => {
+										invoicePromises.push(
+											fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/transaction-tickets/generateInvoice/${ticketId}`)
+												.then(response => response.blob())
+												.then(blob => ({ type: 'ticket', id: ticketId, blob }))
+										);
+									});
+								}
+
+								// Generate invoice for equipment transaction
+								if (summary.equipmentTransactionId) {
+									invoicePromises.push(
+										fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/transactions/generateInvoice/${summary.equipmentTransactionId}`)
+											.then(response => response.blob())
+											.then(blob => ({ type: 'equipment', id: summary.equipmentTransactionId, blob }))
+									);
+								}
+
+								// Download all invoices
+								const results = await Promise.all(invoicePromises);
+
+								results.forEach((result, index) => {
+									const link = document.createElement("a");
+									link.href = URL.createObjectURL(result.blob);
+									link.download = `invoice-${result.type}-${result.id}.pdf`;
+									link.click();
+								});
+
+								if (results.length === 0) {
+									alert("Tidak ada invoice yang dapat diunduh.");
+								}
+							} catch (error) {
+								console.error("Error downloading invoices:", error);
+								alert("Gagal mengunduh invoice. Silakan coba lagi.");
+							}
 						}}
 						className="flex items-center gap-2 mx-auto"
 					>
