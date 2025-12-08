@@ -6,7 +6,15 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
 	try {
 		const { search } = new URL(req.url);
-		const STRAPI_URL = `${process.env.BASE_API}/api/tickets${search}`;
+		const url = new URL(req.url);
+		const searchParams = url.searchParams;
+
+		// Ensure populate=* is included to get all relations including user_event_type
+		if (!searchParams.has('populate')) {
+			searchParams.set('populate', '*');
+		}
+
+		const STRAPI_URL = `${process.env.BASE_API}/api/tickets?${searchParams.toString()}`;
 		const KEY_API = process.env.KEY_API;
 
 		if (!KEY_API) {
