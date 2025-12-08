@@ -51,24 +51,30 @@ const TicketSendInvitationTab: React.FC<TicketSendInvitationTabProps> = ({ vendo
   const [password, setPassword] = React.useState("");
 
   React.useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchTickets = async () => {
       setIsLoadingProducts(true);
       try {
         const response = await axiosUser(
           "GET",
-          `/api/products?vendor_id=${encodeURIComponent(vendorDocumentId)}&populate=variants`,
+          `/api/tickets?filters[users_permissions_user][documentId][$eq]=${encodeURIComponent(vendorDocumentId)}&populate=variant`,
           jwtToken,
         );
-        setProducts(response?.data?.data || []);
+        // Transform ticket data to match the expected product structure
+        const transformedTickets = (response?.data?.data || []).map((ticket: any) => ({
+          id: ticket.id,
+          product_name: ticket.title,
+          variants: ticket.variant || []
+        }));
+        setProducts(transformedTickets);
       } catch (error) {
-        console.error("Failed to load products", error);
-        toast.error("Gagal memuat produk");
+        console.error("Failed to load tickets", error);
+        toast.error("Gagal memuat tiket");
       } finally {
         setIsLoadingProducts(false);
       }
     };
     if (vendorDocumentId && jwtToken) {
-      fetchProducts();
+      fetchTickets();
     }
   }, [vendorDocumentId, jwtToken]);
 
