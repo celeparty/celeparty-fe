@@ -35,7 +35,7 @@ export const ProductListBox: React.FC<iProductListProps> = ({ posts }) => {
 						}
 						rate={item.rate ? `${item.rate}` : "1"}
 						sold={item.sold_count}
-						location={item.vendor_region ? item.vendor_region : null}
+						location={item.__productType === 'ticket' ? item.kota_event : item.vendor_region || null}
 					/>
 				);
 			})}

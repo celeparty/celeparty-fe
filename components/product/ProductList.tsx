@@ -31,8 +31,8 @@ export const ProductList: React.FC<iProductListProps> = ({ boxStyle, title, quer
 
 			// Mark items with type for ProductListBox to handle correctly
 			const allItems = [
-				...products.map((p: any) => ({ ...p, __type: 'product' })),
-				...tickets.map((t: any) => ({ ...t, __type: 'ticket' }))
+				...products.map((p: any) => ({ ...p, __productType: 'equipment' })),
+				...tickets.map((t: any) => ({ ...t, __productType: 'ticket' }))
 			];
 
 			// Sort by updatedAt descending and take top 5

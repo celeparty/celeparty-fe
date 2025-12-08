@@ -395,7 +395,7 @@ export function ProductContent() {
                 {mainData?.length > 0 ? (
                   mainData?.map((item: any) => (
                     <ItemProduct
-                      url={`/products/${item.documentId}${item.__type === 'ticket' ? '?type=ticket' : ''}`}
+                      url={`/products/${item.documentId}${item.__productType === 'ticket' ? '?type=ticket' : ''}`}
                       key={item.id}
                       title={item.title}
                       image_url={getImageUrl(item.main_image)}
@@ -406,7 +406,7 @@ export function ProductContent() {
                       }
                       rate={item.rate ? `${item.rate}` : "1"}
                       sold={item.sold_count}
-                      location={item.__type === 'ticket' ? item.kota_event : item.region || null}
+                      location={item.__productType === 'ticket' ? item.kota_event : item.region || null}
                     />
                   ))
                 ) : (
