@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { axiosUser } from "@/lib/services";
 import { useQuery } from "@tanstack/react-query";
-import { Eye, AlertCircle, Edit, Trash2 } from "lucide-react";
+import { Eye, AlertCircle, Edit } from "lucide-react";
 import { useSession } from "next-auth/react";
 import React, { useCallback } from "react";
 import { toast } from "react-hot-toast";
@@ -155,14 +155,6 @@ export const TicketDashboard: React.FC = () => {
 													<Edit className="h-4 w-4" />
 												</Button>
 											</Link>
-											<Button
-												size="sm"
-												variant="outline"
-												onClick={() => handleDeleteTicket(ticket.documentId)}
-												className="text-red-600 hover:text-red-800"
-											>
-												<Trash2 className="h-4 w-4" />
-											</Button>
 										</div>
 									</TableCell>
 								</TableRow>
