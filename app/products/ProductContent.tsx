@@ -177,12 +177,15 @@ export function ProductContent() {
   }, [getType, getSearch, getCategory, selectedLocation, eventDate]);
   
   const getFilterCatsQuery = async () => {
-    return await axiosData(
-      "GET",
-      `/api/user-event-types?populate=*${
-        getType ? `&filters[name]=${encodeURIComponent(getType)}` : ""
-      }`
-    );
+    // Only show categories for ticket products to avoid confusion with equipment products
+    if (getType === "ticket" || getType === "Tiket") {
+      return await axiosData(
+        "GET",
+        `/api/user-event-types?populate=*&filters[name]=${encodeURIComponent(getType)}`
+      );
+    } else {
+      return { data: [] };
+    }
   };
 
   const filterCatsQuery = useQuery({

@@ -1,30 +1,19 @@
-# Ticket Product Issues - Fix Plan
+# TODO: Remove Ticket Categories from Equipment Products
 
-## Issues Identified:
+## Completed Tasks
 
-1. **Home page & Products page**: Only show approved tickets (correct behavior)
-2. **Vendor products page**: Shows all tickets including pending (correct)
-3. **Management Ticket dashboard**: Currently shows transaction data, should show ticket products
-4. **Edit functionality**: Should work for tickets
-5. **Ticket detail viewing**: Should work for transactions
+- [x] Modified `app/products/ProductContent.tsx` to only show categories for ticket products
+- [x] Updated `getFilterCatsQuery` function to return empty data for non-ticket types
+- [x] Added logic to prevent ticket categories from appearing on equipment product pages
 
-## Current Status:
+## Summary of Changes
 
-- Tickets created with state=pending (confirmed by user)
-- Public pages correctly filter for approved tickets only
-- Vendor pages show all tickets (correct)
-- TicketSendInvitationTab shows vendor's tickets (correct)
+- Equipment products (from product table) will no longer display ticket categories in filters
+- Ticket products (from ticket table) will continue to show their relevant categories
+- This prevents user confusion by clearly separating equipment and ticket product categorization
 
-## Plan:
+## Testing Required
 
-1. **Fix Management Ticket dashboard** - Show ticket products instead of transactions
-2. **Verify edit functionality** - Ensure tickets can be edited
-3. **Verify ticket detail viewing** - Ensure transaction details work
-4. **Test all ticket visibility** - Confirm correct behavior across all pages
-
-## Next Steps:
-
-- Update TicketDashboard component to show ticket products
-- Test edit functionality for tickets
-- Test transaction detail viewing
-- Verify all pages work correctly
+- Verify that equipment product pages do not show ticket categories
+- Verify that ticket product pages still show appropriate categories
+- Test filtering functionality on both product types
