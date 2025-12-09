@@ -236,23 +236,26 @@ export function ProductContent() {
   useEffect(() => {
     if (filterCatsQuery.isSuccess) {
       const data = filterCatsQuery.data?.data || [];
-      
-      // Get categories from ALL event types, not just the first one
+
+      // Get categories from NON-TICKET event types only (equipment products)
       const allCategories = new Map<string, any>();
-      
+
       data.forEach((eventType: any) => {
-        const categories = eventType.categories || [];
-        categories.forEach((cat: any) => {
-          // Use title as unique key to avoid duplicates
-          if (!allCategories.has(cat.title)) {
-            allCategories.set(cat.title, cat);
-          }
-        });
+        // Only include categories from event types that are NOT for tickets
+        if (!eventType.is_ticket) {
+          const categories = eventType.categories || [];
+          categories.forEach((cat: any) => {
+            // Use title as unique key to avoid duplicates
+            if (!allCategories.has(cat.title)) {
+              allCategories.set(cat.title, cat);
+            }
+          });
+        }
       });
-      
+
       // Convert back to array
       const categoriesArray = Array.from(allCategories.values());
-      console.log("Loaded Categories:", categoriesArray);
+      console.log("Loaded Equipment Categories (excluding ticket categories):", categoriesArray);
       setFilterCategories(categoriesArray);
     }
   }, [filterCatsQuery.isSuccess, filterCatsQuery.data]);

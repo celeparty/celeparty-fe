@@ -1,20 +1,32 @@
-# TODO: Remove Ticket Categories from Equipment Products
+# Product Category Definition and Filtering Task
 
-## Completed Tasks
+## Task Overview
 
-- [x] Modified `app/products/ProductContent.tsx` to only show categories for ticket products
-- [x] Updated `getFilterCatsQuery` function to return empty data for non-ticket types
-- [x] Added logic to prevent ticket categories from appearing on equipment product pages
+- Define products from "product" table as "produk equipment"
+- Define products from "Ticket product" table as "Produk Tiket"
+- Remove ticket categories from equipment products to avoid confusion
+- Ensure all products (equipment and ticket) appear in product lists on home and product pages
 
-## Summary of Changes
+## Current Status
 
-- Equipment products (from product table) will no longer display ticket categories in filters
-- Ticket products (from ticket table) will continue to show their relevant categories
-- This prevents user confusion by clearly separating equipment and ticket product categorization
+- ✅ Product list already displays both equipment and ticket products (merged and sorted)
+- ✅ Added "is_ticket" boolean field to user-event-type schema
+- ✅ Modified frontend filtering to exclude ticket categories from equipment product filters
 
-## Testing Status
+## Completed Steps
 
-- Code implementation verified through review
-- Browser testing not available due to disabled tool
-- Logic change correctly addresses the requirement to remove ticket categories from equipment products
-- [x] Task completed successfully
+1. **Schema Update**: Added `is_ticket` field to `user-event-type` schema to distinguish ticket vs equipment event types
+2. **Frontend Filtering**: Updated `ProductContent_.tsx` to only show categories from non-ticket event types for equipment products
+3. **Product Display**: Confirmed both equipment and ticket products are already merged and displayed in product lists
+
+## Next Steps
+
+- Test the implementation to ensure ticket categories are properly filtered from equipment products
+- Verify that both product types still appear in the product lists
+- Update any documentation if needed
+
+## Notes
+
+- The product merging and display functionality was already implemented
+- The main change was adding category filtering based on event type
+- Equipment products will now only show categories from non-ticket event types
