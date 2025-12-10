@@ -180,11 +180,11 @@ export default function ProfilePage() {
 				throw new Error("User ID not found in form data");
 			}
 			
-			// Sanitize data but preserve id/documentId for Strapi
-			const updatedFormData = {
-				...sanitizeVendorData(formData),
-				id: formData.id, // Keep id for Strapi
-			};
+			
+			// Sanitize data but ensure id/documentId are not sent in the PUT payload
+			const { id, documentId, ...dataToSubmit } = sanitizeVendorData(formData);
+			
+			const updatedFormData = { ...dataToSubmit };
 			
 			console.log("Sanitized data to submit:", updatedFormData);
 			
