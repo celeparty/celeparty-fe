@@ -192,7 +192,7 @@ export default function ProfilePage() {
 				"PUT",
 				`/api/users/${userId}`,
 				`${session && session?.jwt}`,
-				updatedFormData,
+				{ data: updatedFormData }, // Wrap updatedFormData in a 'data' object
 			);
 
 			console.log("Profile update response:", response);
