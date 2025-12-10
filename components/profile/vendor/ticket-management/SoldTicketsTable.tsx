@@ -45,10 +45,10 @@ export const SoldTicketsTable: React.FC<iSoldTicketsTableProps> = ({ productId, 
     const fetchSoldTickets = async (): Promise<iTicketDetail[]> => {
         // MOCK DATA
         return [
-            { id: 'tkt_001', documentId: 'tkt_001', ticket_code: 'KMA-REG-001', unique_token: 'xyz1', product_title: 'Konser Musik Akbar', variant_name: 'Reguler', recipient_name: 'Agus P', recipient_email: 'agus@test.com', recipient_phone: '08123456789', purchase_date: '2025-11-10T10:00:00Z', payment_status: 'paid', verification_status: 'verified', verification_date: '2025-12-10T10:00:00Z' },
-            { id: 'tkt_002', documentId: 'tkt_002', ticket_code: 'KMA-REG-002', unique_token: 'xyz2', product_title: 'Konser Musik Akbar', variant_name: 'Reguler', recipient_name: 'Budi S', recipient_email: 'budi@test.com', recipient_phone: '08234567890', purchase_date: '2025-11-11T11:00:00Z', payment_status: 'paid', verification_status: 'unverified' },
-            { id: 'tkt_003', documentId: 'tkt_003', ticket_code: 'KMA-VIP-001', unique_token: 'xyz3', product_title: 'Konser Musik Akbar', variant_name: 'VIP', recipient_name: 'Citra A', recipient_email: 'citra@test.com', recipient_phone: '08345678901', purchase_date: '2025-11-12T12:00:00Z', payment_status: 'paid', verification_status: 'unverified' },
-            { id: 'tkt_004', documentId: 'tkt_004', ticket_code: 'KMA-VVIP-001', unique_token: 'xyz4', product_title: 'Konser Musik Akbar', variant_name: 'VVIP', recipient_name: 'Dani M', recipient_email: 'dani@test.com', recipient_phone: '08345678902', purchase_date: '2025-11-13T13:00:00Z', payment_status: 'bypass', verification_status: 'verified', verification_date: '2025-12-10T11:00:00Z' },
+            { id: 'tkt_001', documentId: 'tkt_001', ticket_code: 'KMA-REG-001', unique_token: 'xyz1', product_title: 'Konser Musik Akbar', variant_name: 'Reguler', recipient_name: 'Agus P', recipient_email: 'agus@test.com', recipient_phone: '08123456789', recipient_identity_type: 'KTP', recipient_identity_number: '1234567890123456', purchase_date: '2025-11-10T10:00:00Z', payment_status: 'paid', verification_status: 'verified', verification_date: '2025-12-10T10:00:00Z' },
+            { id: 'tkt_002', documentId: 'tkt_002', ticket_code: 'KMA-REG-002', unique_token: 'xyz2', product_title: 'Konser Musik Akbar', variant_name: 'Reguler', recipient_name: 'Budi S', recipient_email: 'budi@test.com', recipient_phone: '08234567890', recipient_identity_type: 'KTP', recipient_identity_number: '2345678901234567', purchase_date: '2025-11-11T11:00:00Z', payment_status: 'paid', verification_status: 'unverified' },
+            { id: 'tkt_003', documentId: 'tkt_003', ticket_code: 'KMA-VIP-001', unique_token: 'xyz3', product_title: 'Konser Musik Akbar', variant_name: 'VIP', recipient_name: 'Citra A', recipient_email: 'citra@test.com', recipient_phone: '08345678901', recipient_identity_type: 'KTP', recipient_identity_number: '3456789012345678', purchase_date: '2025-11-12T12:00:00Z', payment_status: 'paid', verification_status: 'unverified' },
+            { id: 'tkt_004', documentId: 'tkt_004', ticket_code: 'KMA-VVIP-001', unique_token: 'xyz4', product_title: 'Konser Musik Akbar', variant_name: 'VVIP', recipient_name: 'Dani M', recipient_email: 'dani@test.com', recipient_phone: '08345678902', recipient_identity_type: 'KTP', recipient_identity_number: '4567890123456789', purchase_date: '2025-11-13T13:00:00Z', payment_status: 'bypass', verification_status: 'verified', verification_date: '2025-12-10T11:00:00Z' },
         ];
     };
 
@@ -72,10 +72,23 @@ export const SoldTicketsTable: React.FC<iSoldTicketsTableProps> = ({ productId, 
         // Sorting
         if (sortConfig !== null) {
             filtered.sort((a, b) => {
-                if (a[sortConfig.key] < b[sortConfig.key]) {
+                const valA = a[sortConfig.key];
+                const valB = b[sortConfig.key];
+
+                // Handle undefined or null values
+                if (valA === undefined || valA === null) {
+                    if (valB === undefined || valB === null) return 0; // Both are undefined/null, consider equal
+                    return sortConfig.direction === 'ascending' ? 1 : -1; // A is undefined/null, B is defined. A comes after B in ascending.
+                }
+                if (valB === undefined || valB === null) {
+                    return sortConfig.direction === 'ascending' ? -1 : 1; // B is undefined/null, A is defined. B comes after A in ascending.
+                }
+
+                // Standard comparison for defined values
+                if (valA < valB) {
                     return sortConfig.direction === 'ascending' ? -1 : 1;
                 }
-                if (a[sortConfig.key] > b[sortConfig.key]) {
+                if (valA > valB) {
                     return sortConfig.direction === 'ascending' ? 1 : -1;
                 }
                 return 0;

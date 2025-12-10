@@ -207,25 +207,6 @@ export function ProductContent() {
   }, [filterCatsQuery.isSuccess, filterCatsQuery.data]);
 
   useEffect(() => {
-    if (price?.min && price?.max) {
-      const dataSort: any = _.filter(dataContent, (item: any) => {
-        return item.main_price >= price.min && item.main_price <= price.max;
-      });
-      setMainData(dataSort);
-    } else if (price?.min && !price?.max) {
-      const dataSort: any = _.filter(dataContent, (item: any) => {
-        return item.main_price >= price.min;
-      });
-      setMainData(dataSort);
-    } else if (!price?.min && price?.max) {
-      const dataSort: any = _.filter(dataContent, (item: any) => {
-        return item.main_price <= price.max;
-      });
-      setMainData(dataSort);
-    } else null;
-  }, [price]);
-
-  useEffect(() => {
     const cleanMin = price?.min
       ? parseInt(price.min.replace(/\./g, ""), 10)
       : null;
@@ -233,26 +214,32 @@ export function ProductContent() {
       ? parseInt(price.max.replace(/\./g, ""), 10)
       : null;
 
+    if (cleanMin === null && cleanMax === null) {
+      setMainData(dataContent);
+      return;
+    }
+
     let dataSort: any[] = [];
 
     if (cleanMin !== null && cleanMax !== null) {
-      dataSort = _.filter(dataContent, (item: any) => {
-        return item.main_price >= cleanMin && item.main_price <= cleanMax;
-      });
+      dataSort = _.filter(
+        dataContent,
+        (item: any) =>
+          item.main_price >= cleanMin && item.main_price <= cleanMax
+      );
     } else if (cleanMin !== null) {
-      dataSort = _.filter(dataContent, (item: any) => {
-        return item.main_price >= cleanMin;
-      });
+      dataSort = _.filter(
+        dataContent,
+        (item: any) => item.main_price >= cleanMin
+      );
     } else if (cleanMax !== null) {
-      dataSort = _.filter(dataContent, (item: any) => {
-        return item.main_price <= cleanMax;
-      });
+      dataSort = _.filter(
+        dataContent,
+        (item: any) => item.main_price <= cleanMax
+      );
     }
-
-    if (dataSort.length || cleanMin !== null || cleanMax !== null) {
-      setMainData(dataSort);
-    }
-  }, [price]);
+    setMainData(dataSort);
+  }, [price, dataContent]);
 
   useEffect(() => {
     if (mainData.length === 0) return;
