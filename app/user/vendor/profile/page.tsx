@@ -483,7 +483,7 @@ export default function ProfilePage() {
 								</button>
 								<button
 									type="submit"
-									disabled={Object.keys(fieldErrors).length > 0}
+									disabled={Object.keys(fieldErrors).length > 0 || isSubmitting}
 									className={`px-6 py-3 rounded-lg font-semibold text-white transition ${
 										Object.keys(fieldErrors).length > 0
 											? 'bg-gray-400 cursor-not-allowed'
