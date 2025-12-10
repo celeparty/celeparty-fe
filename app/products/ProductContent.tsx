@@ -146,6 +146,8 @@ export function ProductContent() {
     staleTime: 60 * 1000, // 1 minute
   });
 
+  const dataContent = query?.data?.data || [];
+
   useEffect(() => {
     if (query.isSuccess) {
       let data = query.data.data;
@@ -300,7 +302,6 @@ export function ProductContent() {
   const getSort = params.get("sort");
   const getMin = params.get("min");
   const getMax = params.get("max");
-  const dataContent = query?.data?.data || [];
 
   const handleSort = (sort: any) => {
     const dataSort: any = _.sortBy(dataContent, (item) => {

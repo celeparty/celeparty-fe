@@ -43,7 +43,7 @@ export const TicketDashboard: React.FC = () => {
 			];
 
 			return mockApiResponse.map((ticket: any) => {
-				const variants = (ticket.variants || []).map((variant: any) => {
+				const variants: iVariantSummary[] = (ticket.variants || []).map((variant: any) => {
 					const quota = parseInt(variant.quota) || 0;
 					const sold = parseInt(variant.sold) || 0;
 					const verified = parseInt(variant.verified) || 0;
@@ -65,8 +65,8 @@ export const TicketDashboard: React.FC = () => {
 					};
 				});
 
-				const totalTicketsSold = variants.reduce((sum, v) => sum + v.sold, 0);
-				const totalRevenue = variants.reduce((sum, v) => sum + v.netIncome, 0);
+				const totalTicketsSold = variants.reduce((sum: number, v) => sum + v.sold, 0);
+				const totalRevenue = variants.reduce((sum: number, v) => sum + v.netIncome, 0);
 
 				return {
 					product_id: ticket.id,
