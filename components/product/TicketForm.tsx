@@ -387,6 +387,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 		
 		let payloadData: any = {
 			...data,
+			user_event_type: "Ticket", // Automatically set the event type
 			main_image: images,
 			event_date: eventDate,
 			end_date: endDate,
@@ -443,12 +444,12 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 				const ticketSlug = slug || (formDefaultData as any).documentId;
 				response = await axiosUser(
 					"PUT",
-					`/api/tickets/${ticketSlug}`,
+					`/api/products/${ticketSlug}`,
 					`${session && session?.jwt}`,
 					payload,
 				);
 			} else {
-				response = await axiosUser("POST", "/api/tickets", session?.jwt || "", payload);
+				response = await axiosUser("POST", "/api/products", session?.jwt || "", payload);
 			}
 
 			if (response) {

@@ -1,6 +1,7 @@
 "use client";
 
 import Box from "@/components/Box";
+import { UserTransactionTable } from "@/components/profile/UserTransactionTable";
 import { TicketDashboard } from "@/components/profile/vendor/ticket-management/TicketDashboard";
 import { TicketScan } from "@/components/profile/vendor/ticket-management/TicketScan";
 import { TicketSend } from "@/components/profile/vendor/ticket-management/TicketSend";
