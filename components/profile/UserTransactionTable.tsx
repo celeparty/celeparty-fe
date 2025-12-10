@@ -15,9 +15,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 interface iTableDataProps {
 	isVendor: boolean;
 	activeTab: string;
+	orderTypeFilter?: 'equipment' | 'ticket' | 'all';
 }
 
-export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, activeTab }) => {
+export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, activeTab, orderTypeFilter = 'all' }) => {
 	const { data: session, status } = useSession();
 
 	const documentId = session?.user?.documentId;
@@ -104,8 +105,16 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 	}));
 
 	// Combine all transactions and sort by created date
-	const dataContent = [...normalizedTicketData, ...normalizedEquipmentData]
+	let dataContent = [...normalizedTicketData, ...normalizedEquipmentData]
 		.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+	// Filter based on orderTypeFilter
+	if (orderTypeFilter === 'equipment') {
+		dataContent = dataContent.filter(item => item.transaction_type === 'equipment');
+	} else if (orderTypeFilter === 'ticket') {
+		dataContent = dataContent.filter(item => item.transaction_type === 'ticket');
+	}
+	// If 'all', no filtering needed
 
 	const toggleRow = (id: number) => {
 		setExpandedRows((prev) => ({

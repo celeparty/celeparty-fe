@@ -14,13 +14,17 @@ export default function TicketManagementPage() {
 		<Box>
 			<h4 className="text-black text-[14px] lg:text-[17px] font-extrabold mb-4">Management Tiket</h4>
 			<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-				<TabsList className="grid w-full grid-cols-3">
+				<TabsList className="grid w-full grid-cols-4">
 					<TabsTrigger value="dashboard">Dashboard Ticket</TabsTrigger>
+					<TabsTrigger value="orders">Pesanan Tiket</TabsTrigger>
 					<TabsTrigger value="scan">Scan Tiket</TabsTrigger>
 					<TabsTrigger value="send">Kirim Undangan Tiket</TabsTrigger>
 				</TabsList>
 				<TabsContent value="dashboard" className="mt-6">
 					<TicketDashboard />
+				</TabsContent>
+				<TabsContent value="orders" className="mt-6">
+					<UserTransactionTable isVendor={true} activeTab="tickets" orderTypeFilter="ticket" />
 				</TabsContent>
 				<TabsContent value="scan" className="mt-6">
 					<TicketScan />
