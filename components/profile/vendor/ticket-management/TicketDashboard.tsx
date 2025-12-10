@@ -19,8 +19,11 @@ export const TicketDashboard: React.FC = () => {
 	const getTicketSummary = async () => {
 		if (!session?.jwt) return [];
 		try {
-			const response = await axiosUser("GET", "/api/tickets", session.jwt);
-			const strapiTickets = response.data; // Assuming response.data contains the array of Strapi tickets
+			console.log("Fetching ticket summary...");
+			const response = await axiosUser("GET", `/api/tickets?filters[product][users_permissions_user][id][$eq]=${session.user.id}&populate=*`, session.jwt);
+			console.log("Raw API response for tickets:", response);
+			const strapiTickets = response.data;
+			console.log("strapiTickets (response.data):", strapiTickets);
 
 			// Group tickets by product_id to aggregate variants
 			const productsMap = new Map<string, any>();
@@ -28,6 +31,10 @@ export const TicketDashboard: React.FC = () => {
 			strapiTickets.forEach((ticket: any) => {
 				const product = ticket.attributes.product.data;
 				const variant = ticket.attributes.variant.data;
+				
+				console.log("Processing ticket:", ticket);
+				console.log("Extracted product:", product);
+				console.log("Extracted variant:", variant);
 
 				if (!product || !variant) {
 					console.warn("Skipping ticket due to missing product or variant data:", ticket);
@@ -64,8 +71,9 @@ export const TicketDashboard: React.FC = () => {
 					currentVariant.verified += 1;
 				}
 			});
+			console.log("productsMap after aggregation:", productsMap);
 
-			return Array.from(productsMap.values()).map((product: any) => {
+			const finalTicketData = Array.from(productsMap.values()).map((product: any) => {
 				const variants: iVariantSummary[] = Array.from(product.variants.values()).map((variant: any) => {
 					const quota = variant.quota;
 					const sold = variant.sold;
