@@ -134,6 +134,10 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 																<span className="font-medium">Telepon:</span>{" "}
 																{item.telp}
 															</p>
+															<p>
+																<span className="font-medium">Email:</span>{" "}
+																{item.customer_mail}
+															</p>
 														</div>
 														<div className="md:col-span-6">
 															<h4 className="font-semibold mb-2">Info Acara</h4>
