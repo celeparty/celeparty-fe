@@ -138,6 +138,28 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 																<span className="font-medium">Email:</span>{" "}
 																{item.customer_mail}
 															</p>
+															{/* Display additional recipients if available */}
+															{item.recipients && item.recipients.length > 0 && (
+																<div className="mt-4">
+																	<h5 className="font-semibold mb-2">Penerima Tambahan:</h5>
+																	{item.recipients.map((recipient: any, idx: number) => (
+																		<div key={idx} className="mb-2 border-l-2 pl-2 border-gray-200">
+																			<p>
+																				<span className="font-medium">Nama:</span>{" "}
+																				{recipient.name}
+																			</p>
+																			<p>
+																				<span className="font-medium">Email:</span>{" "}
+																				{recipient.email}
+																			</p>
+																			<p>
+																				<span className="font-medium">Telepon:</span>{" "}
+																				{recipient.phone}
+																			</p>
+																		</div>
+																	))}
+																</div>
+															)}
 														</div>
 														<div className="md:col-span-6">
 															<h4 className="font-semibold mb-2">Info Acara</h4>

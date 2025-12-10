@@ -81,4 +81,5 @@ export interface iOrderTicket {
 	event_type: string;
 	waktu_event: string;
 	transaction_type: "ticket";
+	recipients?: any[];
 }
