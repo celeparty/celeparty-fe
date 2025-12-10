@@ -19,36 +19,59 @@ export const TicketDashboard: React.FC = () => {
 	const getTicketSummary = async () => {
 		if (!session?.jwt) return [];
 		try {
-			// MOCK DATA IMPLEMENTATION
-			const mockApiResponse = [
-				{
-					id: 'prod_1',
-					title: 'Konser Musik Akbar',
-					image: { url: '/images/placeholder-1.jpg' },
-					variants: [
-						{ id: 'var_1a', name: 'Reguler', quota: 1000, sold: 750, verified: 600, price: 150000 },
-						{ id: 'var_1b', name: 'VIP', quota: 200, sold: 195, verified: 150, price: 450000 },
-						{ id: 'var_1c', name: 'VVIP', quota: 50, sold: 50, verified: 48, price: 1200000 },
-					]
-				},
-				{
-					id: 'prod_2',
-					title: 'Seminar Teknologi Masa Depan',
-					image: { url: '/images/placeholder-2.jpg' },
-					variants: [
-						{ id: 'var_2a', name: 'Mahasiswa', quota: 300, sold: 290, verified: 250, price: 75000 },
-						{ id: 'var_2b', name: 'Umum', quota: 500, sold: 450, verified: 400, price: 125000 },
-					]
-				}
-			];
+			const response = await axiosUser("GET", "/api/tickets", session.jwt);
+			const strapiTickets = response.data; // Assuming response.data contains the array of Strapi tickets
 
-			return mockApiResponse.map((ticket: any) => {
-				const variants: iVariantSummary[] = (ticket.variants || []).map((variant: any) => {
-					const quota = parseInt(variant.quota) || 0;
-					const sold = parseInt(variant.sold) || 0;
-					const verified = parseInt(variant.verified) || 0;
-					const price = parseFloat(variant.price) || 0;
-					const systemFeePercentage = 10; // 10%
+			// Group tickets by product_id to aggregate variants
+			const productsMap = new Map<string, any>();
+
+			strapiTickets.forEach((ticket: any) => {
+				const product = ticket.attributes.product.data;
+				const variant = ticket.attributes.variant.data;
+
+				if (!product || !variant) {
+					console.warn("Skipping ticket due to missing product or variant data:", ticket);
+					return;
+				}
+
+				const productId = product.id;
+				const variantId = variant.id;
+
+				if (!productsMap.has(productId)) {
+					productsMap.set(productId, {
+						id: productId,
+						title: product.attributes.title,
+						image: { url: product.attributes.image?.data?.attributes?.url || "" },
+						variants: new Map<string, any>()
+					});
+				}
+
+				const currentProduct = productsMap.get(productId);
+				if (!currentProduct.variants.has(variantId)) {
+					currentProduct.variants.set(variantId, {
+						id: variantId,
+						name: variant.attributes.name,
+						quota: parseInt(variant.attributes.quota) || 0,
+						price: parseFloat(variant.attributes.price) || 0,
+						sold: 0,
+						verified: 0
+					});
+				}
+
+				const currentVariant = currentProduct.variants.get(variantId);
+				currentVariant.sold += 1; // Each ticket in the response means one sold ticket
+				if (ticket.attributes.verification_status === "verified") {
+					currentVariant.verified += 1;
+				}
+			});
+
+			return Array.from(productsMap.values()).map((product: any) => {
+				const variants: iVariantSummary[] = Array.from(product.variants.values()).map((variant: any) => {
+					const quota = variant.quota;
+					const sold = variant.sold;
+					const price = variant.price;
+					const verified = variant.verified;
+					const systemFeePercentage = 10; // 10% - Assuming this is a constant
 					const netIncome = price * sold * (1 - systemFeePercentage / 100);
 
 					return {
@@ -69,9 +92,9 @@ export const TicketDashboard: React.FC = () => {
 				const totalRevenue = variants.reduce((sum: number, v) => sum + v.netIncome, 0);
 
 				return {
-					product_id: ticket.id,
-					product_title: ticket.title || "Tiket Tanpa Nama",
-					product_image: ticket.image?.url || "",
+					product_id: product.id,
+					product_title: product.title || "Tiket Tanpa Nama",
+					product_image: product.image?.url || "",
 					variants: variants,
 					totalRevenue: totalRevenue,
 					totalTicketsSold: totalTicketsSold,

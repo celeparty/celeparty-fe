@@ -26,27 +26,55 @@ const EquipmentDetailPage = ({ product, onBack }: { product: any, onBack: () => 
     </div>
 );
 
+import { iEquipmentSummary } from "@/lib/interfaces/iEquipmentManagement";
+
 export const EquipmentDashboard: React.FC = () => {
 	const { data: session } = useSession();
-    const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
+    const [selectedProduct, setSelectedProduct] = useState<iEquipmentSummary | null>(null);
 
 	// Fetch equipment summary
-	const getEquipmentSummary = async () => {
+	const getEquipmentSummary = async (): Promise<iEquipmentSummary[]> => {
 		if (!session?.jwt) return [];
 		try {
-			// MOCK DATA - as the endpoint might not exist
-			// In a real scenario, you would fetch from the API
-			// const response = await axiosUser(
-			// 	"GET",
-			// 	"/api/transactions/summary",
-			// 	session.jwt
-			// );
-			// return response.data;
-            return [
-                { product_id: '1', product_title: 'Tenda Pernikahan', total_orders: 15, total_revenue: 15000000 },
-                { product_id: '2', product_title: 'Sound System', total_orders: 25, total_revenue: 12500000 },
-                { product_id: '3', product_title: 'Kursi Futura', total_orders: 50, total_revenue: 5000000 },
-            ];
+			// Call the general transaction proxy to get equipment orders
+			// Assuming Strapi filters: filter by product type 'equipment' and populate product details
+			const response = await axiosUser(
+				"GET",
+				"/api/transaction-proxy?filters[product][product_type][$eq]=equipment&populate=product",
+				session.jwt
+			);
+            
+            const strapiTransactions = response.data; // Assuming response.data is an array of transactions
+
+            const equipmentSummaryMap = new Map<string, iEquipmentSummary>();
+
+            strapiTransactions.forEach((transaction: any) => {
+                const product = transaction.attributes.product?.data;
+                if (!product) {
+                    console.warn("Skipping transaction due to missing product data:", transaction);
+                    return;
+                }
+
+                const productId = product.id;
+                const productTitle = product.attributes.title;
+                const price = parseFloat(transaction.attributes.amount) || 0; // Assuming amount is the price of the order
+
+                if (!equipmentSummaryMap.has(productId)) {
+                    equipmentSummaryMap.set(productId, {
+                        product_id: productId,
+                        product_title: productTitle,
+                        total_orders: 0,
+                        total_revenue: 0,
+                    });
+                }
+
+                const currentSummary = equipmentSummaryMap.get(productId)!;
+                currentSummary.total_orders += 1;
+                currentSummary.total_revenue += price;
+            });
+
+            return Array.from(equipmentSummaryMap.values());
+
 		} catch (error) {
 			console.error("Error fetching equipment summary:", error);
 			return [];
