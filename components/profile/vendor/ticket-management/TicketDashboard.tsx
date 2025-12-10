@@ -19,82 +19,62 @@ export const TicketDashboard: React.FC = () => {
 	const getTicketSummary = async () => {
 		if (!session?.jwt) return [];
 		try {
-			const response = await axiosUser(
-				"GET",
-				"/api/tickets/summary",
-				session.jwt
-			);
-			
-			// Debug log
-			console.log("Ticket Summary Response:", response);
-			
-			// Extract data from response
-			let summaryData: any[] = [];
-			
-			if (response?.success && Array.isArray(response?.data)) {
-				summaryData = response.data;
-			} else if (Array.isArray(response?.data)) {
-				summaryData = response.data;
-			} else if (Array.isArray(response)) {
-				summaryData = response;
-			}
-			
-			if (!Array.isArray(summaryData) || summaryData.length === 0) {
-				console.warn("No ticket data available");
-				return [];
-			}
-			
-			console.log("Transformed Summary Data:", summaryData);
-			
-			return summaryData.map((ticket: any) => {
-				// Get variants from ticket.variant array
-				const ticketVariants = Array.isArray(ticket.variant) ? ticket.variant : [];
-				
-				// Map variant components to iVariantSummary format
-				const variants = ticketVariants.map((variant: any) => {
-					const variantName = variant.name || "Default";
+			// MOCK DATA IMPLEMENTATION
+			const mockApiResponse = [
+				{
+					id: 'prod_1',
+					title: 'Konser Musik Akbar',
+					image: { url: '/images/placeholder-1.jpg' },
+					variants: [
+						{ id: 'var_1a', name: 'Reguler', quota: 1000, sold: 750, verified: 600, price: 150000 },
+						{ id: 'var_1b', name: 'VIP', quota: 200, sold: 195, verified: 150, price: 450000 },
+						{ id: 'var_1c', name: 'VVIP', quota: 50, sold: 50, verified: 48, price: 1200000 },
+					]
+				},
+				{
+					id: 'prod_2',
+					title: 'Seminar Teknologi Masa Depan',
+					image: { url: '/images/placeholder-2.jpg' },
+					variants: [
+						{ id: 'var_2a', name: 'Mahasiswa', quota: 300, sold: 290, verified: 250, price: 75000 },
+						{ id: 'var_2b', name: 'Umum', quota: 500, sold: 450, verified: 400, price: 125000 },
+					]
+				}
+			];
+
+			return mockApiResponse.map((ticket: any) => {
+				const variants = (ticket.variants || []).map((variant: any) => {
 					const quota = parseInt(variant.quota) || 0;
 					const sold = parseInt(variant.sold) || 0;
 					const verified = parseInt(variant.verified) || 0;
 					const price = parseFloat(variant.price) || 0;
-					
+					const systemFeePercentage = 10; // 10%
+					const netIncome = price * sold * (1 - systemFeePercentage / 100);
+
 					return {
-						variant_id: variant.id || variant.documentId || variantName,
-						variant_name: variantName,
+						variant_id: variant.id,
+						variant_name: variant.name || "Default",
 						price: price,
 						quota: quota,
 						sold: sold,
 						verified: verified,
 						remaining: Math.max(0, quota - sold),
 						soldPercentage: quota > 0 ? (sold / quota) * 100 : 0,
-						netIncome: price * sold * 0.9, // Assume 10% system fee
-						systemFeePercentage: 10,
+						netIncome: netIncome,
+						systemFeePercentage: systemFeePercentage,
 					};
 				});
-				
-				// If no variants, create default placeholder
-				if (variants.length === 0) {
-					variants.push({
-						variant_id: "default",
-						variant_name: "Standar",
-						price: 0,
-						quota: 0,
-						sold: 0,
-						verified: 0,
-						remaining: 0,
-						soldPercentage: 0,
-						netIncome: 0,
-						systemFeePercentage: 10,
-					});
-				}
-				
+
+				const totalTicketsSold = variants.reduce((sum, v) => sum + v.sold, 0);
+				const totalRevenue = variants.reduce((sum, v) => sum + v.netIncome, 0);
+
 				return {
-					product_id: ticket.id || ticket.documentId,
-					product_title: ticket.title || ticket.name || "Tiket Tanpa Nama",
-					product_image: ticket.image?.url || ticket.product_image || "",
+					product_id: ticket.id,
+					product_title: ticket.title || "Tiket Tanpa Nama",
+					product_image: ticket.image?.url || "",
 					variants: variants,
-					totalRevenue: variants.reduce((sum: number, v: any) => sum + (v.netIncome || 0), 0),
-					totalTicketsSold: variants.reduce((sum: number, v: any) => sum + (v.sold || 0), 0),
+					totalRevenue: totalRevenue,
+					totalTicketsSold: totalTicketsSold,
 				};
 			});
 		} catch (error) {
