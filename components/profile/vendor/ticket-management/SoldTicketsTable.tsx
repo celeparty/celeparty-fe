@@ -30,7 +30,7 @@ type SortConfig = {
 
 const getStatusBadge = (status: string) => {
     switch (status) {
-        case 'verified': return <Badge variant="success">Verified</Badge>;
+        case 'verified': return <Badge variant="default">Verified</Badge>;
         case 'unverified': return <Badge variant="destructive">Unverified</Badge>;
         case 'bypass': return <Badge variant="secondary">Bypass</Badge>;
         default: return <Badge>{status}</Badge>;
