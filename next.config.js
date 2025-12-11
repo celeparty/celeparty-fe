@@ -22,7 +22,7 @@ const nextConfig = {
 		return config;
 	},
 	images: {
-		unoptimized: false,
+		unoptimized: true,
   		loader: "default",
  	 	domains: ["celeparty.com", "www.celeparty.com", "localhost"],
 		remotePatterns: [

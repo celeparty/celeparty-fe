@@ -89,10 +89,18 @@ export async function GET(req: NextRequest) {
 		const url = new URL(req.url);
 		const searchParams = url.searchParams;
 
-		// Ensure populate=* is included to get all relations
-		if (!searchParams.has('populate')) {
-			searchParams.set('populate', '*');
-		}
+		// Use a more explicit populate for deep relations
+		const populate = {
+			product: {
+				populate: {
+					image: true,
+					user_event_type: true, // Assuming event details are here
+				},
+			},
+			variant: true,
+			recipients: true,
+		};
+		searchParams.set('populate', JSON.stringify(populate));
 
 		const STRAPI_URL = `${process.env.BASE_API}/api/transaction-tickets?${searchParams.toString()}`;
 		const KEY_API = process.env.KEY_API;
@@ -109,6 +117,7 @@ export async function GET(req: NextRequest) {
 		});
 
 		const data = await strapiRes.json();
+		console.log("Raw data from Strapi (transaction-tickets-proxy):", JSON.stringify(data, null, 2)); // Log raw data
 
 		if (!strapiRes.ok) {
 			return NextResponse.json({ error: data.error || data }, { status: strapiRes.status });
