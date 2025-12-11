@@ -94,7 +94,7 @@ export default function DashboardLayout({
 								link="/user/vendor/add-product"
 							/>
 							<ItemMenu
-								title="Pesanan Perlengkapan Event"
+								title="Informasi Transaksi"
 								icon="/images/icon-order.svg"
 								iconWidth={30}
 								iconHeight={30}

@@ -15,11 +15,11 @@ export const OrdersBaseContent: React.FC<iOrdersBaseContentProps> = ({ isVendor 
 		<>
 			<Box>
 				<Tabs defaultValue="general" value={activeTab} onValueChange={setActiveTab}>
-					{isVendor && (
+					{/* {isVendor && (
 						<div className="mb-8">
 							<EquipmentDashboard />
 						</div>
-					)}
+					)} */}
 					<div className="flex items-center justify-between mb-4">
 						<h4 className="text-black text-[14px] lg:text-[17px] font-extrabold">Data Pesanan</h4>
 						{isVendor && (
