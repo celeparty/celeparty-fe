@@ -86,14 +86,45 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 		telp: ticket.telp,
 		email: ticket.customer_mail,
 		shipping_location: null, // Tickets don't have shipping
-		event_date: ticket.event_date,
+		event_date: ticket.event_date, // This is the transaction's event_date
 		loading_date: null, // Tickets don't have loading
 		loading_time: null, // Tickets don't have loading
 		note: ticket.note,
 		quantity: ticket.quantity,
-		products: [{
-			id: ticket.product_id,
-			title: ticket.product_name
+		// Extract product details
+		product: {
+			id: ticket.product?.id,
+			title: ticket.product?.title,
+			image: ticket.product?.image?.url, // Assuming image is directly under product
+			event_date: ticket.product?.event_date, // Product's event date
+			event_end_date: ticket.product?.event_end_date, // Product's event end date
+			event_time: ticket.product?.event_time, // Product's event time
+			location: ticket.product?.location, // Product's event location
+			city: ticket.product?.city, // Product's event city
+		},
+		// Extract variant details
+		variant: {
+			id: ticket.variant?.id,
+			name: ticket.variant?.name,
+			price: ticket.variant?.price,
+		},
+		// Extract recipient details (assuming it's an array of recipients)
+		recipients: ticket.recipients?.map((rec: any) => ({
+			id: rec.id,
+			name: rec.name,
+			email: rec.email,
+			phone: rec.phone,
+			identity_type: rec.identity_type,
+			identity_number: rec.identity_number,
+			ticket_code: rec.ticket_code,
+			verification_status: rec.verification_status,
+		})),
+		unit_price: ticket.unit_price, // Assuming unit_price is available directly on transaction-ticket
+		total_payment: ticket.total_payment, // Assuming total_payment is available directly on transaction-ticket
+		payment_date: ticket.payment_date, // Assuming payment_date is available directly on transaction-ticket
+		products: [{ // Keep for compatibility with existing table rendering
+			id: ticket.product?.id,
+			title: ticket.product?.title
 		}],
 		transaction_type: 'ticket'
 	}));
@@ -241,52 +272,183 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 											<TableRow className="bg-gray-50">
 												<TableCell colSpan={4}>
 													<div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4">
-														<div className="md:col-span-6">
-															<h4 className="font-semibold mb-2">Detail Customer</h4>
+														{/* Detail Tiket */}
+														{item.transaction_type === 'ticket' && item.product && (
+															<div className="md:col-span-6 lg:col-span-4">
+																<h4 className="font-semibold mb-2">Detail Tiket</h4>
+																{item.product.image && (
+																	<img
+																		src={item.product.image}
+																		alt={item.product.title || "Ticket Image"}
+																		className="w-full h-32 object-cover rounded-md mb-2"
+																	/>
+																)}
+																<p>
+																	<span className="font-medium">Nama Produk:</span>{" "}
+																	{item.product.title}
+																</p>
+																<p>
+																	<span className="font-medium">Tanggal Acara:</span>{" "}
+																	{formatDate(item.product.event_date)}
+																</p>
+																{item.product.event_end_date && item.product.event_end_date !== item.product.event_date && (
+																	<p>
+																		<span className="font-medium">Tanggal Selesai:</span>{" "}
+																		{formatDate(item.product.event_end_date)}
+																	</p>
+																)}
+																<p>
+																	<span className="font-medium">Waktu Acara:</span>{" "}
+																	{item.product.event_time}
+																</p>
+																<p>
+																	<span className="font-medium">Lokasi Acara:</span>{" "}
+																	{item.product.location}
+																</p>
+																<p>
+																	<span className="font-medium">Kota Acara:</span>{" "}
+																	{item.product.city}
+																</p>
+															</div>
+														)}
+
+														{/* Detail Transaksi */}
+														<div className="md:col-span-6 lg:col-span-4">
+															<h4 className="font-semibold mb-2">Detail Transaksi</h4>
 															<p>
-																<span className="font-medium">Nama:</span>{" "}
+																<span className="font-medium">Kode Transaksi:</span>{" "}
+																{item.order_id}
+															</p>
+															<p>
+																<span className="font-medium">Nama Pemesan:</span>{" "}
 																{item.customer_name}
 															</p>
 															<p>
-																<span className="font-medium">Telepon:</span>{" "}
-																{item.telp}
+																<span className="font-medium">Email Pemesan:</span>{" "}
+																{item.email}
+															</p>
+															{item.transaction_type === 'ticket' && item.variant && (
+																<p>
+																	<span className="font-medium">Varian Tiket:</span>{" "}
+																	{item.variant.name}
+																</p>
+															)}
+															<p>
+																<span className="font-medium">Quantity:</span>{" "}
+																{item.quantity}
+															</p>
+															{item.unit_price && (
+																<p>
+																	<span className="font-medium">Harga Satuan:</span>{" "}
+																	Rp {item.unit_price.toLocaleString('id-ID')}
+																</p>
+															)}
+															{item.total_payment && (
+																<p>
+																	<span className="font-medium">Jumlah Pembayaran:</span>{" "}
+																	Rp {item.total_payment.toLocaleString('id-ID')}
+																</p>
+															)}
+															<p>
+																<span className="font-medium">Tanggal Pembayaran:</span>{" "}
+																{formatDate(item.createdAt)}
 															</p>
 															<p>
-																<span className="font-medium">Email:</span> {item.email}
+																<span className="font-medium">Status Pembayaran:</span>{" "}
+																<span
+																	className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusConfig(item.payment_status).bgColor} ${getStatusConfig(item.payment_status).textColor}`}
+																>
+																	{getStatusConfig(item.payment_status).text}
+																</span>
 															</p>
 														</div>
-														<div className="md:col-span-6">
-															<h4 className="font-semibold mb-2">Info Pengiriman</h4>
-															<p>
-																<span className="font-medium">Alamat:</span>{" "}
-																{item.shipping_location}
-															</p>
-															<p>
-																<span className="font-medium">Tanggal Event:</span>{" "}
-																{item.event_date}
-															</p>
-															<p>
-																<span className="font-medium">Tanggal Loading:</span>{" "}
-																{item.loading_date} at {item.loading_time}
-															</p>
-														</div>
-														<div className="md:col-span-6">
-															<p>
-																<span className="font-semibold">Produk:</span>{" "}
-															</p>
-															<ul className="list-disc pl-5 space-y-1">
-																{item.products?.map((prod: any) => (
-																	<li key={prod.id}>{prod.title}</li>
+
+														{/* Informasi Penerima Tiket */}
+														{item.transaction_type === 'ticket' && item.recipients && item.recipients.length > 0 && (
+															<div className="md:col-span-12 lg:col-span-4">
+																<h4 className="font-semibold mb-2">Informasi Penerima Tiket</h4>
+																{item.recipients.map((recipient: any, recIdx: number) => (
+																	<div key={recIdx} className="mb-4 p-3 border rounded-md bg-white">
+																		<p>
+																			<span className="font-medium">Nama:</span>{" "}
+																			{recipient.name}
+																		</p>
+																		<p>
+																			<span className="font-medium">Email:</span>{" "}
+																			{recipient.email}
+																		</p>
+																		<p>
+																			<span className="font-medium">No. WhatsApp:</span>{" "}
+																			{recipient.phone}
+																		</p>
+																		<p>
+																			<span className="font-medium">Tipe Identitas:</span>{" "}
+																			{recipient.identity_type}
+																		</p>
+																		<p>
+																			<span className="font-medium">No. Identitas:</span>{" "}
+																			{recipient.identity_number}
+																		</p>
+																		<p>
+																			<span className="font-medium">Kode Tiket:</span>{" "}
+																			{recipient.ticket_code}
+																		</p>
+																		<p>
+																			<span className="font-medium">Status Verifikasi:</span>{" "}
+																			<span
+																				className={`px-2 py-0.5 rounded-full text-xs font-medium ${recipient.verification_status === 'verified' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}
+																			>
+																				{recipient.verification_status || 'pending'}
+																			</span>
+																		</p>
+																	</div>
 																))}
-															</ul>
-															<span>Total Qty: {item.quantity}</span>
-														</div>
-														<div className="md:col-span-2">
-															<p>
-																<span className="font-semibold">Catatan:</span>{" "}
-																{item.note || "-"}
-															</p>
-														</div>
+															</div>
+														)}
+
+														{/* Fallback for Equipment or if ticket details are missing */}
+														{item.transaction_type === 'equipment' && (
+															<div className="md:col-span-12">
+																<h4 className="font-semibold mb-2">Detail Customer</h4>
+																<p>
+																	<span className="font-medium">Nama:</span>{" "}
+																	{item.customer_name}
+																</p>
+																<p>
+																	<span className="font-medium">Telepon:</span>{" "}
+																	{item.telp}
+																</p>
+																<p>
+																	<span className="font-medium">Email:</span> {item.email}
+																</p>
+																<h4 className="font-semibold mb-2 mt-4">Info Pengiriman</h4>
+																<p>
+																	<span className="font-medium">Alamat:</span>{" "}
+																	{item.shipping_location}
+																</p>
+																<p>
+																	<span className="font-medium">Tanggal Event:</span>{" "}
+																	{item.event_date}
+																</p>
+																<p>
+																	<span className="font-medium">Tanggal Loading:</span>{" "}
+																	{item.loading_date} at {item.loading_time}
+																</p>
+																<p>
+																	<span className="font-semibold">Produk:</span>{" "}
+																</p>
+																<ul className="list-disc pl-5 space-y-1">
+																	{item.products?.map((prod: any) => (
+																		<li key={prod.id}>{prod.title}</li>
+																	))}
+																</ul>
+																<span>Total Qty: {item.quantity}</span>
+																<p>
+																	<span className="font-semibold">Catatan:</span>{" "}
+																	{item.note || "-"}
+																</p>
+															</div>
+														)}
 													</div>
 												</TableCell>
 											</TableRow>

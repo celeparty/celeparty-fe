@@ -86,8 +86,15 @@ export async function PUT(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
 	try {
-		const { search } = new URL(req.url);
-		const STRAPI_URL = `${process.env.BASE_API}/api/transaction-tickets${search}`;
+		const url = new URL(req.url);
+		const searchParams = url.searchParams;
+
+		// Ensure populate=* is included to get all relations
+		if (!searchParams.has('populate')) {
+			searchParams.set('populate', '*');
+		}
+
+		const STRAPI_URL = `${process.env.BASE_API}/api/transaction-tickets?${searchParams.toString()}`;
 		const KEY_API = process.env.KEY_API;
 
 		if (!KEY_API) {

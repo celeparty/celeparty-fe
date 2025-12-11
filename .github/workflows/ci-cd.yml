@@ -50,12 +50,12 @@ jobs:
             git reset --hard origin/master
 
             echo "🧹 Cleaning up disk space..."
-            rm -rf node_modules .next .cache
+            rm -rf node_modules .next package-lock.json .cache
             npm cache clean --force
             yarn cache clean --all 2>/dev/null || true
 
             echo "📦 Installing dependencies..."
-            npm install --legacy-peer-deps
+            npm install sharp --save --legacy-peer-deps
 
             echo "⚒️ Building app..."
             npm run build

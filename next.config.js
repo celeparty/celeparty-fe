@@ -22,6 +22,9 @@ const nextConfig = {
 		return config;
 	},
 	images: {
+		unoptimized: false,
+  		loader: "default",
+ 	 	domains: ["celeparty.com", "www.celeparty.com", "localhost"],
 		remotePatterns: [
 			{
 				protocol: "https",
