@@ -56,7 +56,7 @@ const TicketSendInvitationTab: React.FC<TicketSendInvitationTabProps> = ({ vendo
       try {
         const response = await axiosUser(
           "GET",
-          `/api/tickets?filters[users_permissions_user][documentId][$eq]=${encodeURIComponent(vendorDocumentId)}&populate=variant`,
+          `/api/tickets?filters[users_permissions_user][documentId][$eq]=${encodeURIComponent(vendorDocumentId)}&filters[state][$eq]=approved&populate=*`,
           jwtToken,
         );
         // Transform ticket data to match the expected product structure
