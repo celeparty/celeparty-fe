@@ -57,7 +57,7 @@ async function getTicketData(transactionId: string): Promise<iTicketTemplateData
 			recipient_identity_type: ticket.attributes.recipients?.[0]?.identity_type,
 			recipient_identity_number: ticket.attributes.recipients?.[0]?.identity_number,
 			qr_code_data: ticket.attributes.recipients?.[0]?.ticket_code || ticket.attributes.order_id,
-			generated_date: new Date().toISOString(),
+			generated_date: new Date(),
 		};
 
 		return normalizedData;
