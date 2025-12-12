@@ -1,91 +1,117 @@
 /**
  * API Route: POST /api/generate-ticket-pdf
- * 
- * Generates professional ticket PDF using the new TicketTemplate component
- * Returns PDF as base64 or buffer for email attachment
+ *
+ * Generates a professional ticket PDF using Puppeteer to render React components.
+ * Returns the PDF file.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import puppeteer from 'puppeteer';
+import ReactDOMServer from 'react-dom/server';
+import { TicketTemplate } from '@/components/ticket-templates/TicketTemplate';
+import { iTicketTemplateData } from '@/components/ticket-templates/interfaces';
+import React from 'react';
 
-// This would ideally use React Server Components to render the template
-// For now, we'll generate it using a headless approach
+// Helper function to get the base URL
+function getBaseUrl() {
+	if (process.env.VERCEL_URL) {
+		return `https://${process.env.VERCEL_URL}`;
+	}
+	// Assume localhost for local development
+	return 'http://localhost:3000';
+}
 
 export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
-    
-    const {
-      ticket_code,
-      product_title,
-      variant_name,
-      recipient_name,
-      recipient_email,
-      recipient_phone,
-      identity_type,
-      identity_number,
-      event_date,
-      event_location,
-      qr_code_data,
-      product_description,
-      format = 'base64' // 'base64' or 'buffer'
-    } = body;
+	try {
+		const body = await req.json();
 
-    // Validate required fields
-    if (!ticket_code || !product_title || !recipient_name || !recipient_email) {
-      return NextResponse.json(
-        { error: 'Missing required fields: ticket_code, product_title, recipient_name, recipient_email' },
-        { status: 400 }
-      );
-    }
+		// Use the body as the ticket data
+		const ticketData: iTicketTemplateData = body;
 
-    // For production, you would:
-    // 1. Render React component to HTML using something like: @react-pdf/renderer or NextJs rendering
-    // 2. Convert HTML to Canvas using html2canvas
-    // 3. Generate PDF using jsPDF
-    // 4. Return as base64 or buffer
+		// Validate required fields
+		if (
+			!ticketData.ticket_code ||
+			!ticketData.product_title ||
+			!ticketData.recipient_name ||
+			!ticketData.recipient_email
+		) {
+			return NextResponse.json(
+				{
+					error:
+						'Missing required fields: ticket_code, product_title, recipient_name, recipient_email',
+				},
+				{ status: 400 },
+			);
+		}
 
-    // For now, we'll return instructions for backend integration
-    const ticketData = {
-      product_title,
-      ticket_code,
-      variant_name,
-      event_date,
-      event_location,
-      product_description,
-      recipient_name,
-      recipient_email,
-      recipient_phone,
-      identity_type,
-      identity_number,
-      qr_code_data: qr_code_data || ticket_code,
-      generated_date: new Date().toISOString()
-    };
+		// --- Render React component to HTML string ---
+		const ticketHtml = ReactDOMServer.renderToString(
+			React.createElement(TicketTemplate, {
+				data: ticketData,
+				config: {
+					// Config can be customized or passed in the request
+					primary_color: '#3E2882',
+					accent_color: '#DA7E01',
+					company_name: 'Celeparty',
+					logo_url: `${getBaseUrl()}/images/logo.png`, // Assuming logo is in public/images
+				},
+			}),
+		);
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'PDF generation endpoint ready',
-        ticketData,
-        format,
-        instructions: `
-          Use this endpoint to generate professional ticket PDFs.
-          
-          For backend integration:
-          1. Call this endpoint with ticket data
-          2. Receive base64-encoded PDF
-          3. Attach to email
-          
-          OR use the direct npm library approach for SSR rendering
-        `
-      },
-      { status: 200 }
-    );
+		// --- Create the full HTML document with Tailwind CSS ---
+		const html = `
+      <html>
+        <head>
+          <title>E-Ticket</title>
+          <script src="https://cdn.tailwindcss.com"></script>
+          <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+          <style>
+            body {
+              font-family: 'Lato', sans-serif;
+            }
+          </style>
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #f7fafc;">
+          ${ticketHtml}
+        </body>
+      </html>
+    `;
 
-  } catch (error) {
-    console.error('Error generating ticket PDF:', error);
-    return NextResponse.json(
-      { error: 'Failed to generate ticket PDF', details: String(error) },
-      { status: 500 }
-    );
-  }
+		// --- Generate PDF using Puppeteer ---
+		const browser = await puppeteer.launch({
+			headless: true,
+			args: ['--no-sandbox', '--disable-setuid-sandbox'],
+		});
+		const page = await browser.newPage();
+
+		// Set content and wait for network activity to settle
+		await page.setContent(html, { waitUntil: 'networkidle0' });
+
+		// Set a viewport that matches the ticket width to ensure proper rendering
+		await page.setViewport({ width: 800, height: 600, deviceScaleFactor: 1 });
+
+		const pdfBuffer = await page.pdf({
+			width: '800px',
+			printBackground: true,
+			preferCSSPageSize: true,
+		});
+
+		await browser.close();
+
+		// --- Return PDF as response ---
+		return new NextResponse(pdfBuffer, {
+			status: 200,
+			headers: {
+				'Content-Type': 'application/pdf',
+				'Content-Disposition': `attachment; filename="e-ticket-${ticketData.ticket_code}.pdf"`,
+			},
+		});
+	} catch (error) {
+		console.error('Error generating ticket PDF:', error);
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		return NextResponse.json(
+			{ error: 'Failed to generate ticket PDF', details: errorMessage },
+			{ status: 500 },
+		);
+	}
 }
