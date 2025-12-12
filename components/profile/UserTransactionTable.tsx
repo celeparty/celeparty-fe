@@ -3,6 +3,7 @@ import { getStatusConfig } from "@/lib/orderStatusUtils";
 import { axiosUser } from "@/lib/services";
 import { formatDate } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 import { ChevronDown, ChevronUp, Download, Eye } from "lucide-react";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
@@ -38,16 +39,15 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 	};
 
 	const getTicketQuery = async () => {
-		const populateQuery = "&populate[product][populate][main_image]=*&populate[variant]=*";
-		const response = await axiosUser(
-			"GET",
-			`/api/transaction-tickets?filters${
-				isVendor ? `[vendor_id][$eq]=${session?.user?.documentId}` : `[customer_mail][$eq]=${session?.user?.email}`
-			}&sort=createdAt:desc${populateQuery}`,
-			`${session && session?.jwt}`,
+		// Use the local proxy which handles authentication and population securely
+		const filterKey = isVendor ? 'vendor_id' : 'customer_mail';
+		const filterValue = isVendor ? session?.user?.documentId : session?.user?.email;
+		
+		const response = await axios.get(
+			`/api/transaction-tickets-proxy?filters[${filterKey}][$eq]=${filterValue}&sort=createdAt:desc`
 		);
 
-		return response;
+		return response.data; // axios wraps the response in a `data` object
 	};
 
 	const equipmentQuery = useQuery({
