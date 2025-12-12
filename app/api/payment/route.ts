@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
         };
 
         // Create a transaction with Midtrans
-        const token = await snap.createTransactionToken(parameter);
+        const token = await snap.createTransaction(parameter);
 
         console.log('Midtrans token created:', token);
 
