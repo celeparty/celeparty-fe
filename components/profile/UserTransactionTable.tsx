@@ -38,11 +38,12 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 	};
 
 	const getTicketQuery = async () => {
+		const populateQuery = "&populate[product][populate][main_image]=*&populate[variant]=*";
 		const response = await axiosUser(
 			"GET",
 			`/api/transaction-tickets?filters${
 				isVendor ? `[vendor_id][$eq]=${session?.user?.documentId}` : `[customer_mail][$eq]=${session?.user?.email}`
-			}&sort=createdAt:desc`,
+			}&sort=createdAt:desc${populateQuery}`,
 			`${session && session?.jwt}`,
 		);
 
