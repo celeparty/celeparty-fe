@@ -17,67 +17,71 @@ export const TicketDashboard: React.FC = () => {
 
 	// Fetch ticket summary
 	const getTicketSummary = async () => {
-		if (!session?.jwt) return [];
+		if (!session?.jwt || !session?.user?.documentId) return [];
 		try {
-			console.log("Fetching ticket summary...");
-
-			// 1. Fetch all ticket products for the vendor
-			const productResponse = await axiosUser(
+			console.log("Fetching ticket summary from transaction-tickets...");
+			const response = await axiosUser(
 				"GET",
-				`/api/products?filters[users_permissions_user][id][$eq]=${session.user.id}&filters[user_event_type][is_ticket][$eq]=true&populate[main_image][populate]=*&populate[variant][populate]=*`,
+				`/api/transaction-tickets?filters[vendor_id][$eq]=${session.user.documentId}&populate[product][populate][main_image]=*&populate[variant]=*&populate[recipients]=*`,
 				session.jwt
 			);
-			const vendorTicketProducts = productResponse.data;
-			console.log("Vendor's ticket products:", vendorTicketProducts);
-
-			// 2. Fetch all tickets for the vendor to get sales data
-			const ticketResponse = await axiosUser(
-				"GET",
-				`/api/tickets?filters[product][users_permissions_user][id][$eq]=${session.user.id}&populate=*`,
-				session.jwt
-			);
-			const strapiTickets = ticketResponse.data;
-			console.log("All tickets for vendor:", strapiTickets);
-
-			// 3. Process and combine the data
-			const finalTicketData = vendorTicketProducts.map((product: any) => {
-				const productId = product.id;
-				const productTitle = product.attributes.title;
-				const productImage = product.attributes.main_image?.data?.[0]?.attributes?.url || "";
+			const transactions = response.data.data; // transaction-tickets are in response.data.data
+			console.log("Raw API response for transaction-tickets:", transactions);
 	
-				const productTickets = strapiTickets.filter(
-					(ticket: any) => ticket.attributes.product.data?.id === productId
-				);
+			const productsMap = new Map<string, any>();
 	
-				const variantsMap = new Map<string, any>();
+			transactions.forEach((transaction: any) => {
+				const productData = transaction.attributes.product?.data;
+				const variantData = transaction.attributes.variant?.data;
 	
-				// Initialize variants from the product itself
-				if (Array.isArray(product.attributes.variant)) {
-					product.attributes.variant.forEach((variant: any) => {
-						variantsMap.set(variant.id.toString(), {
-							id: variant.id,
-							name: variant.name,
-							quota: parseInt(variant.quota) || 0,
-							price: parseFloat(variant.price) || 0,
-							sold: 0,
-							verified: 0,
-						});
+				if (!productData || !variantData) {
+					console.warn("Skipping transaction due to missing product or variant data:", transaction);
+					return;
+				}
+	
+				const productId = productData.id;
+				const variantId = variantData.id;
+	
+				if (!productsMap.has(productId)) {
+					productsMap.set(productId, {
+						id: productId,
+						title: productData.attributes.title,
+						image: productData.attributes.main_image?.data?.[0]?.attributes?.url || "",
+						variants: new Map<string, any>()
 					});
 				}
 	
-				// Update sold and verified counts from tickets
-				productTickets.forEach((ticket: any) => {
-					const variantId = ticket.attributes.variant.data?.id;
-					if (variantId && variantsMap.has(variantId.toString())) {
-						const currentVariant = variantsMap.get(variantId.toString());
-						currentVariant.sold += 1;
-						if (ticket.attributes.verification_status === "verified") {
+				const currentProduct = productsMap.get(productId);
+				if (!currentProduct.variants.has(variantId)) {
+					const variantDetails = variantData.attributes;
+					currentProduct.variants.set(variantId, {
+						id: variantId,
+						name: variantDetails.name,
+						quota: parseInt(variantDetails.quota) || 0,
+						price: parseFloat(variantDetails.price) || 0,
+						sold: 0,
+						verified: 0
+					});
+				}
+	
+				const currentVariant = currentProduct.variants.get(variantId);
+				currentVariant.sold += transaction.attributes.quantity || 0;
+	
+				const recipients = transaction.attributes.recipients || [];
+				if (Array.isArray(recipients)) {
+					recipients.forEach((recipient: any) => {
+						// Assuming recipient is an object with verification_status
+						if (recipient.verification_status === 'verified') {
 							currentVariant.verified += 1;
 						}
-					}
-				});
+					});
+				}
+			});
 	
-				const variants: iVariantSummary[] = Array.from(variantsMap.values()).map((variant: any) => {
+			console.log("productsMap after aggregation:", productsMap);
+	
+			const finalTicketData = Array.from(productsMap.values()).map((product: any) => {
+				const variants: iVariantSummary[] = Array.from(product.variants.values()).map((variant: any) => {
 					const quota = variant.quota;
 					const sold = variant.sold;
 					const price = variant.price;
@@ -101,11 +105,11 @@ export const TicketDashboard: React.FC = () => {
 	
 				const totalTicketsSold = variants.reduce((sum: number, v) => sum + v.sold, 0);
 				const totalRevenue = variants.reduce((sum: number, v) => sum + v.netIncome, 0);
-	
+
 				return {
-					product_id: productId,
-					product_title: productTitle || "Tiket Tanpa Nama",
-					product_image: productImage,
+					product_id: product.id,
+					product_title: product.title || "Tiket Tanpa Nama",
+					product_image: product.image || "",
 					variants: variants,
 					totalRevenue: totalRevenue,
 					totalTicketsSold: totalTicketsSold,
@@ -122,9 +126,9 @@ export const TicketDashboard: React.FC = () => {
 	};
 
 	const summaryQuery = useQuery({
-		queryKey: ["ticketSummary", session?.jwt],
+		queryKey: ["ticketSummary", session?.jwt, session?.user?.documentId],
 		queryFn: getTicketSummary,
-		enabled: !!session?.jwt,
+		enabled: !!session?.jwt && !!session?.user?.documentId,
 		staleTime: 5 * 60 * 1000,
 	});
 
