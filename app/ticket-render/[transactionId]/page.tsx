@@ -90,6 +90,15 @@ export default async function TicketRenderPage({ params }: PageProps) {
 					accent_color: '#DA7E01',
 					company_name: 'Celeparty',
 					logo_url: `${getBaseUrl()}/images/logo.png`,
+					company_phone: '+62 812 3456 7890',
+					contact_info: {
+						phone: '+62 812 3456 7890',
+						email: 'support@celeparty.com',
+						instagram: 'celeparty.id',
+					},
+					show_qr_code: true,
+					show_footer_line: true,
+					show_social_media: true,
 				}}
 			/>
 		</main>
