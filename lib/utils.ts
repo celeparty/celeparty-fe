@@ -71,7 +71,7 @@ export const formatDate = (isoString: string) => {
 		                "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 		const month = months[monthIndex];
 		const year = date.getFullYear();
-		return `${day} - ${month} - ${year}`;
+		return `${day} ${month} ${year}`;
 	} catch {
 		return ""; // Return empty string if parsing fails
 	}
