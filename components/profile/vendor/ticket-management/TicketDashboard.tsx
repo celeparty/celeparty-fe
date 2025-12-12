@@ -19,67 +19,86 @@ export const TicketDashboard: React.FC = () => {
 	const getTicketSummary = async () => {
 		if (!session?.jwt || !session?.user?.documentId) return [];
 		try {
-			console.log("Fetching ticket summary from transaction-tickets...");
-			const response = await axiosUser(
+			// 1. Fetch all products for the vendor that are in the 'ticket' category
+			console.log("Fetching vendor's ticket products...");
+			const productsResponse = await axiosUser(
 				"GET",
-				`/api/transaction-tickets?filters[vendor_id][$eq]=${session.user.documentId}&populate[product][populate][main_image]=*&populate[variant]=*&populate[recipients]=*`,
+				`/api/products?filters[vendor][id][$eq]=${session.user.documentId}&filters[event_category][slug][$eq]=tiket&populate[main_image]=*&populate[variants]=*`,
 				session.jwt
 			);
-			const transactions = response.data.data; // transaction-tickets are in response.data.data
+			const vendorProducts = productsResponse.data.data;
+			console.log("Vendor's ticket products:", vendorProducts);
+
+			// 2. Fetch all transaction-tickets for the vendor
+			console.log("Fetching ticket summary from transaction-tickets...");
+			const transactionsResponse = await axiosUser(
+				"GET",
+				`/api/transaction-tickets?filters[vendor_id][$eq]=${session.user.documentId}&populate[product]=*&populate[variant]=*&populate[recipients]=*`,
+				session.jwt
+			);
+			const transactions = transactionsResponse.data.data;
 			console.log("Raw API response for transaction-tickets:", transactions);
-	
+
+			// 3. Initialize productsMap with all ticket products
 			const productsMap = new Map<string, any>();
-	
-			transactions.forEach((transaction: any) => {
-				const productData = transaction.attributes.product?.data;
-				const variantData = transaction.attributes.variant?.data;
-	
-				if (!productData || !variantData) {
-					console.warn("Skipping transaction due to missing product or variant data:", transaction);
-					return;
-				}
-	
+			vendorProducts.forEach((productData: any) => {
 				const productId = productData.id;
-				const variantId = variantData.id;
-	
-				if (!productsMap.has(productId)) {
-					productsMap.set(productId, {
-						id: productId,
-						title: productData.attributes.title,
-						image: productData.attributes.main_image?.data?.[0]?.attributes?.url || "",
-						variants: new Map<string, any>()
-					});
-				}
-	
-				const currentProduct = productsMap.get(productId);
-				if (!currentProduct.variants.has(variantId)) {
+				productsMap.set(productId, {
+					id: productId,
+					title: productData.attributes.title,
+					image: productData.attributes.main_image?.data?.[0]?.attributes?.url || "",
+					variants: new Map<string, any>(),
+				});
+
+				const productVariants = productData.attributes.variants?.data || [];
+				productVariants.forEach((variantData: any) => {
+					const variantId = variantData.id;
 					const variantDetails = variantData.attributes;
-					currentProduct.variants.set(variantId, {
+					productsMap.get(productId).variants.set(variantId, {
 						id: variantId,
 						name: variantDetails.name,
 						quota: parseInt(variantDetails.quota) || 0,
 						price: parseFloat(variantDetails.price) || 0,
 						sold: 0,
-						verified: 0
+						verified: 0,
 					});
+				});
+			});
+
+			// 4. Aggregate sales data from transactions
+			transactions.forEach((transaction: any) => {
+				const productData = transaction.attributes.product?.data;
+				const variantData = transaction.attributes.variant?.data;
+
+				if (!productData || !variantData) {
+					console.warn("Skipping transaction due to missing product or variant data:", transaction);
+					return;
 				}
-	
+
+				const productId = productData.id;
+				const variantId = variantData.id;
+
+				const currentProduct = productsMap.get(productId);
+				if (!currentProduct) return; // Skip transactions for products not in the vendor's list
+
 				const currentVariant = currentProduct.variants.get(variantId);
+				if (!currentVariant) return; // Skip if variant doesn't match
+
 				currentVariant.sold += transaction.attributes.quantity || 0;
-	
+
 				const recipients = transaction.attributes.recipients || [];
 				if (Array.isArray(recipients)) {
 					recipients.forEach((recipient: any) => {
-						// Assuming recipient is an object with verification_status
 						if (recipient.verification_status === 'verified') {
 							currentVariant.verified += 1;
 						}
 					});
 				}
 			});
-	
+
 			console.log("productsMap after aggregation:", productsMap);
-	
+
+			// 5. Format the final data structure
 			const finalTicketData = Array.from(productsMap.values()).map((product: any) => {
 				const variants: iVariantSummary[] = Array.from(product.variants.values()).map((variant: any) => {
 					const quota = variant.quota;
@@ -88,7 +107,7 @@ export const TicketDashboard: React.FC = () => {
 					const verified = variant.verified;
 					const systemFeePercentage = 10; // 10%
 					const netIncome = price * sold * (1 - systemFeePercentage / 100);
-	
+
 					return {
 						variant_id: variant.id,
 						variant_name: variant.name || "Default",
@@ -102,7 +121,7 @@ export const TicketDashboard: React.FC = () => {
 						systemFeePercentage: systemFeePercentage,
 					};
 				});
-	
+
 				const totalTicketsSold = variants.reduce((sum: number, v) => sum + v.sold, 0);
 				const totalRevenue = variants.reduce((sum: number, v) => sum + v.netIncome, 0);
 
@@ -115,10 +134,10 @@ export const TicketDashboard: React.FC = () => {
 					totalTicketsSold: totalTicketsSold,
 				};
 			});
-	
+
 			console.log("Final ticket data:", finalTicketData);
 			return finalTicketData;
-	
+
 		} catch (error) {
 			console.error("Error fetching ticket summary:", error);
 			return [];
