@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * Komponen Utama Ticket Template
  * Menyatukan header, body, QR code, dan footer dalam satu template profesional
