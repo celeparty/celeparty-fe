@@ -20,15 +20,20 @@ const snap = new midtransClient.Snap({
 });
 
 export async function POST(req: NextRequest) {
+    console.log("Received payment request");
     try {
-        const { order_id, items, email } = await req.json();
+        const body = await req.json();
+        console.log("Request body:", body);
+        const { order_id, items, email } = body;
 
         if (!order_id || !items || !Array.isArray(items) || items.length === 0 || !email) {
+            console.error("Invalid request body:", body);
             return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
         }
 
         // Calculate gross_amount from items
         const gross_amount = items.reduce((total, item) => total + (item.price * item.quantity), 0);
+        console.log("Calculated gross_amount:", gross_amount);
 
         // Prepare item_details for Midtrans
         const item_details = items.map(item => ({
@@ -37,6 +42,7 @@ export async function POST(req: NextRequest) {
             quantity: item.quantity,
             name: item.name.substring(0, 50), // Max 50 chars for item name
         }));
+        console.log("Prepared item_details for Midtrans:", item_details);
 
         // Prepare transaction parameters for Midtrans
         const parameter = {
@@ -58,16 +64,18 @@ export async function POST(req: NextRequest) {
             }
         };
 
-        // Create a transaction with Midtrans
-        const token = await snap.createTransaction(parameter);
+        console.log("Creating Midtrans transaction with parameter:", parameter);
 
-        console.log('Midtrans token created:', token);
+        // Create a transaction with Midtrans
+        const transaction = await snap.createTransaction(parameter);
+
+        console.log('Midtrans transaction created:', transaction);
 
         // Return the token to the frontend
-        return NextResponse.json({ token });
+        return NextResponse.json({ token: transaction.token });
 
     } catch (error) {
-        console.error('Error creating Midtrans transaction:', error);
+        console.error('Error creating Midtrans transaction:', JSON.stringify(error, null, 2));
         // Check if the error is from Midtrans and log it
         if (error instanceof Error && 'ApiResponse' in error) {
              // @ts-ignore

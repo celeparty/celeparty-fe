@@ -38,6 +38,9 @@ export default function OrderSummaryPage() {
 	};
 
 	const handleUnifiedPayment = async () => {
+		console.log("Starting unified payment process...");
+		console.log("Selected cart items:", selectedCartItems);
+
 		// Validate recipients for all ticket items
 		const ticketItems = selectedCartItems.filter((item) => item.product_type === "ticket");
 		for (const ticketItem of ticketItems) {
@@ -58,6 +61,7 @@ export default function OrderSummaryPage() {
 
 				if (!recipientsValid) {
 					alert(`Silakan lengkapi semua detail penerima tiket untuk ${ticketItem.product_name} sebelum melanjutkan pembayaran.`);
+					console.error("Recipient validation failed for item:", ticketItem);
 					return;
 				}
 			}
@@ -66,10 +70,13 @@ export default function OrderSummaryPage() {
 		try {
 			// Generate order_id
 			const order_id = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+			console.log("Generated order_id:", order_id);
 
 			// Separate tickets and equipment
 			const ticketItems = selectedCartItems.filter((item) => item.product_type === "ticket");
 			const equipmentItems = selectedCartItems.filter((item) => item.product_type !== "ticket");
+			console.log("Ticket items:", ticketItems);
+			console.log("Equipment items:", equipmentItems);
 
 			// Create transactions for tickets
 			const ticketTransactionIds = [];
@@ -95,6 +102,8 @@ export default function OrderSummaryPage() {
 					},
 				};
 
+				console.log("Creating ticket transaction with payload:", transactionTicketPayload);
+
 				const strapiRes = await fetch("/api/transaction-tickets-proxy", {
 					method: "POST",
 					headers: {
@@ -103,11 +112,16 @@ export default function OrderSummaryPage() {
 					body: JSON.stringify(transactionTicketPayload),
 				});
 
+				console.log("Strapi ticket transaction response status:", strapiRes.status);
+
 				if (!strapiRes.ok) {
+					const errorBody = await strapiRes.text();
+					console.error("Failed to create ticket transaction in Strapi. Response body:", errorBody);
 					throw new Error("Failed to create ticket transaction in Strapi");
 				}
 
 				const strapiData = await strapiRes.json();
+				console.log("Strapi ticket transaction response data:", strapiData);
 				ticketTransactionIds.push(strapiData.data.id);
 			}
 
@@ -145,6 +159,8 @@ export default function OrderSummaryPage() {
 					vendor_doc_id: firstItem.vendor_id || "",
 				};
 
+				console.log("Creating equipment transaction with payload:", transactionPayload);
+
 				const strapiRes = await fetch("/api/transaction-proxy", {
 					method: "POST",
 					headers: {
@@ -153,11 +169,16 @@ export default function OrderSummaryPage() {
 					body: JSON.stringify({ data: transactionPayload }),
 				});
 
+				console.log("Strapi equipment transaction response status:", strapiRes.status);
+
 				if (!strapiRes.ok) {
+					const errorBody = await strapiRes.text();
+					console.error("Failed to create equipment transaction in Strapi. Response body:", errorBody);
 					throw new Error("Failed to create equipment transaction in Strapi");
 				}
 
 				const strapiData = await strapiRes.json();
+				console.log("Strapi equipment transaction response data:", strapiData);
 				equipmentTransactionId = strapiData.data.id;
 			}
 
@@ -172,6 +193,8 @@ export default function OrderSummaryPage() {
 				totalPriceItem: item.price * item.quantity,
 			}));
 
+			console.log("Preparing payment data for Midtrans:", paymentData);
+
 			// Send to Midtrans for payment
 			const response = await fetch(`/api/payment`, {
 				method: "POST",
@@ -185,44 +208,58 @@ export default function OrderSummaryPage() {
 				}),
 			});
 
+			console.log("Midtrans payment initiation response status:", response.status);
+
 			if (!response.ok) {
+				const errorBody = await response.text();
+				console.error("Failed to initiate payment. Response body:", errorBody);
 				throw new Error("Failed to initiate payment");
 			}
 
 			const paymentResult = await response.json();
+			console.log("Midtrans payment initiation response data:", paymentResult);
 			const token = paymentResult.token;
 
+			if (!token) {
+				console.error("Midtrans token is missing in the response.");
+				throw new Error("Midtrans token is missing.");
+			}
+
 			// Save transaction summary to sessionStorage
+			const transactionSummary = {
+				orderId: ticketTransactionIds.length > 0 ? ticketTransactionIds[0] : equipmentTransactionId,
+				ticketTransactionIds,
+				equipmentTransactionId,
+				products: selectedCartItems,
+				total: totalAmount,
+				order_id: order_id,
+				email: session?.user?.email || "",
+				recipients: ticketItems.flatMap(item => item.recipients || []),
+			};
+			console.log("Saving transaction summary to sessionStorage:", transactionSummary);
 			sessionStorage.setItem(
 				"transaction_summary",
-				JSON.stringify({
-					orderId: ticketTransactionIds.length > 0 ? ticketTransactionIds[0] : equipmentTransactionId,
-					ticketTransactionIds,
-					equipmentTransactionId,
-					products: selectedCartItems,
-					total: totalAmount,
-					order_id: order_id,
-					email: session?.user?.email || "",
-					recipients: ticketItems.flatMap(item => item.recipients || []),
-				}),
+				JSON.stringify(transactionSummary),
 			);
 
 			// Redirect to Midtrans payment
+			console.log("Redirecting to Midtrans with token:", token);
 			window.snap.pay(token, {
 				onSuccess: function (result: any) {
+					console.log("Midtrans payment success:", result);
 					window.location.href = "/cart/success";
 				},
 				onError: function (error: any) {
-					console.error("Payment error:", error);
+					console.error("Midtrans payment error:", error);
 					alert("Pembayaran gagal. Silakan coba lagi.");
 				},
 				onClose: function () {
-					console.log("Payment popup closed");
+					console.log("Payment popup closed by user.");
 				},
 			});
 		} catch (error) {
 			console.error("Error in unified payment:", error);
-			alert("Gagal memproses pembayaran. Silakan coba lagi.");
+			alert("Gagal memproses pembayaran. Silakan periksa konsol untuk detailnya.");
 		}
 	};
 
