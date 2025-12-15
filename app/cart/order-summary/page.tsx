@@ -1,6 +1,7 @@
 "use client";
 import Box from "@/components/Box";
 import { useCart } from "@/lib/store/cart";
+import { CartItem } from "@/lib/interfaces/iCart"; // Explicitly import CartItem
 import { formatRupiah } from "@/lib/utils";
 import { formatDateIndonesia, formatTimeWithWIB } from "@/lib/dateFormatIndonesia";
 import { useSession } from "next-auth/react";
@@ -42,7 +43,7 @@ export default function OrderSummaryPage() {
 		console.log("Selected cart items:", selectedCartItems);
 
 		// Validate recipients for all ticket items
-		const ticketItems = selectedCartItems.filter((item) => item.product_type === "ticket");
+		const ticketItems = selectedCartItems.filter((item) => item.product_type === "ticket" || item.user_event_type?.toLowerCase() === "ticket"  || item.user_event_type?.toLowerCase() === "tiket");
 		for (const ticketItem of ticketItems) {
 			if (ticketItem.quantity >= 1) {
 				const recipientsValid =
@@ -68,121 +69,64 @@ export default function OrderSummaryPage() {
 		}
 
 		try {
-			// Generate order_id
+			// Generate a single order_id for the entire transaction
 			const order_id = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 			console.log("Generated order_id:", order_id);
 
-			// Separate tickets and equipment
-			const ticketItems = selectedCartItems.filter((item) => item.product_type === "ticket");
-			const equipmentItems = selectedCartItems.filter((item) => item.product_type !== "ticket");
-			console.log("Ticket items:", ticketItems);
-			console.log("Equipment items:", equipmentItems);
+			// Consolidate all items into a single transaction
+			const allRecipients = ticketItems.flatMap(item => item.recipients || []);
+			
+			// Use the first item for common details, assuming they are consistent for the order
+			const firstItem = selectedCartItems[0]; 
 
-			// Create transactions for tickets
-			const ticketTransactionIds = [];
-			for (const ticketItem of ticketItems) {
-				const transactionTicketPayload = {
-					data: {
-						product_name: ticketItem.product_name,
-						price: ticketItem.price.toString(),
-						quantity: ticketItem.quantity.toString(),
-						variant: ticketItem.variant || "",
-						customer_name: ticketItem.customer_name || "",
-						telp: session?.user?.phone || "",
-						total_price: (ticketItem.price * ticketItem.quantity).toString(),
-						payment_status: "pending",
-						event_date: ticketItem.event_date || "",
-						event_type: ticketItem.user_event_type || "",
-						note: ticketItem.note || "",
-						order_id: order_id,
-						customer_mail: session?.user?.email || "",
-						verification: false,
-						vendor_id: ticketItem.vendor_id || "",
-						recipients: ticketItem.recipients,
-					},
-				};
-
-				console.log("Creating ticket transaction with payload:", transactionTicketPayload);
-
-				const strapiRes = await fetch("/api/transaction-tickets-proxy", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(transactionTicketPayload),
-				});
-
-				console.log("Strapi ticket transaction response status:", strapiRes.status);
-
-				if (!strapiRes.ok) {
-					const errorBody = await strapiRes.text();
-					console.error("Failed to create ticket transaction in Strapi. Response body:", errorBody);
-					throw new Error("Failed to create ticket transaction in Strapi");
-				}
-
-				const strapiData = await strapiRes.json();
-				console.log("Strapi ticket transaction response data:", strapiData);
-				ticketTransactionIds.push(strapiData.data.id);
-			}
-
-			// Create transaction for equipment if any
-			let equipmentTransactionId = null;
-			if (equipmentItems.length > 0) {
-				// Combine fields that can differ between products
-				const variants = equipmentItems
-					.map((item: any) => item.variant)
-					.filter((v: string) => v && v.trim() !== "")
-					.join(",");
-				const quantities = equipmentItems.map((item: any) => item.quantity).join(",");
-				const notes = equipmentItems.map((item: any) => item.note).join("; ");
-
-				// Get common fields from first equipment product
-				const firstItem = equipmentItems[0];
-
-				const transactionPayload = {
-					products: equipmentItems.map((item: any) => ({
-						id: item.product_id,
-						title: item.product_name,
-					})),
+			const transactionPayload = {
+				data: {
+					order_id: order_id,
 					payment_status: "pending",
-					variant: variants,
-					quantity: quantities,
-					shipping_location: firstItem.shipping_location,
+					customer_name: firstItem.customer_name || session?.user?.name || "",
+					email: session?.user?.email || "",
+					telp: firstItem.telp || session?.user?.phone || "",
+					shipping_location: firstItem.shipping_location, // Relevant for equipment
 					event_date: firstItem.event_date,
 					loading_date: firstItem.loading_date,
 					loading_time: firstItem.loading_time,
-					customer_name: firstItem.customer_name,
-					telp: session?.user?.phone || "",
-					note: notes,
-					email: session?.user?.email || "",
-					event_type: firstItem.user_event_type,
-					vendor_doc_id: firstItem.vendor_id || "",
-				};
-
-				console.log("Creating equipment transaction with payload:", transactionPayload);
-
-				const strapiRes = await fetch("/api/transaction-proxy", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({ data: transactionPayload }),
-				});
-
-				console.log("Strapi equipment transaction response status:", strapiRes.status);
-
-				if (!strapiRes.ok) {
-					const errorBody = await strapiRes.text();
-					console.error("Failed to create equipment transaction in Strapi. Response body:", errorBody);
-					throw new Error("Failed to create equipment transaction in Strapi");
+					note: selectedCartItems.map(item => item.note).filter(Boolean).join("; "),
+					vendor_doc_id: firstItem.vendor_id || "", // Assuming a single vendor per transaction for now
+					total_payment: totalAmount,
+					order_items: selectedCartItems.map(item => ({
+						product: item.product_id,
+						variant: item.variant_id, // Ensure variant_id is available in cart items
+						quantity: item.quantity,
+						price: item.price,
+					})),
+					recipients: allRecipients, // Add all recipients to the main transaction
 				}
+			};
 
-				const strapiData = await strapiRes.json();
-				console.log("Strapi equipment transaction response data:", strapiData);
-				equipmentTransactionId = strapiData.data.id;
+			console.log("Creating unified transaction with payload:", transactionPayload);
+
+			// POST to the unified transaction proxy
+			const strapiRes = await fetch("/api/transaction-proxy", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(transactionPayload),
+			});
+
+			console.log("Strapi unified transaction response status:", strapiRes.status);
+
+			if (!strapiRes.ok) {
+				const errorBody = await strapiRes.text();
+				console.error("Failed to create transaction in Strapi. Response body:", errorBody);
+				throw new Error("Failed to create transaction in Strapi");
 			}
 
-			// Prepare payment data for Midtrans
+			const strapiData = await strapiRes.json();
+			console.log("Strapi unified transaction response data:", strapiData);
+			const transactionId = strapiData.data.id;
+
+			// Prepare payment data for Midtrans (remains the same)
 			const paymentData = selectedCartItems.map((item: any) => ({
 				id: item.product_id,
 				name: item.product_name,
@@ -195,7 +139,6 @@ export default function OrderSummaryPage() {
 
 			console.log("Preparing payment data for Midtrans:", paymentData);
 
-			// Send to Midtrans for payment
 			const response = await fetch(`/api/payment`, {
 				method: "POST",
 				headers: {
@@ -217,7 +160,6 @@ export default function OrderSummaryPage() {
 			}
 
 			const paymentResult = await response.json();
-			console.log("Midtrans payment initiation response data:", paymentResult);
 			const token = paymentResult.token;
 
 			if (!token) {
@@ -227,14 +169,12 @@ export default function OrderSummaryPage() {
 
 			// Save transaction summary to sessionStorage
 			const transactionSummary = {
-				orderId: ticketTransactionIds.length > 0 ? ticketTransactionIds[0] : equipmentTransactionId,
-				ticketTransactionIds,
-				equipmentTransactionId,
+				orderId: transactionId,
 				products: selectedCartItems,
 				total: totalAmount,
 				order_id: order_id,
 				email: session?.user?.email || "",
-				recipients: ticketItems.flatMap(item => item.recipients || []),
+				recipients: allRecipients,
 			};
 			console.log("Saving transaction summary to sessionStorage:", transactionSummary);
 			sessionStorage.setItem(

@@ -104,6 +104,7 @@ export default function SideBar({
       customer_name: customerName,
       telp: telp,
       variant: variantName,
+      variant_id: selectedVariantId,
       product_type: productTypeName?.toLowerCase() === "ticket" ? "ticket" : (productTypeName?.toLowerCase() || "equipment"),
       user_event_type:
         dataProducts.user_event_type?.name ||

@@ -32,9 +32,10 @@ export const TicketScan: React.FC = () => {
 	const getVerificationHistory = async () => {
 		if (!session?.jwt) return [];
 		try {
+			// TODO: This endpoint is speculative and needs to be implemented in the backend.
 			const response = await axiosUser(
 				"GET",
-				"/api/tickets/verification-history",
+				"/api/transactions/verification-history",
 				session.jwt
 			);
 			return response?.data || [];
@@ -45,7 +46,7 @@ export const TicketScan: React.FC = () => {
 	};
 
 	const historyQuery = useQuery({
-		queryKey: ["verificationHistory", session?.jwt],
+		queryKey: ["transactionVerificationHistory", session?.jwt],
 		queryFn: getVerificationHistory,
 		enabled: !!session?.jwt,
 		staleTime: 2 * 60 * 1000,
@@ -116,10 +117,11 @@ export const TicketScan: React.FC = () => {
 	// Handle detected QR code
 	const handleQRDetected = async (uniqueToken: string) => {
 		try {
-			// Fetch ticket data berdasarkan QR code token
+			// TODO: This endpoint is speculative and needs to be implemented in the backend.
+			// The response should contain recipient and ticket details.
 			const response = await axiosUser(
 				"POST",
-				"/api/tickets/scan",
+				"/api/transactions/scan",
 				session?.jwt || "",
 				{
 					encodedToken: uniqueToken,
@@ -128,7 +130,6 @@ export const TicketScan: React.FC = () => {
 
 			if (response?.data) {
 				setScannedTicket(response.data);
-				// Play success sound atau notification
 				toast({
 					title: "QR Terdeteksi",
 					description: `Tiket ${response.data.ticket_code} siap untuk diverifikasi`,
@@ -137,6 +138,7 @@ export const TicketScan: React.FC = () => {
 			}
 		} catch (error) {
 			console.error("Error scanning QR code:", error);
+			// Optionally, add a toast for scan failure
 		}
 	};
 
@@ -156,15 +158,20 @@ export const TicketScan: React.FC = () => {
 
 	// Verifikasi tiket
 	const verifyTicket = async () => {
-		if (!scannedTicket) return;
+		if (!scannedTicket?.id) return;
 
 		setIsVerifying(true);
 		try {
+			// TODO: This endpoint is speculative and needs to be implemented in the backend.
+			// It should handle the verification of a specific recipient/ticket within a transaction.
 			const response = await axiosUser(
 				"POST",
-				`/api/tickets/${scannedTicket.id}/verify`,
+				`/api/transactions/verify`,
 				session?.jwt || "",
-				{}
+				{ 
+					// The new endpoint should accept the unique identifier for the recipient/ticket
+					recipientId: scannedTicket.id 
+				}
 			);
 
 			if (response?.success) {

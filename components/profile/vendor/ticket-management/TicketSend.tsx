@@ -49,45 +49,28 @@ export const TicketSend: React.FC = () => {
 	const getVendorTickets = async () => {
 		if (!session?.jwt) return [];
 		try {
-			// Use the frontend API proxy route instead of direct axiosUser call
-			// This ensures consistent behavior with the rest of the app
-			const url = new URL(`${window.location.origin}/api/tickets?populate=*&sort[0]=createdAt%3Adesc`);
+			const response = await axiosUser(
+				"GET",
+				`/api/products?filters[vendor][id][$eq]=${session.user.documentId}&filters[user_event_type][name][$in]=Ticket&filters[user_event_type][name][$in]=ticket&populate[variants]=*`,
+				session.jwt
+			);
+			const products = response.data.data;
+			console.log("Vendor's ticket products:", products);
 			
-			const response = await fetch(url.toString(), {
-				method: 'GET',
-				headers: {
-					'Authorization': `Bearer ${session.jwt}`,
-					'Content-Type': 'application/json',
-				},
-			});
-
-			if (!response.ok) {
-				console.error('Error response from tickets API:', response.statusText);
-				return [];
-			}
-
-			const data = await response.json();
-			console.log("Vendor Tickets Response:", data);
-			
-			// Handle Strapi response structure
-			let ticketsData: any[] = [];
-			
-			if (Array.isArray(data?.data)) {
-				ticketsData = data.data;
-			} else if (Array.isArray(data)) {
-				ticketsData = data;
-			}
-			
-			console.log("Vendor Tickets Raw Data:", ticketsData);
-			if (ticketsData[0]) {
-				console.log("First ticket structure:", ticketsData[0]);
-				console.log("First ticket variant:", ticketsData[0].variant);
-			}
-			
-			// Return all tickets - don't filter out, let UI handle empty variants
-			return ticketsData;
+			// Map to a consistent structure, ensuring variants are always an array
+			return products.map((p: any) => ({
+				id: p.id,
+				documentId: p.id, // for compatibility
+				title: p.attributes.title,
+				variant: p.attributes.variants?.data?.map((v: any) => ({
+					id: v.id,
+					documentId: v.id,
+					name: v.attributes.name,
+					price: v.attributes.price
+				})) || [],
+			}));
 		} catch (error) {
-			console.error("Error fetching tickets:", error);
+			console.error("Error fetching vendor tickets:", error);
 			return [];
 		}
 	};
@@ -103,9 +86,10 @@ export const TicketSend: React.FC = () => {
 	const getSendHistory = async () => {
 		if (!session?.jwt) return [];
 		try {
+			// TODO: This endpoint is speculative and needs to be implemented in the backend.
 			const response = await axiosUser(
 				"GET",
-				"/api/tickets/send-history",
+				"/api/transactions/send-history",
 				session.jwt
 			);
 			return response?.data || [];
@@ -116,7 +100,7 @@ export const TicketSend: React.FC = () => {
 	};
 
 	const historyQuery = useQuery({
-		queryKey: ["sendHistory", session?.jwt],
+		queryKey: ["transactionSendHistory", session?.jwt],
 		queryFn: getSendHistory,
 		enabled: !!session?.jwt,
 		staleTime: 5 * 60 * 1000,
@@ -255,9 +239,10 @@ export const TicketSend: React.FC = () => {
 				password,
 			};
 
+			// TODO: This endpoint is speculative and needs to be implemented in the backend.
 			const response = await axiosUser(
 				"POST",
-				"/api/tickets/send-invitation",
+				"/api/transactions/send-invitation",
 				session?.jwt || "",
 				payload
 			);

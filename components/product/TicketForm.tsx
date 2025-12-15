@@ -387,6 +387,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 		
 		let payloadData: any = {
 			...data,
+			category: "ticket", // Explicitly set category for ticket products
 			user_event_type: "Ticket", // Automatically set the event type
 			main_image: images,
 			event_date: eventDate,

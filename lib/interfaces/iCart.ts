@@ -17,6 +17,7 @@ export interface CartItem {
 	customer_name?: string;
 	telp?: string;
 	variant?: string;
+	variant_id?: string | number;
 	vendor_id?: string;
 	user_event_type?: string;
 	product_type?: "ticket" | "equipment"; // Add product type to distinguish between tickets and equipment

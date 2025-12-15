@@ -24,39 +24,50 @@ async function getTicketData(transactionId: string): Promise<iTicketTemplateData
 	try {
 		const baseUrl = getBaseUrl();
 		
-		// The proxy route will handle populating the necessary fields.
-		// We just need to filter by the specific transaction ID.
-		const response = await fetch(`${baseUrl}/api/transaction-tickets-proxy?filters[id][$eq]=${transactionId}`, {
+		// The new unified endpoint for transactions.
+		// We populate all nested fields required for the ticket template.
+		const populateString = "populate[order_items][populate][product]=*&populate[order_items][populate][variant]=*&populate=recipients";
+		const response = await fetch(`${baseUrl}/api/transactions/${transactionId}?${populateString}`, {
 			cache: 'no-store', // Ensure fresh data for every PDF generation
 		});
 
 		if (!response.ok) {
-			throw new Error(`Failed to fetch ticket data: ${response.statusText}`);
+			throw new Error(`Failed to fetch transaction data: ${response.statusText}`);
 		}
 
 		const result = await response.json();
 		
-		// The API returns an array, so we take the first element
-		const ticket = result.data?.[0];
+		const transaction = result.data;
 
-		if (!ticket) {
+		if (!transaction) {
+			return null;
+		}
+		
+		const attributes = transaction.attributes;
+		const orderItem = attributes.order_items?.data?.[0]?.attributes;
+		const product = orderItem?.product?.data?.attributes;
+		const variant = orderItem?.variant?.data?.attributes;
+		const recipient = attributes.recipients?.[0]; // Assuming the first recipient is the primary for the ticket
+
+		if (!product || !variant || !recipient) {
+			console.error("Incomplete data for ticket rendering:", { product, variant, recipient });
 			return null;
 		}
 
 		// Normalize the data to match the iTicketTemplateData interface
 		const normalizedData: iTicketTemplateData = {
-			product_title: ticket.attributes.product?.data?.attributes.title,
-			ticket_code: ticket.attributes.recipients?.[0]?.ticket_code || ticket.attributes.order_id, // Use first recipient's code or order_id
-			variant_name: ticket.attributes.variant?.data?.attributes.name,
-			event_date: ticket.attributes.product?.data?.attributes.event_date,
-			event_location: ticket.attributes.product?.data?.attributes.location,
-			product_description: ticket.attributes.product?.data?.attributes.description,
-			recipient_name: ticket.attributes.recipients?.[0]?.name || ticket.attributes.customer_name,
-			recipient_email: ticket.attributes.recipients?.[0]?.email || ticket.attributes.customer_mail,
-			recipient_phone: ticket.attributes.recipients?.[0]?.phone || ticket.attributes.telp,
-			recipient_identity_type: ticket.attributes.recipients?.[0]?.identity_type,
-			recipient_identity_number: ticket.attributes.recipients?.[0]?.identity_number,
-			qr_code_data: ticket.attributes.recipients?.[0]?.ticket_code || ticket.attributes.order_id,
+			product_title: product.title,
+			ticket_code: recipient.ticket_code || attributes.order_id,
+			variant_name: variant.name,
+			event_date: product.event_date,
+			event_location: product.lokasi_event,
+			product_description: product.description,
+			recipient_name: recipient.name || attributes.customer_name,
+			recipient_email: recipient.email || attributes.email,
+			recipient_phone: recipient.phone || attributes.telp,
+			recipient_identity_type: recipient.identity_type,
+			recipient_identity_number: recipient.identity_number,
+			qr_code_data: recipient.ticket_code || attributes.order_id, // The QR code should contain the unique ticket code
 			generated_date: new Date(),
 		};
 
