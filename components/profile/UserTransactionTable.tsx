@@ -18,6 +18,43 @@ interface iTableDataProps {
 	orderTypeFilter?: 'equipment' | 'ticket' | 'all';
 }
 
+interface TransactionItem {
+	id: string;
+	createdAt: string;
+	payment_status: string;
+	order_id: string;
+	customer_name: string;
+	telp?: string;
+	email?: string;
+	shipping_location?: string;
+	event_date?: string;
+	loading_date?: string;
+	loading_time?: string;
+	note?: string;
+	quantity?: number;
+	unit_price?: number;
+	total_payment: number;
+	payment_date?: string;
+	products: Array<{ id: string; title: string; }>;
+	recipients?: any[]; // Consider defining a more specific interface for recipients if needed
+	transaction_type: 'ticket' | 'equipment';
+	product?: {
+		id: string;
+		title: string;
+		image?: string;
+		event_date?: string;
+		event_end_date?: string;
+		event_time?: string;
+		location?: string;
+		city?: string;
+	} | null;
+	variant?: {
+		id: string;
+		name: string;
+		price: number;
+	} | null;
+}
+
 export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, activeTab, orderTypeFilter = 'all' }) => {
 	const { data: session, status } = useSession();
 	const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
@@ -60,9 +97,7 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 		return <ErrorNetwork style="mt-0" />;
 	}
 
-	// Normalize data from the single unified query
-	const allTransactions = transactionsQuery.data || [];
-	let dataContent = allTransactions.map((transaction: any) => {
+	let dataContent: TransactionItem[] = allTransactions.map((transaction: any) => {
 		const mainItem = transaction.attributes.order_items?.data?.[0]?.attributes;
 		const product = mainItem?.product?.data?.attributes;
 		const productType = product?.user_event_type?.data?.attributes?.name?.toLowerCase();
@@ -115,10 +150,11 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 
 	// Filter based on orderTypeFilter
 	if (orderTypeFilter === 'equipment') {
-		dataContent = dataContent.filter(item => item.transaction_type === 'equipment');
+		dataContent = dataContent.filter((item: TransactionItem) => item.transaction_type === 'equipment');
 	} else if (orderTypeFilter === 'ticket') {
-		dataContent = dataContent.filter(item => item.transaction_type === 'ticket');
+		dataContent = dataContent.filter((item: TransactionItem) => item.transaction_type === 'ticket');
 	}
+
 	
 	const handleStatusAction = async (orderId: number, action: "process" | "cancel" | "complete") => {
 		// Implement your API call here
