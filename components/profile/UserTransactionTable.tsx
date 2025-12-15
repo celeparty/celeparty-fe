@@ -97,6 +97,7 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 		return <ErrorNetwork style="mt-0" />;
 	}
 
+	const allTransactions = transactionsQuery.data || [];
 	let dataContent: TransactionItem[] = allTransactions.map((transaction: any) => {
 		const mainItem = transaction.attributes.order_items?.data?.[0]?.attributes;
 		const product = mainItem?.product?.data?.attributes;
