@@ -11,7 +11,7 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
 		const token = authHeader?.replace("Bearer ", "") || process.env.KEY_API;
 
 		// First, find the ticket by documentId (slug)
-		const findUrl = `${process.env.BASE_API}/api/tickets?filters[documentId][$eq]=${slug}&populate=*`;
+		const findUrl = `${process.env.BASE_API}/api/products?filters[documentId][$eq]=${slug}&filters[category][name][$eq]=ticket&populate=*`;
 		console.log(`Finding ticket by documentId: ${findUrl}`);
 
 		const findResponse = await axios.get(findUrl, {
@@ -48,7 +48,7 @@ export async function PUT(request: NextRequest, { params }: { params: { slug: st
 
 		const token = authHeader?.replace("Bearer ", "") || process.env.KEY_API;
 
-		const url = `${process.env.BASE_API}/api/tickets/${slug}`;
+		const url = `${process.env.BASE_API}/api/products/${slug}`;
 		console.log(`Proxying ticket update request to backend: ${url}`);
 
 		const response = await axios.put(url, body, {

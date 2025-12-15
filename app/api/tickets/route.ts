@@ -43,7 +43,10 @@ export async function GET(req: NextRequest) {
 		searchParams.set('filters[owner][id][$eq]', userId); // Add filter for 'owner' relationship
 		searchParams.set('filters[users_permissions_user][id][$eq]', userId); // Add filter for 'users_permissions_user' relationship
 
-		const STRAPI_URL = `${process.env.BASE_API}/api/tickets?${searchParams.toString()}`;
+		// Add filter for 'ticket' category to ensure only ticket products are fetched
+		searchParams.set('filters[category][name][$eq]', 'ticket');
+
+		const STRAPI_URL = `${process.env.BASE_API}/api/products?${searchParams.toString()}`;
 		console.log("Constructed Strapi URL:", STRAPI_URL); // Log constructed URL
 		const KEY_API = process.env.KEY_API;
 

@@ -65,7 +65,7 @@ export default function Products() {
 					},
 				),
 				axios.get(
-					`${process.env.BASE_API}/api/tickets?populate=*&filters[users_permissions_user][documentId]=${userMe.user.documentId}`,
+					`/api/tickets?populate=*&filters[users_permissions_user][documentId]=${userMe.user.documentId}`,
 					{
 						headers: {
 							Authorization: `Bearer ${userMe.jwt}`,
