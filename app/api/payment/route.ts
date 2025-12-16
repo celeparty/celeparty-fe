@@ -1,22 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import midtransClient from 'midtrans-client';
 
-// Ensure environment variables are defined
-if (!process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION) {
-    throw new Error('NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION is not defined');
-}
-if (!process.env.MIDTRANS_SERVER_KEY) {
-    throw new Error('MIDTRANS_SERVER_KEY is not defined');
-}
-if (!process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY) {
-    throw new Error('NEXT_PUBLIC_MIDTRANS_CLIENT_KEY is not defined');
-}
-
 // Initialize Midtrans Snap client
 const snap = new midtransClient.Snap({
     isProduction: process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === 'true',
-    serverKey: process.env.MIDTRANS_SERVER_KEY,
-    clientKey: process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY
+    serverKey: process.env.MIDTRANS_SERVER_KEY || '',
+    clientKey: process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || ''
 });
 
 export async function POST(req: NextRequest) {
