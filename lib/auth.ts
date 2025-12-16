@@ -81,6 +81,7 @@ export const authOptions: NextAuthOptions = {
 			if (user) {
 				token.accessToken = user.jwt; // Simpan JWT ke token
 				token.user = user.user; // Simpan informasi user
+				token.documentId = user.user?.documentId
 				// Pastikan role juga ada di token.user
 				if (user.user && user.user.role) {
 					token.user.role = user.user.role;
@@ -95,6 +96,7 @@ export const authOptions: NextAuthOptions = {
 			// Transfer token ke session
 			session.jwt = token.accessToken; // Simpan JWT ke session
 			session.user = token.user; // Simpan informasi user ke session
+			session.documentId = token.documentId
 			// Pastikan role juga ada di session.user
 			if (token.user && token.user.role) {
 				session.user.role = token.user.role;

@@ -47,7 +47,7 @@ export default function Products() {
 	const { userMe }: any = useUser();
 
 	const getData = async () => {
-		if (!userMe?.user?.documentId || !userMe?.jwt) {
+		if (!userMe?.documentId || !userMe?.jwt) {
 			console.log('Waiting for user data...');
 			return { data: [] };
 		}
@@ -57,7 +57,7 @@ export default function Products() {
 			// Fetch both products (equipment) and tickets
 			const [productsRes, ticketsRes] = await Promise.all([
 				axios.get(
-					`${process.env.BASE_API}/api/products?populate=*&filters[users_permissions_user][documentId]=${userMe.user.documentId}&filters[publishedAt][$notnull]=true`,
+					`${process.env.BASE_API}/api/products?populate=*&filters[users_permissions_user][documentId]=${userMe.documentId}&filters[publishedAt][$notnull]=true`,
 					{
 						headers: {
 							Authorization: `Bearer ${userMe.jwt}`,
@@ -65,7 +65,7 @@ export default function Products() {
 					},
 				),
 				axios.get(
-					`/api/tickets?populate=*&filters[users_permissions_user][documentId]=${userMe.user.documentId}`,
+					`${process.env.BASE_API}/api/products?populate=*&filters[users_permissions_user][documentId]=${userMe.documentId}&filters[category][name]=ticket`,
 					{
 						headers: {
 							Authorization: `Bearer ${userMe.jwt}`,
@@ -100,9 +100,9 @@ export default function Products() {
 
 	// Use React Query for automatic caching and refetching
 	const { data: queryData = { data: [] }, isLoading, isRefetching, refetch } = useQuery({
-		queryKey: ["vendorProducts", userMe?.user?.documentId],
+		queryKey: ["vendorProducts", userMe?.documentId],
 		queryFn: getData,
-		enabled: !!userMe?.user?.documentId && status === "authenticated",
+		enabled: !!userMe?.documentId && status === "authenticated",
 		staleTime: 5000, // 5 seconds - after this time, data considered stale
 		gcTime: 10000, // 10 seconds - keep in cache for 10 seconds
 		refetchInterval: 10000, // Auto-refetch every 10 seconds while tab is focused
