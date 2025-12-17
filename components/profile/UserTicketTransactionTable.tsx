@@ -112,86 +112,23 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 											</TableCell>
 										</TableRow>
 
+
+import ProductDetails from "./ticket-order-details/ProductDetails";
+import TransactionDetails from "./ticket-order-details/TransactionDetails";
+import TicketRecipientDetails from "./ticket-order-details/TicketRecipientDetails";
+
 										{expandedRows[item.id] && (
 											<TableRow className="bg-gray-50">
 												<TableCell colSpan={4}>
-													<div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4">
-														<div className="md:col-span-6">
-															<h4 className="font-semibold mb-2">Detail Tiket</h4>
-															<p>
-																<span className="font-medium">Nama Tiket:</span>{" "}
-																{item.product_name}
-															</p>
-															<p>
-																<span className="font-medium">Jenis Tiket:</span>{" "}
-																{item.variant}
-															</p>
-															<p>
-																<span className="font-medium">Nama:</span>{" "}
-																{item.customer_name}
-															</p>
-															<p>
-																<span className="font-medium">Telepon:</span>{" "}
-																{item.telp}
-															</p>
-															<p>
-																<span className="font-medium">Email:</span>{" "}
-																{item.customer_mail}
-															</p>
-															{/* Display additional recipients if available */}
-															{item.recipients && item.recipients.length > 0 && (
-																<div className="mt-4">
-																	<h5 className="font-semibold mb-2">Penerima Tambahan:</h5>
-																	{item.recipients.map((recipient: any, idx: number) => (
-																		<div key={idx} className="mb-2 border-l-2 pl-2 border-gray-200">
-																			<p>
-																				<span className="font-medium">Nama:</span>{" "}
-																				{recipient.name}
-																			</p>
-																			<p>
-																				<span className="font-medium">Email:</span>{" "}
-																				{recipient.email}
-																			</p>
-																			<p>
-																				<span className="font-medium">Telepon:</span>{" "}
-																				{recipient.phone}
-																			</p>
-																		</div>
-																	))}
-																</div>
-															)}
-														</div>
-														<div className="md:col-span-6">
-															<h4 className="font-semibold mb-2">Info Acara</h4>
-															<p>
-																<span className="font-medium">Tanggal Acara:</span>{" "}
-																{item.event_date}
-															</p>
-															<p>
-																<span className="font-medium">Waktu Acara:</span>{" "}
-																{item.waktu_event}
-															</p>
-														</div>
-														<div className="md:col-span-6">
-															<p>
-																<span className="font-semibold">Catatan:</span>{" "}
-																{item.note || "-"}
-															</p>
-														</div>
-														<div className="md:col-span-6">
-															<p>
-																<span className="font-semibold">
-																	Status verifikasi:
-																</span>{" "}
-																{`${
-																	item.verification ? "Sudah" : "Belum"
-																} terverifikasi`}
-															</p>
-														</div>
+													<div className="p-4">
+														<ProductDetails item={item} />
+														<TransactionDetails item={item} />
+														<TicketRecipientDetails item={item} />
 													</div>
 												</TableCell>
 											</TableRow>
 										)}
+
 									</React.Fragment>
 								);
 							})}
