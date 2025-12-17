@@ -10,6 +10,9 @@ import ErrorNetwork from "../ErrorNetwork";
 import Skeleton from "../Skeleton";
 import { Button } from "../ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
+import ProductDetails from "./ticket-order-details/ProductDetails";
+import TransactionDetails from "./ticket-order-details/TransactionDetails";
+import TicketRecipientDetails from "./ticket-order-details/TicketRecipientDetails";
 
 interface iTableDataProps {
 	isVendor: boolean;
@@ -111,11 +114,6 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 												</div>
 											</TableCell>
 										</TableRow>
-
-
-import ProductDetails from "./ticket-order-details/ProductDetails";
-import TransactionDetails from "./ticket-order-details/TransactionDetails";
-import TicketRecipientDetails from "./ticket-order-details/TicketRecipientDetails";
 
 										{expandedRows[item.id] && (
 											<TableRow className="bg-gray-50">

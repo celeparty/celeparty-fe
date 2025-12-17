@@ -1,6 +1,6 @@
 
 import { iOrderTicket } from "@/lib/interfaces/iOrder";
-import { dateFormatIndonesia } from "@/lib/dateFormatIndonesia";
+import { formatDateIndonesia } from "@/lib/dateFormatIndonesia";
 
 const ProductDetails = ({ item }: { item: iOrderTicket }) => {
   return (
@@ -16,7 +16,7 @@ const ProductDetails = ({ item }: { item: iOrderTicket }) => {
           </div>
           <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
             <dt className="text-sm font-medium text-gray-500">Tanggal Acara</dt>
-            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{dateFormatIndonesia(item.event_date)}</dd>
+            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{formatDateIndonesia(item.event_date)}</dd>
           </div>
           <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
             <dt className="text-sm font-medium text-gray-500">Jam Acara</dt>
