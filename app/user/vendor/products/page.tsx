@@ -47,51 +47,29 @@ export default function Products() {
 	const { userMe }: any = useUser();
 
 	const getData = async () => {
-		if (!userMe?.documentId || !userMe?.jwt) {
-			console.log('Waiting for user data...');
+		if (!userMe?.user?.id || !userMe?.jwt) {
+			console.log("Waiting for user data...");
 			return { data: [] };
 		}
 
 		try {
-			console.log('Fetching products and tickets...');
 			// Fetch both products (equipment) and tickets
-			const [productsRes, ticketsRes] = await Promise.all([
-				axios.get(
-					`${process.env.BASE_API}/api/products?populate=*&filters[users_permissions_user][documentId]=${userMe.documentId}&filters[publishedAt][$notnull]=true`,
-					{
-						headers: {
-							Authorization: `Bearer ${userMe.jwt}`,
-						},
+			const res = await axios.get(
+				`${process.env.BASE_API}/api/products?populate=*&filters[users_permissions_user][id]=${userMe.user.id}`,
+				{
+					headers: {
+						Authorization: `Bearer ${userMe.jwt}`,
 					},
-				),
-				axios.get(
-					`${process.env.BASE_API}/api/products?populate=*&filters[users_permissions_user][documentId]=${userMe.documentId}&filters[category][name]=ticket`,
-					{
-						headers: {
-							Authorization: `Bearer ${userMe.jwt}`,
-						},
-					},
-				),
-			]);
+				},
+			);
 
-			// Mark tickets with type and status for differentiation
-			const ticketsData = (ticketsRes?.data?.data || []).map((ticket: any) => ({
-				...ticket,
-				__type: 'ticket',
-				__status: ticket.publishedAt ? 'published' : 'unpublished',
+			const data = res.data.data.map((item: any) => ({
+				...item,
+				__type: item.category?.name?.toLowerCase() === "ticket" ? "ticket" : "product",
+				__status: item.publishedAt ? "published" : "unpublished",
 			}));
 
-			// Mark products with type for differentiation
-			const productsData = (productsRes?.data?.data || []).map((product: any) => ({
-				...product,
-				__type: 'product',
-				__status: 'published',
-			}));
-
-			// Combine both data
-			const combinedData = [...productsData, ...ticketsData];
-			console.log('Fetched data:', combinedData.length, 'items');
-			return { data: combinedData };
+			return { data: data };
 		} catch (error) {
 			console.error("Error fetching data:", error);
 			return { data: [] };
@@ -100,9 +78,9 @@ export default function Products() {
 
 	// Use React Query for automatic caching and refetching
 	const { data: queryData = { data: [] }, isLoading, isRefetching, refetch } = useQuery({
-		queryKey: ["vendorProducts", userMe?.documentId],
+		queryKey: ["vendorProducts", userMe?.user?.id],
 		queryFn: getData,
-		enabled: !!userMe?.documentId && status === "authenticated",
+		enabled: !!userMe?.user?.id && status === "authenticated",
 		staleTime: 5000, // 5 seconds - after this time, data considered stale
 		gcTime: 10000, // 10 seconds - keep in cache for 10 seconds
 		refetchInterval: 10000, // Auto-refetch every 10 seconds while tab is focused
@@ -218,7 +196,7 @@ export default function Products() {
 								rate={item.rate ? `${item.rate}` : "1"}
 								sold={item.sold_count}
 								location={item.region ? item.region : null}
-								status={item.__type === 'ticket' ? item.__status : undefined}
+								status={item.__status}
 							>
 								<div className="flex gap-1 justify-end py-2">
 									<Link href={`products/edit/${item.documentId}?type=${item.__type}`}>
