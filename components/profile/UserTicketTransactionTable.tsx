@@ -99,7 +99,10 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 											</TableCell>
 											<TableCell>
 												<div className="flex gap-2">
-													<Button size="sm" variant="link" onClick={() => toggleRow(item.id)}>
+													<Button size="sm" variant="link" onClick={() => {
+														console.log(item.recipients);
+														toggleRow(item.id);
+													}}>
 														{expandedRows[item.id] ? (
 															<>
 																Sembunyikan <ChevronUp className="h-4 w-4" />
