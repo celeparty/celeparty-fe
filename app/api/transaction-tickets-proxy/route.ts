@@ -89,18 +89,10 @@ export async function GET(req: NextRequest) {
 		const url = new URL(req.url);
 		const searchParams = url.searchParams;
 
-		// Use a more explicit populate for deep relations
-		const populate = {
-			product: {
-				populate: {
-					image: true,
-					user_event_type: { populate: '*' }, // Deeply populate user_event_type
-				},
-			},
-			variant: true,
-			recipients: { populate: '*' }, // Deeply populate all recipient fields
-		};
-		searchParams.set('populate', JSON.stringify(populate));
+		// The previous populate object was causing issues due to incorrect serialization.
+		// Strapi's v4 query engine expects a string-based format for deep population.
+		const populateString = "product.user_event_type,product.image,variant,recipients";
+		searchParams.set('populate', populateString);
 
 		const STRAPI_URL = `${process.env.BASE_API}/api/transaction-tickets?${searchParams.toString()}`;
 		const KEY_API = process.env.KEY_API;

@@ -1,8 +1,8 @@
 import { iOrderItem } from "@/lib/interfaces/iOrder";
 import { getStatusConfig } from "@/lib/orderStatusUtils";
-import { axiosUser } from "@/lib/services";
 import { formatDate } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 import { ChevronDown, ChevronUp, Download, Eye } from "lucide-react";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
@@ -60,19 +60,14 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 	const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
 
 	const getTransactionsQuery = async () => {
-		if (!session?.jwt) return [];
+		if (!session) return [];
 
 		const filter = isVendor
 			? `filters[vendor_doc_id][$eq]=${session.user.documentId}`
 			: `filters[email][$eq]=${session.user.email}`;
 
-		// Unified endpoint with comprehensive population
-		const response = await axiosUser(
-			"GET",
-			`/api/transactions?${filter}&sort=createdAt:desc&populate[order_items][populate][product][populate]=user_event_type,main_image&populate[order_items][populate][variant]=*&populate=recipients`,
-			session.jwt
-		);
-		return response.data;
+		const response = await axios.get(`/api/transaction-proxy?${filter}&sort=createdAt:desc`);
+		return response.data.data;
 	};
 
 	const transactionsQuery = useQuery({

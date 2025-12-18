@@ -74,8 +74,17 @@ export async function PUT(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
 	try {
-		const { search } = new URL(req.url);
-		const STRAPI_URL = `${process.env.BASE_API}/api/transactions${search}`;
+		const url = new URL(req.url);
+		const searchParams = url.searchParams;
+
+		// Hardcoded populate string to ensure all necessary relations are fetched
+		const populateString =
+			"populate[order_items][populate][product][populate]=user_event_type,main_image&populate[order_items][populate][variant]=*&populate=recipients";
+
+		const STRAPI_URL = `${
+			process.env.BASE_API
+		}/api/transactions?${searchParams.toString()}&${populateString}`;
+
 		const KEY_API = process.env.KEY_API;
 		if (!KEY_API) {
 			return NextResponse.json({ error: "KEY_API not set in environment" }, { status: 500 });
