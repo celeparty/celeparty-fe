@@ -3,6 +3,7 @@ import { getStatusConfig } from "@/lib/orderStatusUtils";
 import { axiosUser } from "@/lib/services";
 import { formatDate } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
@@ -27,24 +28,20 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 	const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
 
 	const getQuery = async () => {
-		const response = await axiosUser(
-			"GET",
-			`/api/transaction-tickets?filters${
-				isVendor
-					? `[vendor_id][$eq]=${session?.user?.documentId}`
-					: `[customer_mail][$eq]=${session?.user?.email}`
-			}&sort=createdAt:desc&populate=*`,
-			`${session && session?.jwt}`,
+		const filterParam = isVendor
+			? `[vendor_id][$eq]=${session?.user?.documentId}`
+			: `[customer_mail][$eq]=${session?.user?.email}`;
+		const response = await axios.get(
+			`/api/transaction-tickets-proxy?filters${filterParam}&sort=createdAt:desc`,
 		);
-
-		return response;
+		return response.data;
 	};
 
 	const query = useQuery({
 		queryKey: ["qUserOrder", activeTab],
 		queryFn: getQuery,
 		staleTime: 5000,
-		enabled: !!session?.jwt,
+		enabled: !!session,
 		retry: 3,
 	});
 
