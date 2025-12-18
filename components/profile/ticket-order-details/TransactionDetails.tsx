@@ -40,7 +40,7 @@ const TransactionDetails = ({ item }: { item: iOrderTicket }) => {
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
               <DetailItem label="Kode Invoice" value={item.order_id} />
-              <DetailItem label="Waktu Transaksi" value={formatDateIndonesia(item.createdAt, true)} />
+              <DetailItem label="Waktu Transaksi" value={formatDateTimeIndonesia(item.createdAt)} />
               <DetailItem label="Nama Pemesan" value={item.customer_name} />
               <DetailItem label="Email Pemesan" value={item.customer_mail} />
               <DetailItem label="Jenis Varian" value={item.variant} />
