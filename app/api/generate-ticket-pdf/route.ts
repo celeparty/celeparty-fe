@@ -1,69 +1,61 @@
-/**
- * API Route: POST /api/generate-ticket-pdf
- *
- * Generates a ticket PDF by rendering a dedicated page with Puppeteer.
- * This avoids using ReactDOMServer in an API route, which is not supported in Next.js App Router.
- */
+import { NextRequest, NextResponse } from "next/server";
+import qs from "qs";
 
-import { NextRequest, NextResponse } from 'next/server';
-import puppeteer from 'puppeteer';
+export const dynamic = "force-dynamic";
 
-// Helper function to get the base URL
-function getBaseUrl(req: NextRequest) {
-	const protocol = req.headers.get('x-forwarded-proto') || 'http';
-	const host = req.headers.get('host');
-	return `${protocol}://${host}`;
-}
+export async function GET(req: NextRequest) {
+  try {
+    const url = new URL(req.url);
 
-export async function POST(req: NextRequest) {
-	try {
-		const body = await req.json();
-		const { transactionId } = body;
+    // convert searchParams → object
+    const queryObject: any = {};
+    url.searchParams.forEach((value, key) => {
+      queryObject[key] = value;
+    });
 
-		if (!transactionId) {
-			return NextResponse.json({ error: 'Missing required field: transactionId' }, { status: 400 });
-		}
+    // stringify properly for Strapi
+    const queryString = qs.stringify(
+      {
+        ...queryObject,
+        populate: {
+          product: { populate: "*" },
+          variant: true,
+          recipients: true,
+          ticket_details: true,
+        },
+      },
+      { encodeValuesOnly: true }
+    );
 
-		const baseUrl = getBaseUrl(req);
-		const renderUrl = `${baseUrl}/ticket-render/${transactionId}`;
+    const STRAPI_URL = `${process.env.BASE_API}/api/transaction-tickets?${queryString}`;
+    const KEY_API = process.env.KEY_API;
 
-		console.log(`Rendering ticket page for PDF generation: ${renderUrl}`);
+    if (!KEY_API) {
+      return NextResponse.json({ error: "KEY_API not set" }, { status: 500 });
+    }
 
-		// --- Generate PDF using Puppeteer ---
-		const browser = await puppeteer.launch({
-			headless: true,
-			args: ['--no-sandbox', '--disable-setuid-sandbox'],
-		});
-		const page = await browser.newPage();
+    const strapiRes = await fetch(STRAPI_URL, {
+      headers: {
+        Authorization: `Bearer ${KEY_API}`,
+      },
+      cache: "no-store",
+    });
 
-		// Go to the dedicated rendering page
-		await page.goto(renderUrl, { waitUntil: 'networkidle0' });
+    const data = await strapiRes.json();
 
-		// Set a viewport that matches the ticket width to ensure proper rendering
-		await page.setViewport({ width: 800, height: 600, deviceScaleFactor: 1 });
+    if (!strapiRes.ok) {
+      return NextResponse.json(
+        { error: data.error || data },
+        { status: strapiRes.status }
+      );
+    }
 
-		const pdfBuffer = await page.pdf({
-			width: '800px',
-			printBackground: true,
-			preferCSSPageSize: true,
-		});
-
-		await browser.close();
-
-		// --- Return PDF as response ---
-		return new NextResponse(pdfBuffer, {
-			status: 200,
-			headers: {
-				'Content-Type': 'application/pdf',
-				'Content-Disposition': `attachment; filename="e-ticket-${transactionId}.pdf"`,
-			},
-		});
-	} catch (error) {
-		console.error('Error generating ticket PDF:', error);
-		const errorMessage = error instanceof Error ? error.message : String(error);
-		return NextResponse.json(
-			{ error: 'Failed to generate ticket PDF', details: errorMessage },
-			{ status: 500 },
-		);
-	}
+    return NextResponse.json(data);
+  } catch (err: any) {
+    console.error("transaction-tickets-proxy GET error:", err);
+    return NextResponse.json(
+      { error: err.message || "Unknown error" },
+      { status: 500 }
+    );
+  }
 }
