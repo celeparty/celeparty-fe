@@ -44,7 +44,7 @@ const RecipientCard = ({ recipient }: { recipient: Recipient }) => {
   const getStatusBadge = (status: string) => {
     switch (status?.toLowerCase()) {
       case "valid":
-        return <Badge variant="success">Valid</Badge>;
+        return <Badge variant="default">Valid</Badge>;
       case "used":
         return <Badge variant="secondary">Used</Badge>;
       case "invalid":

@@ -14,9 +14,9 @@ const PaymentStatusBadge = ({ status }: { status: PaymentStatus }) => {
     switch (status?.toLowerCase()) {
         case 'paid':
         case 'settlement':
-            return <Badge variant="success">Paid</Badge>;
+            return <Badge variant="default">Paid</Badge>;
         case 'pending':
-            return <Badge variant="warning">Pending</Badge>;
+            return <Badge variant="default">Pending</Badge>;
         case 'cancelled':
             return <Badge variant="destructive">Cancelled</Badge>;
         default:
