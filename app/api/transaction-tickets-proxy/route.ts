@@ -89,10 +89,14 @@ export async function GET(req: NextRequest) {
 		const url = new URL(req.url);
 		const searchParams = url.searchParams;
 
-		// Revert to a simpler populate to test the connection.
-		searchParams.set('populate', '*');
+		// Use a qs-style string for deep population which is more robust.
+		// This populates the product and all of its nested relations (*),
+		// as well as the variant and recipients relations.
+		const populateString = "populate[product][populate]=*&populate=variant&populate=recipients";
 
-		const STRAPI_URL = `${process.env.BASE_API}/api/transaction-tickets?${searchParams.toString()}`;
+		const STRAPI_URL = `${
+			process.env.BASE_API
+		}/api/transaction-tickets?${searchParams.toString()}&${populateString}`;
 		const KEY_API = process.env.KEY_API;
 
 		if (!KEY_API) {
