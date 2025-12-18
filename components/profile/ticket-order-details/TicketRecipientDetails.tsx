@@ -1,55 +1,103 @@
+"use client";
 
 import { iOrderTicket } from "@/lib/interfaces/iOrder";
-import Barcode from "react-barcode";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import QRCode from "qrcode";
+import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Define a more specific type for recipients if possible, for now 'any' is used as in the original interface.
+type Recipient = {
+    id: number;
+    name: string;
+    email: string;
+    telp: string;
+    identity_type: string;
+    identity_number: string;
+    ticket_code: string;
+    status: 'valid' | 'used' | 'invalid' | string;
+};
+
+const DetailItem = ({ label, value }: { label: string; value: string | number }) => (
+    <div className="flex flex-col">
+      <p className="text-sm font-medium text-gray-500">{label}</p>
+      <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 break-words">{value || "N/A"}</p>
+    </div>
+);
+
+const RecipientCard = ({ recipient }: { recipient: Recipient }) => {
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (recipient.ticket_code) {
+      QRCode.toDataURL(recipient.ticket_code, { width: 160, margin: 2 })
+        .then(setQrCodeUrl)
+        .catch(err => console.error("Failed to generate QR code", err))
+        .finally(() => setIsLoading(false));
+    } else {
+        setIsLoading(false);
+    }
+  }, [recipient.ticket_code]);
+
+  const getStatusBadge = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "valid":
+        return <Badge variant="success">Valid</Badge>;
+      case "used":
+        return <Badge variant="secondary">Used</Badge>;
+      case "invalid":
+        return <Badge variant="destructive">Invalid</Badge>;
+      default:
+        return <Badge>{status || 'N/A'}</Badge>;
+    }
+  };
+
+  return (
+    <Card className="bg-gray-50/50 dark:bg-gray-900/50 overflow-hidden">
+      <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+        <div className="grid grid-cols-2 gap-4">
+            <DetailItem label="Nama" value={recipient.name} />
+            <DetailItem label="Email" value={recipient.email} />
+            <DetailItem label="No. WhatsApp" value={recipient.telp} />
+            <DetailItem label="Jenis Identitas" value={recipient.identity_type} />
+            <DetailItem label="No. Identitas" value={recipient.identity_number} />
+            <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium text-gray-500">Status Tiket</p>
+                {getStatusBadge(recipient.status)}
+            </div>
+        </div>
+        <div className="flex flex-col items-center justify-center space-y-2 bg-white dark:bg-black rounded-lg p-2">
+          {isLoading ? <Skeleton className="w-40 h-40" /> :
+           qrCodeUrl ? <img src={qrCodeUrl} alt={`QR Code for ${recipient.ticket_code}`} className="rounded-md"/> :
+           <div className="w-40 h-40 flex items-center justify-center text-center text-xs text-gray-500">QR Code tidak tersedia</div>
+          }
+          <p className="text-sm font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+            {recipient.ticket_code || "NO_CODE"}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 
 const TicketRecipientDetails = ({ item }: { item: iOrderTicket }) => {
   return (
-    <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-      <div className="px-4 py-5 sm:px-6">
-        <h3 className="text-lg leading-6 font-medium text-gray-900">Detail Penerima Tiket</h3>
-      </div>
-      <div className="border-t border-gray-200">
-        {item.recipients?.map((recipient, index) => (
-          <div key={index} className="border-b border-gray-200">
-            <div className="px-4 py-5 sm:px-6">
-              <h4 className="text-md leading-6 font-medium text-gray-900">Penerima {index + 1}</h4>
-            </div>
-            <dl>
-              <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">Nama</dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{recipient.name}</dd>
-              </div>
-              <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">Email</dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{recipient.email}</dd>
-              </div>
-              <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">No Whatsapp</dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{recipient.telp}</dd>
-              </div>
-              <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">Jenis Identitas</dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{recipient.identity_type}</dd>
-              </div>
-              <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">No Identitas</dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{recipient.identity_number}</dd>
-              </div>
-              <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">Kode Tiket</dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  <Barcode value={recipient.ticket_code} />
-                </dd>
-              </div>
-              <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">Status Tiket</dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{recipient.status}</dd>
-              </div>
-            </dl>
-          </div>
-        ))}
-      </div>
-    </div>
+    <Card>
+        <CardHeader>
+          <CardTitle>Detail Penerima Tiket</CardTitle>
+          <CardDescription>
+            Jumlah tiket dibeli: {item.recipients?.length || 0}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {item.recipients?.map((recipient: Recipient, index) => (
+            <RecipientCard key={recipient.id || index} recipient={recipient} />
+          ))}
+        </CardContent>
+    </Card>
   );
 };
 

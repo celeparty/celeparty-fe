@@ -1,30 +1,35 @@
-
 import { iOrderTicket } from "@/lib/interfaces/iOrder";
-import { formatDateIndonesia } from "@/lib/dateFormatIndonesia";
+import { formatDateToIndonesian } from "@/lib/dateFormatIndonesia";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+const DetailItem = ({ label, value }: { label: string; value: string | number }) => (
+    <div className="flex flex-col sm:flex-row">
+      <p className="text-sm font-medium text-gray-500 w-full sm:w-48 shrink-0">{label}</p>
+      <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 break-words">{value}</p>
+    </div>
+);
 
 const ProductDetails = ({ item }: { item: iOrderTicket }) => {
   return (
-    <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-4">
-      <div className="px-4 py-5 sm:px-6">
-        <h3 className="text-lg leading-6 font-medium text-gray-900">Detail Produk</h3>
-      </div>
-      <div className="border-t border-gray-200">
-        <dl>
-          <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt className="text-sm font-medium text-gray-500">Nama Tiket</dt>
-            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{item.product_name}</dd>
-          </div>
-          <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt className="text-sm font-medium text-gray-500">Tanggal Acara</dt>
-            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{formatDateIndonesia(item.event_date)}</dd>
-          </div>
-          <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt className="text-sm font-medium text-gray-500">Jam Acara</dt>
-            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{item.waktu_event}</dd>
-          </div>
-        </dl>
-      </div>
-    </div>
+    <Card className="mb-4">
+        <CardHeader>
+          <CardTitle>Detail Produk</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
+                <DetailItem label="Nama Tiket" value={item.product_name} />
+                <DetailItem label="Tanggal Acara" value={formatDateToIndonesian(item.event_date)} />
+                {item.waktu_event && (
+                  <DetailItem label="Jam Acara" value={`${item.waktu_event.substring(0, 5)} WIB`} />
+                )}
+                {/* Data berikut tidak tersedia dari API */}
+                <DetailItem label="Tanggal Selesai" value={"N/A (Data tidak tersedia)"} />
+                <DetailItem label="Jam Selesai" value={"N/A (Data tidak tersedia)"} />
+                <DetailItem label="Kota" value={"N/A (Data tidak tersedia)"} />
+                <DetailItem label="Lokasi" value={"N/A (Data tidak tersedia)"} />
+            </div>
+        </CardContent>
+    </Card>
   );
 };
 
