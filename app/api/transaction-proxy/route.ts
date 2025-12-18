@@ -78,12 +78,11 @@ export async function GET(req: NextRequest) {
 		const searchParams = url.searchParams;
 
 		// Hardcoded populate string to ensure all necessary relations are fetched
-		const populateString =
-			"populate[order_items][populate][product][populate]=user_event_type,main_image&populate[order_items][populate][variant]=*&populate=recipients";
+		searchParams.set('populate', '*');
 
 		const STRAPI_URL = `${
 			process.env.BASE_API
-		}/api/transactions?${searchParams.toString()}&${populateString}`;
+		}/api/transactions?${searchParams.toString()}`;
 
 		const KEY_API = process.env.KEY_API;
 		if (!KEY_API) {
