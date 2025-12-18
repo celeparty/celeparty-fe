@@ -69,7 +69,7 @@ const RecipientCard = ({ recipient }: { recipient: Recipient }) => {
             </div>
         </div>
         <div className="flex flex-col items-center justify-center space-y-2 bg-white dark:bg-black rounded-lg p-2">
-          {isLoading ? <Skeleton className="w-40 h-40" /> :
+          {isLoading ? <Skeleton width="160px" height="160px" /> :
            qrCodeUrl ? <img src={qrCodeUrl} alt={`QR Code for ${recipient.ticket_code}`} className="rounded-md"/> :
            <div className="w-40 h-40 flex items-center justify-center text-center text-xs text-gray-500">QR Code tidak tersedia</div>
           }
