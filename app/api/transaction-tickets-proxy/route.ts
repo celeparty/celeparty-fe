@@ -94,11 +94,11 @@ export async function GET(req: NextRequest) {
 			product: {
 				populate: {
 					image: true,
-					user_event_type: true, // Assuming event details are here
+					user_event_type: { populate: '*' }, // Deeply populate user_event_type
 				},
 			},
 			variant: true,
-			recipients: true,
+			recipients: { populate: '*' }, // Deeply populate all recipient fields
 		};
 		searchParams.set('populate', JSON.stringify(populate));
 

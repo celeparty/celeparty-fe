@@ -3,10 +3,10 @@ import { formatDateIndonesia, formatDateTimeIndonesia } from "@/lib/dateFormatIn
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-const DetailItem = ({ label, value }: { label: string; value: string | number }) => (
+const DetailItem = ({ label, value }: { label: string; value: string | number | null | undefined }) => (
     <div className="flex flex-col sm:flex-row">
       <p className="text-sm font-medium text-gray-500 w-full sm:w-48 shrink-0">{label}</p>
-      <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 break-words">{value}</p>
+      <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 break-words">{value || "N/A"}</p>
     </div>
 );
 

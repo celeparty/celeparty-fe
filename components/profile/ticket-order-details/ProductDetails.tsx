@@ -2,10 +2,10 @@ import { iOrderTicket } from "@/lib/interfaces/iOrder";
 import { formatDateIndonesia } from "@/lib/dateFormatIndonesia";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const DetailItem = ({ label, value }: { label: string; value: string | number }) => (
+const DetailItem = ({ label, value }: { label: string; value: string | number | null | undefined }) => (
     <div className="flex flex-col sm:flex-row">
       <p className="text-sm font-medium text-gray-500 w-full sm:w-48 shrink-0">{label}</p>
-      <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 break-words">{value}</p>
+      <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 break-words">{value || "N/A"}</p>
     </div>
 );
 
@@ -22,11 +22,14 @@ const ProductDetails = ({ item }: { item: iOrderTicket }) => {
                 {item.waktu_event && (
                   <DetailItem label="Jam Acara" value={`${item.waktu_event.substring(0, 5)} WIB`} />
                 )}
-                {/* Data berikut tidak tersedia dari API */}
-                <DetailItem label="Tanggal Selesai" value={"N/A (Data tidak tersedia)"} />
-                <DetailItem label="Jam Selesai" value={"N/A (Data tidak tersedia)"} />
-                <DetailItem label="Kota" value={"N/A (Data tidak tersedia)"} />
-                <DetailItem label="Lokasi" value={"N/A (Data tidak tersedia)"} />
+                {item.event_end_date && (
+                    <DetailItem label="Tanggal Selesai" value={formatDateIndonesia(item.event_end_date)} />
+                )}
+                {item.event_end_time && (
+                    <DetailItem label="Jam Selesai" value={`${item.event_end_time.substring(0, 5)} WIB`} />
+                )}
+                 <DetailItem label="Kota" value={item.event_city} />
+                 <DetailItem label="Lokasi" value={item.event_location} />
             </div>
         </CardContent>
     </Card>

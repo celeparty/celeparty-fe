@@ -3,6 +3,17 @@ export interface iProduct {
 	title: string;
 }
 
+export interface IRecipientDetail {
+    id: number;
+    name: string;
+    email: string;
+    telp: string; // Phone number
+    identity_type: string;
+    identity_number: string;
+    ticket_code: string;
+    status: 'valid' | 'used' | 'invalid' | string;
+}
+
 export type PaymentStatus = "cancelled" | "pending" | "paid" | "processing" | "settlement";
 
 export type TransactionType = "equipment" | "ticket";
@@ -80,6 +91,11 @@ export interface iOrderTicket {
 	vendor_id: string;
 	event_type: string;
 	waktu_event: string;
+	// New fields from product.user_event_type (assuming API flattens or they are directly available)
+	event_city?: string;
+	event_location?: string;
+	event_end_date?: string;
+	event_end_time?: string;
 	transaction_type: "ticket";
-	recipients?: any[];
+	recipients?: IRecipientDetail[]; // Updated to use the new interface
 }
