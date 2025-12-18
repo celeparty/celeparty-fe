@@ -1,5 +1,5 @@
 import { iOrderTicket, PaymentStatus } from "@/lib/interfaces/iOrder";
-import { formatDateToIndonesian } from "@/lib/dateFormatIndonesia";
+import { formatDateIndonesia } from "@/lib/dateFormatIndonesia";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -40,7 +40,7 @@ const TransactionDetails = ({ item }: { item: iOrderTicket }) => {
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
               <DetailItem label="Kode Invoice" value={item.order_id} />
-              <DetailItem label="Waktu Transaksi" value={formatDateToIndonesian(item.createdAt, true)} />
+              <DetailItem label="Waktu Transaksi" value={formatDateIndonesia(item.createdAt, true)} />
               <DetailItem label="Nama Pemesan" value={item.customer_name} />
               <DetailItem label="Email Pemesan" value={item.customer_mail} />
               <DetailItem label="Jenis Varian" value={item.variant} />

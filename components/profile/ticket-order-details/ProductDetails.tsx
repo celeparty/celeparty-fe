@@ -1,5 +1,5 @@
 import { iOrderTicket } from "@/lib/interfaces/iOrder";
-import { formatDateToIndonesian } from "@/lib/dateFormatIndonesia";
+import { formatDateIndonesia } from "@/lib/dateFormatIndonesia";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const DetailItem = ({ label, value }: { label: string; value: string | number }) => (
@@ -18,7 +18,7 @@ const ProductDetails = ({ item }: { item: iOrderTicket }) => {
         <CardContent className="space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
                 <DetailItem label="Nama Tiket" value={item.product_name} />
-                <DetailItem label="Tanggal Acara" value={formatDateToIndonesian(item.event_date)} />
+                <DetailItem label="Tanggal Acara" value={formatDateIndonesia(item.event_date)} />
                 {item.waktu_event && (
                   <DetailItem label="Jam Acara" value={`${item.waktu_event.substring(0, 5)} WIB`} />
                 )}
