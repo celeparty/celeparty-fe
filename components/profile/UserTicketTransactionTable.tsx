@@ -48,12 +48,6 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 		retry: 3,
 	});
 
-	if (query.isLoading) {
-		return <Skeleton width="100%" height="150px" />;
-	}
-	if (query.isError) {
-		return <ErrorNetwork style="mt-0" />;
-	}
 	const dataContent: iOrderTicket[] = React.useMemo(() => {
 		if (!query.data?.data) return [];
 
@@ -109,6 +103,13 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 			};
 		});
 	}, [query.data]);
+
+	if (query.isLoading) {
+		return <Skeleton width="100%" height="150px" />;
+	}
+	if (query.isError) {
+		return <ErrorNetwork style="mt-0" />;
+	}
 
 	const toggleRow = (id: number) => {
 		setExpandedRows((prev) => ({
