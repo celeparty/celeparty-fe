@@ -1,5 +1,5 @@
 import { iOrderTicket, PaymentStatus } from "@/lib/interfaces/iOrder";
-import { formatDateIndonesia } from "@/lib/dateFormatIndonesia";
+import { formatDateIndonesia, formatDateTimeIndonesia } from "@/lib/dateFormatIndonesia";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
