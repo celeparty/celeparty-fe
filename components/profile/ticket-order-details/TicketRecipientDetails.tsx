@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
-import Skeleton from "../../../Skeleton";
+import Skeleton from "../../Skeleton";
 
 // Define a more specific type for recipients if possible, for now 'any' is used as in the original interface.
 type Recipient = {
