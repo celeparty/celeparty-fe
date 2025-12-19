@@ -1,269 +1,265 @@
 "use client";
 import { axiosUser } from "@/lib/services";
 import { useSession } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
-import React, { useState, useEffect, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import React, { useState, useEffect, Suspense, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
-function getStatus(eventDate: string) {
+function getEventStatus(eventDate: string): { active: boolean; label: string } {
 	try {
-		// Backend format: YYYY-MM-DD
-		const [year, month, day] = eventDate.split("-").map(Number);
-		const event = new Date(year, month - 1, day);
+		const event = new Date(eventDate);
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
-		event.setHours(0, 0, 0, 0);
-		return today <= event ? "active" : "not active";
+		// Don't reset event time, to allow for same-day events
+		return today <= event ? { active: true, label: "Active" } : { active: false, label: "Expired" };
 	} catch (error) {
-		return "not active";
+		return { active: false, label: "Invalid Date" };
 	}
 }
 
 function QRPageContent() {
 	const params = useSearchParams();
+	const router = useRouter();
 	const { data: session } = useSession();
-	const order_id = params.get("order_id") || "";
-	const event_date = params.get("event_date") || "";
-	const customer_name = params.get("customer_name") || "";
-	const email = params.get("email") || "";
-	const event_type = params.get("event_type") || "";
-	const status = event_date !== "" ? getStatus(event_date) : "";
+	const ticketCodeFromUrl = params.get("code");
 
-	const [notif, setNotif] = useState<string | null>(null);
+	const [notif, setNotif] = useState<{ message: string; type: "error" | "success" } | null>(null);
 	const [loading, setLoading] = useState(false);
-	const [transactionData, setTransactionData] = useState<any>(null);
+	const [ticketDetail, setTicketDetail] = useState<any>(null);
 	const [canVerify, setCanVerify] = useState(false);
 	const [userData, setUserData] = useState<any>(null);
-	const [verificationStatus, setVerificationStatus] = useState<boolean | null>(null);
 	const [vendorMatch, setVendorMatch] = useState<boolean | null>(null);
 	const [isChecking, setIsChecking] = useState(true);
+	const [manualCode, setManualCode] = useState("");
 
-	// Check if user is logged in
 	const isLoggedIn = !!session;
 
-	// Get user data from API
 	useEffect(() => {
 		const getUserData = async () => {
 			if (isLoggedIn && session?.jwt) {
 				try {
-					const userResponse = await axiosUser("GET", "/api/users/me", session.jwt);
+					const userResponse = await axiosUser("GET", "/api/users/me?populate=role", session.jwt);
 					setUserData(userResponse);
 				} catch (error) {
 					console.error("Error fetching user data:", error);
 				}
+			} else {
+				setIsChecking(false);
 			}
 		};
 		getUserData();
 	}, [isLoggedIn, session?.jwt]);
 
-	useEffect(() => {
-		const check = async () => {
-			if (!isLoggedIn) {
-				setCanVerify(false);
-				setIsChecking(false);
-				return;
-			}
-
-			// Check if user has vendor role using API data
-			const userRole = userData?.role?.type;
-			if (userRole !== "vendor") {
-				setCanVerify(false);
-				setIsChecking(false);
-				return;
-			}
-
-			if (status !== "active" || order_id === "") {
-				setCanVerify(false);
-				setIsChecking(false);
-				return;
-			}
-
-			try {
-				const res = await fetch(`/api/qr-verify?order_id=${order_id}`);
-				const data = await res.json();
-
-				if (
-					res.ok &&
-					data.data &&
-					(data.data.payment_status === "settlement" || data.data.payment_status === "Settlement")
-				) {
-					setTransactionData(data.data);
-
-					// Check vendor ID match
-					const ticketVendorId = data.data.vendor_id || data.data.vendor_doc_id;
-					const currentUserId = userData?.id;
-					const currentUserDocumentId = userData?.documentId;
-
-					// Try matching with both user ID and documentId
-					const vendorMatches =
-						(ticketVendorId && currentUserId && ticketVendorId === currentUserId) ||
-						(ticketVendorId && currentUserDocumentId && ticketVendorId === currentUserDocumentId);
-
-					if (vendorMatches) {
-						setVendorMatch(true);
-						setCanVerify(true);
-					} else {
-						setVendorMatch(false);
-						setCanVerify(false);
-					}
-
-					// Set verification status
-					setVerificationStatus(data.data.verification || false);
-				} else {
-					setCanVerify(false);
-					setVerificationStatus(null);
-					setVendorMatch(null);
-				}
-			} catch (error) {
-				console.error("Error checking transaction:", error);
-				setCanVerify(false);
-				setVendorMatch(null);
-			}
+	const checkTicket = useCallback(async (code: string) => {
+		if (!isLoggedIn || !userData || userData?.role?.type !== "vendor") {
+			setCanVerify(false);
 			setIsChecking(false);
-		};
-		check();
-	}, [isLoggedIn, status, order_id, userData]);
-
-	const handleVerify = async () => {
-		if (!canVerify || !transactionData?.id) {
-			setNotif("Tidak dapat melakukan verifikasi.");
+			if (isLoggedIn) {
+				setNotif({ message: "Hanya akun vendor yang dapat melakukan verifikasi.", type: "error" });
+			}
 			return;
 		}
+
+		setIsChecking(true);
 		setNotif(null);
-		setLoading(true);
+		setTicketDetail(null);
+		setVendorMatch(null);
+		setCanVerify(false);
 
 		try {
-			const findRes = await fetch(`/api/qr-verify?order_id=${order_id}`);
-			const findData = await findRes.json();
+			const res = await fetch(`/api/qr-verify?code=${code}`);
+			const data = await res.json();
 
-			if (!findRes.ok || !findData.data) {
-				setNotif("Order ID tidak ditemukan di database.");
-				setLoading(false);
-				return;
+			if (!res.ok) {
+				throw new Error(data.error || "Gagal mengambil data tiket.");
 			}
 
-			const documentId = findData.data.documentId;
-			if (!documentId) {
-				setNotif("Document ID tidak ditemukan.");
-				setLoading(false);
-				return;
-			}
+			const detail = data.data.attributes;
+			setTicketDetail(data.data);
 
-			// 2. PUT ke Strapi dengan documentId
-			const updateRes = await fetch(`/api/update-verification`, {
+			const eventStatus = getEventStatus(detail.ticket_product.data.attributes.date);
+			const ticketVendorId = detail.ticket_product.data.attributes.vendor?.data?.id;
+			const currentUserId = userData?.id;
+
+			const isVendorMatch = ticketVendorId && currentUserId && ticketVendorId === currentUserId;
+			setVendorMatch(isVendorMatch);
+
+			if (isVendorMatch && eventStatus.active && !detail.is_verified) {
+				setCanVerify(true);
+			} else {
+				setCanVerify(false);
+				if (!isVendorMatch) {
+					setNotif({ message: "Anda bukan vendor untuk tiket ini.", type: "error" });
+				} else if (!eventStatus.active) {
+					setNotif({ message: "Tiket ini sudah kedaluwarsa.", type: "error" });
+				} else if (detail.is_verified) {
+					setNotif({ message: "Tiket ini sudah pernah diverifikasi.", type: "success" });
+				}
+			}
+		} catch (error: any) {
+			setNotif({ message: error.message, type: "error" });
+			setCanVerify(false);
+			setVendorMatch(null);
+		} finally {
+			setIsChecking(false);
+		}
+	}, [isLoggedIn, userData]);
+
+	useEffect(() => {
+		if (ticketCodeFromUrl && userData) {
+			checkTicket(ticketCodeFromUrl);
+		} else if (!ticketCodeFromUrl) {
+			setIsChecking(false);
+		}
+	}, [ticketCodeFromUrl, userData, checkTicket]);
+
+	const handleVerify = async () => {
+		if (!canVerify || !ticketDetail) {
+			setNotif({ message: "Tidak dapat melakukan verifikasi.", type: "error" });
+			return;
+		}
+
+		const isConfirmed = window.confirm(
+			`Anda akan memverifikasi tiket dengan kode: ${ticketDetail.attributes.ticket_code}\n\nLanjutkan?`,
+		);
+
+		if (!isConfirmed) return;
+
+		setLoading(true);
+		setNotif(null);
+
+		try {
+			const res = await fetch(`/api/ticket-verify`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					documentId: documentId,
-				}),
+				body: JSON.stringify({ ticket_code: ticketDetail.attributes.ticket_code }),
 			});
 
-			const updateData = await updateRes.json();
+			const data = await res.json();
+			if (!res.ok) throw new Error(data.message || "Gagal verifikasi tiket.");
 
-			if (updateRes.ok) {
-				setNotif("Tiket berhasil diverifikasi!");
-				setVerificationStatus(true); // Update verification status to true
-			} else {
-				setNotif(`Gagal verifikasi tiket: ${updateData.error || "Unknown error"}`);
-			}
-		} catch (err) {
-			console.error("Verification failed:", err);
-			setNotif("Terjadi error saat verifikasi.");
+			setNotif({ message: "Tiket berhasil diverifikasi!", type: "success" });
+			setCanVerify(false);
+			// Re-fetch ticket data to show updated status
+			checkTicket(ticketDetail.attributes.ticket_code);
+		} catch (err: any) {
+			setNotif({ message: err.message, type: "error" });
+		} finally {
+			setLoading(false);
 		}
-		setLoading(false);
+	};
+
+	const handleManualSearch = () => {
+		if (manualCode.trim()) {
+			router.push(`/qr?code=${manualCode.trim()}`);
+		}
+	};
+
+	const renderTicketDetails = () => {
+		if (!ticketDetail) return null;
+		const { attributes: ticket } = ticketDetail;
+		const { attributes: product } = ticket.ticket_product.data;
+		const eventStatus = getEventStatus(product.date);
+
+		return (
+			<CardContent className="mt-6 space-y-3">
+				<div>
+					<p className="font-bold text-lg">{product.name}</p>
+					<p className="text-sm text-gray-600">{product.location}</p>
+				</div>
+				<hr />
+				<div className="grid grid-cols-2 gap-x-4 gap-y-2">
+					<div>
+						<p className="text-xs text-gray-500">Kode Tiket</p>
+						<p className="font-mono font-bold">{ticket.ticket_code}</p>
+					</div>
+					<div>
+						<p className="text-xs text-gray-500">Tanggal Acara</p>
+						<p>{new Date(product.date).toLocaleDateString("id-ID", { dateStyle: "full" })}</p>
+					</div>
+					<div>
+						<p className="text-xs text-gray-500">Pemegang Tiket</p>
+						<p>{ticket.recipient_name}</p>
+					</div>
+					<div>
+						<p className="text-xs text-gray-500">Email</p>
+						<p>{ticket.recipient_email}</p>
+					</div>
+				</div>
+				<div className="flex justify-between items-center pt-4">
+					<Badge variant={eventStatus.active ? "secondary" : "destructive"}>{eventStatus.label}</Badge>
+					<Badge variant={ticket.is_verified ? "default" : "outline"}>
+						{ticket.is_verified ? "Sudah Diverifikasi" : "Belum Diverifikasi"}
+					</Badge>
+				</div>
+			</CardContent>
+		);
 	};
 
 	return (
-		<div className="max-w-lg mx-auto my-16 p-6 bg-white rounded shadow">
-			<h1 className="text-2xl font-bold mb-4 text-center">E-Ticket Celeparty</h1>
-
-			{isChecking ? (
-				<div className="text-center text-gray-600">
-					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-					<div>Memeriksa tiket...</div>
-				</div>
-			) : !session ? (
-				<div className="text-center text-red-600 font-semibold">Silahkan login sebagai vendor</div>
-			) : !isLoggedIn || userData?.role?.type !== "vendor" ? (
-				<div className="text-center text-gray-400 font-semibold bg-gray-100 px-2 py-9">Akun tidak sesuai</div>
-			) : vendorMatch === false ? (
-				<div className="text-center text-gray-400 font-semibold bg-gray-100 px-2 py-9">Akun tidak sesuai</div>
-			) : vendorMatch === true ? (
-				<>
-					<div className="mb-2">
-						<b>Order ID:</b> {order_id}
-					</div>
-					<div className="mb-2">
-						<b>Nama Pemesan:</b> {decodeURIComponent(customer_name)}
-					</div>
-					<div className="mb-2">
-						<b>Email:</b> {email}
-					</div>
-					<div className="mb-2">
-						<b>Nama Event:</b>{" "}
-						{transactionData?.product_name ||
-							(transactionData?.products && typeof transactionData.products === "object"
-								? transactionData.products.title || transactionData.products.name || "N/A"
-								: "N/A")}
-					</div>
-					<div className="mb-2">
-						<b>Tipe Event:</b> {event_type}
-					</div>
-					<div className="mb-2">
-						<b>Varian:</b> {transactionData?.variant}
-					</div>
-					<div className="mb-2">
-						<b>Quantity:</b> {transactionData?.quantity}
-					</div>
-					<div className="mb-2">
-						<b>Tanggal Acara:</b> {event_date}
-					</div>
-					<div className="mb-2">
-						<b>Status Tiket:</b>{" "}
-						<span className={status === "active" ? "text-green-600 font-bold" : "text-red-600 font-bold"}>
-							{status}
-						</span>
-					</div>
-					{verificationStatus !== null && (
-						<div className="mb-2">
-							<b>Status Verifikasi:</b>
-							<span
-								className={
-									verificationStatus ? "text-green-600 font-bold" : "text-orange-600 font-bold"
-								}
-							>
-								{verificationStatus ? " Sudah Diverifikasi" : " Belum Diverifikasi"}
-							</span>
+		<div className="max-w-2xl mx-auto my-10 p-4">
+			<Card>
+				<CardHeader>
+					<CardTitle className="text-center text-2xl">Verifikasi E-Ticket</CardTitle>
+				</CardHeader>
+				<CardContent>
+					{!session ? (
+						<div className="text-center text-red-600 font-semibold py-8">
+							Silahkan login sebagai vendor untuk menggunakan halaman ini.
 						</div>
-					)}
-				</>
-			) : null}
+					) : (
+						<>
+							<div className="flex w-full max-w-sm items-center space-x-2 mx-auto">
+								<Input
+									type="text"
+									placeholder="Masukkan kode tiket..."
+									value={manualCode}
+									onChange={(e) => setManualCode(e.target.value)}
+									onKeyUp={(e) => e.key === "Enter" && handleManualSearch()}
+								/>
+								<Button type="button" onClick={handleManualSearch}>
+									Cari Tiket
+								</Button>
+							</div>
 
-			{session && !isChecking && (
-				<>
-					{isLoggedIn && userData?.role?.type === "vendor" && !canVerify && vendorMatch !== false && (
-						<div className="mt-4 text-center text-sm text-red-600">
-							Tiket tidak dapat diverifikasi. Pastikan status pembayaran settlement dan tiket aktif.
-						</div>
-					)}
-				</>
-			)}
+							{isChecking && (
+								<div className="text-center text-gray-600 mt-6">
+									<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+									<div>Memeriksa tiket...</div>
+								</div>
+							)}
 
-			{!verificationStatus ? (
-				<div className="mt-6 text-center">
-					{session && !isChecking && canVerify && (
-						<button
-							onClick={handleVerify}
-							disabled={loading}
-							className="btn px-3 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
-						>
-							{loading ? "Memverifikasi..." : "Verifikasi"}
-						</button>
+							{notif && (
+								<div
+									className={`mt-4 text-center text-sm font-semibold p-3 rounded-md ${
+										notif.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+									}`}
+								>
+									{notif.message}
+								</div>
+							)}
+
+							{ticketDetail && vendorMatch && renderTicketDetails()}
+							{ticketDetail && vendorMatch === false && !isChecking && (
+								<div className="mt-6 text-center text-red-700 font-bold bg-red-100 p-4 rounded-md">
+									Anda tidak memiliki akses untuk memverifikasi tiket ini.
+								</div>
+							)}
+						</>
 					)}
-					{session && !isChecking && notif && (
-						<div className="mt-4 text-center text-sm font-semibold text-red-600">{notif}</div>
-					)}
-				</div>
-			) : null}
+				</CardContent>
+
+				{canVerify && !ticketDetail?.attributes.is_verified && (
+					<div className="p-6 text-center border-t">
+						<Button onClick={handleVerify} disabled={loading} size="lg">
+							{loading ? "Memverifikasi..." : "Konfirmasi & Verifikasi Tiket"}
+						</Button>
+					</div>
+				)}
+			</Card>
 		</div>
 	);
 }
@@ -271,7 +267,12 @@ function QRPageContent() {
 export default function QRPage() {
 	return (
 		<Suspense
-			fallback={<div className="max-w-lg mx-auto my-16 p-6 bg-white rounded shadow text-center">Loading...</div>}
+			fallback={
+				<div className="max-w-lg mx-auto my-16 p-6 text-center">
+					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+					Memuat Halaman Verifikasi...
+				</div>
+			}
 		>
 			<QRPageContent />
 		</Suspense>

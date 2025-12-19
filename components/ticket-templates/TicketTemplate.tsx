@@ -1,42 +1,30 @@
-"use client";
+// components/ticket-templates/TicketTemplate.tsx
+import React from "react";
+import { TicketData } from "./interfaces";
+import TicketTemplateHeader from "./TicketTemplateHeader";
+import TicketTemplateBody from "./TicketTemplateBody";
+import TicketTemplateFooter from "./TicketTemplateFooter";
 
-/**
- * Komponen Utama Ticket Template
- * Menyatukan header, body, QR code, dan footer dalam satu template profesional
- */
+interface Props {
+	ticket: TicketData;
+}
 
-import React from 'react';
-import { TicketTemplateHeader } from './TicketTemplateHeader';
-import { TicketTemplateBody } from './TicketTemplateBody';
-import { TicketTemplateQRCode } from './TicketTemplateQRCode';
-import { TicketTemplateFooter } from './TicketTemplateFooter';
-import { iTicketTemplateContext } from './interfaces';
-
-export const TicketTemplate: React.FC<iTicketTemplateContext> = ({
-	data,
-	config,
-	className = '',
-}) => {
+const TicketTemplate: React.FC<Props> = ({ ticket }) => {
 	return (
 		<div
-			className={`mx-auto w-full bg-white print:w-full ${className}`}
 			style={{
-				maxWidth: '800px',
-				fontFamily: 'Lato, sans-serif',
-				boxShadow: '0 2px 15px rgba(0, 0, 0, 0.08)',
+				width: "780px",
+				margin: "auto",
+				border: "1px solid #ddd",
+				borderRadius: "15px",
+				fontFamily: "Arial, sans-serif",
+				boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+				backgroundColor: "white",
 			}}
 		>
-			{/* Header dengan Logo dan Nama Perusahaan */}
-			<TicketTemplateHeader data={data} config={config} />
-
-			{/* Body dengan Informasi Tiket dan Penerima */}
-			<TicketTemplateBody data={data} config={config} />
-
-			{/* QR Code di Tengah */}
-			<TicketTemplateQRCode data={data} config={config} />
-
-			{/* Footer dengan Informasi Kontak */}
-			<TicketTemplateFooter data={data} config={config} />
+			<TicketTemplateHeader ticket={ticket} />
+			<TicketTemplateBody ticket={ticket} />
+			<TicketTemplateFooter />
 		</div>
 	);
 };
