@@ -15,16 +15,16 @@ async function getBrowser() {
 
 export async function POST(req: NextRequest) {
 	try {
-		const { ticketDetailId } = await req.json();
+		const { transactionId } = await req.json();
 
-		if (!ticketDetailId) {
-			return NextResponse.json({ error: "ticketDetailId is required" }, { status: 400 });
+		if (!transactionId) {
+			return NextResponse.json({ error: "transactionId is required" }, { status: 400 });
 		}
 		
 		// Construct the URL to the ticket rendering page
 		const host = req.headers.get("host");
 		const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-		const renderUrl = `${protocol}://${host}/ticket-render/${ticketDetailId}`;
+		const renderUrl = `${protocol}://${host}/ticket-render/${transactionId}`;
 
 		// Fetch the HTML of the ticket page
 		const ticketPageResponse = await fetch(renderUrl, { cache: 'no-store' });
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
 			status: 200,
 			headers: {
 				"Content-Type": "application/pdf",
-				"Content-Disposition": `attachment; filename="e-ticket-${ticketDetailId}.pdf"`,
+				"Content-Disposition": `attachment; filename="e-ticket-${transactionId}.pdf"`,
 			},
 		});
 	} catch (error) {
