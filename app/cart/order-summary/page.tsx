@@ -92,7 +92,7 @@ export default function OrderSummaryPage() {
 					loading_time: firstItem.loading_time,
 					note: selectedCartItems.map(item => item.note).filter(Boolean).join("; "),
 					vendor_doc_id: firstItem.vendor_id || "", // Assuming a single vendor per transaction for now
-					total_payment: totalAmount,
+					total: totalAmount,
 					order_items: selectedCartItems.map(item => ({
 						product: item.product_id,
 						variant: item.variant_id, // Ensure variant_id is available in cart items

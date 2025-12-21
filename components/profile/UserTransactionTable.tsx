@@ -120,7 +120,7 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 			note: transaction.attributes.note,
 			quantity: transaction.attributes.quantity,
 			unit_price: mainItem?.price,
-			total_payment: transaction.attributes.total_payment,
+			total_payment: transaction.attributes.total_payment || transaction.attributes.total,
 			payment_date: transaction.attributes.payment_date,
 			products: productsList,
 			recipients: transaction.attributes.recipients, // Assuming backend provides this
