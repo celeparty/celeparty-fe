@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import puppeteer from "puppeteer";
-import ReactDOMServer from "react-dom/server";
+import { renderComponentToString } from "@/lib/render-component";
 import TicketTemplate from "@/components/ticket-templates/TicketTemplate"; // This component needs to be created
 
 // Helper function to get a browser instance
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// 2. Render the React component to an HTML string
-		const ticketHtml = ReactDOMServer.renderToString(
+		const ticketHtml = renderComponentToString(
 			<TicketTemplate ticket={ticketData.attributes} />,
 		);
 
