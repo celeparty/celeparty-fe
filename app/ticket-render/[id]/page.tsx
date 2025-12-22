@@ -44,20 +44,39 @@ async function getByTransactionId(transactionId: string): Promise<TicketData | n
 		}
 
 		const normalizedData: TicketData = {
-			product_title: product.title,
 			ticket_code: recipient.ticket_code || attributes.order_id,
-			variant_name: variant.name,
-			event_date: product.event_date,
-			event_location: product.lokasi_event,
-			product_description: product.description,
-			recipient_name: recipient.name || attributes.customer_name,
-			recipient_email: recipient.email || attributes.email,
-			recipient_phone: recipient.phone || attributes.telp,
-			recipient_identity_type: recipient.identity_type,
-			recipient_identity_number: recipient.identity_number,
-			qr_code_data: recipient.ticket_code || attributes.order_id,
-			generated_date: new Date(),
-		};
+		    barcode_url: recipient.barcode_url,
+		    recipient_name: recipient.name,
+		    recipient_email: recipient.email,
+		    createdAt: recipient.createdAt,
+				  
+		    ticket_product: {
+		      id: product.id,
+		      attributes: {
+		        name: product.title,
+		        description: product.description,
+		        date: product.event_date,
+		        location: product.location,
+		      },
+		    },
+  	  
+		    transaction_ticket: {
+		      id: transaction.id,
+		      attributes: {
+		        order_id: attributes.order_id,
+		        total_price: attributes.total_price,
+		        payment_method: attributes.payment_method,
+		      },
+		    },
+  	  
+		    user: {
+		      id: user.id,
+		      attributes: {
+		        username: user.username,
+		        email: user.email,
+		      },
+		    },
+		  };
 
 		return normalizedData;
 
@@ -97,39 +116,20 @@ async function getByTicketDetailId(ticketDetailId: string): Promise<TicketData |
         
         // Normalize the data to match the iTicketTemplateData interface
         const normalizedData: TicketData = {
-            ticket_code: recipient.ticket_code || attributes.order_id,
-		    barcode_url: recipient.barcode_url,
-		    recipient_name: recipient.name,
-		    recipient_email: recipient.email,
-		    createdAt: recipient.createdAt,
-				  
-		    ticket_product: {
-		      id: product.id,
-		      attributes: {
-		        name: product.title,
-		        description: product.description,
-		        date: product.event_date,
-		        location: product.location,
-		      },
-		    },
-	    
-		    transaction_ticket: {
-		      id: transaction.id,
-		      attributes: {
-		        order_id: attributes.order_id,
-		        total_price: attributes.total_price,
-		        payment_method: attributes.payment_method,
-		      },
-		    },
-	    
-		    user: {
-		      id: user.id,
-		      attributes: {
-		        username: user.username,
-		        email: user.email,
-		      },
-		    },
-		  };
+            product_title: ticketDetail.ticket_product?.data?.attributes?.name || 'Nama Event',
+            ticket_code: ticketDetail.ticket_code,
+            variant_name: 'Regular', // Assuming default, as it's not in the ticket-details response
+            event_date: ticketDetail.ticket_product?.data?.attributes?.date,
+            event_location: ticketDetail.ticket_product?.data?.attributes?.location,
+            product_description: ticketDetail.ticket_product?.data?.attributes?.description,
+            recipient_name: ticketDetail.recipient_name,
+            recipient_email: ticketDetail.recipient_email,
+            recipient_phone: ticketDetail.recipient_whatsapp,
+            recipient_identity_type: ticketDetail.id_type,
+            recipient_identity_number: ticketDetail.id_number,
+            qr_code_data: ticketDetail.ticket_code,
+            generated_date: new Date(ticketDetail.createdAt),
+        };
 
 		return normalizedData;
 
