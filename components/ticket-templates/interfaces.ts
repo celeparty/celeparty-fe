@@ -37,5 +37,5 @@ export interface TicketData {
 	createdAt: string;
 	ticket_product: StrapiEntity<TicketProduct>;
 	transaction_ticket: StrapiEntity<TransactionTicket>;
-	user: StrapiEntity<User>;
+	user?: StrapiEntity<User>;
 }
