@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 		// Construct the URL to the ticket rendering page
 		const host = req.headers.get("host");
 		const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-		const renderUrl = `${protocol}://${host}/ticket-render/${transactionId}`;
+		const renderUrl = `${protocol}://${host}/ticket-render/${transactionId}?type=transaction`;
 
 		// Fetch the HTML of the ticket page
 		const ticketPageResponse = await fetch(renderUrl, { cache: 'no-store' });
