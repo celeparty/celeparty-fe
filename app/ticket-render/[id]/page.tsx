@@ -194,7 +194,7 @@ export default async function UnifiedTicketRenderPage({ params, searchParams }: 
 
 	return (
 		<main>
-			<TicketTemplate data={ticketData} config={templateConfig} />
+			<TicketTemplate ticket={ticketData} config={templateConfig} />
 		</main>
 	);
 }
