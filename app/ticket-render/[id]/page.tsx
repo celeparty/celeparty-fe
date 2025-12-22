@@ -1,5 +1,5 @@
 
-import { TicketTemplate } from '@/components/ticket-templates/TicketTemplate';
+import TicketTemplate from '@/components/ticket-templates/TicketTemplate';
 import { iTicketTemplateData, iTicketTemplateConfig } from '@/components/ticket-templates/interfaces';
 import { getDefaultTemplateConfig } from '@/lib/utils/ticket-template/configTemplate';
 import { notFound } from 'next/navigation';
