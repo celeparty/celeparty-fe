@@ -11,9 +11,4 @@ export { TicketTemplateFooter } from './TicketTemplateFooter';
 export { TicketPreview } from './TicketPreview';
 export { TicketTemplateDemo } from './TicketTemplateDemo';
 
-export type {
-	iTicketTemplateData,
-	iTicketTemplateConfig,
-	iPDFGenerateOptions,
-	iTicketTemplateContext,
-} from './interfaces';
+export type { TicketData } from './interfaces';

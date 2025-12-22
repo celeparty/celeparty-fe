@@ -1,6 +1,6 @@
 
 import TicketTemplate from '@/components/ticket-templates/TicketTemplate';
-import { iTicketTemplateData, iTicketTemplateConfig } from '@/components/ticket-templates/interfaces';
+import { TicketData } from '@/components/ticket-templates/interfaces';
 import { getDefaultTemplateConfig } from '@/lib/utils/ticket-template/configTemplate';
 import { notFound } from 'next/navigation';
 
@@ -14,7 +14,7 @@ function getBaseUrl() {
  * --- FETCHER 1: For Transaction Based Tickets ---
  * Fetches data from the transaction endpoint and normalizes it for the template.
  */
-async function getByTransactionId(transactionId: string): Promise<iTicketTemplateData | null> {
+async function getByTransactionId(transactionId: string): Promise<TicketData | null> {
 	try {
 		const baseUrl = getBaseUrl();
 		const populateString = "populate[order_items][populate][product]=*&populate[order_items][populate][variant]=*&populate=recipients";
@@ -43,7 +43,7 @@ async function getByTransactionId(transactionId: string): Promise<iTicketTemplat
 			return null;
 		}
 
-		const normalizedData: iTicketTemplateData = {
+		const normalizedData: TicketData = {
 			product_title: product.title,
 			ticket_code: recipient.ticket_code || attributes.order_id,
 			variant_name: variant.name,
@@ -71,7 +71,7 @@ async function getByTransactionId(transactionId: string): Promise<iTicketTemplat
  * --- FETCHER 2: For Ticket Detail Based Tickets (Preview) ---
  * Fetches data from the ticket-details endpoint and normalizes it for the template.
  */
-async function getByTicketDetailId(ticketDetailId: string): Promise<iTicketTemplateData | null> {
+async function getByTicketDetailId(ticketDetailId: string): Promise<TicketData | null> {
     const BASE_API = process.env.BASE_API;
     const KEY_API = process.env.KEY_API;
 
@@ -96,7 +96,7 @@ async function getByTicketDetailId(ticketDetailId: string): Promise<iTicketTempl
         if (!ticketDetail) return null;
         
         // Normalize the data to match the iTicketTemplateData interface
-        const normalizedData: iTicketTemplateData = {
+        const normalizedData: TicketData = {
             product_title: ticketDetail.ticket_product?.data?.attributes?.name || 'Nama Event',
             ticket_code: ticketDetail.ticket_code,
             variant_name: 'Regular', // Assuming default, as it's not in the ticket-details response
@@ -131,7 +131,7 @@ export default async function UnifiedTicketRenderPage({ params, searchParams }: 
 	const { id } = params;
 	const type = searchParams.type;
 
-	let ticketData: iTicketTemplateData | null = null;
+	let ticketData: TicketData | null = null;
 
 	if (type === 'transaction') {
 		ticketData = await getByTransactionId(id);
@@ -146,7 +146,7 @@ export default async function UnifiedTicketRenderPage({ params, searchParams }: 
 	}
 
     // Use a default config for consistent appearance
-	const templateConfig: iTicketTemplateConfig = {
+	const templateConfig: TicketData = {
 		...getDefaultTemplateConfig(),
 		logo_url: `${getBaseUrl()}/images/logo.png`, // Ensure logo URL is absolute
 	};
