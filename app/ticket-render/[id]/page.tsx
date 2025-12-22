@@ -68,14 +68,6 @@ async function getByTransactionId(transactionId: string): Promise<TicketData | n
 		        payment_method: attributes.payment_method,
 		      },
 		    },
-  	  
-		    user: {
-		      id: user.id,
-		      attributes: {
-		        username: user.username,
-		        email: user.email,
-		      },
-		    },
 		  };
 
 		return normalizedData;
