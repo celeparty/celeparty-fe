@@ -6,14 +6,15 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import { TicketTemplate, iTicketTemplateData, iTicketTemplateConfig } from '@/components/ticket-templates';
+import { TicketTemplate } from '@/components/ticket-templates';
+import type {TicketData , iTicketTemplateConfig } from '@/components/ticket-templates';
 import { downloadTicketPDF, getTicketPDFAsBase64 } from '@/lib/utils/ticket-template';
 import { getDefaultTemplateConfig } from '@/lib/utils/ticket-template/configTemplate';
 import toast from 'react-hot-toast';
 import { Download, Mail, Eye, X } from 'lucide-react';
 
 interface TicketPreviewProps {
-	ticketData: iTicketTemplateData;
+	ticketData: TicketData;
 	templateConfig?: Partial<iTicketTemplateConfig>;
 	onDownload?: (filename: string) => void;
 	onEmail?: (pdfBase64: string) => void;
