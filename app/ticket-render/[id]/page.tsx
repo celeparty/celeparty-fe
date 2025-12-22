@@ -108,20 +108,50 @@ async function getByTicketDetailId(ticketDetailId: string): Promise<TicketData |
         
         // Normalize the data to match the iTicketTemplateData interface
         const normalizedData: TicketData = {
-            product_title: ticketDetail.ticket_product?.data?.attributes?.name || 'Nama Event',
             ticket_code: ticketDetail.ticket_code,
-            variant_name: 'Regular', // Assuming default, as it's not in the ticket-details response
-            event_date: ticketDetail.ticket_product?.data?.attributes?.date,
-            event_location: ticketDetail.ticket_product?.data?.attributes?.location,
-            product_description: ticketDetail.ticket_product?.data?.attributes?.description,
-            recipient_name: ticketDetail.recipient_name,
-            recipient_email: ticketDetail.recipient_email,
-            recipient_phone: ticketDetail.recipient_whatsapp,
-            recipient_identity_type: ticketDetail.id_type,
-            recipient_identity_number: ticketDetail.id_number,
-            qr_code_data: ticketDetail.ticket_code,
-            generated_date: new Date(ticketDetail.createdAt),
-        };
+		    barcode_url: ticketDetail.barcode_url,
+		    recipient_name: ticketDetail.recipient_name,
+		    recipient_email: ticketDetail.recipient_email,
+		    createdAt: ticketDetail.createdAt,
+				  
+		    ticket_product: {
+		      id: ticketDetail.ticket_product?.data?.id,
+		      attributes: {
+		        name:
+		          ticketDetail.ticket_product?.data?.attributes?.name ||
+		          'Nama Event',
+		        description:
+		          ticketDetail.ticket_product?.data?.attributes?.description || '',
+		        date:
+		          ticketDetail.ticket_product?.data?.attributes?.date || '',
+		        location:
+		          ticketDetail.ticket_product?.data?.attributes?.location || '',
+		      },
+		    },
+	    
+		    transaction_ticket: {
+		      id: ticketDetail.transaction_ticket?.data?.id,
+		      attributes: {
+		        order_id:
+		          ticketDetail.transaction_ticket?.data?.attributes?.order_id,
+		        total_price:
+		          ticketDetail.transaction_ticket?.data?.attributes?.total_price,
+		        payment_method:
+		          ticketDetail.transaction_ticket?.data?.attributes?.payment_method,
+		      },
+		    },
+	    
+		    // user OPTIONAL → boleh ada / boleh tidak
+		    user: ticketDetail.user?.data
+		      ? {
+		          id: ticketDetail.user.data.id,
+		          attributes: {
+		            username: ticketDetail.user.data.attributes.username,
+		            email: ticketDetail.user.data.attributes.email,
+		          },
+		        }
+		      : undefined,
+		  };
 
 		return normalizedData;
 
