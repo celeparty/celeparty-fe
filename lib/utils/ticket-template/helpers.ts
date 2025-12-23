@@ -3,13 +3,13 @@
  * Fungsi-fungsi pembantu untuk manipulasi tiket
  */
 
-import { iTicketTemplateData, iTicketTemplateConfig } from '@/components/ticket-templates/interfaces';
+import { TicketData, iTicketTemplateConfig } from '@/components/ticket-templates/interfaces';
 
 /**
  * Format ticket data dari API response
  * Mengkonversi data dari backend ke format yang dibutuhkan template
  */
-export const formatTicketDataFromAPI = (apiData: any): iTicketTemplateData => {
+export const formatTicketDataFromAPI = (apiData: any): TicketData => {
 	return {
 		product_title: apiData.product?.title || apiData.product_title || '',
 		product_description: apiData.product?.description || apiData.product_description || '',
@@ -39,7 +39,7 @@ export const formatTicketDataFromAPI = (apiData: any): iTicketTemplateData => {
  * Validate ticket data
  * Memastikan data tiket memiliki informasi yang lengkap
  */
-export const validateTicketData = (data: iTicketTemplateData): { valid: boolean; errors: string[] } => {
+export const validateTicketData = (data: TicketData): { valid: boolean; errors: string[] } => {
 	const errors: string[] = [];
 
 	if (!data.product_title) errors.push('Product title is required');
@@ -59,7 +59,7 @@ export const validateTicketData = (data: iTicketTemplateData): { valid: boolean;
  * Generate sample ticket data untuk testing
  * Berguna untuk preview template
  */
-export const generateSampleTicketData = (): iTicketTemplateData => {
+export const generateSampleTicketData = (): TicketData => {
 	return {
 		product_title: 'Concert - The Grand Performance',
 		product_description: 'Konser musik live dengan artis-artis ternama. Durasi 4 jam dengan berbagai genre musik. Tersedia free snacks dan beverages.',
