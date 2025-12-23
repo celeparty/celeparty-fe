@@ -10,7 +10,7 @@ interface Props {
 	config: iTicketTemplateConfig;
 }
 
-const TicketTemplate: React.FC<Props> = ({ ticket }) => {
+const TicketTemplate: React.FC<Props> = ({ ticket, config }) => {
 	return (
 		<div
 			style={{

@@ -3,7 +3,7 @@
  * Export semua komponen ticket template
  */
 
-export { TicketTemplate } from './TicketTemplate';
+export { default as TicketTemplate } from './TicketTemplate';
 export { TicketTemplateHeader } from './TicketTemplateHeader';
 export { TicketTemplateBody } from './TicketTemplateBody';
 export { TicketTemplateQRCode } from './TicketTemplateQRCode';
