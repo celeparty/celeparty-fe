@@ -50,7 +50,7 @@ export const TicketTemplateDemo: React.FC = () => {
 								<strong>Kode:</strong> {ticketData.ticket_code}
 							</p>
 							<p className="text-sm text-blue-700">
-								<strong>Varian:</strong>   {ticketData.transaction_ticket.attributes?.variant ?? 'Regular';}
+								<strong>Varian:</strong>   {ticketData.transaction_ticket.attributes?.variant ?? 'Regular'}
 							</p>
 						</div>
 						<div>
@@ -61,7 +61,7 @@ export const TicketTemplateDemo: React.FC = () => {
 								<strong>Email:</strong> {ticketData.recipient_email}
 							</p>
 							<p className="text-sm text-blue-700">
-								<strong>Telepon:</strong> {ticketData.recipient_phone}
+								<strong>Telepon:</strong> {ticketData.recipient_whatsapp}
 							</p>
 						</div>
 					</div>
