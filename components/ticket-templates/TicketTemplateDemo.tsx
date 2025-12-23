@@ -158,7 +158,7 @@ export const TicketTemplateDemo: React.FC = () => {
 						<div>
 							<p className="font-semibold">3. Render Komponen</p>
 							<code className="mt-1 block rounded bg-green-100 p-2">
-								{'<TicketTemplate data={ticketData} config={config} />'}
+								{'<TicketTemplate ticket={ticketData} config={config} />'}
 							</code>
 						</div>
 						<div>

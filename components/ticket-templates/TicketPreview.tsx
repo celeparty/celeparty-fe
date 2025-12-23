@@ -107,7 +107,7 @@ export const TicketPreview: React.FC<TicketPreviewProps> = ({
 			{/* Ticket Preview */}
 			<div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
 				<div ref={ticketRef} className="mx-auto max-w-[800px]">
-					<TicketTemplate data={ticketData} config={config} />
+					<TicketTemplate ticket={ticketData} config={config} />
 				</div>
 			</div>
 
