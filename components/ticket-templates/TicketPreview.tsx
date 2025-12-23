@@ -8,7 +8,7 @@
 import React, { useRef, useState } from 'react';
 import { TicketTemplate } from '@/components/ticket-templates';
 import type { TicketData }from '@/components/ticket-templates';
-import type { iTicketTemplateConfig } from '@/lib/utils/ticket-template/configTemplate';
+import type { iTicketTemplateConfig } from '@/components/ticket-templates/interfaces';
 import { downloadTicketPDF, getTicketPDFAsBase64 } from '@/lib/utils/ticket-template';
 import { getDefaultTemplateConfig } from '@/lib/utils/ticket-template/configTemplate';
 import toast from 'react-hot-toast';
