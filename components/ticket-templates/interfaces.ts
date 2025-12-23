@@ -17,6 +17,7 @@ export interface TransactionTicket {
 	order_id: string;
 	total_price: number;
 	payment_method: string;
+	varian?: string;
 	// Add other transaction fields as needed
 }
 
