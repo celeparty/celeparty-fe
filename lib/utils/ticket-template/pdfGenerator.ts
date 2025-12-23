@@ -5,7 +5,7 @@
 
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { iPDFGenerateOptions, iTicketTemplateData } from '@/components/ticket-templates/interfaces';
+import { iPDFGenerateOptions, TicketData } from '@/components/ticket-templates/interfaces';
 
 /**
  * Generate PDF dari elemen HTML
@@ -15,7 +15,7 @@ import { iPDFGenerateOptions, iTicketTemplateData } from '@/components/ticket-te
  */
 export const generateTicketPDF = async (
 	element: HTMLElement,
-	ticketData: iTicketTemplateData,
+	ticketData: TicketData,
 	options: iPDFGenerateOptions = {}
 ): Promise<string | void> => {
 	try {
@@ -96,7 +96,7 @@ export const generateTicketPDF = async (
  */
 export const generateMultipleTicketPDFs = async (
 	elements: HTMLElement[],
-	ticketsData: iTicketTemplateData[],
+	ticketsData: TicketData[],
 	options: iPDFGenerateOptions = {}
 ): Promise<string[]> => {
 	try {
@@ -133,7 +133,7 @@ export const generateMultipleTicketPDFs = async (
  */
 export const downloadTicketPDF = async (
 	element: HTMLElement,
-	ticketData: iTicketTemplateData,
+	ticketData: TicketData,
 	filename?: string
 ): Promise<void> => {
 	await generateTicketPDF(element, ticketData, {
@@ -151,7 +151,7 @@ export const downloadTicketPDF = async (
  */
 export const getTicketPDFAsBase64 = async (
 	element: HTMLElement,
-	ticketData: iTicketTemplateData
+	ticketData: TicketData
 ): Promise<string> => {
 	const result = await generateTicketPDF(element, ticketData, {
 		download: false,
@@ -169,7 +169,7 @@ export const getTicketPDFAsBase64 = async (
  */
 export const getTicketPDFAsBlob = async (
 	element: HTMLElement,
-	ticketData: iTicketTemplateData
+	ticketData: TicketData
 ): Promise<Blob> => {
 	try {
 		const canvas = await html2canvas(element, {

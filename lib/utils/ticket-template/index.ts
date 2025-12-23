@@ -11,9 +11,5 @@ export {
 	formatTicketDataFromAPI,
 	validateTicketData,
 	generateSampleTicketData,
-	generateSampleTemplateConfig,
-	checkLogoAvailability,
-	sanitizeFilename,
-	formatPhoneNumber,
-	mergePDFs,
+	generateSampleTemplateConfig
 } from './helpers';
