@@ -44,7 +44,7 @@ export const TicketTemplateDemo: React.FC = () => {
 					<div className="grid gap-4 sm:grid-cols-2">
 						<div>
 							<p className="text-sm text-blue-700">
-								<strong>Produk:</strong> {ticketData.product_title}
+								<strong>Produk:</strong> {ticketData.ticket_product.attributes.name}
 							</p>
 							<p className="text-sm text-blue-700">
 								<strong>Kode:</strong> {ticketData.ticket_code}
