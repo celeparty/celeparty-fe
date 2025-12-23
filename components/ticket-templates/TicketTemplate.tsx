@@ -1,6 +1,6 @@
 // components/ticket-templates/TicketTemplate.tsx
 import React from "react";
-import { TicketData } from "./interfaces";
+import { TicketData, iTicketTemplateConfig } from "./interfaces";
 import TicketTemplateHeader from "./TicketTemplateHeader";
 import TicketTemplateBody from "./TicketTemplateBody";
 import TicketTemplateFooter from "./TicketTemplateFooter";
