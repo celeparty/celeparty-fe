@@ -94,7 +94,7 @@ export const TicketPreview: React.FC<TicketPreviewProps> = ({
 				<div className="flex-1 overflow-auto">
 					<div className="mx-auto flex justify-center py-8">
 						<div ref={ticketRef} className="print:w-full">
-							<TicketTemplate data={ticketData} config={config} />
+							<TicketTemplate ticket={ticketData} config={config} />
 						</div>
 					</div>
 				</div>
