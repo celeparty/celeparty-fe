@@ -40,8 +40,8 @@ jobs:
         with:
           host: ${{ secrets.DO_HOST }}
           username: ${{ secrets.DO_USERNAME }}
-          #password: ${{ secrets.DO_PASSWORD }}
-          key: ${{ secrets.DO_SSH_KEY }}
+          password: ${{ secrets.DO_PASSWORD }}
+         # key: ${{ secrets.DO_SSH_KEY }}
           port: 22
           script: |
             cd /var/www/celeparty.com/celeparty-fe
