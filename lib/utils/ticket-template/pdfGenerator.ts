@@ -5,7 +5,7 @@
 
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { iPDFGenerateOptions, TicketData } from '@/components/ticket-templates/interfaces';
+import { TicketData } from '@/components/ticket-templates/interfaces';
 
 /**
  * Generate PDF dari elemen HTML
@@ -13,10 +13,19 @@ import { iPDFGenerateOptions, TicketData } from '@/components/ticket-templates/i
  * @param options - Opsi untuk generate PDF
  * @returns Promise dengan hasil PDF (base64 atau download)
  */
+type PDFGenerateOptions = {
+	filename?: string;
+	scale?: number;
+	quality?: number;
+	format?: 'A4' | 'A3';
+	orientation?: 'portrait' | 'landscape';
+	download?: boolean;
+	returnBase64?: boolean;
+};
 export const generateTicketPDF = async (
 	element: HTMLElement,
 	ticketData: TicketData,
-	options: iPDFGenerateOptions = {}
+	options: PDFGenerateOptions = {}
 ): Promise<string | void> => {
 	try {
 		const {
@@ -97,7 +106,7 @@ export const generateTicketPDF = async (
 export const generateMultipleTicketPDFs = async (
 	elements: HTMLElement[],
 	ticketsData: TicketData[],
-	options: iPDFGenerateOptions = {}
+	options: PDFGenerateOptions = {}
 ): Promise<string[]> => {
 	try {
 		const results: string[] = [];
