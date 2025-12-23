@@ -7,7 +7,7 @@ import TicketTemplateFooter from "./TicketTemplateFooter";
 
 interface Props {
 	ticket: TicketData;
-	config: TicketData;
+	config: iTicketTemplateConfig;
 }
 
 const TicketTemplate: React.FC<Props> = ({ ticket }) => {

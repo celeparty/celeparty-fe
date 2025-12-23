@@ -1,7 +1,8 @@
 
 import TicketTemplate from '@/components/ticket-templates/TicketTemplate';
-import { TicketData } from '@/components/ticket-templates/interfaces';
+import type { TicketData, iTicketTemplateConfig } from '@/components/ticket-templates/interfaces';
 import { getDefaultTemplateConfig } from '@/lib/utils/ticket-template/configTemplate';
+
 import { notFound } from 'next/navigation';
 
 // Helper to get the base URL for server-side fetching
@@ -187,7 +188,7 @@ export default async function UnifiedTicketRenderPage({ params, searchParams }: 
 	}
 
     // Use a default config for consistent appearance
-	const templateConfig: TicketData = {
+	const templateConfig: iTicketTemplateConfig = {
 		...getDefaultTemplateConfig(),
 		logo_url: `${getBaseUrl()}/images/logo.png`, // Ensure logo URL is absolute
 	};
