@@ -8,11 +8,11 @@
 import React, { useState } from 'react';
 import { TicketPreview } from '@/components/ticket-templates/TicketPreview';
 import { generateSampleTicketData, generateSampleTemplateConfig } from '@/lib/utils/ticket-template';
-import { iTicketTemplateData, iTicketTemplateConfig } from '@/components/ticket-templates/interfaces';
+import { TicketData, iTicketTemplateConfig } from '@/components/ticket-templates/interfaces';
 import toast from 'react-hot-toast';
 
 export const TicketTemplateDemo: React.FC = () => {
-	const [ticketData] = useState<iTicketTemplateData>(generateSampleTicketData());
+	const [ticketData] = useState<TicketData>(generateSampleTicketData());
 	const [templateConfig] = useState<iTicketTemplateConfig>(generateSampleTemplateConfig());
 
 	const handleDownload = (filename: string) => {
@@ -152,7 +152,7 @@ export const TicketTemplateDemo: React.FC = () => {
 						<div>
 							<p className="font-semibold">2. Siapkan Data Tiket</p>
 							<code className="mt-1 block rounded bg-green-100 p-2">
-								const ticketData: iTicketTemplateData = {'{ ... }'};
+								const ticketData: TicketData = {'{ ... }'};
 							</code>
 						</div>
 						<div>

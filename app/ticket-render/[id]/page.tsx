@@ -107,7 +107,7 @@ async function getByTicketDetailId(ticketDetailId: string): Promise<TicketData |
 
         if (!ticketDetail) return null;
         
-        // Normalize the data to match the iTicketTemplateData interface
+        // Normalize the data to match the TicketData interface
         const normalizedData: TicketData = {
             ticket_code: ticketDetail.ticket_code,
 		    barcode_url: ticketDetail.barcode_url,
