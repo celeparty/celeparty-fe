@@ -4,11 +4,11 @@
  */
 
 export { default as TicketTemplate } from './TicketTemplate';
-export { TicketTemplateHeader } from './TicketTemplateHeader';
-export { TicketTemplateBody } from './TicketTemplateBody';
-export { TicketTemplateQRCode } from './TicketTemplateQRCode';
-export { TicketTemplateFooter } from './TicketTemplateFooter';
-export { TicketPreview } from './TicketPreview';
-export { TicketTemplateDemo } from './TicketTemplateDemo';
+export { default as TicketTemplateHeader } from './TicketTemplateHeader';
+export { default as TicketTemplateBody } from './TicketTemplateBody';
+export { default as TicketTemplateQRCode } from './TicketTemplateQRCode';
+export { default as TicketTemplateFooter } from './TicketTemplateFooter';
+export { default as TicketPreview } from './TicketPreview';
+export { default as TicketTemplateDemo } from './TicketTemplateDemo';
 
 export type { TicketData } from './interfaces';
