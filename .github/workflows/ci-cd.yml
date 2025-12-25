@@ -1,4 +1,4 @@
-name: Deploy Celeparty FE
+name: CI/CD Next.js to DigitalOcean
 
 on:
   push:
@@ -6,32 +6,50 @@ on:
 
 jobs:
   # ========================
-  # 1. CI Job (build & test)
+  # 1. CI Job (build)
   # ========================
-  build:
+  ci:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: "20.9.0"
           cache: npm
 
-      - name: Install deps
-        #echo "📦 Installing dependencies..."
-        run: npm install --legacy-peer-deps
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps --no-audit --no-fund
 
       - name: Build
-        #echo "⚒️ Building app..."
         run: npm run build
 
-      # ========================
-      # 2. CD Job (deploy ke server)
-      # ========================
+      # ⬇️ SIMPAN HASIL BUILD
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-build
+          path: |
+            .next
+            public
+            package.json
+            package-lock.json
+
+  # ========================
+  # 2. CD Job (deploy)
+  # ========================
+  cd:
+    runs-on: ubuntu-latest
+    needs: ci
+    environment: Production
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: next-build
 
       - name: Upload build to server
         uses: appleboy/scp-action@v0.1.7
@@ -40,19 +58,20 @@ jobs:
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
+          timeout: 120s
           source: ".next,public,package.json,package-lock.json"
           target: "/var/www/celeparty.com/celeparty-fe"
 
-      - name: Run app on server
+      - name: Restart app
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DO_HOST }}
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
+          timeout: 120s
+          command_timeout: 15m
           script: |
             cd /var/www/celeparty.com/celeparty-fe
-            npm install --omit=dev
-
-            echo "🚀 Restarting app with pm2..."
+            npm install --omit=dev --no-audit --no-fund
             pm2 restart celeparty.com || pm2 start npm --name "celeparty.com" -- run start
