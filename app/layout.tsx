@@ -16,18 +16,16 @@ import { useState } from "react";
 const inter = localfont({ 
   src: [ { path: '../public/fonts/inter.woff2',
           
-        },], 
-          subsets: ["latin"], 
-          variable: "--font-inter",
+        },],
+          variable: '--font-inter',
     })
 const quick = localfont({
   src: [ { path: '../public/fonts/quicksand.woff2',
+          weight: ['500', '600', '700'],
       },
     ],
-        subsets: ["latin"],
-            weight: ["500", "600", "700"],
-            display: "swap",
-            variable: "--font-quicksand",
+            display: 'swap',
+            variable: '--font-quicksand',
 })
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
