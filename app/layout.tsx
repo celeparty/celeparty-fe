@@ -6,20 +6,29 @@ import SessionWrapper from "@/components/SessionWrapper";
 import TopHeader from "@/components/TopHeader";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
-import { Inter, Quicksand } from "next/font/google";
+import localfont from "next/font/local";
 import Script from "next/script";
 import "@/public/styles/globals.css";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const quick = Quicksand({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  display: "swap",
-  variable: "--font-quicksand",
-});
+const inter = localfont({ 
+  src: [ { path: '../public/fonts/inter.woff2',
+          
+        },], 
+          subsets: ["latin"], 
+          variable: "--font-inter",
+    })
+const quick = localfont({
+  src: [ { path: '../public/fonts/quicksand.woff2',
+      },
+    ],
+        subsets: ["latin"],
+            weight: ["500", "600", "700"],
+            display: "swap",
+            variable: "--font-quicksand",
+})
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
