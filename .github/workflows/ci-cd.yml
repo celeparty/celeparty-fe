@@ -5,10 +5,11 @@ on:
     branches: [master]
 
 jobs:
+
   ci:
-    # ========================
-    # 1. CI Job (build & test)
-    # ========================
+  # ========================
+  # 1. CI Job (build & test)
+  # ========================
     runs-on: ubuntu-latest
 
     steps:
@@ -26,41 +27,39 @@ jobs:
       - name: Build
         run: npm run build
 
+
   cd:
-    # ========================
-    # 2. CD Job (deploy ke server)
-    # ========================
+  # ========================
+  # 2. CD Job (deploy ke server)
+  # ========================
     runs-on: ubuntu-latest
-    needs: ci
+    needs: ci # hanya jalan kalau CI sukses
     environment: Production
 
     steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: next-build
-
-      - name: Upload build to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.DO_HOST }}
-          username: ${{ secrets.DO_USERNAME }}
-          key: ${{ secrets.DO_SSH_KEY }}
-          port: 22
-          timeout: 120s
-          source: ".next,public,package.json,package-lock.json"
-          target: "/var/www/celeparty.com/celeparty-fe"
-
-      - name: Restart app
+      - name: Deploy & Build on Server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DO_HOST }}
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
-          timeout: 120s
-          command_timeout: 15m
           script: |
             cd /var/www/celeparty.com/celeparty-fe
-            npm install --omit=dev --no-audit --no-fund
+
+            echo "📥 Pulling latest code..."
+            git fetch origin master
+            git reset --hard origin/master
+
+            echo "🧹 Cleaning up disk space..."
+            rm -rf node_modules .next package-lock.json .cache
+            npm cache clean --force
+
+            echo "📦 Installing dependencies..."
+            npm install --legacy-peer-deps --no-audit --no-fund
+
+            echo "⚒️ Building app..."
+            NODE_OPTIONS="--max-old-space-size=4096" npm run build
+
+            echo "🚀 Restarting app with pm2..."
             pm2 restart celeparty.com || pm2 start npm --name "celeparty.com" -- run start
