@@ -5,11 +5,10 @@ on:
     branches: [master]
 
 jobs:
-
   ci:
-  # ========================
-  # 1. CI Job (build & test)
-  # ========================
+    # ========================
+    # 1. CI Job (build & test)
+    # ========================
     runs-on: ubuntu-latest
 
     steps:
@@ -27,11 +26,10 @@ jobs:
       - name: Build
         run: npm run build
 
-
   cd:
-  # ========================
-  # 2. CD Job (deploy ke server)
-  # ========================
+    # ========================
+    # 2. CD Job (deploy ke server)
+    # ========================
     runs-on: ubuntu-latest
     needs: ci # hanya jalan kalau CI sukses
     environment: Production
@@ -44,6 +42,10 @@ jobs:
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
+          timeout: 120s
+          command_timeout: 30m
+          request_pty: false
+          debug: true
           script: |
             cd /var/www/celeparty.com/celeparty-fe
 
@@ -53,13 +55,14 @@ jobs:
 
             echo "🧹 Cleaning up disk space..."
             rm -rf node_modules .next package-lock.json .cache
-            npm cache clean --force
+            npm cache clean --force || true
 
             echo "📦 Installing dependencies..."
-            npm install --legacy-peer-deps --no-audit --no-fund
+            npm install --legacy-peer-deps --no-audit --no-fund --silent
 
             echo "⚒️ Building app..."
-            NODE_OPTIONS="--max-old-space-size=4096" npm run build
+            export NODE_OPTIONS="--max-old-space-size=4096" 
+            npm run build --silent
 
             echo "🚀 Restarting app with pm2..."
             pm2 restart celeparty.com || pm2 start npm --name "celeparty.com" -- run start
