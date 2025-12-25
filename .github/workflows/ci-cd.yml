@@ -1,4 +1,4 @@
-name: CI/CD Next.js to DigitalOcean
+name: Deploy Celeparty FE
 
 on:
   push:
@@ -8,34 +8,42 @@ jobs:
   # ========================
   # 1. CI Job (build & test)
   # ========================
-  ci:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20.9.0"
-          check-latest: true
+          node-version: 18
+          cache: npm
 
-      - name: Install dependencies
+      - name: Install deps
+        #echo "📦 Installing dependencies..."
         run: npm install --legacy-peer-deps
 
       - name: Build
+        #echo "⚒️ Building app..."
         run: npm run build
 
-  # ========================
-  # 2. CD Job (deploy ke server)
-  # ========================
-  cd:
-    runs-on: ubuntu-latest
-    needs: ci # hanya jalan kalau CI sukses
-    environment: Production
+      # ========================
+      # 2. CD Job (deploy ke server)
+      # ========================
 
-    steps:
-      - name: Deploy & Build on Server
+      - name: Upload build to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DO_HOST }}
+          username: ${{ secrets.DO_USERNAME }}
+          key: ${{ secrets.DO_SSH_KEY }}
+          port: 22
+          source: ".next,public,package.json,package-lock.json"
+          target: "/var/www/celeparty.com/celeparty-fe"
+
+      - name: Run app on server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DO_HOST }}
@@ -44,21 +52,7 @@ jobs:
           port: 22
           script: |
             cd /var/www/celeparty.com/celeparty-fe
-
-            echo "📥 Pulling latest code..."
-            git fetch origin master
-            git reset --hard origin/master
-
-            echo "🧹 Cleaning up disk space..."
-            rm -rf node_modules .next package-lock.json .cache
-            npm cache clean --force
-            yarn cache clean --all 2>/dev/null || true
-
-            echo "📦 Installing dependencies..."
-            npm install --legacy-peer-deps --no-audit --no-fund
-
-            echo "⚒️ Building app..."
-            npm run build
+            npm install --omit=dev
 
             echo "🚀 Restarting app with pm2..."
             pm2 restart celeparty.com || pm2 start npm --name "celeparty.com" -- run start
