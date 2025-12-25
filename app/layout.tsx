@@ -6,27 +6,46 @@ import SessionWrapper from "@/components/SessionWrapper";
 import TopHeader from "@/components/TopHeader";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
-import localfont from "next/font/local";
+import localFont from "next/font/local";
 import Script from "next/script";
 import "@/public/styles/globals.css";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
-const inter = localfont({ 
-  src: [ { path: '../public/fonts/inter.woff2',
-          
-        },],
-          variable: '--font-inter',
-    })
-const quick = localfont({
-  src: [ { path: '../public/fonts/quicksand.woff2',
-          weight: ['500', '600', '700'],
-      },
-    ],
-            display: 'swap',
-            variable: '--font-quicksand',
-})
+const inter = localFont({
+  src: [
+    {
+      path: "./fonts/inter.woff2",
+      weight: "400",
+      style: "normal",
+    },
+  ],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const quick = localFont({
+  src: [
+    {
+      path: "./fonts/quicksand-500.woff2",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "./fonts/quicksand-600.woff2",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "./fonts/quicksand-700.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-quicksand",
+  display: "swap",
+});
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
