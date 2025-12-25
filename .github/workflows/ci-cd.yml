@@ -55,7 +55,7 @@ jobs:
             yarn cache clean --all 2>/dev/null || true
 
             echo "📦 Installing dependencies..."
-            npm install sharp --save --legacy-peer-deps
+            npm install --legacy-peer-deps --no-audit --no-fund
 
             echo "⚒️ Building app..."
             npm run build
