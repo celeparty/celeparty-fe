@@ -62,41 +62,41 @@ const nextConfig = {
 			},
 		],
 	},
-	async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'Content-Security-Policy',
-            value: `
-              default-src 'self';
-              script-src
-                'self'
-                'unsafe-inline'
-                'unsafe-eval'
-                blob:
-                https://app.sandbox.midtrans.com
-                https://snap-assets.al-pc-id-b.cdn.gtflabs.io
-                https://api.sandbox.midtrans.com
-                https://pay.google.com
-                https://js-agent.newrelic.com
-                https://bam.nr-data.net
-                https://gwk.gopayapi.com;
-              frame-src
-                'self'
-                https://app.sandbox.midtrans.com
-                https://snap.midtrans.com;
-              connect-src
-                'self'
-                https://api.sandbox.midtrans.com
-                https://bam.nr-data.net;
-            `.replace(/\s{2,}/g, ' ').trim(),
-          },
-        ],
-      },
-    ];
-  },
+// 	async headers() {
+//     return [
+//       {
+//         source: '/(.*)',
+//         headers: [
+//           {
+//             key: 'Content-Security-Policy',
+//             value: `
+//               default-src 'self';
+//               script-src
+//                 'self'
+//                 'unsafe-inline'
+//                 'unsafe-eval'
+//                 blob:
+//                 https://app.sandbox.midtrans.com
+//                 https://snap-assets.al-pc-id-b.cdn.gtflabs.io
+//                 https://api.sandbox.midtrans.com
+//                 https://pay.google.com
+//                 https://js-agent.newrelic.com
+//                 https://bam.nr-data.net
+//                 https://gwk.gopayapi.com;
+//               frame-src
+//                 'self'
+//                 https://app.sandbox.midtrans.com
+//                 https://snap.midtrans.com;
+//               connect-src
+//                 'self'
+//                 https://api.sandbox.midtrans.com
+//                 https://bam.nr-data.net;
+//             `.replace(/\s{2,}/g, ' ').trim(),
+//           },
+//         ],
+//       },
+//     ];
+//   },
 };
 
 module.exports = nextConfig;
