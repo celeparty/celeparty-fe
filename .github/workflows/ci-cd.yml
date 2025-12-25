@@ -65,4 +65,4 @@ jobs:
             npm run build --silent
 
             echo "🚀 Restarting app with pm2..."
-            pm2 restart celeparty.com || pm2 start npm --name "celeparty.com" -- run start
+            pm2 startOrRestart ecosystem.config.js --update-env
