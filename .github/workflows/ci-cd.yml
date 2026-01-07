@@ -66,3 +66,5 @@ jobs:
 
             echo "🚀 Restarting app with pm2..."
             pm2 startOrRestart ecosystem.config.js --update-env
+            pm2 save
+            

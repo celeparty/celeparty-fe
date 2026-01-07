@@ -79,6 +79,18 @@ export default function OrderSummaryPage() {
 			// Use the first item for common details, assuming they are consistent for the order
 			const firstItem = selectedCartItems[0]; 
 
+			// Build products array matching Strapi schema (JSON field)
+			const productsData = selectedCartItems.map(item => ({
+				product_id: item.product_id,
+				product_name: item.product_name,
+				variant: item.variant_id || item.variant || "",
+				quantity: item.quantity,
+				price: item.price,
+				product_type: item.product_type,
+				note: item.note || "",
+				recipients: item.recipients || [], // Include recipients here
+			}));
+
 			const transactionPayload = {
 				data: {
 					order_id: order_id,
@@ -86,20 +98,14 @@ export default function OrderSummaryPage() {
 					customer_name: firstItem.customer_name || session?.user?.name || "",
 					email: session?.user?.email || "",
 					telp: firstItem.telp || session?.user?.phone || "",
-					shipping_location: firstItem.shipping_location, // Relevant for equipment
-					event_date: firstItem.event_date,
-					loading_date: firstItem.loading_date,
-					loading_time: firstItem.loading_time,
+					shipping_location: firstItem.shipping_location || "",
+					event_date: firstItem.event_date || "",
+					loading_date: firstItem.loading_date || "",
+					loading_time: firstItem.loading_time || "",
 					note: selectedCartItems.map(item => item.note).filter(Boolean).join("; "),
-					vendor_doc_id: firstItem.vendor_id || "", // Assuming a single vendor per transaction for now
-					total: totalAmount,
-					order_items: selectedCartItems.map(item => ({
-						product: item.product_id,
-						variant: item.variant_id, // Ensure variant_id is available in cart items
-						quantity: item.quantity,
-						price: item.price,
-					})),
-					recipients: allRecipients, // Add all recipients to the main transaction
+					vendor_doc_id: firstItem.vendor_id || "",
+					event_type: ticketItems.length > 0 ? "ticket" : "equipment",
+					products: productsData, // Use 'products' field from Strapi schema
 				}
 			};
 
