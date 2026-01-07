@@ -47,30 +47,76 @@ export const TicketSend: React.FC = () => {
 
 	// Fetch products
 	const getVendorTickets = async () => {
-		if (!session?.jwt) return [];
+		if (!session?.jwt || !session?.user?.documentId) return [];
 		try {
-			const response = await axiosUser(
-				"GET",
-				`/api/products?filters[vendor][id][$eq]=${session.user.documentId}&filters[user_event_type][name][$in]=Ticket&filters[user_event_type][name][$in]=ticket&populate[variants]=*`,
-				session.jwt
-			);
-			const products = response.data.data;
-			console.log("Vendor's ticket products:", products);
+			// Try method 1: Filter by users_permissions_user relationship
+			console.log("TicketSend - Fetching products for vendor:", session.user.documentId);
+			let response = null;
+			let fallbackError = null;
+
+			try {
+				// Method 1: Filter by users_permissions_user id
+				const url1 = `/api/products?filters[users_permissions_user][id][$eq]=${session.user.documentId}&filters[user_event_type][name][$eq]=Ticket&populate[variants]=*&pagination[pageSize]=100`;
+				console.log("TicketSend - Trying filter method 1:", url1);
+				response = await axiosUser("GET", url1, session.jwt);
+				console.log("TicketSend - Method 1 success:", response.data?.data?.length || 0, "products found");
+			} catch (error1: any) {
+				console.warn("TicketSend - Method 1 failed:", error1.response?.status, error1.response?.data?.error || error1.message);
+				fallbackError = error1;
+				
+				try {
+					// Method 2: Fetch all ticket products and filter by user relationship
+					const url2 = `/api/products?filters[user_event_type][name][$eq]=Ticket&populate[users_permissions_user]=*&populate[variants]=*&pagination[pageSize]=100`;
+					console.log("TicketSend - Trying filter method 2:", url2);
+					response = await axiosUser("GET", url2, session.jwt);
+					console.log("TicketSend - Method 2 success, filtering client-side");
+				} catch (error2: any) {
+					console.warn("TicketSend - Method 2 failed:", error2.response?.status, error2.response?.data?.error || error2.message);
+					
+					try {
+						// Method 3: Just get all products and filter by user
+						const url3 = `/api/products?filters[user_event_type][name][$eq]=Ticket&populate=*&pagination[pageSize]=100`;
+						console.log("TicketSend - Trying filter method 3:", url3);
+						response = await axiosUser("GET", url3, session.jwt);
+						console.log("TicketSend - Method 3 success, will filter client-side");
+					} catch (error3: any) {
+						console.error("TicketSend - All methods failed, returning empty", error3.message);
+						return [];
+					}
+				}
+			}
+
+			const products = response?.data?.data || [];
+			console.log("TicketSend - Total products fetched:", products.length);
 			
 			// Map to a consistent structure, ensuring variants are always an array
 			return products.map((p: any) => ({
-				id: p.id,
-				documentId: p.id, // for compatibility
-				title: p.attributes.title,
-				variant: p.attributes.variants?.data?.map((v: any) => ({
-					id: v.id,
-					documentId: v.id,
-					name: v.attributes.name,
-					price: v.attributes.price
+				id: p.id || p.documentId,
+				documentId: p.id || p.documentId,
+				title: p.attributes?.title || p.title || "Tiket Tanpa Nama",
+				vendor_id: p.attributes?.users_permissions_user?.data?.id || p.attributes?.users_permissions_user,
+				variant: (p.attributes?.variant || []).map((v: any) => ({
+					id: v.id || v.documentId,
+					documentId: v.id || v.documentId,
+					name: v.name || "Default",
+					price: parseFloat(v.price || 0)
 				})) || [],
-			}));
+			})).filter((product: any) => {
+				// Client-side filter: Only return products where vendor matches current user
+				// This handles case where filter didn't work on server side
+				const vendorMatch = product.vendor_id === session.user.documentId ||
+					product.vendor_id === session.user.id ||
+					!product.vendor_id; // Include if vendor_id not set (fallback)
+				console.log("TicketSend - Product filter check:", {
+					title: product.title,
+					vendor_id: product.vendor_id,
+					currentUser: session.user.documentId,
+					matches: vendorMatch
+				});
+				return vendorMatch;
+			});
 		} catch (error) {
-			console.error("Error fetching vendor tickets:", error);
+			console.error("TicketSend - Error fetching vendor tickets:", error);
 			return [];
 		}
 	};
@@ -86,13 +132,15 @@ export const TicketSend: React.FC = () => {
 	const getSendHistory = async () => {
 		if (!session?.jwt) return [];
 		try {
-			// TODO: This endpoint is speculative and needs to be implemented in the backend.
+			// Correct endpoint: /api/ticket-send-histories instead of /api/transactions/send-history
 			const response = await axiosUser(
 				"GET",
-				"/api/transactions/send-history",
+				`/api/ticket-send-histories?filters[vendor][$eq]=${session.user.documentId}&sort=createdAt:desc&pagination[pageSize]=100`,
 				session.jwt
 			);
-			return response?.data || [];
+			const histories = response.data?.data || [];
+			console.log("Ticket send history:", histories);
+			return histories;
 		} catch (error) {
 			console.error("Error fetching send history:", error);
 			return [];

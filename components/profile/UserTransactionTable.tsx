@@ -63,14 +63,21 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 		if (!session) return [];
 
 		try {
-			// Try with proper populate parameter for all relations
-			let url = `/api/transaction-proxy?sort=createdAt:desc&populate=*`;
+			// Build URL with proper filters
+			let url = `/api/transaction-proxy?sort=createdAt:desc&pagination[pageSize]=100`;
+			
+			// Add filter based on order type
+			if (orderTypeFilter === 'equipment') {
+				url += `&filters[event_type][$eq]=equipment`;
+			} else if (orderTypeFilter === 'ticket') {
+				url += `&filters[event_type][$eq]=ticket`;
+			}
+			// if 'all', don't add event_type filter
 			
 			// Add vendor filter if vendor
-			if (isVendor) {
-				// Try multiple field name possibilities
+			if (isVendor && session.user?.documentId) {
 				url += `&filters[vendor_doc_id][$eq]=${session.user.documentId}`;
-			} else {
+			} else if (!isVendor && session.user?.email) {
 				// For customer, filter by email
 				url += `&filters[email][$eq]=${session.user.email}`;
 			}
@@ -86,7 +93,11 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 			
 			return response.data.data;
 		} catch (error: any) {
-			console.error("UserTransactionTable - Fetch error:", error.response?.data || error.message);
+			console.error("UserTransactionTable - Fetch error:", {
+				message: error.message,
+				status: error.response?.status,
+				data: error.response?.data
+			});
 			throw error;
 		}
 	};
