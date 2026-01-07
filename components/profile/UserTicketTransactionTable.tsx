@@ -32,42 +32,54 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 			// Use unified transaction-proxy endpoint with proper filters
 			let filterParam = '';
 			
-			if (isVendor) {
+			if (isVendor && session?.user?.documentId) {
 				// For vendor, filter by vendor_doc_id and event_type=ticket
-				filterParam = `filters[vendor_doc_id][$eq]=${session?.user?.documentId}&filters[event_type][$eq]=ticket`;
-			} else {
+				filterParam = `filters[vendor_doc_id][$eq]=${session.user.documentId}&filters[event_type][$eq]=ticket`;
+			} else if (!isVendor && session?.user?.email) {
 				// For customer, filter by email and event_type=ticket
-				filterParam = `filters[email][$eq]=${session?.user?.email}&filters[event_type][$eq]=ticket`;
+				filterParam = `filters[email][$eq]=${session.user.email}&filters[event_type][$eq]=ticket`;
+			} else {
+				// No valid filter, return empty
+				console.warn("UserTicketTransactionTable - No valid filter params");
+				return { data: [] };
 			}
 			
-			const url = `/api/transaction-proxy?${filterParam}&sort=createdAt:desc&populate=*`;
+			const url = `/api/transaction-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=100`;
 			console.log("UserTicketTransactionTable - Fetching URL:", url);
 			
 			const response = await axios.get(url);
 			console.log("UserTicketTransactionTable - Response data:", response.data);
 			
-			if (!response.data.data) {
+			if (!response.data?.data) {
 				console.warn("UserTicketTransactionTable - No data field in response:", response.data);
 				return { data: [] };
 			}
 			
 			return response.data;
 		} catch (error: any) {
-			console.error("UserTicketTransactionTable - Fetch error:", error.response?.data || error.message);
-			throw error;
+			console.error("UserTicketTransactionTable - Fetch error:", {
+				message: error.message,
+				status: error.response?.status,
+				data: error.response?.data
+			});
+			// Return empty data on error instead of throwing
+			return { data: [] };
 		}
 	};
 
 	const query = useQuery({
-		queryKey: ["qUserOrder", activeTab],
+		queryKey: ["qUserTicketOrder", activeTab, isVendor, session?.user?.documentId, session?.user?.email],
 		queryFn: getQuery,
 		staleTime: 5000,
-		enabled: !!session,
-		retry: 3,
+		enabled: !!session && (isVendor ? !!session.user?.documentId : !!session.user?.email),
+		retry: 1,
 	});
 
 	const dataContent: iOrderTicket[] = React.useMemo(() => {
-		if (!query.data?.data) return [];
+		if (!query.data?.data || query.data.data.length === 0) {
+			console.log("UserTicketTransactionTable - No data to display");
+			return [];
+		}
 
 		return query.data.data.map((item: any): iOrderTicket => {
 			const attr = item.attributes;
@@ -75,6 +87,12 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 			// NEW STRUCTURE: products is a JSON field with array
 			const productsData = attr.products || [];
 			const mainProduct = productsData?.[0];
+			
+			console.log("UserTicketTransactionTable - Processing item:", {
+				id: item.id,
+				product: mainProduct?.product_name,
+				recipients: mainProduct?.recipients?.length || 0
+			});
 			
 			// Extract recipients from main product
 			const recipients = (mainProduct?.recipients || []).map((recipient: any) => ({
@@ -121,14 +139,26 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 				// Recipients from products data
 				recipients: recipients,
 			};
-		});
+		}).filter(item => item !== null && item !== undefined); // Filter out any nulls
 	}, [query.data]);
 
 	if (query.isLoading) {
 		return <Skeleton width="100%" height="150px" />;
 	}
 	if (query.isError) {
-		return <ErrorNetwork style="mt-0" />;
+		console.error("UserTicketTransactionTable - Query error:", query.error);
+		return (
+			<div className="bg-red-50 border border-red-200 rounded-lg p-4">
+				<p className="text-red-600 font-semibold">Error memuat data pesanan tiket</p>
+				<p className="text-sm text-red-500 mt-1">Silakan coba refresh halaman atau hubungi support</p>
+				<details className="mt-2 text-xs text-red-500">
+					<summary className="cursor-pointer">Detail error</summary>
+					<pre className="mt-1 p-2 bg-red-100 rounded text-red-700 overflow-auto">
+						{JSON.stringify(query.error, null, 2)}
+					</pre>
+				</details>
+			</div>
+		);
 	}
 
 	const toggleRow = (id: number) => {
