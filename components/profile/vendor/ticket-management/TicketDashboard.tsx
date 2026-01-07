@@ -19,119 +19,108 @@ export const TicketDashboard: React.FC = () => {
 	const getTicketSummary = async () => {
 		if (!session?.jwt || !session?.user?.documentId) return [];
 		try {
-			// 1. Fetch all products for the vendor that are in the 'ticket' user_event_type
-			console.log("Fetching vendor's ticket products...");
-			const productsResponse = await axiosUser(
-				"GET",
-				`/api/products?filters[vendor][id][$eq]=${session.user.documentId}&filters[user_event_type][name][$in]=Ticket&filters[user_event_type][name][$in]=ticket&populate[main_image]=*&populate[variants]=*`,
-				session.jwt
-			);
-			const vendorProducts = productsResponse.data.data;
-			console.log("Vendor's ticket products:", vendorProducts);
-
-			// 2. Fetch all transactions for the vendor to aggregate sales data
-			console.log("Fetching transactions for ticket summary...");
+			// 1. Fetch all ticket transactions for this vendor using unified endpoint
+			console.log("Fetching vendor's ticket transactions...");
+			const filterParam = `filters[vendor_doc_id][$eq]=${session.user.documentId}&filters[event_type][$eq]=ticket`;
 			const transactionsResponse = await axiosUser(
 				"GET",
-				`/api/transactions?filters[vendor_doc_id][$eq]=${session.user.documentId}&populate[order_items][populate]=product,variant`,
+				`/api/transaction-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=1000`,
 				session.jwt
 			);
-			const transactions = transactionsResponse.data; // Assuming .data contains the array
-			console.log("Raw API response for transactions:", transactions);
+			
+			const transactions = transactionsResponse.data?.data || [];
+			console.log("Vendor's ticket transactions:", transactions);
 
-			// 3. Initialize productsMap with all ticket products from this vendor
+			// 2. Initialize productsMap to aggregate data by product
 			const productsMap = new Map<string, any>();
-			vendorProducts.forEach((productData: any) => {
-				const productId = productData.id;
-				productsMap.set(productId.toString(), {
-					id: productId,
-					title: productData.attributes.title,
-					image: productData.attributes.main_image?.data?.[0]?.attributes?.url || "",
-					variants: new Map<string, any>(),
-				});
 
-				const productVariants = productData.attributes.variants?.data || [];
-				productVariants.forEach((variantData: any) => {
-					const variantId = variantData.id;
-					const variantDetails = variantData.attributes;
-					productsMap.get(productId.toString()).variants.set(variantId.toString(), {
-						id: variantId,
-						name: variantDetails.name,
-						quota: parseInt(variantDetails.quota) || 0,
-						price: parseFloat(variantDetails.price) || 0,
-						sold: 0,
-						verified: 0, // TODO: Cannot calculate verified status from /api/transactions yet.
+			// 3. Process each transaction to aggregate sales data
+			transactions.forEach((transaction: any) => {
+				const attrs = transaction.attributes;
+				const products = attrs.products || [];
+
+				products.forEach((product: any) => {
+					// Only process ticket products
+					if (product.product_type !== 'ticket') return;
+
+					const productId = product.product_id;
+					
+					// Initialize product entry if not exists
+					if (!productsMap.has(productId)) {
+						productsMap.set(productId, {
+							id: productId,
+							title: product.title || "Tiket Tanpa Nama",
+							image: product.image_url || "",
+							variants: new Map<string, any>(),
+							totalSold: 0,
+							totalRevenue: 0,
+						});
+					}
+
+					const currentProduct = productsMap.get(productId);
+					const variantId = product.variant_id || "default";
+					const quantity = product.quantity || 1;
+					const price = parseFloat(product.price) || 0;
+
+					// Initialize variant entry if not exists
+					if (!currentProduct.variants.has(variantId)) {
+						currentProduct.variants.set(variantId, {
+							id: variantId,
+							name: product.variant_name || "Default",
+							price: price,
+							quota: 0, // Not available in transaction data
+							sold: 0,
+							verified: 0,
+						});
+					}
+
+					// Update variant sales
+					const variant = currentProduct.variants.get(variantId);
+					variant.sold += quantity;
+					currentProduct.totalSold += quantity;
+
+					// Calculate revenue
+					const systemFeePercentage = 10; // 10%
+					const netIncome = price * quantity * (1 - systemFeePercentage / 100);
+					currentProduct.totalRevenue += netIncome;
+
+					// Count verified tickets from recipients
+					const recipients = product.recipients || [];
+					recipients.forEach((recipient: any) => {
+						if (recipient.verification_status === 'verified' || recipient.verification_status === 'Verified') {
+							variant.verified += 1;
+						}
 					});
 				});
 			});
 
-			// 4. Aggregate sales data from transactions
-			if (transactions && Array.isArray(transactions)) {
-				transactions.forEach((transaction: any) => {
-					const orderItems = transaction.attributes.order_items?.data || [];
-					orderItems.forEach((item: any) => {
-						const product = item.attributes.product?.data;
-						const variant = item.attributes.variant?.data;
-
-						if (!product || !variant) {
-							console.warn("Skipping order item due to missing product or variant data:", item);
-							return;
-						}
-
-						const productId = product.id.toString();
-						const variantId = variant.id.toString();
-
-						const currentProduct = productsMap.get(productId);
-						// Only aggregate for ticket products owned by the vendor
-						if (!currentProduct) return;
-
-						const currentVariant = currentProduct.variants.get(variantId);
-						if (!currentVariant) return;
-
-						currentVariant.sold += item.attributes.quantity || 0;
-						
-						// The 'verified' count cannot be calculated from the main transaction endpoint yet.
-						// This will require backend changes to include recipient/verification status in the /api/transactions response.
-					});
-				});
-			}
-
-			console.log("productsMap after aggregation:", productsMap);
-
-			// 5. Format the final data structure
+			// 4. Format the final data structure
 			const finalTicketData = Array.from(productsMap.values()).map((product: any) => {
 				const variants: iVariantSummary[] = Array.from(product.variants.values()).map((variant: any) => {
-					const quota = variant.quota;
-					const sold = variant.sold;
-					const price = variant.price;
-					const verified = variant.verified; // Will be 0 for now
-					const systemFeePercentage = 10; // 10%
-					const netIncome = price * sold * (1 - systemFeePercentage / 100);
+					const systemFeePercentage = 10;
+					const netIncome = variant.price * variant.sold * (1 - systemFeePercentage / 100);
 
 					return {
 						variant_id: variant.id,
 						variant_name: variant.name || "Default",
-						price: price,
-						quota: quota,
-						sold: sold,
-						verified: verified,
-						remaining: Math.max(0, quota - sold),
-						soldPercentage: quota > 0 ? (sold / quota) * 100 : 0,
+						price: variant.price,
+						quota: variant.quota || 0,
+						sold: variant.sold,
+						verified: variant.verified,
+						remaining: Math.max(0, (variant.quota || 0) - variant.sold),
+						soldPercentage: (variant.quota || 0) > 0 ? (variant.sold / (variant.quota || 1)) * 100 : 0,
 						netIncome: netIncome,
 						systemFeePercentage: systemFeePercentage,
 					};
 				});
-
-				const totalTicketsSold = variants.reduce((sum: number, v) => sum + v.sold, 0);
-				const totalRevenue = variants.reduce((sum: number, v) => sum + v.netIncome, 0);
 
 				return {
 					product_id: product.id,
 					product_title: product.title || "Tiket Tanpa Nama",
 					product_image: product.image || "",
 					variants: variants,
-					totalRevenue: totalRevenue,
-					totalTicketsSold: totalTicketsSold,
+					totalRevenue: product.totalRevenue,
+					totalTicketsSold: product.totalSold,
 				};
 			});
 

@@ -94,6 +94,13 @@ export default function DashboardLayout({
 								link="/user/vendor/add-product"
 							/>
 							<ItemMenu
+								title="Manajemen Pesanan"
+								icon="/images/mng-order.svg"
+								iconWidth={30}
+								iconHeight={30}
+								link="/user/vendor/equipment-orders"
+							/>
+							<ItemMenu
 								title="Informasi Transaksi"
 								icon="/images/icon-order.svg"
 								iconWidth={30}

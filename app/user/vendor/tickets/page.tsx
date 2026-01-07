@@ -3,7 +3,7 @@
 import Box from "@/components/Box";
 import { UserTransactionTable } from "@/components/profile/UserTransactionTable";
 import { TicketDashboard } from "@/components/profile/vendor/ticket-management/TicketDashboard";
-import { TicketScan } from "@/components/profile/vendor/ticket-management/TicketScan";
+import { TicketVerification } from "@/components/profile/vendor/ticket-management/TicketVerification";
 import { TicketSend } from "@/components/profile/vendor/ticket-management/TicketSend";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import React, { useState } from "react";
@@ -17,14 +17,14 @@ export default function TicketManagementPage() {
 			<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
 				<TabsList className="grid w-full grid-cols-3">
 					<TabsTrigger value="dashboard">Dashboard Ticket</TabsTrigger>
-					<TabsTrigger value="scan">Scan Tiket</TabsTrigger>
+					<TabsTrigger value="verification">Verifikasi Tiket</TabsTrigger>
 					<TabsTrigger value="send">Kirim Undangan Tiket</TabsTrigger>
 				</TabsList>
 				<TabsContent value="dashboard" className="mt-6">
 					<TicketDashboard />
 				</TabsContent>
-				<TabsContent value="scan" className="mt-6">
-					<TicketScan />
+				<TabsContent value="verification" className="mt-6">
+					<TicketVerification />
 				</TabsContent>
 				<TabsContent value="send" className="mt-6">
 					<TicketSend />
