@@ -7,14 +7,19 @@ import { EquipmentDashboard } from "./vendor/equipment-management/EquipmentDashb
 
 interface iOrdersBaseContentProps {
 	isVendor: boolean;
+	orderTypeFilter?: 'equipment' | 'ticket' | 'all';
 }
-export const OrdersBaseContent: React.FC<iOrdersBaseContentProps> = ({ isVendor }) => {
-	const [activeTab, setActiveTab] = useState<string>("general");
+export const OrdersBaseContent: React.FC<iOrdersBaseContentProps> = ({ isVendor, orderTypeFilter = 'all' }) => {
+	const [activeTab, setActiveTab] = useState<string>(orderTypeFilter === 'equipment' ? 'general' : orderTypeFilter === 'ticket' ? 'tickets' : 'general');
+
+	// Determine which tabs to show based on orderTypeFilter
+	const showGeneralTab = orderTypeFilter === 'equipment' || orderTypeFilter === 'all';
+	const showTicketsTab = orderTypeFilter === 'ticket' || orderTypeFilter === 'all';
 
 	return (
 		<>
 			<Box>
-				<Tabs defaultValue="general" value={activeTab} onValueChange={setActiveTab}>
+				<Tabs defaultValue={orderTypeFilter === 'equipment' ? 'general' : orderTypeFilter === 'ticket' ? 'tickets' : 'general'} value={activeTab} onValueChange={setActiveTab}>
 					{/* {isVendor && (
 						<div className="mb-8">
 							<EquipmentDashboard />
@@ -22,7 +27,7 @@ export const OrdersBaseContent: React.FC<iOrdersBaseContentProps> = ({ isVendor 
 					)} */}
 					<div className="flex items-center justify-between mb-4">
 						<h4 className="text-black text-[14px] lg:text-[17px] font-extrabold">Data Pesanan</h4>
-						{isVendor && (
+						{isVendor && (showGeneralTab && showTicketsTab) && (
 							<TabsList className="grid w-[400px] grid-cols-2">
 								<TabsTrigger value="general">Pesanan Umum</TabsTrigger>
 								<TabsTrigger value="tickets">Pesanan Tiket</TabsTrigger>
@@ -30,11 +35,13 @@ export const OrdersBaseContent: React.FC<iOrdersBaseContentProps> = ({ isVendor 
 						)}
 					</div>
 
-					<TabsContent value="general">
-						<UserTransactionTable isVendor={isVendor} activeTab={activeTab} orderTypeFilter="equipment" />
-					</TabsContent>
+					{showGeneralTab && (
+						<TabsContent value="general">
+							<UserTransactionTable isVendor={isVendor} activeTab={activeTab} orderTypeFilter={orderTypeFilter === 'all' || orderTypeFilter === 'equipment' ? 'equipment' : 'all'} />
+						</TabsContent>
+					)}
 
-					{isVendor && (
+					{showTicketsTab && isVendor && (
 						<TabsContent value="tickets">
 							<UserTicketTransactionTable isVendor={isVendor} activeTab={activeTab} />
 						</TabsContent>
