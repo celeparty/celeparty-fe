@@ -104,29 +104,65 @@ export async function GET(req: NextRequest) {
 		const url = new URL(req.url);
 		const searchParams = url.searchParams;
 
-		// Hardcoded populate string to ensure all necessary relations are fetched
-		searchParams.set('populate', '*');
+		// Set populate to get all relations
+		if (!searchParams.has('populate')) {
+			searchParams.set('populate', '*');
+		}
 
-		const STRAPI_URL = `${
-			process.env.BASE_API
-		}/api/transactions?${searchParams.toString()}`;
+		const strapiUrl = `${process.env.BASE_API}/api/transactions?${searchParams.toString()}`;
+		console.log("[TransactionProxy GET] URL:", strapiUrl);
 
 		const KEY_API = process.env.KEY_API;
 		if (!KEY_API) {
-			return NextResponse.json({ error: "KEY_API not set in environment" }, { status: 500 });
+			console.error("[TransactionProxy GET] KEY_API not set");
+			return NextResponse.json(
+				{ error: "API key not configured", statusCode: 500 },
+				{ status: 500 }
+			);
 		}
-		const strapiRes = await fetch(STRAPI_URL, {
+
+		const strapiRes = await fetch(strapiUrl, {
 			method: "GET",
 			headers: {
 				Authorization: `Bearer ${KEY_API}`,
+				"Content-Type": "application/json",
 			},
 		});
+
 		const data = await strapiRes.json();
+		console.log("[TransactionProxy GET] Status:", strapiRes.status);
+		console.log("[TransactionProxy GET] Response data count:", data?.data?.length || 0);
+
 		if (!strapiRes.ok) {
-			return NextResponse.json({ error: data.error || data }, { status: strapiRes.status });
+			console.error("[TransactionProxy GET] Error response:", data);
+			return NextResponse.json(
+				{
+					error: data.error?.message || data.message || "Failed to fetch transactions",
+					details: data.error || data,
+					statusCode: strapiRes.status,
+				},
+				{ status: strapiRes.status }
+			);
 		}
+
+		// Ensure response has proper structure
+		if (!data.data) {
+			console.warn("[TransactionProxy GET] Response missing data field");
+			return NextResponse.json({
+				data: [],
+				meta: { pagination: { total: 0, page: 1, pageSize: 25, pageCount: 0 } },
+			});
+		}
+
 		return NextResponse.json(data);
 	} catch (err: any) {
-		return NextResponse.json({ error: err.message || "Unknown error" }, { status: 500 });
+		console.error("[TransactionProxy GET] Exception:", err.message);
+		return NextResponse.json(
+			{
+				error: err.message || "Unknown error occurred",
+				statusCode: 500,
+			},
+			{ status: 500 }
+		);
 	}
 }

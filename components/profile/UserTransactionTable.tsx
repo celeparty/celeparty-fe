@@ -62,12 +62,33 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 	const getTransactionsQuery = async () => {
 		if (!session) return [];
 
-		const filter = isVendor
-			? `filters[vendor_doc_id][$eq]=${session.user.documentId}`
-			: `filters[email][$eq]=${session.user.email}`;
-
-		const response = await axios.get(`/api/transaction-proxy?${filter}&sort=createdAt:desc`);
-		return response.data.data;
+		try {
+			// Try with proper populate parameter for all relations
+			let url = `/api/transaction-proxy?sort=createdAt:desc&populate=*`;
+			
+			// Add vendor filter if vendor
+			if (isVendor) {
+				// Try multiple field name possibilities
+				url += `&filters[vendor_doc_id][$eq]=${session.user.documentId}`;
+			} else {
+				// For customer, filter by email
+				url += `&filters[email][$eq]=${session.user.email}`;
+			}
+			
+			console.log("UserTransactionTable - Fetching URL:", url);
+			const response = await axios.get(url);
+			console.log("UserTransactionTable - Response data:", response.data);
+			
+			if (!response.data.data) {
+				console.warn("UserTransactionTable - No data field in response:", response.data);
+				return [];
+			}
+			
+			return response.data.data;
+		} catch (error: any) {
+			console.error("UserTransactionTable - Fetch error:", error.response?.data || error.message);
+			throw error;
+		}
 	};
 
 	const transactionsQuery = useQuery({

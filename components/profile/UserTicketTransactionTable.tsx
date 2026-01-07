@@ -28,15 +28,34 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 	const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
 
 	const getQuery = async () => {
-		// Use unified transaction-proxy endpoint instead of separate transaction-tickets-proxy
-		const filterParam = isVendor
-			? `filters[vendor_doc_id][$eq]=${session?.user?.documentId}&filters[event_type][$eq]=ticket`
-			: `filters[email][$eq]=${session?.user?.email}&filters[event_type][$eq]=ticket`;
-		
-		const response = await axios.get(
-			`/api/transaction-proxy?${filterParam}&sort=createdAt:desc`,
-		);
-		return response.data;
+		try {
+			// Use unified transaction-proxy endpoint with proper filters
+			let filterParam = '';
+			
+			if (isVendor) {
+				// For vendor, filter by vendor_doc_id and event_type=ticket
+				filterParam = `filters[vendor_doc_id][$eq]=${session?.user?.documentId}&filters[event_type][$eq]=ticket`;
+			} else {
+				// For customer, filter by email and event_type=ticket
+				filterParam = `filters[email][$eq]=${session?.user?.email}&filters[event_type][$eq]=ticket`;
+			}
+			
+			const url = `/api/transaction-proxy?${filterParam}&sort=createdAt:desc&populate=*`;
+			console.log("UserTicketTransactionTable - Fetching URL:", url);
+			
+			const response = await axios.get(url);
+			console.log("UserTicketTransactionTable - Response data:", response.data);
+			
+			if (!response.data.data) {
+				console.warn("UserTicketTransactionTable - No data field in response:", response.data);
+				return { data: [] };
+			}
+			
+			return response.data;
+		} catch (error: any) {
+			console.error("UserTicketTransactionTable - Fetch error:", error.response?.data || error.message);
+			throw error;
+		}
 	};
 
 	const query = useQuery({
