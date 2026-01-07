@@ -94,52 +94,57 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 
 	const allTransactions = transactionsQuery.data || [];
 	let dataContent: TransactionItem[] = allTransactions.map((transaction: any) => {
-		const mainItem = transaction.attributes.order_items?.data?.[0]?.attributes;
-		const product = mainItem?.product?.data?.attributes;
-		const productType = product?.user_event_type?.data?.attributes?.name?.toLowerCase();
-		const isTicket = productType === 'ticket' || productType === 'tiket';
-
+		// Handle both new flat structure and old nested structure
+		const attrs = transaction.attributes;
+		
+		// NEW STRUCTURE: products is a JSON field with array of product objects
+		const productsData = attrs.products || [];
+		const isTicket = attrs.event_type === 'ticket' || productsData.some((p: any) => p.product_type === 'ticket');
+		
 		// Reconstruct products list for display
-		const productsList = transaction.attributes.order_items?.data?.map((item: any) => ({
-			id: item.attributes.product?.data?.id,
-			title: item.attributes.product?.data?.attributes?.title,
+		const productsList = productsData.map((item: any) => ({
+			id: item.product_id || item.id,
+			title: item.product_name || item.name,
 		})) || [];
+		
+		// Get first product for details
+		const mainProduct = productsData?.[0];
 
 		return {
 			id: transaction.id,
-			createdAt: transaction.attributes.createdAt,
-			payment_status: transaction.attributes.payment_status,
-			order_id: transaction.attributes.order_id,
-			customer_name: transaction.attributes.customer_name,
-			telp: transaction.attributes.telp,
-			email: transaction.attributes.email,
-			shipping_location: transaction.attributes.shipping_location,
-			event_date: transaction.attributes.event_date,
-			loading_date: transaction.attributes.loading_date,
-			loading_time: transaction.attributes.loading_time,
-			note: transaction.attributes.note,
-			quantity: transaction.attributes.quantity,
-			unit_price: mainItem?.price,
-			total_payment: transaction.attributes.total_payment || transaction.attributes.total,
-			payment_date: transaction.attributes.payment_date,
+			createdAt: attrs.createdAt,
+			payment_status: attrs.payment_status,
+			order_id: attrs.order_id,
+			customer_name: attrs.customer_name,
+			telp: attrs.telp,
+			email: attrs.email,
+			shipping_location: attrs.shipping_location,
+			event_date: attrs.event_date,
+			loading_date: attrs.loading_date,
+			loading_time: attrs.loading_time,
+			note: attrs.note,
+			quantity: mainProduct?.quantity || 1,
+			unit_price: mainProduct?.price || 0,
+			total_payment: attrs.total || 0,
+			payment_date: attrs.payment_date,
 			products: productsList,
-			recipients: transaction.attributes.recipients, // Assuming backend provides this
+			recipients: mainProduct?.recipients || attrs.recipients || [], // Recipients from products data
 			transaction_type: isTicket ? 'ticket' : 'equipment',
-			// Detailed product and variant info for expansion
+			// Detailed product info for expansion (simplified since we don't have full product details in flat structure)
 			product: isTicket ? {
-				id: mainItem?.product?.data?.id,
-				title: product?.title,
-				image: product?.main_image?.data?.[0]?.attributes?.url,
-				event_date: product?.event_date,
-				event_end_date: product?.end_date,
-				event_time: product?.waktu_event,
-				location: product?.lokasi_event,
-				city: product?.kota_event,
+				id: mainProduct?.product_id,
+				title: mainProduct?.product_name,
+				image: mainProduct?.image, // Assuming image URL is stored
+				event_date: attrs.event_date,
+				event_end_date: attrs.event_date, // May need to get from full product data
+				event_time: '', // Data not in flat structure
+				location: '', // Data not in flat structure
+				city: '', // Data not in flat structure
 			} : null,
 			variant: isTicket ? {
-				id: mainItem?.variant?.data?.id,
-				name: mainItem?.variant?.data?.attributes?.name,
-				price: mainItem?.variant?.data?.attributes?.price,
+				id: mainProduct?.variant || '',
+				name: mainProduct?.variant || '',
+				price: mainProduct?.price || 0,
 			} : null,
 		};
 	});

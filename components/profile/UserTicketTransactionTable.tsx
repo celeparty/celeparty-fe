@@ -28,11 +28,13 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 	const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
 
 	const getQuery = async () => {
+		// Use unified transaction-proxy endpoint instead of separate transaction-tickets-proxy
 		const filterParam = isVendor
-			? `[vendor_id][$eq]=${session?.user?.documentId}`
-			: `[customer_mail][$eq]=${session?.user?.email}`;
+			? `filters[vendor_doc_id][$eq]=${session?.user?.documentId}&filters[event_type][$eq]=ticket`
+			: `filters[email][$eq]=${session?.user?.email}&filters[event_type][$eq]=ticket`;
+		
 		const response = await axios.get(
-			`/api/transaction-tickets-proxy?filters${filterParam}&sort=createdAt:desc`,
+			`/api/transaction-proxy?${filterParam}&sort=createdAt:desc`,
 		);
 		return response.data;
 	};
@@ -50,19 +52,21 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 
 		return query.data.data.map((item: any): iOrderTicket => {
 			const attr = item.attributes;
-			// Safely access nested product and event type attributes
-			const productAttr = attr.product?.data?.attributes;
-			const eventTypeAttr = productAttr?.user_event_type?.data?.attributes;
-
-			const recipients = attr.recipients?.data?.map((recipient: any) => ({
-				id: recipient.id,
-				name: recipient.attributes.name,
-				email: recipient.attributes.email,
-				telp: recipient.attributes.telp,
-				identity_type: recipient.attributes.identity_type,
-				identity_number: recipient.attributes.identity_number,
-				ticket_code: recipient.attributes.ticket_code,
-				status: recipient.attributes.status,
+			
+			// NEW STRUCTURE: products is a JSON field with array
+			const productsData = attr.products || [];
+			const mainProduct = productsData?.[0];
+			
+			// Extract recipients from main product
+			const recipients = (mainProduct?.recipients || []).map((recipient: any) => ({
+				id: recipient.id || Math.random().toString(),
+				name: recipient.name || '',
+				email: recipient.email || '',
+				telp: recipient.whatsapp_number || recipient.phone || recipient.telp || '',
+				identity_type: recipient.identity_type || '',
+				identity_number: recipient.identity_number || '',
+				ticket_code: recipient.ticket_code || '',
+				status: recipient.status || 'pending',
 			})) || [];
 
 			return {
@@ -70,32 +74,32 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 				documentId: item.id.toString(),
 				createdAt: attr.createdAt,
 				updatedAt: attr.updatedAt,
-				publishedAt: attr.publishedAt,
-				product_name: attr.product_name,
-				price: attr.price,
-				quantity: attr.quantity,
-				variant: attr.variant,
-				customer_name: attr.customer_name,
-				telp: attr.telp,
-				total_price: attr.total_price,
-				payment_status: attr.payment_status,
-				event_date: attr.event_date,
-				note: attr.note,
-				order_id: attr.order_id,
-				customer_mail: attr.customer_mail,
-				verification: attr.verification,
-				vendor_id: attr.vendor_id,
-				event_type: attr.event_type,
-				waktu_event: attr.waktu_event,
+				publishedAt: attr.createdAt, // Use createdAt as publishedAt for new structure
+				product_name: mainProduct?.product_name || attr.product_name || '',
+				price: mainProduct?.price || 0,
+				quantity: mainProduct?.quantity || 1,
+				variant: mainProduct?.variant || '',
+				customer_name: attr.customer_name || '',
+				telp: attr.telp || '',
+				total_price: attr.total || 0,
+				payment_status: attr.payment_status || 'pending',
+				event_date: attr.event_date || '',
+				note: attr.note || '',
+				order_id: attr.order_id || '',
+				customer_mail: attr.email || '',
+				verification: attr.verification || false,
+				vendor_id: attr.vendor_doc_id || '',
+				event_type: attr.event_type || 'ticket',
+				waktu_event: mainProduct?.event_time || '',
 				transaction_type: "ticket",
 
-				// Flattened from related product/event type
-				event_city: eventTypeAttr?.event_city,
-				event_location: eventTypeAttr?.event_location,
-				event_end_date: eventTypeAttr?.event_end_date,
-				event_end_time: eventTypeAttr?.event_end_time,
+				// Event/Product details
+				event_city: mainProduct?.city || '',
+				event_location: mainProduct?.location || '',
+				event_end_date: attr.event_date, // New structure doesn't have separate end_date
+				event_end_time: mainProduct?.event_end_time || '',
 				
-				// Mapped recipients
+				// Recipients from products data
 				recipients: recipients,
 			};
 		});
