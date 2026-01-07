@@ -81,7 +81,7 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 			return [];
 		}
 
-		return query.data.data.map((item: any): iOrderTicket => {
+		const mappedItems: iOrderTicket[] = query.data.data.map((item: any): iOrderTicket => {
 			const attr = item.attributes;
 			
 			// NEW STRUCTURE: products is a JSON field with array
@@ -139,7 +139,9 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 				// Recipients from products data
 				recipients: recipients,
 			};
-		}).filter(item => item !== null && item !== undefined); // Filter out any nulls
+		});
+
+		return mappedItems;
 	}, [query.data]);
 
 	if (query.isLoading) {
