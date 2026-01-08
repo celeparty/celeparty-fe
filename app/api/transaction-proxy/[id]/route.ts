@@ -11,7 +11,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 		}
 
 		// BASE_API already includes /api, so don't add it again
-		const STRAPI_URL = `${process.env.BASE_API}/transactions/${id}`;
+		const STRAPI_URL = `${process.env.BASE_API}/transaction/${id}`;
 		const KEY_API = process.env.KEY_API;
 
 		if (!KEY_API) {
