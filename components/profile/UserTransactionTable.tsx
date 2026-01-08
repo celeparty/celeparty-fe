@@ -129,9 +129,8 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 		// Handle both new flat structure and old nested structure
 		const attrs = transaction.attributes;
 		
-		// NEW STRUCTURE: products is a JSON field with array of product objects
+		// EQUIPMENT TRANSACTIONS STRUCTURE: products is a JSON field with array of product objects
 		const productsData = attrs.products || [];
-		const isTicket = attrs.event_type === 'ticket' || productsData.some((p: any) => p.product_type === 'ticket');
 		
 		// Reconstruct products list for display
 		const productsList = productsData.map((item: any) => ({
@@ -141,6 +140,22 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 		
 		// Get first product for details
 		const mainProduct = productsData?.[0];
+		
+		// Calculate total from products (since there's no total field)
+		// Sum up (price * quantity) for each product
+		const totalPayment = productsData.reduce((sum: number, product: any) => {
+			const price = parseFloat(product.price || 0);
+			const qty = parseFloat(product.quantity || 1);
+			return sum + (price * qty);
+		}, 0);
+
+		console.log("UserTransactionTable - Processing equipment transaction:", {
+			id: transaction.id,
+			order_id: attrs.order_id,
+			vendor_doc_id: attrs.vendor_doc_id,
+			products_count: productsData.length,
+			total_calculated: totalPayment
+		});
 
 		return {
 			id: transaction.id,
@@ -157,26 +172,26 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 			note: attrs.note,
 			quantity: mainProduct?.quantity || 1,
 			unit_price: mainProduct?.price || 0,
-			total_payment: attrs.total || 0,
+			total_payment: totalPayment,  // ✅ Calculated from products JSON
 			payment_date: attrs.payment_date,
 			products: productsList,
-			recipients: mainProduct?.recipients || attrs.recipients || [], // Recipients from products data
-			transaction_type: isTicket ? 'ticket' : 'equipment',
-			// Detailed product info for expansion (simplified since we don't have full product details in flat structure)
-			product: isTicket ? {
-				id: mainProduct?.product_id,
-				title: mainProduct?.product_name,
-				image: mainProduct?.image, // Assuming image URL is stored
+			recipients: mainProduct?.recipients || attrs.recipients || [],
+			transaction_type: attrs.event_type === 'ticket' ? 'ticket' : 'equipment',
+			// Detailed product info for expansion
+			product: attrs.product ? {
+				id: attrs.product?.id,
+				title: mainProduct?.product_name || attrs.product?.attributes?.title || 'Produk',
+				image: mainProduct?.image,
 				event_date: attrs.event_date,
-				event_end_date: attrs.event_date, // May need to get from full product data
-				event_time: '', // Data not in flat structure
-				location: '', // Data not in flat structure
-				city: '', // Data not in flat structure
+				event_end_date: attrs.event_date,
+				event_time: '',
+				location: attrs.shipping_location || '',
+				city: '',
 			} : null,
-			variant: isTicket ? {
+			variant: mainProduct ? {
 				id: mainProduct?.variant || '',
 				name: mainProduct?.variant || '',
-				price: mainProduct?.price || 0,
+				price: parseFloat(mainProduct?.price || 0),
 			} : null,
 		};
 	});

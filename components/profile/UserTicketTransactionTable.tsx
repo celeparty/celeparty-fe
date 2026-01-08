@@ -91,18 +91,8 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 		const mappedItems: iOrderTicket[] = query.data.data.map((item: any): iOrderTicket => {
 			const attr = item.attributes;
 			
-			// NEW STRUCTURE: products is a JSON field with array
-			const productsData = attr.products || [];
-			const mainProduct = productsData?.[0];
-			
-			console.log("UserTicketTransactionTable - Processing item:", {
-				id: item.id,
-				product: mainProduct?.product_name,
-				recipients: mainProduct?.recipients?.length || 0
-			});
-			
-			// Extract recipients from main product
-			const recipients = (mainProduct?.recipients || []).map((recipient: any) => ({
+			// CORRECT STRUCTURE: Transaction-ticket has recipients as JSON and product as relation
+			const recipients = (attr.recipients || []).map((recipient: any) => ({
 				id: recipient.id || Math.random().toString(),
 				name: recipient.name || '',
 				email: recipient.email || '',
@@ -113,37 +103,49 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 				status: recipient.status || 'pending',
 			})) || [];
 
+			// Get product details from relation
+			const productData = attr.product?.data?.attributes || {};
+			const productRelation = attr.product?.data || {};
+
+			console.log("UserTicketTransactionTable - Processing item:", {
+				id: item.id,
+				product_name: attr.product_name,
+				recipients_count: recipients.length,
+				vendor_id: attr.vendor_id,
+				raw_attr: attr
+			});
+
 			return {
 				id: item.id,
 				documentId: item.id.toString(),
 				createdAt: attr.createdAt,
 				updatedAt: attr.updatedAt,
-				publishedAt: attr.createdAt, // Use createdAt as publishedAt for new structure
-				product_name: mainProduct?.product_name || attr.product_name || '',
-				price: mainProduct?.price || 0,
-				quantity: mainProduct?.quantity || 1,
-				variant: mainProduct?.variant || '',
+				publishedAt: attr.createdAt,
+				product_name: attr.product_name || productData?.title || '',
+				price: attr.price || 0,
+				quantity: attr.quantity || 1,
+				variant: attr.variant || '',
 				customer_name: attr.customer_name || '',
 				telp: attr.telp || '',
-				total_price: attr.total || 0,
+				total_price: attr.total_price || 0,
 				payment_status: attr.payment_status || 'pending',
-				event_date: attr.event_date || '',
+				event_date: attr.event_date || productData?.event_date || '',
 				note: attr.note || '',
 				order_id: attr.order_id || '',
-				customer_mail: attr.email || '',
+				customer_mail: attr.customer_mail || '',
 				verification: attr.verification || false,
-				vendor_id: attr.vendor_doc_id || '',
+				vendor_id: attr.vendor_id || '',
 				event_type: attr.event_type || 'ticket',
-				waktu_event: mainProduct?.event_time || '',
+				waktu_event: productData?.waktu_event || '',
 				transaction_type: "ticket",
 
-				// Event/Product details
-				event_city: mainProduct?.city || '',
-				event_location: mainProduct?.location || '',
-				event_end_date: attr.event_date, // New structure doesn't have separate end_date
-				event_end_time: mainProduct?.event_end_time || '',
+				// Event/Product details from product relation
+				event_city: productData?.kota_event || '',
+				event_location: productData?.lokasi_event || '',
+				event_end_date: productData?.end_date || attr.event_date,
+				event_end_time: productData?.end_time || '',
 				
-				// Recipients from products data
+				// Recipients from transaction
 				recipients: recipients,
 			};
 		});
