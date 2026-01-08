@@ -1,47 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
 
 // Force dynamic rendering for this route
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
 	try {
-		const { search } = new URL(req.url);
 		const url = new URL(req.url);
 		const searchParams = url.searchParams;
 
-		// Extract JWT from Authorization header
-		const authorizationHeader = req.headers.get("Authorization");
-		if (!authorizationHeader || !authorizationHeader.startsWith("Bearer ")) {
-			return NextResponse.json({ error: "Unauthorized: Missing or invalid Authorization header" }, { status: 401 });
-		}
-		const token = authorizationHeader.substring(7); // Remove "Bearer "
-
-		// Decode JWT to get user ID
-		let userId: string | undefined;
-		try {
-			const decodedToken: any = jwt.decode(token);
-			console.log("Decoded JWT Payload:", decodedToken); // Log decoded token
-			userId = decodedToken?.id || decodedToken?.user?.id; // Try 'id' or 'user.id'
-			if (!userId) {
-				return NextResponse.json({ error: "Unauthorized: User ID not found in token" }, { status: 401 });
-			}
-		} catch (decodeError) {
-			console.error("Error decoding JWT:", decodeError);
-			return NextResponse.json({ error: "Unauthorized: Invalid token" }, { status: 401 });
+		// Ensure populate=* is included to get all relations
+		if (!searchParams.has('populate')) {
+			searchParams.set('populate', '*');
 		}
 
-	// Ensure populate=* is included to get all relations
-	if (!searchParams.has('populate')) {
-		searchParams.set('populate', '*');
-	}
+		// Add filter for approved state (public endpoint - no JWT needed)
+		if (!searchParams.has('filters[state]')) {
+			searchParams.set('filters[state][$eq]', 'approved');
+		}
 
-	// Add filter for user ID - use the direct endpoint which is /api/tickets (not /api/products)
-	// The 'tickets' collection in Strapi is separate from 'products'
-	searchParams.set('filters[users_permissions_user][id][$eq]', userId);
-
-	const STRAPI_URL = `${process.env.BASE_API}/api/tickets?${searchParams.toString()}`;
-		console.log("Constructed Strapi URL:", STRAPI_URL); // Log constructed URL
+		const STRAPI_URL = `${process.env.BASE_API}/api/tickets?${searchParams.toString()}`;
+		console.log("Constructed Strapi URL for tickets:", STRAPI_URL);
 		const KEY_API = process.env.KEY_API;
 
 		if (!KEY_API) {

@@ -41,12 +41,15 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 			if (isVendor && session?.user?.documentId) {
 				// For vendor, filter by vendor_id
 				filterParam = `filters[vendor_id][$eq]=${session.user.documentId}`;
+				console.log("UserTicketTransactionTable - Vendor filter:", filterParam);
 			} else if (!isVendor && session?.user?.email) {
-				// For customer, filter by email
-				filterParam = `filters[email][$eq]=${session.user.email}`;
+				// For customer, filter by customer_mail (not email field in transaction-tickets)
+				filterParam = `filters[customer_mail][$eq]=${session.user.email}`;
+				console.log("UserTicketTransactionTable - Customer filter:", filterParam);
 			} else {
 				// No valid filter, return empty
 				console.warn("UserTicketTransactionTable - No valid filter params");
+				console.log("Session data:", { isVendor, documentId: session?.user?.documentId, email: session?.user?.email });
 				return { data: [] };
 			}
 			
