@@ -29,6 +29,12 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 
 	const getQuery = async () => {
 		try {
+			// Validate session first
+			if (!session?.jwt) {
+				console.warn("UserTicketTransactionTable - No JWT token in session");
+				return { data: [] };
+			}
+
 			// Use unified transaction-proxy endpoint with proper filters
 			let filterParam = '';
 			
@@ -47,7 +53,8 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 			const url = `/api/transaction-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=100`;
 			console.log("UserTicketTransactionTable - Fetching URL:", url);
 			
-			const response = await axios.get(url);
+			// Use axiosUser with JWT token instead of plain axios
+			const response = await axiosUser("GET", url, session.jwt);
 			console.log("UserTicketTransactionTable - Response data:", response.data);
 			
 			if (!response.data?.data) {
@@ -68,10 +75,10 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 	};
 
 	const query = useQuery({
-		queryKey: ["qUserTicketOrder", activeTab, isVendor, session?.user?.documentId, session?.user?.email],
+		queryKey: ["qUserTicketOrder", activeTab, isVendor, session?.user?.documentId, session?.user?.email, session?.jwt],
 		queryFn: getQuery,
 		staleTime: 5000,
-		enabled: !!session && (isVendor ? !!session.user?.documentId : !!session.user?.email),
+		enabled: !!session?.jwt && (isVendor ? !!session?.user?.documentId : !!session?.user?.email),
 		retry: 1,
 	});
 
