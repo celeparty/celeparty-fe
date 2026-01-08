@@ -35,22 +35,22 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 				return { data: [] };
 			}
 
-			// Use unified transaction-proxy endpoint with proper filters
+			// Use transaction-tickets endpoint for ticket data
 			let filterParam = '';
 			
 			if (isVendor && session?.user?.documentId) {
-				// For vendor, filter by vendor_doc_id and event_type=ticket
-				filterParam = `filters[vendor_doc_id][$eq]=${session.user.documentId}&filters[event_type][$eq]=ticket`;
+				// For vendor, filter by vendor_id
+				filterParam = `filters[vendor_id][$eq]=${session.user.documentId}`;
 			} else if (!isVendor && session?.user?.email) {
-				// For customer, filter by email and event_type=ticket
-				filterParam = `filters[email][$eq]=${session.user.email}&filters[event_type][$eq]=ticket`;
+				// For customer, filter by email
+				filterParam = `filters[email][$eq]=${session.user.email}`;
 			} else {
 				// No valid filter, return empty
 				console.warn("UserTicketTransactionTable - No valid filter params");
 				return { data: [] };
 			}
 			
-			const url = `/api/transaction-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=100`;
+			const url = `/api/transaction-tickets-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=100`;
 			console.log("UserTicketTransactionTable - Fetching URL:", url);
 			
 			// Use axiosUser with JWT token instead of plain axios

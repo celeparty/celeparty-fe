@@ -22,10 +22,10 @@ export const TicketDashboard: React.FC = () => {
 			return [];
 		}
 		try {
-			// 1. Fetch all ticket transactions for this vendor using unified endpoint
+			// 1. Fetch all ticket transactions using transaction-tickets endpoint (not transaction-proxy)
 			console.log("TicketDashboard - Fetching vendor's ticket transactions...");
-			const filterParam = `filters[vendor_doc_id][$eq]=${session.user.documentId}&filters[event_type][$eq]=ticket`;
-			const url = `/api/transaction-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=1000`;
+			const filterParam = `filters[vendor_id][$eq]=${session.user.documentId}`;
+			const url = `/api/transaction-tickets-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=1000`;
 			console.log("TicketDashboard - Request URL:", url);
 			
 			const transactionsResponse = await axiosUser(

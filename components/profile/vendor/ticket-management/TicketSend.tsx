@@ -49,14 +49,14 @@ export const TicketSend: React.FC = () => {
 	const getVendorTickets = async () => {
 		if (!session?.jwt || !session?.user?.documentId) return [];
 		try {
-			// Try method 1: Filter by users_permissions_user relationship
+			// Fetch ticket products for this vendor
 			console.log("TicketSend - Fetching products for vendor:", session.user.documentId);
 			let response = null;
 			let fallbackError = null;
 
 			try {
-				// Method 1: Filter by users_permissions_user id
-				const url1 = `/api/products?filters[users_permissions_user][id][$eq]=${session.user.documentId}&filters[user_event_type][name][$eq]=Ticket&populate[variants]=*&pagination[pageSize]=100`;
+				// Method 1: Filter by users_permissions_user and category
+				const url1 = `/api/products?filters[users_permissions_user][id][$eq]=${session.user.documentId}&filters[category][name][$eq]=ticket&populate[variants]=*&pagination[pageSize]=100`;
 				console.log("TicketSend - Trying filter method 1:", url1);
 				response = await axiosUser("GET", url1, session.jwt);
 				console.log("TicketSend - Method 1 success:", response.data?.data?.length || 0, "products found");
@@ -66,7 +66,7 @@ export const TicketSend: React.FC = () => {
 				
 				try {
 					// Method 2: Fetch all ticket products and filter by user relationship
-					const url2 = `/api/products?filters[user_event_type][name][$eq]=Ticket&populate[users_permissions_user]=*&populate[variants]=*&pagination[pageSize]=100`;
+					const url2 = `/api/products?filters[category][name][$eq]=ticket&populate[users_permissions_user]=*&populate[variants]=*&pagination[pageSize]=100`;
 					console.log("TicketSend - Trying filter method 2:", url2);
 					response = await axiosUser("GET", url2, session.jwt);
 					console.log("TicketSend - Method 2 success, filtering client-side");
@@ -75,7 +75,7 @@ export const TicketSend: React.FC = () => {
 					
 					try {
 						// Method 3: Just get all products and filter by user
-						const url3 = `/api/products?filters[user_event_type][name][$eq]=Ticket&populate=*&pagination[pageSize]=100`;
+						const url3 = `/api/products?filters[category][name][$eq]=ticket&populate=*&pagination[pageSize]=100`;
 						console.log("TicketSend - Trying filter method 3:", url3);
 						response = await axiosUser("GET", url3, session.jwt);
 						console.log("TicketSend - Method 3 success, will filter client-side");
