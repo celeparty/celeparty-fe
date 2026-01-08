@@ -10,7 +10,8 @@ export async function POST(req: NextRequest) {
 		const body = await req.json();
 		console.log("Transaction Proxy - Received payload:", JSON.stringify(body, null, 2));
 		
-		const STRAPI_URL = `${process.env.BASE_API}/api/transactions`;
+		// BASE_API already includes /api, so don't add it again
+		const STRAPI_URL = `${process.env.BASE_API}/transactions`;
 		console.log("Transaction Proxy - Posting to:", STRAPI_URL);
 		
 		const KEY_API = process.env.KEY_API;
@@ -65,7 +66,8 @@ export async function PUT(req: NextRequest) {
 		if (!id) {
 			return NextResponse.json({ error: "Missing transaction id." }, { status: 400 });
 		}
-		const STRAPI_URL = `${process.env.BASE_API}/api/transactions/${id}`;
+		// BASE_API already includes /api, so don't add it again
+		const STRAPI_URL = `${process.env.BASE_API}/transactions/${id}`;
 		const KEY_API = process.env.KEY_API;
 		if (!KEY_API) {
 			return NextResponse.json({ error: "KEY_API not set in environment" }, { status: 500 });
@@ -109,7 +111,8 @@ export async function GET(req: NextRequest) {
 			searchParams.set('populate', '*');
 		}
 
-		const strapiUrl = `${process.env.BASE_API}/api/transactions?${searchParams.toString()}`;
+		// BASE_API already includes /api, so don't add it again
+		const strapiUrl = `${process.env.BASE_API}/transactions?${searchParams.toString()}`;
 		console.log("[TransactionProxy GET] URL:", strapiUrl);
 
 		const KEY_API = process.env.KEY_API;

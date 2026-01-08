@@ -10,7 +10,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 			return NextResponse.json({ error: "Missing transaction id." }, { status: 400 });
 		}
 
-		const STRAPI_URL = `${process.env.BASE_API}/api/transactions/${id}`;
+		// BASE_API already includes /api, so don't add it again
+		const STRAPI_URL = `${process.env.BASE_API}/transactions/${id}`;
 		const KEY_API = process.env.KEY_API;
 
 		if (!KEY_API) {

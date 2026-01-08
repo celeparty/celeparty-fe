@@ -6,7 +6,8 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
 	try {
 		const body = await req.json();
-		const STRAPI_URL = `${process.env.BASE_API}/api/transaction-tickets`;
+		// BASE_API already includes /api, so don't add it again
+		const STRAPI_URL = `${process.env.BASE_API}/transaction-tickets`;
 		const KEY_API = process.env.KEY_API;
 
 		if (!KEY_API) {
@@ -49,7 +50,8 @@ export async function PUT(req: NextRequest) {
 		if (!id) {
 			return NextResponse.json({ error: "Missing transaction-ticket id." }, { status: 400 });
 		}
-		const STRAPI_URL = `${process.env.BASE_API}/api/transaction-tickets/${id}`;
+		// BASE_API already includes /api, so don't add it again
+		const STRAPI_URL = `${process.env.BASE_API}/transaction-tickets/${id}`;
 		const KEY_API = process.env.KEY_API;
 
 		if (!KEY_API) {
@@ -94,9 +96,10 @@ export async function GET(req: NextRequest) {
 		// as well as the variant and recipients relations.
 		const populateString = "populate[product][populate]=*&populate=variant&populate=recipients";
 
+		// BASE_API already includes /api, so don't add it again
 		const STRAPI_URL = `${
 			process.env.BASE_API
-		}/api/transaction-tickets?${searchParams.toString()}&${populateString}`;
+		}/transaction-tickets?${searchParams.toString()}&${populateString}`;
 		const KEY_API = process.env.KEY_API;
 
 		if (!KEY_API) {
