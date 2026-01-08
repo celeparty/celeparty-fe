@@ -17,19 +17,28 @@ export const TicketDashboard: React.FC = () => {
 
 	// Fetch ticket summary
 	const getTicketSummary = async () => {
-		if (!session?.jwt || !session?.user?.documentId) return [];
+		if (!session?.jwt || !session?.user?.documentId) {
+			console.warn("TicketDashboard - Missing session or documentId");
+			return [];
+		}
 		try {
 			// 1. Fetch all ticket transactions for this vendor using unified endpoint
-			console.log("Fetching vendor's ticket transactions...");
+			console.log("TicketDashboard - Fetching vendor's ticket transactions...");
 			const filterParam = `filters[vendor_doc_id][$eq]=${session.user.documentId}&filters[event_type][$eq]=ticket`;
+			const url = `/api/transaction-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=1000`;
+			console.log("TicketDashboard - Request URL:", url);
+			
 			const transactionsResponse = await axiosUser(
 				"GET",
-				`/api/transaction-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=1000`,
+				url,
 				session.jwt
 			);
 			
 			const transactions = transactionsResponse.data?.data || [];
-			console.log("Vendor's ticket transactions:", transactions);
+			console.log("TicketDashboard - Vendor's ticket transactions received:", {
+				count: transactions.length,
+				data: transactions
+			});
 
 			// 2. Initialize productsMap to aggregate data by product
 			const productsMap = new Map<string, any>();
@@ -124,11 +133,17 @@ export const TicketDashboard: React.FC = () => {
 				};
 			});
 
-			console.log("Final ticket data:", finalTicketData);
+			console.log("TicketDashboard - Final ticket data:", finalTicketData);
 			return finalTicketData;
 
-		} catch (error) {
-			console.error("Error fetching ticket summary:", error);
+		} catch (error: any) {
+			console.error("TicketDashboard - Error fetching ticket summary:", {
+				message: error.message,
+				status: error.response?.status,
+				data: error.response?.data,
+				url: error.config?.url
+			});
+			// Return empty instead of throwing to show "Belum ada tiket" message
 			return [];
 		}
 	};
@@ -150,10 +165,17 @@ export const TicketDashboard: React.FC = () => {
 	}
 
 	if (summaryQuery.isError) {
+		console.log("TicketDashboard - Error state detected");
 		return (
 			<div className="bg-red-50 border border-red-200 rounded-lg p-4">
 				<p className="text-red-600 font-semibold">Error memuat data tiket</p>
 				<p className="text-sm text-red-500 mt-1">Silakan refresh halaman atau hubungi support</p>
+				<details className="mt-2 text-xs text-red-500">
+					<summary className="cursor-pointer">Detail error</summary>
+					<pre className="mt-1 p-2 bg-red-100 rounded text-red-700 overflow-auto">
+						{JSON.stringify(summaryQuery.error, null, 2)}
+					</pre>
+				</details>
 			</div>
 		);
 	}

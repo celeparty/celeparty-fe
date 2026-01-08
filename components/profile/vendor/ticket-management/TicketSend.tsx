@@ -90,18 +90,33 @@ export const TicketSend: React.FC = () => {
 			console.log("TicketSend - Total products fetched:", products.length);
 			
 			// Map to a consistent structure, ensuring variants are always an array
-			return products.map((p: any) => ({
-				id: p.id || p.documentId,
-				documentId: p.id || p.documentId,
-				title: p.attributes?.title || p.title || "Tiket Tanpa Nama",
-				vendor_id: p.attributes?.users_permissions_user?.data?.id || p.attributes?.users_permissions_user,
-				variant: (p.attributes?.variant || []).map((v: any) => ({
-					id: v.id || v.documentId,
-					documentId: v.id || v.documentId,
-					name: v.name || "Default",
-					price: parseFloat(v.price || 0)
-				})) || [],
-			})).filter((product: any) => {
+			return products.map((p: any) => {
+				// Try both 'variant' and 'variants' field names
+				const variantData = p.attributes?.variants || p.attributes?.variant || [];
+				const variantArray = Array.isArray(variantData) ? variantData : [];
+				
+				const mappedProduct = {
+					id: p.id || p.documentId,
+					documentId: p.id || p.documentId,
+					title: p.attributes?.title || p.title || "Tiket Tanpa Nama",
+					vendor_id: p.attributes?.users_permissions_user?.data?.id || p.attributes?.users_permissions_user,
+					variant: variantArray.map((v: any) => ({
+						id: v.id || v.documentId,
+						documentId: v.id || v.documentId,
+						name: v.name || "Default",
+						price: parseFloat(v.price || 0)
+					})) || [],
+				};
+				
+				console.log("TicketSend - Mapped product:", {
+					title: mappedProduct.title,
+					id: mappedProduct.id,
+					variantCount: mappedProduct.variant.length,
+					variants: mappedProduct.variant
+				});
+				
+				return mappedProduct;
+			}).filter((product: any) => {
 				// Client-side filter: Only return products where vendor matches current user
 				// This handles case where filter didn't work on server side
 				const vendorMatch = product.vendor_id === session.user.documentId ||
