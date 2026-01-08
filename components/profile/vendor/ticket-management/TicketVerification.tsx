@@ -44,29 +44,33 @@ export const TicketVerification: React.FC = () => {
 
 	// Fetch verification history
 	const getVerificationHistory = async (): Promise<VerificationHistory[]> => {
-		if (!session?.user?.documentId) return [];
+		if (!session?.user?.documentId || !session?.jwt) return [];
 		try {
-			const response = await axios.get(
-				`/api/transaction-proxy?filters[vendor_doc_id][$eq]=${session.user.documentId}&filters[event_type][$eq]=ticket&sort=createdAt:desc&limit=50`
+			// Fetch ticket transactions for this vendor
+			const { axiosUser } = await import('@/lib/services');
+			const filterParam = `filters[vendor_id][$eq]=${session.user.documentId}`;
+			const response = await axiosUser(
+				"GET",
+				`/api/transaction-tickets-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=1000`,
+				session.jwt
 			);
 			
-			// Extract verification history from transactions
+			// Extract verification history from transaction-tickets
 			const history: VerificationHistory[] = [];
-			(response.data.data || []).forEach((transaction: any) => {
-				const products = transaction.attributes.products || [];
-				products.forEach((product: any) => {
-					const recipients = product.recipients || [];
-					recipients.forEach((recipient: any) => {
-						if (recipient.ticket_code) {
-							history.push({
-								ticket_code: recipient.ticket_code,
-								verified_date: transaction.attributes.createdAt || new Date().toISOString(),
-								status: recipient.verification_status === 'verified' ? 'verified' : 'rejected',
-								verified_by: 'vendor',
-								notes: transaction.attributes.note || '',
-							});
-						}
-					});
+			(response.data?.data || []).forEach((transaction: any) => {
+				const attrs = transaction.attributes;
+				const recipients = attrs.recipients || [];
+				
+				recipients.forEach((recipient: any) => {
+					if (recipient.ticket_code) {
+						history.push({
+							ticket_code: recipient.ticket_code,
+							verified_date: attrs.createdAt || new Date().toISOString(),
+							status: recipient.status === 'verified' || recipient.verification_status === 'verified' ? 'verified' : 'rejected',
+							verified_by: 'vendor',
+							notes: attrs.note || '',
+						});
+					}
 				});
 			});
 			return history;
@@ -99,36 +103,47 @@ export const TicketVerification: React.FC = () => {
 		setHasSearched(true);
 
 		try {
-			// Search in all transactions for this vendor with matching ticket code
-			const response = await axios.get(
-				`/api/transaction-proxy?filters[vendor_doc_id][$eq]=${session?.user?.documentId}&filters[event_type][$eq]=ticket&sort=createdAt:desc`
+			// Search in all ticket transactions for this vendor with matching ticket code
+			const { axiosUser } = await import('@/lib/services');
+			if (!session?.jwt) {
+				toast({
+					title: "Error",
+					description: "Session expired, please login again",
+					className: eAlertType.FAILED,
+				});
+				return;
+			}
+
+			const filterParam = `filters[vendor_id][$eq]=${session?.user?.documentId}`;
+			const response = await axiosUser(
+				"GET",
+				`/api/transaction-tickets-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=1000`,
+				session.jwt
 			);
 
 			let ticketFound = false;
-			const transactions = response.data.data || [];
+			const transactions = response.data?.data || [];
 
 			for (const transaction of transactions) {
-				const products = transaction.attributes.products || [];
-				for (const product of products) {
-					const recipients = product.recipients || [];
-					for (const recipient of recipients) {
-						if (recipient.ticket_code === searchCode.toUpperCase()) {
-							setFoundTicket({
-								ticket_code: recipient.ticket_code,
-								product_name: product.product_name,
-								recipient_name: recipient.name,
-								recipient_email: recipient.email,
-								recipient_identity: `${recipient.identity_type}: ${recipient.identity_number}`,
-								verification_status: recipient.verification_status || 'pending',
-								verified_date: transaction.attributes.createdAt,
-								transaction_id: transaction.id,
-							});
-							ticketFound = true;
-							setVerificationStatus(recipient.verification_status || '');
-							break;
-						}
+				const attrs = transaction.attributes;
+				const recipients = attrs.recipients || [];
+				
+				for (const recipient of recipients) {
+					if (recipient.ticket_code === searchCode.toUpperCase()) {
+						setFoundTicket({
+							ticket_code: recipient.ticket_code,
+							product_name: attrs.product_name,
+							recipient_name: recipient.name,
+							recipient_email: recipient.email,
+							recipient_identity: `${recipient.identity_type}: ${recipient.identity_number}`,
+							verification_status: recipient.status || recipient.verification_status || 'pending',
+							verified_date: attrs.createdAt,
+							transaction_id: transaction.id,
+						});
+						ticketFound = true;
+						setVerificationStatus(recipient.status || recipient.verification_status || '');
+						break;
 					}
-					if (ticketFound) break;
 				}
 				if (ticketFound) break;
 			}
@@ -165,12 +180,26 @@ export const TicketVerification: React.FC = () => {
 
 		setIsVerifying(true);
 		try {
-			// Update transaction with verification status
-			const response = await axios.put(
-				`/api/transaction-proxy`,
+			// Update transaction-ticket with verification status
+			const { axiosUser } = await import('@/lib/services');
+			if (!session?.jwt) {
+				toast({
+					title: "Error",
+					description: "Session expired, please login again",
+					className: eAlertType.FAILED,
+				});
+				return;
+			}
+
+			const response = await axiosUser(
+				"PUT",
+				`/api/transaction-tickets-proxy`,
+				session.jwt,
 				{
 					id: foundTicket.transaction_id,
 					data: {
+						// Update recipients array in the transaction
+						// Note: This may need backend endpoint enhancement to properly update recipient verification status
 						verification: verificationStatus === 'verified',
 					},
 				}

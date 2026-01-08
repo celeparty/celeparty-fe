@@ -22,7 +22,7 @@ export const TicketDashboard: React.FC = () => {
 			return [];
 		}
 		try {
-			// 1. Fetch all ticket transactions using transaction-tickets endpoint (not transaction-proxy)
+			// 1. Fetch all ticket transactions using transaction-tickets endpoint
 			console.log("TicketDashboard - Fetching vendor's ticket transactions...");
 			const filterParam = `filters[vendor_id][$eq]=${session.user.documentId}`;
 			const url = `/api/transaction-tickets-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=1000`;
@@ -41,65 +41,87 @@ export const TicketDashboard: React.FC = () => {
 			});
 
 			// 2. Initialize productsMap to aggregate data by product
+			// Each transaction is ONE ticket product (not an array of products)
 			const productsMap = new Map<string, any>();
 
 			// 3. Process each transaction to aggregate sales data
 			transactions.forEach((transaction: any) => {
 				const attrs = transaction.attributes;
-				const products = attrs.products || [];
 
-				products.forEach((product: any) => {
-					// Only process ticket products
-					if (product.product_type !== 'ticket') return;
+				// Get product info - either from product relation or direct fields
+				const productId = attrs.product?.data?.id || attrs.product_name;
+				const productData = attrs.product?.data?.attributes || {};
+				const productTitle = productData.title || attrs.product_name || "Tiket Tanpa Nama";
+				const productImage = productData.image_url || "";
 
-					const productId = product.product_id;
-					
-					// Initialize product entry if not exists
-					if (!productsMap.has(productId)) {
-						productsMap.set(productId, {
-							id: productId,
-							title: product.title || "Tiket Tanpa Nama",
-							image: product.image_url || "",
-							variants: new Map<string, any>(),
-							totalSold: 0,
-							totalRevenue: 0,
-						});
-					}
-
-					const currentProduct = productsMap.get(productId);
-					const variantId = product.variant_id || "default";
-					const quantity = product.quantity || 1;
-					const price = parseFloat(product.price) || 0;
-
-					// Initialize variant entry if not exists
-					if (!currentProduct.variants.has(variantId)) {
-						currentProduct.variants.set(variantId, {
-							id: variantId,
-							name: product.variant_name || "Default",
-							price: price,
-							quota: 0, // Not available in transaction data
-							sold: 0,
-							verified: 0,
-						});
-					}
-
-					// Update variant sales
-					const variant = currentProduct.variants.get(variantId);
-					variant.sold += quantity;
-					currentProduct.totalSold += quantity;
-
-					// Calculate revenue
-					const systemFeePercentage = 10; // 10%
-					const netIncome = price * quantity * (1 - systemFeePercentage / 100);
-					currentProduct.totalRevenue += netIncome;
-
-					// Count verified tickets from recipients
-					const recipients = product.recipients || [];
-					recipients.forEach((recipient: any) => {
-						if (recipient.verification_status === 'verified' || recipient.verification_status === 'Verified') {
-							variant.verified += 1;
-						}
+				// Initialize product entry if not exists
+				if (!productsMap.has(productId)) {
+					productsMap.set(productId, {
+						id: productId,
+						title: productTitle,
+						image: productImage,
+						variants: new Map<string, any>(),
+						totalSold: 0,
+						totalRevenue: 0,
 					});
+				}
+
+				const currentProduct = productsMap.get(productId);
+
+				// Get transaction details from direct attributes (not from products array)
+				const variantId = attrs.variant || "default";
+				const quantity = parseInt(attrs.quantity) || 1;
+				const price = parseFloat(attrs.price) || 0;
+				const payment_status = attrs.payment_status || "pending";
+
+				// Only count paid transactions
+				if (payment_status !== "paid" && payment_status !== "settlement") {
+					console.log("TicketDashboard - Skipping non-paid transaction:", {
+						order_id: attrs.order_id,
+						payment_status: payment_status
+					});
+					return;
+				}
+
+				// Initialize variant entry if not exists
+				if (!currentProduct.variants.has(variantId)) {
+					currentProduct.variants.set(variantId, {
+						id: variantId,
+						name: variantId,
+						price: price,
+						quota: 0, // Not available in transaction data
+						sold: 0,
+						verified: 0,
+					});
+				}
+
+				// Update variant sales
+				const variant = currentProduct.variants.get(variantId);
+				variant.sold += quantity;
+				currentProduct.totalSold += quantity;
+
+				// Calculate revenue
+				const systemFeePercentage = 10; // 10%
+				const netIncome = price * quantity * (1 - systemFeePercentage / 100);
+				currentProduct.totalRevenue += netIncome;
+
+				// Count verified tickets from recipients array (direct in transaction, not in products)
+				const recipients = attrs.recipients || [];
+				let verifiedCount = 0;
+				recipients.forEach((recipient: any) => {
+					if (recipient.status === 'verified' || recipient.verification_status === 'verified' || recipient.verification_status === 'Verified') {
+						verifiedCount += 1;
+						variant.verified += 1;
+					}
+				});
+
+				console.log("TicketDashboard - Processing transaction:", {
+					order_id: attrs.order_id,
+					product_name: attrs.product_name,
+					variant: variantId,
+					quantity: quantity,
+					recipients_count: recipients.length,
+					verified_count: verifiedCount
 				});
 			});
 

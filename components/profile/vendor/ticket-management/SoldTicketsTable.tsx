@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { iTicketDetail, iVariantSummary } from '@/lib/interfaces/iTicketManagement';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import Skeleton from '@/components/Skeleton';
@@ -15,6 +16,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { axiosUser } from '@/lib/services';
 
 
 interface iSoldTicketsTableProps {
@@ -38,23 +40,83 @@ const getStatusBadge = (status: string) => {
 }
 
 export const SoldTicketsTable: React.FC<iSoldTicketsTableProps> = ({ productId, variants }) => {
+    const { data: session } = useSession();
     
     const [filters, setFilters] = useState({ variant: 'all', status: 'all' });
     const [sortConfig, setSortConfig] = useState<SortConfig>(null);
 
     const fetchSoldTickets = async (): Promise<iTicketDetail[]> => {
-        // MOCK DATA
-        return [
-            { id: 'tkt_001', documentId: 'tkt_001', ticket_code: 'KMA-REG-001', unique_token: 'xyz1', product_title: 'Konser Musik Akbar', variant_name: 'Reguler', recipient_name: 'Agus P', recipient_email: 'agus@test.com', recipient_phone: '08123456789', recipient_identity_type: 'KTP', recipient_identity_number: '1234567890123456', purchase_date: '2025-11-10T10:00:00Z', payment_status: 'paid', verification_status: 'verified', verification_date: '2025-12-10T10:00:00Z' },
-            { id: 'tkt_002', documentId: 'tkt_002', ticket_code: 'KMA-REG-002', unique_token: 'xyz2', product_title: 'Konser Musik Akbar', variant_name: 'Reguler', recipient_name: 'Budi S', recipient_email: 'budi@test.com', recipient_phone: '08234567890', recipient_identity_type: 'KTP', recipient_identity_number: '2345678901234567', purchase_date: '2025-11-11T11:00:00Z', payment_status: 'paid', verification_status: 'unverified' },
-            { id: 'tkt_003', documentId: 'tkt_003', ticket_code: 'KMA-VIP-001', unique_token: 'xyz3', product_title: 'Konser Musik Akbar', variant_name: 'VIP', recipient_name: 'Citra A', recipient_email: 'citra@test.com', recipient_phone: '08345678901', recipient_identity_type: 'KTP', recipient_identity_number: '3456789012345678', purchase_date: '2025-11-12T12:00:00Z', payment_status: 'paid', verification_status: 'unverified' },
-            { id: 'tkt_004', documentId: 'tkt_004', ticket_code: 'KMA-VVIP-001', unique_token: 'xyz4', product_title: 'Konser Musik Akbar', variant_name: 'VVIP', recipient_name: 'Dani M', recipient_email: 'dani@test.com', recipient_phone: '08345678902', recipient_identity_type: 'KTP', recipient_identity_number: '4567890123456789', purchase_date: '2025-11-13T13:00:00Z', payment_status: 'bypass', verification_status: 'verified', verification_date: '2025-12-10T11:00:00Z' },
-        ];
+        if (!session?.jwt || !session?.user?.documentId) {
+            console.warn("SoldTicketsTable - Missing session or documentId");
+            return [];
+        }
+
+        try {
+            // Fetch all ticket transactions for this vendor
+            const filterParam = `filters[vendor_id][$eq]=${session.user.documentId}`;
+            const url = `/api/transaction-tickets-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=1000`;
+            
+            const response = await axiosUser("GET", url, session.jwt);
+            const transactions = response.data?.data || [];
+            
+            // Convert transactions to ticket details
+            const ticketDetails: iTicketDetail[] = [];
+            
+            transactions.forEach((transaction: any) => {
+                const attrs = transaction.attributes;
+                
+                // Only process transactions for this specific product
+                const transactionProductId = attrs.product?.data?.id;
+                if (transactionProductId !== productId && attrs.product_name !== productId) {
+                    return;
+                }
+                
+                // Get recipients array
+                const recipients = attrs.recipients || [];
+                
+                // Each recipient is a separate ticket detail
+                recipients.forEach((recipient: any, index: number) => {
+                    ticketDetails.push({
+                        id: `${transaction.id}_${index}`,
+                        documentId: transaction.id.toString(),
+                        ticket_code: recipient.ticket_code || `TIC-${transaction.id}-${index}`,
+                        unique_token: recipient.unique_token || '',
+                        product_title: attrs.product_name || '',
+                        variant_name: attrs.variant || 'Default',
+                        recipient_name: recipient.name || '',
+                        recipient_email: recipient.email || '',
+                        recipient_phone: recipient.whatsapp_number || recipient.phone || recipient.telp || '',
+                        recipient_identity_type: recipient.identity_type || '',
+                        recipient_identity_number: recipient.identity_number || '',
+                        purchase_date: transaction.attributes.createdAt || '',
+                        payment_status: attrs.payment_status || 'pending',
+                        verification_status: recipient.status || recipient.verification_status || 'unverified',
+                        verification_date: recipient.verification_date || undefined,
+                    });
+                });
+            });
+            
+            console.log("SoldTicketsTable - Fetched ticket details:", {
+                count: ticketDetails.length,
+                data: ticketDetails
+            });
+            
+            return ticketDetails;
+        } catch (error: any) {
+            console.error("SoldTicketsTable - Error fetching ticket details:", {
+                message: error.message,
+                status: error.response?.status,
+                data: error.response?.data
+            });
+            return [];
+        }
     };
 
     const { data: tickets, isLoading, isError } = useQuery({
-        queryKey: ['soldTickets', productId],
+        queryKey: ['soldTickets', productId, session?.jwt],
         queryFn: fetchSoldTickets,
+        enabled: !!session?.jwt && !!session?.user?.documentId && !!productId,
+        staleTime: 5 * 60 * 1000,
     });
 
     const sortedAndFilteredTickets = useMemo(() => {

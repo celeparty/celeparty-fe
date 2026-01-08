@@ -18,10 +18,6 @@ const nextConfig = {
 	output: "standalone",
 	reactStrictMode: true,
 	swcMinify: false,
-
-  experimental: {
-    serverActions: false,
-  },
 	webpack: (config) => {
 		config.resolve.alias['@'] = path.resolve(__dirname);
 		return config;
