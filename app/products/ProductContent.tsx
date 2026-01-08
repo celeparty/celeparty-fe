@@ -77,12 +77,12 @@ export function ProductContent() {
 
     try {
       // Fetch both products (equipment) and tickets in parallel
+      // Note: /api/tickets proxies to /api/tickets collection in Strapi (Ticket Product collection)
+      // /api/products proxies to /api/products collection (Equipment collection)
       const [productsRes, ticketsRes] = await Promise.all([
         axiosData("GET", `/api/products?populate=*&filters[state][$eq]=approved&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${Math.ceil(pageSize * 0.7)}${productFilters}`),
         axiosData("GET", `/api/tickets?populate=*&filters[state][$eq]=approved&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${Math.ceil(pageSize * 0.3)}${
           getSearch ? `&filters[title][$containsi]=${encodeURIComponent(getSearch)}` : ''
-        }${
-          getType && (getType === 'ticket' || getType === 'Tiket') ? '' : `&filters[user_event_type][name][$eq]=${encodeURIComponent(getType || '')}`
         }`)
       ]);
 

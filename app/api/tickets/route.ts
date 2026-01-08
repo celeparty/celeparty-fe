@@ -31,22 +31,16 @@ export async function GET(req: NextRequest) {
 			return NextResponse.json({ error: "Unauthorized: Invalid token" }, { status: 401 });
 		}
 
-		// Ensure populate=* is included to get all relations including user_event_type
-		if (!searchParams.has('populate')) {
-			searchParams.set('populate', '*');
-		}
+	// Ensure populate=* is included to get all relations
+	if (!searchParams.has('populate')) {
+		searchParams.set('populate', '*');
+	}
 
-		// Add filter for user ID
-		// Assuming the ticket model in Strapi has a relation to 'user', 'vendor', 'owner', or 'users_permissions_user' with 'id' field
-		searchParams.set('filters[user][id][$eq]', userId);
-		searchParams.set('filters[vendor][id][$eq]', userId); // Add filter for 'vendor' relationship
-		searchParams.set('filters[owner][id][$eq]', userId); // Add filter for 'owner' relationship
-		searchParams.set('filters[users_permissions_user][id][$eq]', userId); // Add filter for 'users_permissions_user' relationship
+	// Add filter for user ID - use the direct endpoint which is /api/tickets (not /api/products)
+	// The 'tickets' collection in Strapi is separate from 'products'
+	searchParams.set('filters[users_permissions_user][id][$eq]', userId);
 
-		// Add filter for 'ticket' category to ensure only ticket products are fetched
-		searchParams.set('filters[category][name][$eq]', 'ticket');
-
-		const STRAPI_URL = `${process.env.BASE_API}/api/products?${searchParams.toString()}`;
+	const STRAPI_URL = `${process.env.BASE_API}/api/tickets?${searchParams.toString()}`;
 		console.log("Constructed Strapi URL:", STRAPI_URL); // Log constructed URL
 		const KEY_API = process.env.KEY_API;
 

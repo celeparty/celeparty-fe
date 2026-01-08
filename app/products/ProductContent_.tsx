@@ -125,15 +125,13 @@ export function ProductContent() {
     // Add price filters
     baseParams += priceFilterString;
 
-    // Add event type filter
-    if (selectedEventType) {
-      baseParams += `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}`;
-    }
-
     try {
-      // Fetch both products and tickets in parallel
+      // Fetch products and tickets - note: tickets collection doesn't have user_event_type field
+      // Only apply event_type filter to /api/products endpoint
+      const productsParams = baseParams + (selectedEventType ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}` : '');
+      
       const [productsRes, ticketsRes] = await Promise.all([
-        axiosData("GET", `/api/products?${baseParams}&filters[state][$eq]=approved`),
+        axiosData("GET", `/api/products?${productsParams}&filters[state][$eq]=approved`),
         axiosData("GET", `/api/tickets?${baseParams}&filters[state][$eq]=approved`)
       ]);
 
