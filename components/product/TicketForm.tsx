@@ -67,12 +67,42 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 
 	const { toast } = useToast();
 
+	// Defensive default values - ensure all fields have proper default
+	const getDefaultValues = (): iTicketFormReq => {
+		const defaults: iTicketFormReq = {
+			title: "",
+			description: "",
+			event_date: "",
+			waktu_event: "",
+			end_date: "",
+			end_time: "",
+			kota_event: "",
+			lokasi_event: "",
+			main_image: [],
+			variant: [],
+			terms_conditions: "",
+		};
+
+		if (!formDefaultData) return defaults;
+
+		return {
+			title: formDefaultData.title || "",
+			description: formDefaultData.description || "",
+			event_date: formDefaultData.event_date || "",
+			waktu_event: formDefaultData.waktu_event || "",
+			end_date: formDefaultData.end_date || "",
+			end_time: formDefaultData.end_time || "",
+			kota_event: formDefaultData.kota_event || "",
+			lokasi_event: formDefaultData.lokasi_event || "",
+			main_image: formDefaultData.main_image || [],
+			variant: formDefaultData.variant || [],
+			terms_conditions: formDefaultData.terms_conditions || "",
+		};
+	};
+
 	const formMethods = useForm<iTicketFormReq>({
 		resolver: zodResolver(SchemaTicket),
-		defaultValues: {
-			...formDefaultData,
-			terms_conditions: formDefaultData?.terms_conditions || "",
-		},
+		defaultValues: getDefaultValues(),
 	});
 
 	const {
@@ -285,44 +315,50 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 		}));
 		
 		// Normalize and ensure dates are in correct format (YYYY-MM-DD for Strapi date type)
-		const normalizeToYMD = (val: any): string | null => {
+		const normalizeToYMD = (val: any, fieldName: string = "date"): string | null => {
 			if (val === null || val === undefined || val === "") return null;
 			
-			// If already a valid YYYY-MM-DD string, return as-is
-			const s = String(val).trim();
-			if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
-				// Validate that it's a real date
-				const testDate = new Date(s + "T00:00:00Z");
-				if (!isNaN(testDate.getTime())) {
-					return s;
+			try {
+				const s = String(val).trim();
+				
+				// If already a valid YYYY-MM-DD string, return as-is
+				if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+					// Validate that it's a real date
+					const testDate = new Date(s + "T00:00:00Z");
+					if (!isNaN(testDate.getTime())) {
+						return s;
+					}
 				}
-			}
-			
-			// If Date object
-			if (val instanceof Date) {
-				if (isDateValid(val)) {
+				
+				// If Date object
+				if (val instanceof Date && isDateValid(val)) {
 					return format(val, "yyyy-MM-dd");
 				}
+				
+				// Try ISO string parse (for strings with T like "2024-01-15T00:00:00Z")
+				if (s.includes("T")) {
+					try {
+						const iso = parseISO(s);
+						if (isDateValid(iso)) {
+							return format(iso, "yyyy-MM-dd");
+						}
+					} catch (e) {
+						// ignore parse error, try fallback
+					}
+				}
+				
+				// Fallback: try Date constructor
+				const d = new Date(s);
+				if (!isNaN(d.getTime())) {
+					return format(d, "yyyy-MM-dd");
+				}
+				
+				console.warn(`⚠️ Unable to normalize ${fieldName}:`, val);
+				return null;
+			} catch (error) {
+				console.error(`❌ Error normalizing ${fieldName}:`, val, error);
 				return null;
 			}
-			
-			// Try ISO string parse
-			if (typeof s === "string" && s.includes("T")) {
-				try {
-					const iso = parseISO(s);
-					if (isDateValid(iso)) return format(iso, "yyyy-MM-dd");
-				} catch (e) {
-					// ignore
-				}
-			}
-			
-			// Fallback: try Date constructor
-			const d = new Date(s);
-			if (!isNaN(d.getTime())) {
-				return d.toISOString().slice(0, 10);
-			}
-			
-			return null;
 		};
 
 		// DEBUG: Log raw dates before normalization
@@ -333,8 +369,8 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 			end_date_type: typeof data.end_date,
 		});
 
-		const eventDate = normalizeToYMD(data.event_date);
-		const endDate = normalizeToYMD(data.end_date);
+		const eventDate = normalizeToYMD(data.event_date, "event_date");
+		const endDate = normalizeToYMD(data.end_date, "end_date");
 
 		// DEBUG: Log normalized dates
 		console.log("Normalized dates:", { eventDate, endDate });
@@ -385,55 +421,40 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 			return;
 		}
 		
+		// Build payload dengan hanya field yang valid
 		let payloadData: any = {
-			...data,
+			title: data.title,
+			description: data.description,
 			category: "ticket", // Explicitly set category for ticket products
 			user_event_type: "Ticket", // Automatically set the event type
 			main_image: images,
-			event_date: eventDate,
-			end_date: endDate,
+			waktu_event: data.waktu_event || "",
 			end_time: data.end_time || "",
+			kota_event: data.kota_event,
+			lokasi_event: data.lokasi_event,
 			variant: variants,
-			terms_conditions: data.terms_conditions,
+			terms_conditions: data.terms_conditions || "",
 		};
+
+		// IMPORTANT: Hanya set event_date dan end_date jika valid (bukan null/undefined)
+		if (eventDate) {
+			payloadData.event_date = eventDate;
+		}
+		if (endDate) {
+			payloadData.end_date = endDate;
+		}
 
 		let payload: any = {
 			data: payloadData,
 		};
 
-		// DEBUG: Log payload sebelum cleanup dan submit
+		// DEBUG: Log payload sebelum submit
 		console.log("===== TICKET FORM DEBUG =====");
 		console.log("Normalized dates:", { eventDate, endDate });
 		console.log("Raw form data:", data);
-		console.log("Payload sebelum cleanup:", JSON.stringify(payload, null, 2));
+		console.log("Payload siap dikirim:", JSON.stringify(payload, null, 2));
 
 		try {
-			// Whitelist approach: hanya hapus field yang truly tidak perlu
-			const fieldsToKeep = [
-				"title",
-				"description",
-				"event_date",
-				"end_date",
-				"waktu_event",
-				"end_time",
-				"kota_event",
-				"lokasi_event",
-				"main_image",
-				"variant",
-				"terms_conditions",
-			];
-
-			Object.keys(payload.data).forEach((k) => {
-				// Hanya hapus jika bukan field yang harus dipertahankan dan empty
-				if (
-					!fieldsToKeep.includes(k) &&
-					(payload.data[k] === undefined ||
-						payload.data[k] === null ||
-						(Array.isArray(payload.data[k]) && payload.data[k].length === 0))
-				) {
-					delete payload.data[k];
-				}
-			});
 
 			let response: any;
 			delete payload.data.documentId;

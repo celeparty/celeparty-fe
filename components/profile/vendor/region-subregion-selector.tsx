@@ -71,15 +71,13 @@ const RegionSubregionSelector: React.FC<RegionSubregionSelectorProps> = ({ index
 									onChange={(id) => {
 										let selectedProvince = provinceOptions.find((pv) => pv.value === id);
 										if (selectedProvince) {
-											let updatedValue: iServiceLocation = {
-												id,
-												region: selectedProvince?.label || "",
-												subregion: field.value?.subregion || "",
-												idSubRegion: field.value?.idSubRegion || "",
-											};
-											field.onChange(updatedValue);
-											setValue(`serviceLocation.${index}.id`, id);
+											// ✅ Only set the id field value
+											field.onChange(id);
+											// ✅ Also set the region name for reference
 											setValue(`serviceLocation.${index}.region`, selectedProvince?.label);
+											// ✅ Reset subregion when province changes
+											setValue(`serviceLocation.${index}.idSubRegion`, "");
+											setValue(`serviceLocation.${index}.subregion`, "");
 										}
 									}}
 									value={field.value || ""}
@@ -100,14 +98,9 @@ const RegionSubregionSelector: React.FC<RegionSubregionSelectorProps> = ({ index
 								onChange={(id) => {
 									let selectedRegion = subregionOptions.find((sr) => sr.value === id);
 									if (selectedRegion) {
-										let updatedValue: iServiceLocation = {
-											idSubRegion: id,
-											subregion: selectedRegion.label,
-											region: field.value?.region || "",
-											id: field.value?.id || "",
-										};
-										field.onChange(updatedValue);
-										setValue(`serviceLocation.${index}.idSubRegion`, id);
+										// ✅ Only set the idSubRegion field value
+										field.onChange(id);
+										// ✅ Also set the subregion name for reference
 										setValue(`serviceLocation.${index}.subregion`, selectedRegion?.label);
 									}
 								}}

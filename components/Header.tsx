@@ -30,7 +30,9 @@ export default function Header() {
 
 	const logout = () => {
 		setUserMe(null);
-		signOut();
+		// Explicitly redirect to home page after logout
+		// This ensures redirect to the correct domain in production
+		signOut({ redirect: true, callbackUrl: "/" });
 	};
 
 	return (
