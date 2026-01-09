@@ -32,10 +32,7 @@ function LoginPage() {
 	const [message, setMessage] = useState({
 		status: false,
 		info: "",
-		type: "error", // "error" or "unverified"
 	});
-	const [unverifiedEmail, setUnverifiedEmail] = useState("");
-	const [resendLoading, setResendLoading] = useState(false);
 	const router = useRouter();
 	const params = useSearchParams();
 	const getTheme = params.get("theme");
@@ -55,58 +52,16 @@ function LoginPage() {
 			identifier: email,
 			password: password,
 		});
-		
 		if (result?.error) {
-			setMessage({ status: true, info: "Username atau password salah", type: "error" });
-		} else if (result?.ok) {
-			setMessage({ status: false, info: "", type: "error" });
-			
-			// Login successful - redirect to appropriate page
+			setMessage({ status: true, info: "Username atau password salah" });
+		} else {
+			setMessage({ status: false, info: "" });
 			const redirectUrl = params.get("redirect");
 			if (redirectUrl) {
 				router.replace(redirectUrl);
 			} else {
 				router.replace("/user/home");
 			}
-		}
-	};
-
-	const handleResendVerificationEmail = async () => {
-		if (!unverifiedEmail) return;
-
-		setResendLoading(true);
-		try {
-			const response = await fetch("/api/resend-verification-email", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ email: unverifiedEmail }),
-			});
-
-			const data = await response.json();
-
-			if (response.ok) {
-				setMessage({
-					status: true,
-					info: "Email verifikasi telah dikirim ulang. Silakan cek email Anda.",
-					type: "success"
-				});
-			} else {
-				setMessage({
-					status: true,
-					info: data.message || "Gagal mengirim email verifikasi",
-					type: "error"
-				});
-			}
-		} catch (error: any) {
-			setMessage({
-				status: true,
-				info: error.message || "Terjadi kesalahan saat mengirim email",
-				type: "error"
-			});
-		} finally {
-			setResendLoading(false);
 		}
 	};
 
@@ -150,29 +105,7 @@ function LoginPage() {
 									{show ? <IoIosEye /> : <IoIosEyeOff />}
 								</div>
 							</div>
-							{message.status ? (
-								<div className={`p-3 rounded-lg mb-4 ${
-									message.type === "unverified"
-										? "bg-yellow-100 border border-yellow-400 text-yellow-800"
-										: message.type === "success"
-										? "bg-green-100 border border-green-400 text-green-800"
-										: "bg-red-100 border border-red-400 text-red-800"
-								}`}>
-									<p className="text-sm font-medium">{message.info}</p>
-									{message.type === "unverified" && unverifiedEmail && (
-										<div className="mt-3 flex gap-2">
-											<Button
-												type="button"
-												onClick={handleResendVerificationEmail}
-												disabled={resendLoading}
-												className="text-xs bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 h-auto"
-											>
-												{resendLoading ? "Mengirim..." : "Kirim Ulang Email"}
-											</Button>
-										</div>
-									)}
-								</div>
-							) : null}
+							{message.status ? <div className="text-red-500">{message.info}</div> : null}
 
 							<div className="flex justify-end mt-2">
 								<Link
