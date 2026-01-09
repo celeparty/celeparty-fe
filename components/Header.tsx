@@ -108,7 +108,7 @@ export default function Header() {
 										Keluar
 									</button>
 								</>
-							) : status === "unauthenticated" ? (
+							) : status === "unauthenticated" || status === "loading" ? (
 								<>
 									<Link
 										href={`/auth/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`}
