@@ -55,24 +55,13 @@ function LoginPage() {
 			identifier: email,
 			password: password,
 		});
+		
 		if (result?.error) {
 			setMessage({ status: true, info: "Username atau password salah", type: "error" });
-		} else {
+		} else if (result?.ok) {
 			setMessage({ status: false, info: "", type: "error" });
 			
-			// Check if user account is confirmed/verified
-			// The user data from the API will have a 'confirmed' field
-			if (result?.ok && !result?.user?.user?.confirmed) {
-				// Account not verified, show notification but allow user to see message
-				setUnverifiedEmail(email);
-				setMessage({
-					status: true,
-					info: "Akun Anda belum diverifikasi. Silakan cek email untuk link verifikasi.",
-					type: "unverified"
-				});
-				return;
-			}
-			
+			// Login successful - redirect to appropriate page
 			const redirectUrl = params.get("redirect");
 			if (redirectUrl) {
 				router.replace(redirectUrl);
