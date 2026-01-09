@@ -13,6 +13,7 @@ export default function Header() {
 	const { data: session, status } = useSession();
 	const { cart, setCart, cartLength, setCartLength }: any = useCart();
 	const [searchValue, setSearchValue] = useState("");
+	const [redirectPath, setRedirectPath] = useState("");
 	const { userMe, setUserMe }: any = useUser();
 
 	const handleSubmit = (e: any) => {
@@ -27,6 +28,13 @@ export default function Header() {
 			setUserMe(session);
 		}
 	}, [session, status, setUserMe]);
+
+	useEffect(() => {
+		// Set redirect path from current location for login/register links
+		if (typeof window !== "undefined") {
+			setRedirectPath(window.location.pathname + window.location.search);
+		}
+	}, []);
 
 	const logout = () => {
 		setUserMe(null);
@@ -111,13 +119,13 @@ export default function Header() {
 							) : status === "unauthenticated" || status === "loading" ? (
 								<>
 									<Link
-										href={`/auth/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`}
+										href={`/auth/login?redirect=${encodeURIComponent(redirectPath)}`}
 										className="px-4 py-2 border border-c-gray-300 text-c-gray-700 rounded-lg hover:bg-c-gray-50 transition-colors duration-200 font-medium"
 									>
 										Masuk
 									</Link>
 									<Link
-										href={`/auth/register?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`}
+										href={`/auth/register?redirect=${encodeURIComponent(redirectPath)}`}
 										className="px-4 py-2 bg-c-green text-white rounded-lg hover:bg-c-green-light transition-colors duration-200 font-medium"
 									>
 										Daftar
