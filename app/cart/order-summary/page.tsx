@@ -104,7 +104,9 @@ export default function OrderSummaryPage() {
 					loading_time: firstItem.loading_time || "",
 					note: selectedCartItems.map(item => item.note).filter(Boolean).join("; "),
 					vendor_doc_id: firstItem.vendor_id || "",
-					event_type: ticketItems.length > 0 ? "ticket" : "equipment",
+					event_type: ticketItems.length > 0 ? "Ticket" : "Equipment",
+					total_quantity: selectedCartItems.reduce((sum, item) => sum + item.quantity, 0),
+					ticket_recipients: JSON.stringify(allRecipients),
 					products: productsData, // Use 'products' field from Strapi schema
 				}
 			};

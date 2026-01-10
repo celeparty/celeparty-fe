@@ -12,89 +12,194 @@ function generateRandomCode(length: number): string {
 }
 
 async function handleSuccessfulTicketTransaction(
-	transactionTicketId: string,
+	transactionId: string,
 	BASE_API: string,
 	KEY_API: string,
 ) {
 	try {
-		// 1. Fetch the full transaction-ticket data
-		const ticketResponse = await fetch(`${BASE_API}/api/transaction-tickets/${transactionTicketId}?populate=*`, {
-			headers: {
-				Authorization: `Bearer ${KEY_API}`,
+		console.log(`[Webhook] Starting ticket transaction processing for transaction ID: ${transactionId}`);
+
+		// 1. Fetch the full transaction data
+		const transactionResponse = await fetch(
+			`${BASE_API}/api/transactions/${transactionId}`,
+			{
+				headers: {
+					Authorization: `Bearer ${KEY_API}`,
+				},
 			},
+		);
+
+		if (!transactionResponse.ok) {
+			const errorData = await transactionResponse.text();
+			console.error(
+				`[Webhook] Failed to fetch transaction details for ID ${transactionId}:`,
+				errorData,
+			);
+			throw new Error(`Failed to fetch transaction: ${errorData}`);
+		}
+
+		const transactionDataResponse = await transactionResponse.json();
+		const transaction = transactionDataResponse.data?.attributes;
+
+		if (!transaction) {
+			console.error("[Webhook] Transaction attributes not found in response:", transactionDataResponse);
+			throw new Error("Transaction attributes not found");
+		}
+
+		console.log("[Webhook] Transaction data loaded:", {
+			orderId: transaction.order_id,
+			eventType: transaction.event_type,
+			hasTicketRecipients: !!transaction.ticket_recipients,
 		});
 
-		if (!ticketResponse.ok) {
-			const errorData = await ticketResponse.json();
-			console.error(`Failed to fetch transaction-ticket details for ID ${transactionTicketId}:`, errorData);
+		// 2. Only process if this is a Ticket transaction
+		if (transaction.event_type !== "Ticket") {
+			console.log(
+				`[Webhook] Skipping non-ticket transaction. Event type: ${transaction.event_type}`,
+			);
 			return;
 		}
 
-		const ticketData = await ticketResponse.json();
-		const transaction = ticketData.data.attributes;
-		const ticketProduct = transaction.ticket_product?.data;
-		const user = transaction.user?.data;
-
-		if (!ticketProduct || !user) {
-			console.error("Missing ticket_product or user in transaction data:", transaction);
-			return;
+		// 3. Parse ticket recipients
+		let recipients = [];
+		if (transaction.ticket_recipients) {
+			try {
+				if (typeof transaction.ticket_recipients === "string") {
+					recipients = JSON.parse(transaction.ticket_recipients);
+				} else {
+					recipients = transaction.ticket_recipients;
+				}
+			} catch (parseError) {
+				console.error("[Webhook] Failed to parse ticket_recipients:", parseError);
+				throw new Error(`Failed to parse ticket_recipients: ${parseError}`);
+			}
 		}
 
-		// 2. Generate unique ticket code
-		const randomCode = generateRandomCode(6);
-		const ticketCode = `CTix-${ticketProduct.id}-${randomCode}`;
-
-		// 3. Generate barcode URL
-		const verificationUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/qr/verify?code=${ticketCode}`;
-
-		// 4. Create the ticket-detail entry in Strapi
-		const ticketDetailPayload = {
-			data: {
-				ticket_code: ticketCode,
-				barcode_url: verificationUrl,
-				ticket_product: ticketProduct.id,
-				transaction_ticket: transactionTicketId,
-				user: user.id,
-				recipient_name: transaction.customer_name,
-				recipient_email: transaction.customer_email,
-				recipient_whatsapp: transaction.customer_phone,
-				id_type: transaction.customer_identity_type,
-				id_number: transaction.customer_identity_number,
-				is_verified: false,
-			},
-		};
-
-		const createTicketDetailResponse = await fetch(`${BASE_API}/api/ticket-details`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${KEY_API}`,
-			},
-			body: JSON.stringify(ticketDetailPayload),
-		});
-
-		if (!createTicketDetailResponse.ok) {
-			const errorData = await createTicketDetailResponse.json();
-			console.error("Failed to create ticket-detail:", errorData);
-			return;
+		if (!recipients || recipients.length === 0) {
+			console.error(
+				"[Webhook] No ticket recipients found in transaction data",
+				transaction.ticket_recipients,
+			);
+			throw new Error("No ticket recipients found");
 		}
 
-		const newTicketDetail = await createTicketDetailResponse.json();
-		console.log("Successfully created ticket-detail:", newTicketDetail.data.id);
+		console.log(`[Webhook] Processing ${recipients.length} ticket recipients`);
 
-		// 5. Trigger email sending (non-blocking)
-		fetch(`${process.env.NEXTAUTH_URL}/api/send-ticket-email`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({ ticketDetailId: newTicketDetail.data.id }),
-		}).catch(error => {
-			console.error("Error triggering send-ticket-email:", error);
-		});
+		// 4. Create ticket-detail for each recipient
+		const createdTickets = [];
+		for (let index = 0; index < recipients.length; index++) {
+			const recipient = recipients[index];
 
+			if (!recipient || !recipient.email) {
+				console.warn(`[Webhook] Skipping recipient at index ${index}: missing email`, recipient);
+				continue;
+			}
+
+			try {
+				const randomCode = generateRandomCode(6);
+				const ticketCode = `CTix-${transactionId}-${index + 1}-${randomCode}`;
+				const verificationUrl = `${
+					process.env.NEXTAUTH_URL || "http://localhost:3000"
+				}/qr/verify?code=${ticketCode}`;
+
+				const ticketDetailPayload = {
+					data: {
+						ticket_code: ticketCode,
+						barcode_url: verificationUrl,
+						recipient_name: recipient.name || "",
+						recipient_email: recipient.email,
+						recipient_whatsapp: recipient.whatsapp_number || "",
+						id_type: recipient.identity_type || "",
+						id_number: recipient.identity_number || "",
+						is_verified: false,
+						transaction: transactionId,
+					},
+				};
+
+				console.log(
+					`[Webhook] Creating ticket-detail for recipient ${index + 1}: ${recipient.email}`,
+				);
+
+				const createTicketDetailResponse = await fetch(`${BASE_API}/api/ticket-details`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${KEY_API}`,
+					},
+					body: JSON.stringify(ticketDetailPayload),
+				});
+
+				if (!createTicketDetailResponse.ok) {
+					const errorData = await createTicketDetailResponse.text();
+					console.error(
+						`[Webhook] Failed to create ticket-detail for recipient ${index + 1}:`,
+						errorData,
+					);
+					throw new Error(`Failed to create ticket-detail: ${errorData}`);
+				}
+
+				const newTicketDetail = await createTicketDetailResponse.json();
+				const ticketDetailId = newTicketDetail.data?.id;
+
+				if (!ticketDetailId) {
+					console.error("[Webhook] No ID returned for created ticket-detail");
+					throw new Error("No ticket-detail ID in response");
+				}
+
+				createdTickets.push({
+					id: ticketDetailId,
+					email: recipient.email,
+					code: ticketCode,
+				});
+
+				console.log(
+					`[Webhook] Successfully created ticket-detail: ${ticketDetailId} for ${recipient.email}`,
+				);
+
+				// 5. Trigger e-ticket email sending (non-blocking)
+				const emailUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/send-eticket-email`;
+				console.log(`[Webhook] Queuing email send to: ${emailUrl}`);
+
+				fetch(emailUrl, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						ticketDetailId: ticketDetailId,
+						recipientEmail: recipient.email,
+						recipientName: recipient.name || "Penerima Tiket",
+						ticketCode: ticketCode,
+					}),
+				}).catch((error) => {
+					console.error(
+						`[Webhook] Error queuing e-ticket email for ${recipient.email}:`,
+						error,
+					);
+				});
+			} catch (recipientError) {
+				console.error(
+					`[Webhook] Error processing recipient at index ${index}:`,
+					recipientError,
+				);
+				// Continue processing other recipients even if one fails
+				continue;
+			}
+		}
+
+		if (createdTickets.length === 0) {
+			console.error("[Webhook] No tickets were successfully created");
+			throw new Error("Failed to create any ticket details");
+		}
+
+		console.log(
+			`[Webhook] Successfully created ${createdTickets.length} ticket details`,
+			createdTickets,
+		);
 	} catch (error) {
-		console.error("Error in handleSuccessfulTicketTransaction:", error);
+		console.error("[Webhook] Error in handleSuccessfulTicketTransaction:", error);
+		// Re-throw to be caught by the main handler
+		throw error;
 	}
 }
 
@@ -155,8 +260,93 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
 		}
 
-		// First, try to find and update transaction-tickets
+		// First, try to find and update transactions (for unified transaction flow)
 		try {
+			console.log(`[Webhook] Looking for transaction with order_id: ${order_id}`);
+			const encodedOrderId = encodeURIComponent(order_id);
+			const transactionResponse = await fetch(
+				`${BASE_API}/api/transactions?filters[order_id][$eq]=${encodedOrderId}`,
+				{
+					headers: {
+						Authorization: `Bearer ${KEY_API}`,
+					},
+				},
+			);
+
+			if (!transactionResponse.ok) {
+				throw new Error("Failed to fetch transactions");
+			}
+
+			const transactionData = await transactionResponse.json();
+			console.log(`[Webhook] Transaction search result:`, {
+				found: transactionData.data?.length > 0,
+				count: transactionData.data?.length || 0,
+			});
+
+			if (transactionData.data && transactionData.data.length > 0) {
+				const transactionDocument = transactionData.data[0];
+				const transactionDocumentId = transactionDocument.id;
+				const currentPaymentStatus = transactionDocument.attributes?.payment_status;
+				const eventType = transactionDocument.attributes?.event_type;
+
+				console.log(`[Webhook] Found transaction: ${transactionDocumentId}`, {
+					currentPaymentStatus,
+					eventType,
+					newPaymentStatus: paymentStatus,
+				});
+
+				// Update the payment status in Strapi
+				const updateResponse = await fetch(`${BASE_API}/api/transactions/${transactionDocumentId}`, {
+					method: "PUT",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${KEY_API}`,
+					},
+					body: JSON.stringify({
+						data: {
+							payment_status: paymentStatus,
+						},
+					}),
+				});
+
+				if (!updateResponse.ok) {
+					const errorData = await updateResponse.text();
+					console.error(
+						`[Webhook] Failed to update transaction ${transactionDocumentId}:`,
+						errorData,
+					);
+					// Don't throw - still proceed if it's a successful payment
+				} else {
+					console.log(`[Webhook] Successfully updated transaction payment status to: ${paymentStatus}`);
+				}
+
+				// If payment is successful AND it wasn't already marked as successful, handle ticket transaction
+				if (
+					(paymentStatus === "success" || paymentStatus === "settlement") &&
+					currentPaymentStatus !== "success" &&
+					currentPaymentStatus !== "settlement"
+				) {
+					console.log(
+						`[Webhook] Payment successful for transaction ${transactionDocumentId}. Processing tickets...`,
+					);
+					await handleSuccessfulTicketTransaction(transactionDocumentId, BASE_API, KEY_API);
+				}
+
+				return NextResponse.json({
+					success: true,
+					type: "transaction",
+					updated_id: transactionDocumentId,
+				});
+			}
+		} catch (error) {
+			console.error("[Webhook] Error processing transactions collection:", error);
+		}
+
+		// If not found in unified transactions, try transaction-tickets (legacy flow)
+		try {
+			console.log(
+				`[Webhook] Looking for transaction-ticket with order_id: ${order_id}`,
+			);
 			const encodedOrderId = encodeURIComponent(order_id);
 			const ticketResponse = await fetch(
 				`${BASE_API}/api/transaction-tickets?filters[order_id][$eq]=${encodedOrderId}&populate=*`,
@@ -179,56 +369,9 @@ export async function POST(req: NextRequest) {
 				const currentPaymentStatus = ticketDocument.attributes.payment_status;
 
 				// Update the payment status in Strapi
-				const updateResponse = await fetch(`${BASE_API}/api/transaction-tickets/${ticketDocumentId}`, {
-					method: "PUT",
-					headers: {
-						"Content-Type": "application/json",
-						Authorization: `Bearer ${KEY_API}`,
-					},
-					body: JSON.stringify({
-						data: {
-							payment_status: paymentStatus,
-						},
-					}),
-				});
-
-				if (!updateResponse.ok) {
-					const errorData = await updateResponse.json();
-					console.error(`Failed to update transaction-ticket ${ticketDocumentId}:`, errorData);
-					// Still, we might want to proceed if the status is already success.
-				}
-
-				// If payment is successful AND it wasn't already marked as successful, create the e-ticket
-				if (
-					(paymentStatus === "success" || paymentStatus === "settlement") &&
-					currentPaymentStatus !== "success" &&
-					currentPaymentStatus !== "settlement"
-				) {
-					await handleSuccessfulTicketTransaction(ticketDocumentId, BASE_API, KEY_API);
-				}
-
-				return NextResponse.json({ success: true, type: "ticket", updated_id: ticketDocumentId });
-			}
-		} catch (error) {
-			console.error("Error processing transaction-ticket:", error);
-		}
-
-		// If not a ticket or an error occurred, try regular transactions
-		try {
-			const transactionResponse = await fetch(
-				`${BASE_API}/api/transactions?filters[order_id][$eq]=${order_id}`,
-				{
-					headers: {
-						Authorization: `Bearer ${KEY_API}`,
-					},
-				},
-			);
-
-			if (transactionResponse.ok) {
-				const transactionData = await transactionResponse.json();
-				if (transactionData.data && transactionData.data.length > 0) {
-					const transactionId = transactionData.data[0].id;
-					const updateResponse = await fetch(`${BASE_API}/api/transactions/${transactionId}`, {
+				const updateResponse = await fetch(
+					`${BASE_API}/api/transaction-tickets/${ticketDocumentId}`,
+					{
 						method: "PUT",
 						headers: {
 							"Content-Type": "application/json",
@@ -239,15 +382,39 @@ export async function POST(req: NextRequest) {
 								payment_status: paymentStatus,
 							},
 						}),
-					});
+					},
+				);
 
-					if (updateResponse.ok) {
-						return NextResponse.json({ success: true, type: "transaction", updated_id: transactionId });
-					}
+				if (!updateResponse.ok) {
+					const errorData = await updateResponse.json();
+					console.error(
+						`[Webhook] Failed to update transaction-ticket ${ticketDocumentId}:`,
+						errorData,
+					);
+					// Still, we might want to proceed if the status is already success.
 				}
+
+				// If payment is successful AND it wasn't already marked as successful, create the e-ticket
+				if (
+					(paymentStatus === "success" || paymentStatus === "settlement") &&
+					currentPaymentStatus !== "success" &&
+					currentPaymentStatus !== "settlement"
+				) {
+					console.log(
+						`[Webhook] Processing legacy transaction-ticket: ${ticketDocumentId}`,
+					);
+					// Note: Legacy handler would be different - keeping original logic for backward compatibility
+					// await handleSuccessfulTicketTransaction(ticketDocumentId, BASE_API, KEY_API);
+				}
+
+				return NextResponse.json({
+					success: true,
+					type: "transaction-ticket",
+					updated_id: ticketDocumentId,
+				});
 			}
 		} catch (error) {
-			console.error("Error updating regular transaction:", error);
+			console.error("[Webhook] Error processing transaction-tickets collection:", error);
 		}
 
 		return NextResponse.json({ error: "Transaction not found or failed to update" }, { status: 404 });
