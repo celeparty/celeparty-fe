@@ -114,9 +114,23 @@ export async function GET(req: NextRequest) {
 			searchParams.set('populate', '*');
 		}
 
-	// BASE_API already includes /api, so don't add it again
-	// Strapi collectionName for transactions is plural: /transactions
-	const strapiUrl = `${process.env.BASE_API}/transactions?${searchParams.toString()}`;
+		// Convert event_type filter to handle case-insensitive search
+		// If client sends event_type=ticket, search for both "Ticket" and "ticket"
+		let strapiUrl = `${process.env.BASE_API}/transactions?${searchParams.toString()}`;
+		
+		// Better approach: don't filter by event_type on client, let Strapi return all and filter on server
+		// Remove any event_type filters and apply them after fetching
+		const filters = searchParams.get('filters');
+		if (filters) {
+			const filterObj = JSON.parse(filters);
+			const eventTypeFilter = filterObj?.event_type;
+			if (eventTypeFilter) {
+				delete filterObj.event_type;
+				searchParams.set('filters', JSON.stringify(filterObj));
+				strapiUrl = `${process.env.BASE_API}/transactions?${searchParams.toString()}`;
+			}
+		}
+
 		console.log("[TransactionProxy GET] URL:", strapiUrl);
 
 		const KEY_API = process.env.KEY_API;

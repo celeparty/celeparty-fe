@@ -34,7 +34,9 @@ export default function VendorInformasiTransaksiPage() {
 
 		try {
 			const vendorId = session.user.documentId;
-			const url = `/api/transaction-proxy?filters[vendor_doc_id][$eq]=${vendorId}&populate=*&pagination[pageSize]=1000&sort=createdAt:desc`;
+			
+			// Simplified URL - remove complex filters
+			const url = `/api/transaction-proxy?pagination[pageSize]=100&sort=createdAt:desc`;
 			
 			console.log("[fetchTransactionData] Fetching from:", url);
 			console.log("[fetchTransactionData] Vendor ID:", vendorId);
@@ -42,16 +44,24 @@ export default function VendorInformasiTransaksiPage() {
 			const response = await axios.get(url);
 
 			const allTransactions = response.data.data || [];
-			console.log("[fetchTransactionData] Got", allTransactions.length, 'transactions');
+			console.log("[fetchTransactionData] Got", allTransactions.length, 'total transactions');
+
+			// Filter by vendor ID and event type on client side
+			const vendorTransactions = allTransactions.filter((t: any) => {
+				const txVendorId = t.attributes?.vendor_doc_id;
+				return txVendorId === vendorId;
+			});
+
+			console.log("[fetchTransactionData] Filtered to", vendorTransactions.length, 'vendor transactions');
 
 			// Pisahkan tiket dan non-tiket (case-insensitive)
-			const tiketTransactions = allTransactions.filter(
+			const tiketTransactions = vendorTransactions.filter(
 				(t: any) => {
 					const eventType = t.attributes?.event_type?.toLowerCase();
 					return eventType === "ticket" || eventType === "tiket";
 				}
 			);
-			const umumTransactions = allTransactions.filter(
+			const umumTransactions = vendorTransactions.filter(
 				(t: any) => {
 					const eventType = t.attributes?.event_type?.toLowerCase();
 					return eventType !== "ticket" && eventType !== "tiket";
@@ -60,9 +70,10 @@ export default function VendorInformasiTransaksiPage() {
 
 			console.log("[fetchTransactionData] Summary:", {
 				total: allTransactions.length,
+				vendor: vendorTransactions.length,
 				tiket: tiketTransactions.length,
 				umum: umumTransactions.length,
-				eventTypes: allTransactions.map((t: any) => t.attributes?.event_type),
+				eventTypes: vendorTransactions.map((t: any) => t.attributes?.event_type).slice(0, 5),
 			});
 
 			return {
@@ -70,9 +81,13 @@ export default function VendorInformasiTransaksiPage() {
 				umum: umumTransactions,
 			};
 		} catch (error: any) {
-			console.error("[fetchTransactionData] Error:", error.response?.status, error.message);
+			console.error("[fetchTransactionData] Error:", {
+				status: error.response?.status,
+				message: error.message,
+				data: error.response?.data
+			});
 			if (error.response?.status === 404) {
-				console.error("[fetchTransactionData] 404 - Check if transaction-proxy endpoint exists");
+				console.error("[fetchTransactionData] 404 - transaction-proxy endpoint not found or responding with error");
 			}
 			if (error.response?.status === 401) {
 				console.error("[fetchTransactionData] 401 - Authorization failed. Check KEY_API");
