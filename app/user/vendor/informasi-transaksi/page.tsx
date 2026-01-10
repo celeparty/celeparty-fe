@@ -27,36 +27,56 @@ export default function VendorInformasiTransaksiPage() {
 	}, [status, session, router]);
 
 	const fetchTransactionData = async () => {
-		if (!session?.user?.documentId) return { tiket: [], umum: [] };
+		if (!session?.user?.documentId) {
+			console.warn("[fetchTransactionData] No documentId available");
+			return { tiket: [], umum: [] };
+		}
 
 		try {
-			// Fetch semua transaksi vendor
-			const response = await axios.get(
-				`/api/transaction-proxy?filters[vendor_doc_id][$eq]=${session.user.documentId}&populate=*&pagination[pageSize]=1000&sort=createdAt:desc`
-			);
+			const vendorId = session.user.documentId;
+			const url = `/api/transaction-proxy?filters[vendor_doc_id][$eq]=${vendorId}&populate=*&pagination[pageSize]=1000&sort=createdAt:desc`;
+			
+			console.log("[fetchTransactionData] Fetching from:", url);
+			console.log("[fetchTransactionData] Vendor ID:", vendorId);
+			
+			const response = await axios.get(url);
 
 			const allTransactions = response.data.data || [];
+			console.log("[fetchTransactionData] Got", allTransactions.length, 'transactions');
 
-			// Pisahkan tiket dan non-tiket
+			// Pisahkan tiket dan non-tiket (case-insensitive)
 			const tiketTransactions = allTransactions.filter(
-				(t: any) => t.attributes?.event_type === "ticket" || t.attributes?.event_type === "tiket"
+				(t: any) => {
+					const eventType = t.attributes?.event_type?.toLowerCase();
+					return eventType === "ticket" || eventType === "tiket";
+				}
 			);
 			const umumTransactions = allTransactions.filter(
-				(t: any) => t.attributes?.event_type !== "ticket" && t.attributes?.event_type !== "tiket"
+				(t: any) => {
+					const eventType = t.attributes?.event_type?.toLowerCase();
+					return eventType !== "ticket" && eventType !== "tiket";
+				}
 			);
 
-			console.log("Transaction Data:", {
+			console.log("[fetchTransactionData] Summary:", {
 				total: allTransactions.length,
 				tiket: tiketTransactions.length,
 				umum: umumTransactions.length,
+				eventTypes: allTransactions.map((t: any) => t.attributes?.event_type),
 			});
 
 			return {
 				tiket: tiketTransactions,
 				umum: umumTransactions,
 			};
-		} catch (error) {
-			console.error("Error fetching transactions:", error);
+		} catch (error: any) {
+			console.error("[fetchTransactionData] Error:", error.response?.status, error.message);
+			if (error.response?.status === 404) {
+				console.error("[fetchTransactionData] 404 - Check if transaction-proxy endpoint exists");
+			}
+			if (error.response?.status === 401) {
+				console.error("[fetchTransactionData] 401 - Authorization failed. Check KEY_API");
+			}
 			throw error;
 		}
 	};
@@ -77,6 +97,11 @@ export default function VendorInformasiTransaksiPage() {
 		return null;
 	}
 
+	// Debug logging
+	if (!session?.user?.documentId) {
+		console.warn("[InformasiTransaksi] No vendor documentId found in session:", session?.user);
+	}
+
 	return (
 		<div className="wrapper-big py-8 lg:py-12">
 			<Box>
@@ -86,6 +111,12 @@ export default function VendorInformasiTransaksiPage() {
 						Lihat semua transaksi produk Anda berdasarkan kategori tiket dan umum
 					</p>
 				</div>
+
+				{!session?.user?.documentId && (
+					<div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded mb-6">
+						⚠️ Vendor ID tidak ditemukan. Silakan logout dan login kembali.
+					</div>
+				)}
 
 				<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
 					<TabsList className="grid w-full grid-cols-2 mb-6">
