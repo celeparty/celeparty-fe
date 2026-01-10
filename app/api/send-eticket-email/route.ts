@@ -1,16 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import nodemailer from "nodemailer";
-
-// Configure email transporter
-const transporter = nodemailer.createTransport({
-	host: process.env.SMTP_HOST || "localhost",
-	port: parseInt(process.env.SMTP_PORT || "587"),
-	secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
-	auth: {
-		user: process.env.SMTP_USER,
-		pass: process.env.SMTP_PASSWORD,
-	},
-});
 
 // Helper function to generate QR code URL
 function generateQRCodeUrl(text: string): string {
@@ -275,24 +263,54 @@ export async function POST(req: NextRequest) {
 			qrCodeUrl,
 		);
 
-		const mailOptions = {
-			from: process.env.SMTP_FROM || "noreply@celeparty.com",
-			to: recipientEmail,
-			subject: `🎫 E-Tiket Anda - ${ticketCode}`,
-			html: emailHtml,
-		};
-
 		console.log("[E-Ticket Email] Sending email to:", recipientEmail);
 
-		// Send email
-		const info = await transporter.sendMail(mailOptions);
-		console.log("[E-Ticket Email] Email sent successfully:", info.messageId);
+		// Send email via Strapi backend
+		const BASE_API = process.env.BASE_API || "http://localhost:1337";
+		const KEY_API = process.env.KEY_API;
+
+		if (!KEY_API) {
+			console.error("[E-Ticket Email] KEY_API not configured");
+			return NextResponse.json(
+				{ error: "Server configuration error" },
+				{ status: 500 },
+			);
+		}
+
+		// Call Strapi email plugin endpoint
+		const strapiEmailResponse = await fetch(`${BASE_API}/api/email/send`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${KEY_API}`,
+			},
+			body: JSON.stringify({
+				to: recipientEmail,
+				subject: `🎫 E-Tiket Anda - ${ticketCode}`,
+				html: emailHtml,
+			}),
+		});
+
+		if (!strapiEmailResponse.ok) {
+			const errorData = await strapiEmailResponse.text();
+			console.error("[E-Ticket Email] Failed to send email via Strapi:", errorData);
+			return NextResponse.json(
+				{
+					error: "Failed to send e-ticket email",
+					details: errorData,
+				},
+				{ status: 500 },
+			);
+		}
+
+		const emailResult = await strapiEmailResponse.json();
+		console.log("[E-Ticket Email] Email sent successfully via Strapi");
 
 		return NextResponse.json(
 			{
 				success: true,
 				message: "E-ticket email sent successfully",
-				messageId: info.messageId,
+				sentVia: "Strapi",
 			},
 			{ status: 200 },
 		);
