@@ -49,7 +49,7 @@ export const TicketDashboard: React.FC = () => {
 		try {
 			const response = await axiosUser(
 				"GET",
-				`/api/tickets?filters[vendor_id][$eq]=${encodeURIComponent(session.user.documentId)}&populate=variant,main_image&sort=createdAt:desc`,
+				`/api/tickets?filters[vendor_doc_id][$eq]=${encodeURIComponent(session.user.documentId)}&populate=variant,main_image&sort=createdAt:desc`,
 				`${session?.jwt}`,
 			);
 			return response;

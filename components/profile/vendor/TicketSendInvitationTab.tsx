@@ -82,7 +82,7 @@ const TicketSendInvitationTab: React.FC<TicketSendInvitationTabProps> = ({ vendo
     try {
       const response = await axiosUser(
         "GET",
-        `/api/transaction-tickets?filters[vendor_id][$eq]=${encodeURIComponent(vendorDocumentId)}&filters[payment_status][$eq]=bypass&sort=createdAt:desc`,
+        `/api/transaction-tickets?filters[vendor_doc_id][$eq]=${encodeURIComponent(vendorDocumentId)}&filters[payment_status][$eq]=bypass&sort=createdAt:desc`,
         jwtToken,
       );
       return response;

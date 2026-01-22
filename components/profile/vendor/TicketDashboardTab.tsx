@@ -316,7 +316,7 @@ const TicketDashboardTab: React.FC<TicketDashboardTabProps> = ({ vendorDocumentI
     try {
       const params = new URLSearchParams();
       const filters: Record<string, string> = {
-        "filters[vendor_id][$eq]": vendorDocumentId,
+        "filters[vendor_doc_id][$eq]": vendorDocumentId,
       };
       for (const key in filters) {
         if (Object.prototype.hasOwnProperty.call(filters, key)) {

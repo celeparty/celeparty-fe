@@ -24,7 +24,7 @@ export const TicketDashboard: React.FC = () => {
 		try {
 			// 1. Fetch all ticket transactions using transaction-tickets endpoint
 			console.log("TicketDashboard - Fetching vendor's ticket transactions...");
-			const filterParam = `filters[vendor_id][$eq]=${session.user.documentId}`;
+			const filterParam = `filters[vendor_doc_id][$eq]=${session.user.documentId}`;
 			const url = `/api/transaction-tickets-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=1000`;
 			console.log("TicketDashboard - Request URL:", url);
 			

@@ -51,7 +51,7 @@ export interface iOrder {
 	total_price?: string;
 	customer_mail?: string;
 	verification_ticket?: boolean;
-	vendor_id?: string;
+	vendor_doc_id?: string;
 	waktu_event?: string;
 	recipients?: any[];
 }
@@ -88,7 +88,7 @@ export interface iOrderTicket {
 	order_id: string;
 	customer_mail: string;
 	verification: boolean;
-	vendor_id: string;
+	vendor_doc_id: string;
 	event_type: string;
 	waktu_event: string;
 	// New fields from product.user_event_type (assuming API flattens or they are directly available)

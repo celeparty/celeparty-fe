@@ -58,7 +58,7 @@ export const TicketVerificationImproved: React.FC = () => {
 			const vendorTransactions = allTransactions.filter((transaction: any) => {
 				const attrs = transaction.attributes;
 				// Check both possible field names
-				const vendorId = attrs.vendor_doc_id || attrs.vendor_id || attrs.mitra_id;
+				const vendorId = attrs.vendor_doc_id || attrs.vendor_doc_id || attrs.mitra_id;
 				return vendorId === session.user.documentId;
 			});
 
