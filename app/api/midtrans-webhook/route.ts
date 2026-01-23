@@ -232,7 +232,7 @@ export async function POST(req: NextRequest) {
 		switch (transaction_status) {
 			case "capture":
 			case "settlement":
-				paymentStatus = "success";
+				paymentStatus = "settlement";
 				break;
 			case "pending":
 				paymentStatus = "pending";
@@ -396,10 +396,7 @@ export async function POST(req: NextRequest) {
 
 				// If payment is successful AND it wasn't already marked as successful, create the e-ticket
 				if (
-					(paymentStatus === "success" || paymentStatus === "settlement") &&
-					currentPaymentStatus !== "success" &&
-					currentPaymentStatus !== "settlement"
-				) {
+				(paymentStatus === "settlement") &&
 					console.log(
 						`[Webhook] Processing legacy transaction-ticket: ${ticketDocumentId}`,
 					);

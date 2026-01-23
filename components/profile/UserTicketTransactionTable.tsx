@@ -39,8 +39,8 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 			let filterParam = '';
 			
 			if (isVendor && session?.user?.documentId) {
-				// For vendor, filter by vendor_id
-				filterParam = `filters[vendor_id][$eq]=${session.user.documentId}`;
+				// For vendor, filter by vendor_doc_id
+				filterParam = `filters[vendor_doc_id][$eq]=${session.user.documentId}`;
 				console.log("UserTicketTransactionTable - Vendor filter:", filterParam);
 			} else if (!isVendor && session?.user?.email) {
 				// For customer, filter by customer_mail (not email field in transaction-tickets)
