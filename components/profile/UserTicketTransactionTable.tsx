@@ -137,7 +137,7 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 				order_id: attr.order_id || '',
 				customer_mail: attr.customer_mail || '',
 				verification: attr.verification || false,
-				vendor_id: attr.vendor_id || '',
+			vendor_doc_id: attr.vendor_doc_id || '',
 				event_type: attr.event_type || 'ticket',
 				waktu_event: productData?.waktu_event || '',
 				transaction_type: "ticket",
