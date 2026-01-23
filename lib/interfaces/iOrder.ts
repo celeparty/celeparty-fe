@@ -51,7 +51,7 @@ export interface iOrder {
 	total_price?: string;
 	customer_mail?: string;
 	verification_ticket?: boolean;
-	vendor_doc_id?: string;
+	vendor_id?: string
 	waktu_event?: string;
 	recipients?: any[];
 }
