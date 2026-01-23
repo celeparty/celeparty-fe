@@ -397,8 +397,8 @@ export async function POST(req: NextRequest) {
 				// If payment is successful AND it wasn't already marked as successful, create the e-ticket
 				if (
 				(paymentStatus === "settlement") &&
-					console.log(
-						`[Webhook] Processing legacy transaction-ticket: ${ticketDocumentId}`,
+				currentPaymentStatus !== "settlement"
+			) {
 					);
 					// Note: Legacy handler would be different - keeping original logic for backward compatibility
 					// await handleSuccessfulTicketTransaction(ticketDocumentId, BASE_API, KEY_API);
