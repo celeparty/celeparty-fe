@@ -401,12 +401,16 @@ export async function POST(req: NextRequest) {
 			) {
 				console.log(
 					`[Webhook] Processing legacy transaction-ticket: ${ticketDocumentId}`,
+			);
+			// Note: Legacy handler would be different - keeping original logic for backward compatibility
+			// await handleSuccessfulTicketTransaction(ticketDocumentId, BASE_API, KEY_API);
+		}
 
-				return NextResponse.json({
-					success: true,
-					type: "transaction-ticket",
-					updated_id: ticketDocumentId,
-				});
+		return NextResponse.json({
+			success: true,
+			type: "transaction-ticket",
+			updated_id: ticketDocumentId,
+		});
 			}
 		} catch (error) {
 			console.error("[Webhook] Error processing transaction-tickets collection:", error);
