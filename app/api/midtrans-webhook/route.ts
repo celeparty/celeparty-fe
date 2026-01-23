@@ -399,10 +399,8 @@ export async function POST(req: NextRequest) {
 				(paymentStatus === "settlement") &&
 				currentPaymentStatus !== "settlement"
 			) {
-					);
-					// Note: Legacy handler would be different - keeping original logic for backward compatibility
-					// await handleSuccessfulTicketTransaction(ticketDocumentId, BASE_API, KEY_API);
-				}
+				console.log(
+					`[Webhook] Processing legacy transaction-ticket: ${ticketDocumentId}`,
 
 				return NextResponse.json({
 					success: true,
