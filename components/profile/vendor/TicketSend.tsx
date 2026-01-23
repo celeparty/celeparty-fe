@@ -65,7 +65,7 @@ export const TicketSend: React.FC = () => {
 	const getSendHistory = async () => {
 		const response = await axiosUser(
 			"GET",
-			`/api/transaction-tickets?filters[vendor_doc_id][$eq]=${session?.user?.documentId}&filters[payment_status][$eq]=bypass&sort=createdAt:desc`,
+			`/api/transaction-tickets?filters[vendor_id][$eq]=${session?.user?.documentId}&filters[payment_status][$eq]=bypass&sort=createdAt:desc`,
 			`${session?.jwt}`,
 		);
 		return response;
@@ -103,7 +103,7 @@ export const TicketSend: React.FC = () => {
 						)?.price || 0) * quantity,
 					payment_status: "bypass",
 					verification: false,
-					vendor_doc_id: session?.user?.documentId,
+					vendor_id: session?.user?.documentId,
 					recipients: recipients,
 					note: note,
 					event_date: selectedProductData?.event_date,

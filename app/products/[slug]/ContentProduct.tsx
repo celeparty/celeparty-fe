@@ -110,7 +110,7 @@ export default function ContentProduct(props: any) {
               <h5 className="font-hint text-[20px] lg:text-sm mb-2 font-medium text-black lg:text-c-gray-text2">
                 {dataContent?.category
                   ? dataContent?.category.title
-                  : "Kategori Tidak Tersedia"}
+                  : "Kategory Tidak Tersedia"}
               </h5>
               <h1 className="text-[26px] font-hind font-bold">
                 {dataContent?.title

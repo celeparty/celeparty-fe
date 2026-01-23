@@ -47,7 +47,7 @@ export const TicketScan: React.FC = () => {
 	const getVerificationHistory = async () => {
 		const response = await axiosUser(
 			"GET",
-			`/api/transaction-tickets?filters[vendor_doc_id][$eq]=${session?.user?.documentId}&filters[verification][$eq]=true&sort=updatedAt:desc`,
+			`/api/transaction-tickets?filters[vendor_id][$eq]=${session?.user?.documentId}&filters[verification][$eq]=true&sort=updatedAt:desc`,
 			`${session?.jwt}`,
 		);
 		return response;

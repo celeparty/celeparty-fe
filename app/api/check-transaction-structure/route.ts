@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
 			telp: transaction.telp,
 			note: transaction.note,
 			verification: transaction.verification,
-			vendor_doc_id: transaction.vendor_doc_id,
+			vendor_id: transaction.vendor_id,
 			all_fields: Object.keys(transaction),
 		};
 

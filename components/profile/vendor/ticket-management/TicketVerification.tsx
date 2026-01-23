@@ -48,7 +48,7 @@ export const TicketVerification: React.FC = () => {
 		try {
 			// Fetch ticket transactions for this vendor
 			const { axiosUser } = await import('@/lib/services');
-			const filterParam = `filters[vendor_doc_id][$eq]=${session.user.documentId}`;
+			const filterParam = `filters[vendor_id][$eq]=${session.user.documentId}`;
 			const response = await axiosUser(
 				"GET",
 				`/api/transaction-tickets-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=1000`,
@@ -114,7 +114,7 @@ export const TicketVerification: React.FC = () => {
 				return;
 			}
 
-			const filterParam = `filters[vendor_doc_id][$eq]=${session?.user?.documentId}`;
+			const filterParam = `filters[vendor_id][$eq]=${session?.user?.documentId}`;
 			const response = await axiosUser(
 				"GET",
 				`/api/transaction-tickets-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=1000`,

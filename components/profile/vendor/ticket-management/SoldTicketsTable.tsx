@@ -53,7 +53,7 @@ export const SoldTicketsTable: React.FC<iSoldTicketsTableProps> = ({ productId, 
 
         try {
             // Fetch all ticket transactions for this vendor
-            const filterParam = `filters[vendor_doc_id][$eq]=${session.user.documentId}`;
+            const filterParam = `filters[vendor_id][$eq]=${session.user.documentId}`;
             const url = `/api/transaction-tickets-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=1000`;
             
             const response = await axiosUser("GET", url, session.jwt);

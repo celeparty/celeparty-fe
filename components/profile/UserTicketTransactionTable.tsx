@@ -39,8 +39,8 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 			let filterParam = '';
 			
 			if (isVendor && session?.user?.documentId) {
-				// For vendor, filter by vendor_doc_id
-				filterParam = `filters[vendor_doc_id][$eq]=${session.user.documentId}`;
+				// For vendor, filter by vendor_id
+				filterParam = `filters[vendor_id][$eq]=${session.user.documentId}`;
 				console.log("UserTicketTransactionTable - Vendor filter:", filterParam);
 			} else if (!isVendor && session?.user?.email) {
 				// For customer, filter by customer_mail (not email field in transaction-tickets)
@@ -114,7 +114,7 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 				id: item.id,
 				product_name: attr.product_name,
 				recipients_count: recipients.length,
-				vendor_doc_id: attr.vendor_doc_id,
+				vendor_id: attr.vendor_id,
 				raw_attr: attr
 			});
 
@@ -137,7 +137,7 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 				order_id: attr.order_id || '',
 				customer_mail: attr.customer_mail || '',
 				verification: attr.verification || false,
-				vendor_doc_id: attr.vendor_doc_id || '',
+				vendor_id: attr.vendor_id || '',
 				event_type: attr.event_type || 'ticket',
 				waktu_event: productData?.waktu_event || '',
 				transaction_type: "ticket",

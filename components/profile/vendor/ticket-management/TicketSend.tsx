@@ -99,7 +99,7 @@ export const TicketSend: React.FC = () => {
 					id: p.id || p.documentId,
 					documentId: p.id || p.documentId,
 					title: p.attributes?.title || p.title || "Tiket Tanpa Nama",
-					vendor_doc_id: p.attributes?.users_permissions_user?.data?.id || p.attributes?.users_permissions_user,
+					vendor_id: p.attributes?.users_permissions_user?.data?.id || p.attributes?.users_permissions_user,
 					variant: variantArray.map((v: any) => ({
 						id: v.id || v.documentId,
 						documentId: v.id || v.documentId,
@@ -119,12 +119,12 @@ export const TicketSend: React.FC = () => {
 			}).filter((product: any) => {
 				// Client-side filter: Only return products where vendor matches current user
 				// This handles case where filter didn't work on server side
-				const vendorMatch = product.vendor_doc_id === session.user.documentId ||
-					product.vendor_doc_id === session.user.id ||
-					!product.vendor_doc_id; // Include if vendor_doc_id not set (fallback)
+				const vendorMatch = product.vendor_id === session.user.documentId ||
+					product.vendor_id === session.user.id ||
+					!product.vendor_id; // Include if vendor_id not set (fallback)
 				console.log("TicketSend - Product filter check:", {
 					title: product.title,
-					vendor_doc_id: product.vendor_doc_id,
+					vendor_id: product.vendor_id,
 					currentUser: session.user.documentId,
 					matches: vendorMatch
 				});
