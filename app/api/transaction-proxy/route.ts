@@ -121,13 +121,23 @@ export async function GET(req: NextRequest) {
 
 		console.log("[TransactionProxy GET] Extracted params:", { vendorDocId, eventType, pageSize, page, sort });
 
+		// Validate vendor_doc_id is provided
+		if (!vendorDocId) {
+			console.error("[TransactionProxy GET] Missing vendor_doc_id parameter");
+			return NextResponse.json(
+				{
+					error: "Missing vendor_doc_id parameter",
+					statusCode: 400,
+				},
+				{ status: 400 }
+			);
+		}
+
 		// Build proper Strapi URL with correct filter syntax
 		let strapiUrl = `${process.env.BASE_API}/transactions?`;
 		
 		// Add filters - Strapi expects: filters[field][operator]=value
-		if (vendorDocId) {
-			strapiUrl += `filters[vendor_doc_id][$eq]=${encodeURIComponent(vendorDocId)}&`;
-		}
+		strapiUrl += `filters[vendor_doc_id][$eq]=${encodeURIComponent(vendorDocId)}&`;
 		
 		if (eventType) {
 			strapiUrl += `filters[event_type][$eq]=${encodeURIComponent(eventType)}&`;

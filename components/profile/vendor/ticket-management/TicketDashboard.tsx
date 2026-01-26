@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
-import { axiosUser } from "@/lib/services";
+import axios from "axios";
 import { iTicketSummary, iVariantSummary } from "@/lib/interfaces/iTicketManagement";
 import Skeleton from "@/components/Skeleton";
 import { TicketSummaryTable } from "./TicketSummaryTable";
@@ -25,14 +25,20 @@ export const TicketDashboard: React.FC = () => {
 			// 1. Fetch all ticket transactions using transaction-tickets endpoint
 			console.log("TicketDashboard - Fetching vendor's ticket transactions...");
 			const vendorId = session.user.documentId;
-			const url = `/api/transaction-tickets-proxy?vendor_doc_id=${encodeURIComponent(vendorId)}&sort=createdAt:desc&pageSize=1000`;
+			
+			const params = new URLSearchParams();
+			params.append('vendor_doc_id', vendorId);
+			params.append('sort', 'createdAt:desc');
+			params.append('pageSize', '1000');
+			
+			const url = `/api/transaction-tickets-proxy?${params.toString()}`;
 			console.log("TicketDashboard - Request URL:", url);
 			
-			const transactionsResponse = await axiosUser(
-				"GET",
-				url,
-				session.jwt
-			);
+			const transactionsResponse = await axios.get(url, {
+				headers: {
+					Authorization: `Bearer ${session.jwt}`,
+				},
+			});
 			
 			const transactions = transactionsResponse.data?.data || [];
 			console.log("TicketDashboard - Vendor's ticket transactions received:", {

@@ -3,13 +3,13 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import axios from "axios";
 import Box from "@/components/Box";
 import Skeleton from "@/components/Skeleton";
 import ErrorNetwork from "@/components/ErrorNetwork";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TransactionProductList from "@/components/vendor/transaction/TransactionProductList";
 import { useQuery } from "@tanstack/react-query";
-import { axiosUser } from "@/lib/services";
 
 export default function VendorInformasiTransaksiPage() {
 	const { data: session, status } = useSession();
@@ -38,11 +38,21 @@ export default function VendorInformasiTransaksiPage() {
 			
 			console.log("[fetchTransactionData] Fetching transactions for vendor:", vendorId);
 			
-			// Fetch transaksi umum (non-ticket)
-			const umumUrl = `/api/transaction-proxy?vendor_doc_id=${encodeURIComponent(vendorId)}&pageSize=100&page=1&sort=createdAt:desc`;
+			// Build URL untuk transaksi umum - use axios directly untuk next.js API endpoints
+			const umumParams = new URLSearchParams();
+			umumParams.append('vendor_doc_id', vendorId);
+			umumParams.append('pageSize', '100');
+			umumParams.append('page', '1');
+			umumParams.append('sort', 'createdAt:desc');
+			
+			const umumUrl = `/api/transaction-proxy?${umumParams.toString()}`;
 			console.log("[fetchTransactionData] Umum URL:", umumUrl);
 			
-			const umumResponse = await axiosUser("GET", umumUrl, jwt);
+			const umumResponse = await axios.get(umumUrl, {
+				headers: {
+					Authorization: `Bearer ${jwt}`,
+				},
+			});
 			const umumTransactions = umumResponse?.data?.data || [];
 			console.log("[fetchTransactionData] Got", umumTransactions.length, 'umum transactions');
 
@@ -54,11 +64,21 @@ export default function VendorInformasiTransaksiPage() {
 				}
 			);
 			
-			// Fetch transaksi tiket
-			const tiketUrl = `/api/transaction-tickets-proxy?vendor_doc_id=${encodeURIComponent(vendorId)}&pageSize=100&page=1&sort=createdAt:desc`;
+			// Build URL untuk transaksi tiket
+			const tiketParams = new URLSearchParams();
+			tiketParams.append('vendor_doc_id', vendorId);
+			tiketParams.append('pageSize', '100');
+			tiketParams.append('page', '1');
+			tiketParams.append('sort', 'createdAt:desc');
+			
+			const tiketUrl = `/api/transaction-tickets-proxy?${tiketParams.toString()}`;
 			console.log("[fetchTransactionData] Tiket URL:", tiketUrl);
 			
-			const tiketResponse = await axiosUser("GET", tiketUrl, jwt);
+			const tiketResponse = await axios.get(tiketUrl, {
+				headers: {
+					Authorization: `Bearer ${jwt}`,
+				},
+			});
 			const tiketTransactions = tiketResponse?.data?.data || [];
 			console.log("[fetchTransactionData] Got", tiketTransactions.length, "ticket transactions");
 

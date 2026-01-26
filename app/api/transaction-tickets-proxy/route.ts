@@ -102,13 +102,23 @@ export async function GET(req: NextRequest) {
 
 		console.log("[transaction-tickets-proxy GET] Extracted params:", { vendorDocId, pageSize, page, sort });
 
+		// Validate vendor_doc_id is provided
+		if (!vendorDocId) {
+			console.error("[transaction-tickets-proxy GET] Missing vendor_doc_id parameter");
+			return NextResponse.json(
+				{
+					error: "Missing vendor_doc_id parameter",
+					statusCode: 400,
+				},
+				{ status: 400 }
+			);
+		}
+
 		// Build proper Strapi URL for transaction-tickets
 		let strapiUrl = `${process.env.BASE_API}/transaction-tickets?`;
 		
 		// Add filters
-		if (vendorDocId) {
-			strapiUrl += `filters[vendor_doc_id][$eq]=${encodeURIComponent(vendorDocId)}&`;
-		}
+		strapiUrl += `filters[vendor_doc_id][$eq]=${encodeURIComponent(vendorDocId)}&`;
 
 		// Add pagination and sort
 		strapiUrl += `pagination[pageSize]=${encodeURIComponent(pageSize)}&`;
