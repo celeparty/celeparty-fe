@@ -265,7 +265,7 @@ export const TicketSend: React.FC = () => {
 				headers: { Authorization: `Bearer ${session?.jwt || ''}` }
 			});
 
-			if (response?.success) {
+			if (response?.data?.success) {
 				toast({
 					title: "Sukses",
 					description: `Tiket berhasil dikirim ke ${recipients.length} penerima!`,

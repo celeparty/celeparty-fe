@@ -4,7 +4,7 @@ import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { axiosUser } from "@/lib/services";
+import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { Eye, AlertCircle, Edit } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -47,12 +47,11 @@ export const TicketDashboard: React.FC = () => {
 			throw new Error("Vendor ID is missing");
 		}
 		try {
-			const response = await axiosUser(
-				"GET",
+			const response = await axios.get(
 				`/api/tickets?filters[vendor_doc_id][$eq]=${encodeURIComponent(session.user.documentId)}&populate=variant,main_image&sort=createdAt:desc`,
-				`${session?.jwt}`,
+				{ headers: { Authorization: `Bearer ${session?.jwt}` } }
 			);
-			return response;
+			return response.data;
 		} catch (error: any) {
 			console.error("Error fetching ticket products:", error);
 			throw new Error(error?.response?.data?.error?.message || "Failed to fetch ticket data");

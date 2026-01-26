@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { axiosUser } from "@/lib/services";
+import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Minus, Plus, Send } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -111,8 +111,10 @@ export const TicketSend: React.FC = () => {
 				},
 			};
 
-			const response = await axiosUser("POST", "/api/transaction-tickets-proxy", `${session?.jwt}`, payload);
-			return response;
+			const response = await axios.post("/api/transaction-tickets-proxy", payload, {
+				headers: { Authorization: `Bearer ${session?.jwt}` }
+			});
+			return response.data;
 		},
 		onSuccess: () => {
 			toast.success("Tiket berhasil dikirim!");
