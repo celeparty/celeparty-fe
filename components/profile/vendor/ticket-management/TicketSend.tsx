@@ -107,10 +107,9 @@ export const TicketSend: React.FC = () => {
 		if (!session?.jwt) return [];
 		try {
 			// Correct endpoint: /api/ticket-send-histories instead of /api/transactions/send-history
-			const response = await axiosUser(
-				"GET",
-				`/api/ticket-send-histories?filters[vendor][$eq]=${session.user.documentId}&sort=createdAt:desc&pagination[pageSize]=100`,
-				session.jwt
+			const response = await axios.get(
+				`/api/ticket-send-histories?filters[vendor][$eq]=${encodeURIComponent(session.user.documentId)}&sort=createdAt:desc&pagination[pageSize]=100`,
+				{ headers: { Authorization: `Bearer ${session.jwt}` } }
 			);
 			const histories = response.data?.data || [];
 			console.log("Ticket send history:", histories);
