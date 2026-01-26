@@ -54,21 +54,19 @@ export const TicketSend: React.FC = () => {
 	const [showPasswordDialog, setShowPasswordDialog] = useState(false);
 
 	const getTicketProducts = async () => {
-		const response = await axiosUser(
-			"GET",
-			`/api/tickets?filters[users_permissions_user][documentId][$eq]=${session?.user?.documentId}&populate=*`,
-			`${session?.jwt}`,
+		const response = await axios.get(
+			`/api/tickets?filters[users_permissions_user][documentId][$eq]=${encodeURIComponent(session?.user?.documentId || '')}&populate=*`,
+			{ headers: { Authorization: `Bearer ${session?.jwt}` } }
 		);
-		return response;
+		return response.data;
 	};
 
 	const getSendHistory = async () => {
-		const response = await axiosUser(
-			"GET",
-			`/api/transaction-tickets?filters[vendor_doc_id][$eq]=${session?.user?.documentId}&filters[payment_status][$eq]=bypass&sort=createdAt:desc`,
-			`${session?.jwt}`,
+		const response = await axios.get(
+			`/api/transaction-tickets?filters[vendor_doc_id][$eq]=${encodeURIComponent(session?.user?.documentId || '')}&filters[payment_status][$eq]=bypass&sort=createdAt:desc`,
+			{ headers: { Authorization: `Bearer ${session?.jwt}` } }
 		);
-		return response;
+		return response.data;
 	};
 
 	const productsQuery = useQuery({
