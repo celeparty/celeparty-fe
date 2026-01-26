@@ -109,29 +109,25 @@ export async function GET(req: NextRequest) {
 		const url = new URL(req.url);
 		const searchParams = url.searchParams;
 
-		// Set populate to get all relations
+		console.log("[TransactionProxy GET] Incoming searchParams:", searchParams.toString());
+
+		// Set populate to get all relations if not specified
 		if (!searchParams.has('populate')) {
 			searchParams.set('populate', '*');
 		}
 
-		// Convert event_type filter to handle case-insensitive search
-		// If client sends event_type=ticket, search for both "Ticket" and "ticket"
-		let strapiUrl = `${process.env.BASE_API}/transactions?${searchParams.toString()}`;
+		// Build the Strapi URL with all query parameters
+		let strapiUrl = `${process.env.BASE_API}/transactions?`;
 		
-		// Better approach: don't filter by event_type on client, let Strapi return all and filter on server
-		// Remove any event_type filters and apply them after fetching
-		const filters = searchParams.get('filters');
-		if (filters) {
-			const filterObj = JSON.parse(filters);
-			const eventTypeFilter = filterObj?.event_type;
-			if (eventTypeFilter) {
-				delete filterObj.event_type;
-				searchParams.set('filters', JSON.stringify(filterObj));
-				strapiUrl = `${process.env.BASE_API}/transactions?${searchParams.toString()}`;
-			}
+		// Add all search params from client
+		for (const [key, value] of searchParams.entries()) {
+			strapiUrl += `${key}=${encodeURIComponent(value)}&`;
 		}
 
-		console.log("[TransactionProxy GET] URL:", strapiUrl);
+		// Remove trailing ampersand
+		strapiUrl = strapiUrl.slice(0, -1);
+
+		console.log("[TransactionProxy GET] Final Strapi URL:", strapiUrl);
 
 		const KEY_API = process.env.KEY_API;
 		if (!KEY_API) {
@@ -155,7 +151,12 @@ export async function GET(req: NextRequest) {
 		console.log("[TransactionProxy GET] Response data count:", data?.data?.length || 0);
 
 		if (!strapiRes.ok) {
-			console.error("[TransactionProxy GET] Error response:", data);
+			console.error("[TransactionProxy GET] Error response:", {
+				status: strapiRes.status,
+				error: data.error,
+				message: data.message,
+				details: data
+			});
 			return NextResponse.json(
 				{
 					error: data.error?.message || data.message || "Failed to fetch transactions",
@@ -177,7 +178,7 @@ export async function GET(req: NextRequest) {
 
 		return NextResponse.json(data);
 	} catch (err: any) {
-		console.error("[TransactionProxy GET] Exception:", err.message);
+		console.error("[TransactionProxy GET] Exception:", err.message, err.stack);
 		return NextResponse.json(
 			{
 				error: err.message || "Unknown error occurred",

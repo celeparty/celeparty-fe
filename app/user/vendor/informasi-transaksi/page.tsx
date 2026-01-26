@@ -3,13 +3,13 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import Box from "@/components/Box";
 import Skeleton from "@/components/Skeleton";
 import ErrorNetwork from "@/components/ErrorNetwork";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TransactionProductList from "@/components/vendor/transaction/TransactionProductList";
 import { useQuery } from "@tanstack/react-query";
+import { axiosUser } from "@/lib/services";
 
 export default function VendorInformasiTransaksiPage() {
 	const { data: session, status } = useSession();
@@ -27,41 +27,36 @@ export default function VendorInformasiTransaksiPage() {
 	}, [status, session, router]);
 
 	const fetchTransactionData = async () => {
-		if (!session?.user?.documentId) {
-			console.warn("[fetchTransactionData] No documentId available");
+		if (!session?.user?.documentId || !session?.jwt) {
+			console.warn("[fetchTransactionData] No documentId or JWT available");
 			return { tiket: [], umum: [] };
 		}
 
 		try {
 			const vendorId = session.user.documentId;
+			const jwt = session.jwt;
 			
-			// Simplified URL - remove complex filters
-			const url = `/api/transaction-proxy?pagination[pageSize]=100&sort=createdAt:desc`;
+			// Use the corrected transaction-proxy endpoint with proper filter
+			const filterParam = `filters[vendor_doc_id][$eq]=${vendorId}`;
+			const url = `/api/transaction-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=100`;
 			
 			console.log("[fetchTransactionData] Fetching from:", url);
 			console.log("[fetchTransactionData] Vendor ID:", vendorId);
 			
-			const response = await axios.get(url);
+			const response = await axiosUser("GET", url, jwt);
 
-			const allTransactions = response.data.data || [];
-			console.log("[fetchTransactionData] Got", allTransactions.length, 'total transactions');
-
-			// Filter by vendor ID and event type on client side
-			const vendorTransactions = allTransactions.filter((t: any) => {
-				const txVendorId = t.attributes?.vendor_doc_id;
-				return txVendorId === vendorId;
-			});
-
-			console.log("[fetchTransactionData] Filtered to", vendorTransactions.length, 'vendor transactions');
+			const allTransactions = response?.data?.data || [];
+			console.log("[fetchTransactionData] Got", allTransactions.length, 'total transactions from API');
 
 			// Pisahkan tiket dan non-tiket (case-insensitive)
-			const tiketTransactions = vendorTransactions.filter(
+			// Note: API should already filter by vendor_doc_id, but we do client-side filtering as fallback
+			const tiketTransactions = allTransactions.filter(
 				(t: any) => {
 					const eventType = t.attributes?.event_type?.toLowerCase();
 					return eventType === "ticket" || eventType === "tiket";
 				}
 			);
-			const umumTransactions = vendorTransactions.filter(
+			const umumTransactions = allTransactions.filter(
 				(t: any) => {
 					const eventType = t.attributes?.event_type?.toLowerCase();
 					return eventType !== "ticket" && eventType !== "tiket";
@@ -70,10 +65,9 @@ export default function VendorInformasiTransaksiPage() {
 
 			console.log("[fetchTransactionData] Summary:", {
 				total: allTransactions.length,
-				vendor: vendorTransactions.length,
 				tiket: tiketTransactions.length,
 				umum: umumTransactions.length,
-				eventTypes: vendorTransactions.map((t: any) => t.attributes?.event_type).slice(0, 5),
+				eventTypes: allTransactions.map((t: any) => t.attributes?.event_type).slice(0, 5),
 			});
 
 			return {
@@ -84,22 +78,23 @@ export default function VendorInformasiTransaksiPage() {
 			console.error("[fetchTransactionData] Error:", {
 				status: error.response?.status,
 				message: error.message,
+				url: error.config?.url,
 				data: error.response?.data
 			});
 			if (error.response?.status === 404) {
 				console.error("[fetchTransactionData] 404 - transaction-proxy endpoint not found or responding with error");
 			}
 			if (error.response?.status === 401) {
-				console.error("[fetchTransactionData] 401 - Authorization failed. Check KEY_API");
+				console.error("[fetchTransactionData] 401 - Authorization failed. Check KEY_API or JWT");
 			}
 			throw error;
 		}
 	};
 
 	const { data, isLoading, isError } = useQuery({
-		queryKey: ["vendorTransactions", session?.user?.documentId],
+		queryKey: ["vendorTransactions", session?.user?.documentId, session?.jwt],
 		queryFn: fetchTransactionData,
-		enabled: !!session?.user?.documentId,
+		enabled: !!session?.user?.documentId && !!session?.jwt,
 		staleTime: 5000,
 		retry: 2,
 	});

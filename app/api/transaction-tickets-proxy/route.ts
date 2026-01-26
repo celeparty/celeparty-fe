@@ -91,38 +91,77 @@ export async function GET(req: NextRequest) {
 		const url = new URL(req.url);
 		const searchParams = url.searchParams;
 
-		// Use a qs-style string for deep population which is more robust.
-		// This populates the product and all of its nested relations (*),
-		// as well as the variant and recipients relations.
+		console.log("[transaction-tickets-proxy GET] Incoming searchParams:", searchParams.toString());
+
+		// Convert query parameters from filters[vendor_doc_id][$eq]=value format to Strapi-compatible format
+		// Strapi expects: filters[vendor_doc_id][$eq]=value
+		// We'll pass these through as-is to Strapi
+
+		// Build populate string for deep relations
 		const populateString = "populate[product][populate]=*&populate=variant&populate=recipients";
 
-		// BASE_API already includes /api, so don't add it again
-		const STRAPI_URL = `${
-			process.env.BASE_API
-		}/transaction-tickets?${searchParams.toString()}&${populateString}`;
+		// Reconstruct URL for Strapi with proper filter syntax
+		let strapiUrl = `${process.env.BASE_API}/transaction-tickets?`;
+		
+		// Add all search params from client
+		for (const [key, value] of searchParams.entries()) {
+			strapiUrl += `${key}=${encodeURIComponent(value)}&`;
+		}
+
+		// Add populate parameters
+		strapiUrl += populateString;
+
+		console.log("[transaction-tickets-proxy GET] Final Strapi URL:", strapiUrl);
+
 		const KEY_API = process.env.KEY_API;
 
 		if (!KEY_API) {
+			console.error("[transaction-tickets-proxy GET] KEY_API not set in environment");
 			return NextResponse.json({ error: "KEY_API not set in environment" }, { status: 500 });
 		}
 
-		const strapiRes = await fetch(STRAPI_URL, {
+		const strapiRes = await fetch(strapiUrl, {
 			method: "GET",
 			headers: {
 				Authorization: `Bearer ${KEY_API}`,
+				"Content-Type": "application/json",
 			},
 		});
 
 		const data = await strapiRes.json();
-		console.log("Raw data from Strapi (transaction-tickets-proxy):", JSON.stringify(data, null, 2)); // Log raw data
+
+		console.log("[transaction-tickets-proxy GET] Strapi response status:", strapiRes.status);
+		console.log("[transaction-tickets-proxy GET] Response data count:", data?.data?.length || 0);
 
 		if (!strapiRes.ok) {
-			return NextResponse.json({ error: data.error || data }, { status: strapiRes.status });
+			console.error("[transaction-tickets-proxy GET] Strapi error response:", {
+				status: strapiRes.status,
+				error: data.error,
+				message: data.message,
+				details: data
+			});
+			return NextResponse.json(
+				{ 
+					error: data.error?.message || data.error || data.message || "Failed to fetch transaction tickets",
+					details: data.error || data,
+					statusCode: strapiRes.status
+				}, 
+				{ status: strapiRes.status }
+			);
+		}
+
+		// Ensure response structure is consistent
+		if (!data.data) {
+			console.warn("[transaction-tickets-proxy GET] Response missing data field, wrapping");
+			return NextResponse.json({
+				data: [],
+				meta: { pagination: { total: 0, page: 1, pageSize: 25, pageCount: 0 } },
+			});
 		}
 
 		return NextResponse.json(data);
 	} catch (err: any) {
-		console.error("Error in GET transaction-tickets-proxy:", err);
+		console.error("[transaction-tickets-proxy GET] Exception:", err.message, err.stack);
 		return NextResponse.json({ error: err.message || "Unknown error" }, { status: 500 });
 	}
 }

@@ -102,6 +102,29 @@ export default function ContentProductEdit(props: any) {
     if (dataContent) {
       console.log('Processing dataContent:', dataContent);
       
+      // Helper function to normalize dates to YYYY-MM-DD format
+      const normalizeDate = (dateValue: any): string => {
+        if (!dateValue) return "";
+        try {
+          const dateStr = String(dateValue).trim();
+          // Already in YYYY-MM-DD format
+          if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+            return dateStr;
+          }
+          // If ISO format with T
+          if (dateStr.includes("T")) {
+            const date = new Date(dateStr);
+            if (!isNaN(date.getTime())) {
+              return date.toISOString().split("T")[0];
+            }
+          }
+          return dateStr;
+        } catch (error) {
+          console.error("Error normalizing date:", dateValue, error);
+          return "";
+        }
+      };
+      
       // Auto-detect product type from data structure if not specified
       let actualProductType = productType;
       if (productType === 'product' && dataContent.event_date) {
@@ -117,9 +140,9 @@ export default function ContentProductEdit(props: any) {
         const ticketFormData: iTicketFormReq = {
           title: dataContent.title || "",
           description: dataContent.description || "",
-          event_date: dataContent.event_date || "",
+          event_date: normalizeDate(dataContent.event_date),
           waktu_event: dataContent.waktu_event || "",
-          end_date: dataContent.end_date || "",
+          end_date: normalizeDate(dataContent.end_date),
           end_time: dataContent.end_time || "",
           kota_event: dataContent.kota_event || "",
           lokasi_event: dataContent.lokasi_event || "",
