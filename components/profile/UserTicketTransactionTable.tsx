@@ -55,17 +55,16 @@ export const UserTicketTransactionTable: React.FC<iTableDataProps> = ({ isVendor
 			
 			const url = `/api/transaction-tickets-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=100`;
 			console.log("UserTicketTransactionTable - Fetching URL:", url);
-			
-			// Use axiosUser with JWT token instead of plain axios
-			const response = await axiosUser("GET", url, session.jwt);
-			console.log("UserTicketTransactionTable - Response data:", response.data);
-			
-			if (!response.data?.data) {
-				console.warn("UserTicketTransactionTable - No data field in response:", response.data);
+			const response = await axios.get(url, {
+				headers: { Authorization: `Bearer ${session.jwt}` },
+			});
+			const payload = response.data || {};
+			console.log("UserTicketTransactionTable - Response data:", payload);
+			if (!payload?.data) {
+				console.warn("UserTicketTransactionTable - No data field in response:", payload);
 				return { data: [] };
 			}
-			
-			return response.data;
+			return payload;
 		} catch (error: any) {
 			console.error("UserTicketTransactionTable - Fetch error:", {
 				message: error.message,

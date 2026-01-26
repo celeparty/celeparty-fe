@@ -16,7 +16,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { axiosUser } from '@/lib/services';
+import axios from 'axios';
 
 
 interface iSoldTicketsTableProps {
@@ -55,8 +55,7 @@ export const SoldTicketsTable: React.FC<iSoldTicketsTableProps> = ({ productId, 
             // Fetch all ticket transactions for this vendor
             const filterParam = `filters[vendor_doc_id][$eq]=${session.user.documentId}`;
             const url = `/api/transaction-tickets-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=1000`;
-            
-            const response = await axiosUser("GET", url, session.jwt);
+            const response = await axios.get(url, { headers: { Authorization: `Bearer ${session.jwt}` } });
             const transactions = response.data?.data || [];
             
             // Convert transactions to ticket details

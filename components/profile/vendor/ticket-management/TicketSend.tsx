@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
-import { axiosUser } from "@/lib/services";
+import axios from "axios";
 import {
 	iSendTicketRequest,
 	iTicketRecipient,
@@ -49,9 +49,11 @@ export const TicketSend: React.FC = () => {
 	const getVendorTickets = async () => {
 		if (!session?.jwt) return [];
 		try {
-			// Use the dedicated vendor-tickets endpoint
+			// Use the dedicated vendor-tickets endpoint (internal Next.js API)
 			console.log("TicketSend - Fetching vendor tickets from /api/vendor-tickets");
-			const response = await axiosUser("GET", "/api/vendor-tickets", session.jwt);
+			const response = await axios.get('/api/vendor-tickets', {
+				headers: { Authorization: `Bearer ${session.jwt}` }
+			});
 			
 			const products = response?.data?.data || [];
 			console.log("TicketSend - Total products fetched:", products.length);
@@ -260,12 +262,9 @@ export const TicketSend: React.FC = () => {
 			};
 
 			// TODO: This endpoint is speculative and needs to be implemented in the backend.
-			const response = await axiosUser(
-				"POST",
-				"/api/transactions/send-invitation",
-				session?.jwt || "",
-				payload
-			);
+			const response = await axios.post('/api/transactions/send-invitation', payload, {
+				headers: { Authorization: `Bearer ${session?.jwt || ''}` }
+			});
 
 			if (response?.success) {
 				toast({

@@ -112,42 +112,55 @@ export async function GET(req: NextRequest) {
 		console.log("[TransactionProxy GET] Full incoming URL:", req.url);
 		console.log("[TransactionProxy GET] Incoming searchParams:", Array.from(searchParams.entries()));
 
-		// Extract vendor_doc_id filter if exists
-		const vendorDocId = searchParams.get('vendor_doc_id');
-		const eventType = searchParams.get('event_type');
-		const pageSize = searchParams.get('pageSize') || '100';
-		const page = searchParams.get('page') || '1';
+		// Try to support two incoming shapes:
+		// 1) Simplified params: vendor_doc_id, event_type, pageSize, page, sort
+		// 2) Strapi-style params: filters[vendor_doc_id][$eq]=..., filters[event_type][$eq]=..., pagination[...], sort=...
+		const vendorDocId = searchParams.get('vendor_doc_id') || searchParams.get('filters[vendor_doc_id][$eq]');
+		const eventType = searchParams.get('event_type') || searchParams.get('filters[event_type][$eq]');
+		const pageSize = searchParams.get('pageSize') || searchParams.get('pagination[pageSize]') || '100';
+		const page = searchParams.get('page') || searchParams.get('pagination[page]') || '1';
 		const sort = searchParams.get('sort') || 'createdAt:desc';
 
 		console.log("[TransactionProxy GET] Extracted params:", { vendorDocId, eventType, pageSize, page, sort });
 
-		// Validate vendor_doc_id is provided
-		if (!vendorDocId) {
-			console.error("[TransactionProxy GET] Missing vendor_doc_id parameter");
-			return NextResponse.json(
-				{
-					error: "Missing vendor_doc_id parameter",
-					statusCode: 400,
-				},
-				{ status: 400 }
-			);
-		}
+		// If the client already sent Strapi-style filters/pagination, forward the query as-is.
+		const hasStrapiFilters = Array.from(searchParams.keys()).some((k) => k.startsWith('filters[') || k.startsWith('pagination['));
 
-		// Build proper Strapi URL with correct filter syntax
-		let strapiUrl = `${process.env.BASE_API}/transactions?`;
-		
-		// Add filters - Strapi expects: filters[field][operator]=value
-		strapiUrl += `filters[vendor_doc_id][$eq]=${encodeURIComponent(vendorDocId)}&`;
-		
-		if (eventType) {
-			strapiUrl += `filters[event_type][$eq]=${encodeURIComponent(eventType)}&`;
-		}
+		if (hasStrapiFilters) {
+			// Ensure vendor_doc_id exists in the provided filters
+			if (!vendorDocId) {
+				console.error("[TransactionProxy GET] Missing vendor_doc_id in provided filters");
+				return NextResponse.json({ error: "Missing vendor_doc_id parameter in filters", statusCode: 400 }, { status: 400 });
+			}
 
-		// Add pagination and sort
-		strapiUrl += `pagination[pageSize]=${encodeURIComponent(pageSize)}&`;
-		strapiUrl += `pagination[page]=${encodeURIComponent(page)}&`;
-		strapiUrl += `sort=${encodeURIComponent(sort)}&`;
-		strapiUrl += `populate=*`;
+			const queryString = url.searchParams.toString();
+			var strapiUrl = `${process.env.BASE_API}/transactions?${queryString}&populate=*`;
+		} else {
+			// Build proper Strapi URL with correct filter syntax
+			if (!vendorDocId) {
+				console.error("[TransactionProxy GET] Missing vendor_doc_id parameter");
+				return NextResponse.json(
+					{
+						error: "Missing vendor_doc_id parameter",
+						statusCode: 400,
+					},
+					{ status: 400 }
+				);
+			}
+
+			let strapiUrlLocal = `${process.env.BASE_API}/transactions?`;
+			// Add filters - Strapi expects: filters[field][operator]=value
+			strapiUrlLocal += `filters[vendor_doc_id][$eq]=${encodeURIComponent(vendorDocId)}&`;
+			if (eventType) {
+				strapiUrlLocal += `filters[event_type][$eq]=${encodeURIComponent(eventType)}&`;
+			}
+			// Add pagination and sort
+			strapiUrlLocal += `pagination[pageSize]=${encodeURIComponent(pageSize)}&`;
+			strapiUrlLocal += `pagination[page]=${encodeURIComponent(page)}&`;
+			strapiUrlLocal += `sort=${encodeURIComponent(sort)}&`;
+			strapiUrlLocal += `populate=*`;
+			var strapiUrl = strapiUrlLocal;
+		}
 
 		console.log("[TransactionProxy GET] Final Strapi URL:", strapiUrl);
 
