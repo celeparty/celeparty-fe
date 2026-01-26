@@ -109,23 +109,35 @@ export async function GET(req: NextRequest) {
 		const url = new URL(req.url);
 		const searchParams = url.searchParams;
 
-		console.log("[TransactionProxy GET] Incoming searchParams:", searchParams.toString());
+		console.log("[TransactionProxy GET] Full incoming URL:", req.url);
+		console.log("[TransactionProxy GET] Incoming searchParams:", Array.from(searchParams.entries()));
 
-		// Set populate to get all relations if not specified
-		if (!searchParams.has('populate')) {
-			searchParams.set('populate', '*');
-		}
+		// Extract vendor_doc_id filter if exists
+		const vendorDocId = searchParams.get('vendor_doc_id');
+		const eventType = searchParams.get('event_type');
+		const pageSize = searchParams.get('pageSize') || '100';
+		const page = searchParams.get('page') || '1';
+		const sort = searchParams.get('sort') || 'createdAt:desc';
 
-		// Build the Strapi URL with all query parameters
+		console.log("[TransactionProxy GET] Extracted params:", { vendorDocId, eventType, pageSize, page, sort });
+
+		// Build proper Strapi URL with correct filter syntax
 		let strapiUrl = `${process.env.BASE_API}/transactions?`;
 		
-		// Add all search params from client
-		for (const [key, value] of searchParams.entries()) {
-			strapiUrl += `${key}=${encodeURIComponent(value)}&`;
+		// Add filters - Strapi expects: filters[field][operator]=value
+		if (vendorDocId) {
+			strapiUrl += `filters[vendor_doc_id][$eq]=${encodeURIComponent(vendorDocId)}&`;
+		}
+		
+		if (eventType) {
+			strapiUrl += `filters[event_type][$eq]=${encodeURIComponent(eventType)}&`;
 		}
 
-		// Remove trailing ampersand
-		strapiUrl = strapiUrl.slice(0, -1);
+		// Add pagination and sort
+		strapiUrl += `pagination[pageSize]=${encodeURIComponent(pageSize)}&`;
+		strapiUrl += `pagination[page]=${encodeURIComponent(page)}&`;
+		strapiUrl += `sort=${encodeURIComponent(sort)}&`;
+		strapiUrl += `populate=*`;
 
 		console.log("[TransactionProxy GET] Final Strapi URL:", strapiUrl);
 

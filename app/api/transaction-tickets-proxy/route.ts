@@ -91,25 +91,32 @@ export async function GET(req: NextRequest) {
 		const url = new URL(req.url);
 		const searchParams = url.searchParams;
 
-		console.log("[transaction-tickets-proxy GET] Incoming searchParams:", searchParams.toString());
+		console.log("[transaction-tickets-proxy GET] Full incoming URL:", req.url);
+		console.log("[transaction-tickets-proxy GET] Incoming searchParams:", Array.from(searchParams.entries()));
 
-		// Convert query parameters from filters[vendor_doc_id][$eq]=value format to Strapi-compatible format
-		// Strapi expects: filters[vendor_doc_id][$eq]=value
-		// We'll pass these through as-is to Strapi
+		// Extract parameters
+		const vendorDocId = searchParams.get('vendor_doc_id');
+		const pageSize = searchParams.get('pageSize') || '100';
+		const page = searchParams.get('page') || '1';
+		const sort = searchParams.get('sort') || 'createdAt:desc';
 
-		// Build populate string for deep relations
-		const populateString = "populate[product][populate]=*&populate=variant&populate=recipients";
+		console.log("[transaction-tickets-proxy GET] Extracted params:", { vendorDocId, pageSize, page, sort });
 
-		// Reconstruct URL for Strapi with proper filter syntax
+		// Build proper Strapi URL for transaction-tickets
 		let strapiUrl = `${process.env.BASE_API}/transaction-tickets?`;
 		
-		// Add all search params from client
-		for (const [key, value] of searchParams.entries()) {
-			strapiUrl += `${key}=${encodeURIComponent(value)}&`;
+		// Add filters
+		if (vendorDocId) {
+			strapiUrl += `filters[vendor_doc_id][$eq]=${encodeURIComponent(vendorDocId)}&`;
 		}
 
-		// Add populate parameters
-		strapiUrl += populateString;
+		// Add pagination and sort
+		strapiUrl += `pagination[pageSize]=${encodeURIComponent(pageSize)}&`;
+		strapiUrl += `pagination[page]=${encodeURIComponent(page)}&`;
+		strapiUrl += `sort=${encodeURIComponent(sort)}&`;
+		
+		// Add populate for deep relations
+		strapiUrl += `populate[product][populate]=*&populate=variant&populate=recipients`;
 
 		console.log("[transaction-tickets-proxy GET] Final Strapi URL:", strapiUrl);
 

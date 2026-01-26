@@ -36,43 +36,40 @@ export default function VendorInformasiTransaksiPage() {
 			const vendorId = session.user.documentId;
 			const jwt = session.jwt;
 			
-			// Use the corrected transaction-proxy endpoint with proper filter
-			const filterParam = `filters[vendor_doc_id][$eq]=${vendorId}`;
-			const url = `/api/transaction-proxy?${filterParam}&sort=createdAt:desc&pagination[pageSize]=100`;
+			console.log("[fetchTransactionData] Fetching transactions for vendor:", vendorId);
 			
-			console.log("[fetchTransactionData] Fetching from:", url);
-			console.log("[fetchTransactionData] Vendor ID:", vendorId);
+			// Fetch transaksi umum (non-ticket)
+			const umumUrl = `/api/transaction-proxy?vendor_doc_id=${encodeURIComponent(vendorId)}&pageSize=100&page=1&sort=createdAt:desc`;
+			console.log("[fetchTransactionData] Umum URL:", umumUrl);
 			
-			const response = await axiosUser("GET", url, jwt);
+			const umumResponse = await axiosUser("GET", umumUrl, jwt);
+			const umumTransactions = umumResponse?.data?.data || [];
+			console.log("[fetchTransactionData] Got", umumTransactions.length, 'umum transactions');
 
-			const allTransactions = response?.data?.data || [];
-			console.log("[fetchTransactionData] Got", allTransactions.length, 'total transactions from API');
-
-			// Pisahkan tiket dan non-tiket (case-insensitive)
-			// Note: API should already filter by vendor_doc_id, but we do client-side filtering as fallback
-			const tiketTransactions = allTransactions.filter(
-				(t: any) => {
-					const eventType = t.attributes?.event_type?.toLowerCase();
-					return eventType === "ticket" || eventType === "tiket";
-				}
-			);
-			const umumTransactions = allTransactions.filter(
+			// Filter untuk hanya produk umum (event_type bukan ticket/tiket)
+			const umumFiltered = umumTransactions.filter(
 				(t: any) => {
 					const eventType = t.attributes?.event_type?.toLowerCase();
 					return eventType !== "ticket" && eventType !== "tiket";
 				}
 			);
+			
+			// Fetch transaksi tiket
+			const tiketUrl = `/api/transaction-tickets-proxy?vendor_doc_id=${encodeURIComponent(vendorId)}&pageSize=100&page=1&sort=createdAt:desc`;
+			console.log("[fetchTransactionData] Tiket URL:", tiketUrl);
+			
+			const tiketResponse = await axiosUser("GET", tiketUrl, jwt);
+			const tiketTransactions = tiketResponse?.data?.data || [];
+			console.log("[fetchTransactionData] Got", tiketTransactions.length, "ticket transactions");
 
 			console.log("[fetchTransactionData] Summary:", {
-				total: allTransactions.length,
+				umum: umumFiltered.length,
 				tiket: tiketTransactions.length,
-				umum: umumTransactions.length,
-				eventTypes: allTransactions.map((t: any) => t.attributes?.event_type).slice(0, 5),
 			});
 
 			return {
 				tiket: tiketTransactions,
-				umum: umumTransactions,
+				umum: umumFiltered,
 			};
 		} catch (error: any) {
 			console.error("[fetchTransactionData] Error:", {
@@ -82,10 +79,10 @@ export default function VendorInformasiTransaksiPage() {
 				data: error.response?.data
 			});
 			if (error.response?.status === 404) {
-				console.error("[fetchTransactionData] 404 - transaction-proxy endpoint not found or responding with error");
+				console.error("[fetchTransactionData] 404 - endpoint not found or responding with error");
 			}
 			if (error.response?.status === 401) {
-				console.error("[fetchTransactionData] 401 - Authorization failed. Check KEY_API or JWT");
+				console.error("[fetchTransactionData] 401 - Authorization failed. Check JWT or API key");
 			}
 			throw error;
 		}
