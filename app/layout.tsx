@@ -59,7 +59,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <QueryClientProvider client={queryClient}>
         <html lang="id" className={`${inter.variable} ${quick.variable}`}>
           <head>
-            <Script src={midtransUrl} data-client-key={process.env.NEXT_PUBLIC_CLIENT_KEY} />
+            <Script src={midtransUrl} data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY} />
           </head>
           <body
             className="font-inter antialiased bg-c-gray-50 min-h-screen"

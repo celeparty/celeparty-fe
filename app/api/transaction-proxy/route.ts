@@ -28,26 +28,43 @@ export async function POST(req: NextRequest) {
 			},
 			body: JSON.stringify(body),
 		});
-		
-		const data = await strapiRes.json();
+
+		const contentType = strapiRes.headers.get("content-type") || "";
+		let data: any = null;
+		try {
+			if (contentType.includes("application/json")) {
+				data = await strapiRes.json();
+			} else {
+				// Fallback to text for HTML/plain responses
+				data = await strapiRes.text();
+			}
+		} catch (parseErr) {
+			// If parsing fails, capture raw text
+			try {
+				data = await strapiRes.text();
+			} catch (tErr) {
+				data = `Failed to parse response body: ${String(parseErr)}`;
+			}
+		}
+
 		console.log("Strapi Response Status:", strapiRes.status);
-		console.log("Strapi Response Data:", JSON.stringify(data, null, 2));
-		
+		console.log("Strapi Response Body:", contentType.includes("application/json") ? JSON.stringify(data, null, 2) : data);
+
 		if (!strapiRes.ok) {
 			console.error("Strapi Error Response:", {
 				status: strapiRes.status,
-				error: data.error,
-				data: data
+				body: data,
 			});
 			return NextResponse.json(
 				{
-					error: data.error?.message || data.message || data.error || "Failed to create transaction",
+					error: typeof data === "object" ? data.error?.message || data.message || data.error : String(data || "Failed to create transaction"),
 					details: data,
-					statusCode: strapiRes.status
+					statusCode: strapiRes.status,
 				},
 				{ status: strapiRes.status }
 			);
 		}
+
 		return NextResponse.json(data);
 	} catch (err: any) {
 		console.error("Transaction Proxy Error:", err);
@@ -85,12 +102,26 @@ export async function PUT(req: NextRequest) {
 			body: JSON.stringify({ data }),
 		});
 
-		const resData = await strapiRes.json();
+		const contentType = strapiRes.headers.get("content-type") || "";
+		let resData: any = null;
+		try {
+			if (contentType.includes("application/json")) {
+				resData = await strapiRes.json();
+			} else {
+				resData = await strapiRes.text();
+			}
+		} catch (parseErr) {
+			try {
+				resData = await strapiRes.text();
+			} catch (tErr) {
+				resData = `Failed to parse response body: ${String(parseErr)}`;
+			}
+		}
 
 		if (!strapiRes.ok) {
 			return NextResponse.json(
 				{
-					error: resData.error || resData,
+					error: typeof resData === "object" ? resData.error || resData : String(resData),
 					status: strapiRes.status,
 					details: resData,
 				},
@@ -181,21 +212,34 @@ export async function GET(req: NextRequest) {
 			},
 		});
 
-		const data = await strapiRes.json();
+		const contentType = strapiRes.headers.get("content-type") || "";
+		let data: any = null;
+		try {
+			if (contentType.includes("application/json")) {
+				data = await strapiRes.json();
+			} else {
+				data = await strapiRes.text();
+			}
+		} catch (parseErr) {
+			try {
+				data = await strapiRes.text();
+			} catch (tErr) {
+				data = `Failed to parse response body: ${String(parseErr)}`;
+			}
+		}
+
 		console.log("[TransactionProxy GET] Status:", strapiRes.status);
-		console.log("[TransactionProxy GET] Response data count:", data?.data?.length || 0);
+		console.log("[TransactionProxy GET] Response data count:", typeof data === "object" ? data?.data?.length || 0 : 0);
 
 		if (!strapiRes.ok) {
 			console.error("[TransactionProxy GET] Error response:", {
 				status: strapiRes.status,
-				error: data.error,
-				message: data.message,
-				details: data
+				body: data,
 			});
 			return NextResponse.json(
 				{
-					error: data.error?.message || data.message || "Failed to fetch transactions",
-					details: data.error || data,
+					error: typeof data === "object" ? data.error?.message || data.message || "Failed to fetch transactions" : String(data),
+					details: data,
 					statusCode: strapiRes.status,
 				},
 				{ status: strapiRes.status }
@@ -203,8 +247,8 @@ export async function GET(req: NextRequest) {
 		}
 
 		// Ensure response has proper structure
-		if (!data.data) {
-			console.warn("[TransactionProxy GET] Response missing data field");
+		if (typeof data !== "object" || !data.data) {
+			console.warn("[TransactionProxy GET] Response missing data field or not JSON");
 			return NextResponse.json({
 				data: [],
 				meta: { pagination: { total: 0, page: 1, pageSize: 25, pageCount: 0 } },
