@@ -91,6 +91,9 @@ export default function OrderSummaryPage() {
 				recipients: item.recipients || [], // Include recipients here
 			}));
 
+			// Calculate total price
+			const totalPrice = selectedCartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
 			const transactionPayload = {
 				data: {
 					order_id: order_id,
@@ -106,6 +109,7 @@ export default function OrderSummaryPage() {
 					vendor_doc_id: firstItem.vendor_doc_id || "",
 					event_type: ticketItems.length > 0 ? "Ticket" : "Equipment",
 					total_quantity: selectedCartItems.reduce((sum, item) => sum + item.quantity, 0),
+					total_price: totalPrice.toString(),
 					ticket_recipients: JSON.stringify(allRecipients),
 					products: productsData, // Use 'products' field from Strapi schema
 				}
