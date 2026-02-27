@@ -12,16 +12,24 @@ import { useEffect, useState } from "react";
 export default function OrderSummaryPage() {
 	const { getSelectedItems, selectedItems } = useCart();
 	const selectedCartItems = getSelectedItems();
+	// debug info for troubleshooting blank page
+	console.log("OrderSummary selectedCartItems:", selectedCartItems);
 	const { data: session } = useSession();
 	const router = useRouter();
 
 	const [isProcessing, setIsProcessing] = useState(false);
 
+	// we previously redirected back to cart when there were no selected items.
+	// this caused the page to appear blank if Zustand state had not hydrated
+	// yet. Instead we simply render a message below and allow the user to
+	// manually navigate back.
+	/*
 	useEffect(() => {
 		if (selectedCartItems.length === 0) {
 			router.push("/cart");
 		}
 	}, [selectedCartItems, router]);
+	*/
 
 	const totalAmount = selectedCartItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
@@ -220,7 +228,11 @@ export default function OrderSummaryPage() {
 			<div className="wrapper-big py-8 lg:py-12">
 				<Box className="text-center py-20">
 					<h2 className="text-2xl font-semibold mb-4">Tidak ada item yang dipilih</h2>
-					<p className="text-gray-600 mb-6">Silakan kembali ke keranjang dan pilih item yang ingin dibeli.</p>
+					<p className="text-gray-600 mb-6">
+						Halaman ini memerlukan item terpilih. Jika Anda baru saja menavigasi ke sini
+						mungkin penyimpanan belum siap; mohon tunggu beberapa saat atau kembali ke
+						keranjang untuk memilih ulang.
+					</p>
 					<button
 						onClick={() => router.push("/cart")}
 						className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"

@@ -374,7 +374,8 @@ export function ProductContent() {
     // clear product type from URL
     const searchParams = new URLSearchParams(params.toString());
     searchParams.delete("type");
-    const base = router.pathname || "/products";
+    // router.pathname unavailable in AppRouterInstance; use literal path
+    const base = "/products";
     router.push(`${base}?${searchParams.toString()}`);
     setCurrentPage(1); // Reset to first page when filters change
   };

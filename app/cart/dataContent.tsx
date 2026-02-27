@@ -8,6 +8,7 @@ import { formatDateIndonesia, formatTimeWithWIB } from "@/lib/dateFormatIndonesi
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import { PiSmileySadDuotone } from "react-icons/pi";
 import { RiDeleteBin6Fill } from "react-icons/ri";
@@ -19,6 +20,7 @@ declare global {
 }
 
 export default function CartContent() {
+	const router = useRouter();
 	const { cart, setCart, updateQuantity, updateNote, deleteItem, calculateTotal, updateProductDetails }: any = useCart();
 
 	// Debug log the product_type of items in cart
@@ -595,7 +597,7 @@ export default function CartContent() {
 												className="w-full bg-blue-600 text-white text-center py-3 rounded-lg hover:bg-blue-700 transition-colors"
 												onClick={() => {
 													// Navigate to order summary page with selected items
-													window.location.href = "/cart/order-summary";
+													router.push("/cart/order-summary");
 												}}
 											>
 												Lanjut ke Order Summary ({selectedCartItems.length} item)

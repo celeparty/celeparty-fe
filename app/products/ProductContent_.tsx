@@ -72,7 +72,8 @@ export function ProductContent() {
     } else {
       searchParams.delete("type");
     }
-    const base = router.pathname || "/products";
+    // AppRouterInstance does not expose pathname; use known route
+    const base = "/products";
     router.push(`${base}?${searchParams.toString()}`);
   };
 
