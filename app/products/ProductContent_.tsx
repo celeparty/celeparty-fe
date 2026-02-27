@@ -51,31 +51,10 @@ export function ProductContent() {
 
   const router = useRouter();
   const params = useSearchParams();
-  // raw parameter from URL, may represent either a product type or an event
-  // type depending on context.
-  const rawTypeParam = params.get("type") || "";
-  const productType = rawTypeParam.toLowerCase();
-  const isProductTypeTicket = productType === "ticket" || productType === "tiket";
-  const isProductTypeEquipment = productType === "equipment";
-  // when the `type` param does *not* correspond to one of the two known
-  // product types, treat it as an event type filter and prefill the sidebar.
-  const eventTypeParam = !isProductTypeTicket && !isProductTypeEquipment ? rawTypeParam : "";
+  const getType = params.get("type") || "";
   const getSearch = params.get("search");
   const getCategory = params.get("cat");
   const [cat, setCat] = useState(`${getCategory ? getCategory : ""}`);
-
-  // When user selects a product type from filter UI, update URL params
-  const handleProductTypeChange = (type: string) => {
-    const searchParams = new URLSearchParams(params.toString());
-    if (type) {
-      searchParams.set("type", type);
-    } else {
-      searchParams.delete("type");
-    }
-    // AppRouterInstance does not expose pathname; use known route
-    const base = "/products";
-    router.push(`${base}?${searchParams.toString()}`);
-  };
 
   const [eventDate, setEventDate] = useState<string>("");
   const [eventLocations, setEventLocations] = useState<iSelectOption[]>([]);
@@ -83,8 +62,8 @@ export function ProductContent() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [filterCategories, setFilterCategories] = useState<iEventCategory[]>([]);
 
-  // New states for event type filter (controlled by sidebar UI)
-  const [selectedEventType, setSelectedEventType] = useState<string>(eventTypeParam);
+  // New states for event type filter
+  const [selectedEventType, setSelectedEventType] = useState<string>(getType);
   const [eventTypes, setEventTypes] = useState<iSelectOption[]>([]);
 
   // New states for price range filter
@@ -147,51 +126,24 @@ export function ProductContent() {
     baseParams += priceFilterString;
 
     try {
-      // Fetch products and tickets.  The `selectedEventType` filter should apply to
-      // both collections – earlier code applied it only to products which meant the
-      // sidebar dropdown didn’t work for ticket items.
-      let productsParams = baseParams;
-      let ticketsParams = baseParams;
-
-      if (selectedEventType) {
-        const evtFilter = `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}`;
-        productsParams += evtFilter;
-        ticketsParams += evtFilter;
-      }
-
-      // if the caller has requested a specific product type, avoid requesting the
-      // other collection entirely – it saves bandwidth and keeps pagination counts
-      // accurate on the server side.
-      const shouldFetchProducts = !isProductTypeTicket;
-      const shouldFetchTickets = !isProductTypeEquipment;
-
-      const productsPromise = shouldFetchProducts
-        ? axiosData("GET", `/api/products?${productsParams}&filters[state][$eq]=approved`)
-        : Promise.resolve({ data: [], meta: { pagination: { total: 0 } } });
-      const ticketsPromise = shouldFetchTickets
-        ? axiosData("GET", `/api/tickets?${ticketsParams}&filters[state][$eq]=approved`)
-        : Promise.resolve({ data: [], meta: { pagination: { total: 0 } } });
-
-      const [productsRes, ticketsRes] = await Promise.all([productsPromise, ticketsPromise]);
+      // Fetch products and tickets - note: tickets collection doesn't have user_event_type field
+      // Only apply event_type filter to /api/products endpoint
+      const productsParams = baseParams + (selectedEventType ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}` : '');
+      
+      const [productsRes, ticketsRes] = await Promise.all([
+        axiosData("GET", `/api/products?${productsParams}&filters[state][$eq]=approved`),
+        axiosData("GET", `/api/tickets?${baseParams}&filters[state][$eq]=approved`)
+      ]);
 
       // Extract data arrays
       const products = productsRes?.data || [];
       const tickets = ticketsRes?.data || [];
 
       // Mark items with type for proper handling
-      let allItems: any[] = [
+      const allItems = [
         ...products.map((p: any) => ({ ...p, __productType: 'equipment' })),
         ...tickets.map((t: any) => ({ ...t, __productType: 'ticket' }))
       ];
-
-      // Apply optional product-type filter coming from the `type` query parameter
-      if (productType) {
-        if (isProductTypeTicket) {
-          allItems = allItems.filter((i: any) => i.__productType === 'ticket');
-        } else if (isProductTypeEquipment) {
-          allItems = allItems.filter((i: any) => i.__productType === 'equipment');
-        }
-      }
 
       // Sort by updatedAt descending (most recent first)
       allItems.sort((a: any, b: any) => {
@@ -201,10 +153,7 @@ export function ProductContent() {
       });
 
       // Calculate pagination info for combined results
-      let totalItems = (productsRes?.meta?.pagination?.total || 0) + (ticketsRes?.meta?.pagination?.total || 0);
-      // if the user is filtering by a specific product type, the helper promises
-      // above already ensure the other side returned total=0, so this is still
-      // correct; we leave the variable as-is for clarity.
+      const totalItems = (productsRes?.meta?.pagination?.total || 0) + (ticketsRes?.meta?.pagination?.total || 0);
       const totalPages = Math.ceil(totalItems / pageSize);
 
       return {
@@ -228,7 +177,6 @@ export function ProductContent() {
   const query = useQuery({
     queryKey: [
       "qProducts",
-      productType,
       selectedEventType,
       getSearch,
       getCategory,
@@ -255,7 +203,6 @@ export function ProductContent() {
   useEffect(() => {
     setCurrentPage(1);
   }, [
-    productType,
     selectedEventType,
     getSearch,
     getCategory,
@@ -267,19 +214,11 @@ export function ProductContent() {
   ]);
 
   const getFilterCatsQuery = async () => {
-    // if URL carried a non-product type string, fetch only that event type so
-    // the category extractor below can still operate.
-    if (eventTypeParam) {
-      return await axiosData(
-        "GET",
-        `/api/user-event-types?populate=*&filters[name]=${encodeURIComponent(eventTypeParam)}`
-      );
-    }
     return await axiosData("GET", "/api/user-event-types?populate=*");
   };
 
   const filterCatsQuery = useQuery({
-    queryKey: ["qFilterCats", eventTypeParam, productType],
+    queryKey: ["qFilterCats"],
     queryFn: getFilterCatsQuery,
   });
 
@@ -296,16 +235,15 @@ export function ProductContent() {
     if (filterCatsQuery.isSuccess) {
       const data = filterCatsQuery.data?.data || [];
 
+      // Get categories from NON-TICKET event types only (equipment products)
       const allCategories = new Map<string, any>();
 
       data.forEach((eventType: any) => {
-        const shouldInclude = isProductTypeTicket
-          ? eventType.is_ticket
-          : !eventType.is_ticket;
-
-        if (shouldInclude) {
+        // Only include categories from event types that are NOT for tickets
+        if (!eventType.is_ticket) {
           const categories = eventType.categories || [];
           categories.forEach((cat: any) => {
+            // Use title as unique key to avoid duplicates
             if (!allCategories.has(cat.title)) {
               allCategories.set(cat.title, cat);
             }
@@ -313,14 +251,12 @@ export function ProductContent() {
         }
       });
 
+      // Convert back to array
       const categoriesArray = Array.from(allCategories.values());
-      console.log(
-        `Loaded ${isProductTypeTicket ? "ticket" : "equipment"} categories:`,
-        categoriesArray
-      );
+      console.log("Loaded Equipment Categories (excluding ticket categories):", categoriesArray);
       setFilterCategories(categoriesArray);
     }
-  }, [filterCatsQuery.isSuccess, filterCatsQuery.data, isProductTypeTicket]);
+  }, [filterCatsQuery.isSuccess, filterCatsQuery.data]);
 
   useEffect(() => {
     if (eventTypesQuery.isSuccess) {
@@ -390,8 +326,6 @@ export function ProductContent() {
     setMinPrice("");
     setMaxPrice("");
     setSortOption("updatedAt:desc");
-    // also clear product type filter from URL
-    handleProductTypeChange("");
     setCurrentPage(1);
   };
 
@@ -408,7 +342,6 @@ export function ProductContent() {
 
   // Check if any filter is active
   const hasActiveFilters: boolean =
-    !!productType ||
     !!selectedEventType ||
     !!eventDate ||
     !!selectedLocation ||
@@ -427,8 +360,6 @@ export function ProductContent() {
     <div className="grid grid-cols-12 gap-6">
       {/* Product Filter Sidebar */}
       <ProductFilter
-        productType={productType}
-        onProductTypeChange={handleProductTypeChange}
         eventTypes={eventTypes}
         selectedEventType={selectedEventType}
         onEventTypeChange={setSelectedEventType}

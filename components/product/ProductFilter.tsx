@@ -18,10 +18,6 @@ import {
 } from "lucide-react";
 
 interface ProductFilterProps {
-  // Product Type (ticket/equipment)
-  productType: string;
-  onProductTypeChange: (type: string) => void;
-
   // Event Type
   eventTypes: iSelectOption[];
   selectedEventType: string;
@@ -62,8 +58,6 @@ interface ProductFilterProps {
 }
 
 export const ProductFilter: React.FC<ProductFilterProps> = ({
-  productType,
-  onProductTypeChange,
   eventTypes,
   selectedEventType,
   onEventTypeChange,
@@ -140,7 +134,6 @@ export const ProductFilter: React.FC<ProductFilterProps> = ({
               {hasActiveFilters && (
                 <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                   {[
-                    productType && productType !== "" && "tipe produk",
                     selectedEventType && "jenis event",
                     selectedLocation && "lokasi",
                     activeCategory && "kategori",
@@ -154,24 +147,6 @@ export const ProductFilter: React.FC<ProductFilterProps> = ({
 
             {/* Content */}
             <div className="p-6 space-y-6">
-              {/* Filter: Product Type */}
-              <FilterSection
-                title="Tipe Produk"
-                icon={<Grid3x3 size={18} />}
-                isExpanded={expandedSections.productType}
-                onToggle={() => toggleSection("productType")}
-              >
-                <select
-                  value={productType}
-                  onChange={(e) => onProductTypeChange(e.target.value)}
-                  className="w-full rounded-lg px-4 py-3 text-gray-800 bg-white border-2 border-blue-200 focus:border-c-blue focus:ring-2 focus:ring-blue-300 outline-none transition"
-                >
-                  <option value="">Semua Tipe Produk</option>
-                  <option value="ticket">Tiket</option>
-                  <option value="equipment">Perlengkapan</option>
-                </select>
-              </FilterSection>
-
               {/* Filter: Event Type */}
               <FilterSection
                 title="Jenis Event"
