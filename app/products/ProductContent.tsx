@@ -37,7 +37,20 @@ export function ProductContent() {
   const [pageSize] = useState<number>(15); // Number of items per page
   const router = useRouter();
   const params = useSearchParams();
-  const getType = params.get("type") || "";
+  // `type` parameter may represent a product type or an event type.  Keep the
+  // raw version so we can decide after lowercasing whether it matches one of the
+  // known product types.
+  const rawTypeParam = params.get("type") || "";
+  // URL `type` parameter indicates the product type (ticket/equipment) on the
+  // listing page.  Previously this value was used to filter by
+  // `user_event_type.name`, which caused queries like `?type=ticket` to return
+  // nothing because there is no event type named "ticket".
+  const productType = rawTypeParam.toLowerCase();
+  const isProductTypeTicket = productType === "ticket" || productType === "tiket";
+  const isProductTypeEquipment = productType === "equipment";
+  // if the passed value isn't a product type, treat it as an event type filter
+  const eventTypeParam = !isProductTypeTicket && !isProductTypeEquipment ? rawTypeParam : "";
+
   const getSearch = params.get("search");
   const getCategory = params.get("cat");
   const [cat, setCat] = useState(`${getCategory ? getCategory : ""}`);
@@ -59,11 +72,11 @@ export function ProductContent() {
       ? format(new Date(eventDate), "yyyy-MM-dd")
       : null;
 
-    // Build filter string for products
+    // Build filter string for products/tickets independent of product type
     let productFilters = "";
-    
-    if (getType) {
-      productFilters += `&filters[user_event_type][name][$eq]=${encodeURIComponent(getType)}`;
+
+    if (eventTypeParam) {
+      productFilters += `&filters[user_event_type][name][$eq]=${encodeURIComponent(eventTypeParam)}`;
     }
     if (getSearch) {
       productFilters += `&filters[title][$containsi]=${encodeURIComponent(getSearch)}`;
@@ -91,6 +104,16 @@ export function ProductContent() {
         ...(productsRes?.data || []).map((p: any) => ({ ...p, __productType: 'equipment' })),
         ...(ticketsRes?.data || []).map((t: any) => ({ ...t, __productType: 'ticket' }))
       ];
+
+      // If the caller requested a specific product type, discard the others now that
+      // we have combined the two lists.
+      if (productType) {
+        if (isProductTypeTicket) {
+          allProducts = allProducts.filter((i: any) => i.__productType === 'ticket');
+        } else if (isProductTypeEquipment) {
+          allProducts = allProducts.filter((i: any) => i.__productType === 'equipment');
+        }
+      }
 
       // Apply location filter
       if (selectedLocation) {
@@ -134,7 +157,8 @@ export function ProductContent() {
   const query = useQuery({
     queryKey: [
       "qProducts",
-      getType,
+      productType,
+      eventTypeParam,
       getSearch,
       getCategory,
       selectedLocation,
@@ -173,40 +197,47 @@ export function ProductContent() {
     }
   }, [query.isSuccess, query.data, selectedLocation]);
 
-  // Reset to first page when filters change
+  // Reset to first page when filters change (including product type param)
   useEffect(() => {
     setCurrentPage(1);
-  }, [getType, getSearch, getCategory, selectedLocation, eventDate]);
+  }, [productType, eventTypeParam, getSearch, getCategory, selectedLocation, eventDate]);
   
   const getFilterCatsQuery = async () => {
-    // Only show categories for ticket products to avoid confusion with equipment products
-    if (getType === "ticket" || getType === "Tiket") {
-      return await axiosData(
-        "GET",
-        `/api/user-event-types?populate=*&filters[name]=${encodeURIComponent(getType)}`
-      );
+    // When viewing tickets we want the categories attached to event-types marked
+    // as `is_ticket`.  When viewing equipment we show categories attached to
+    // non-ticket event-types.  We fetch all event-types and filter on the
+    // frontend because the structures vary.
+    if (isProductTypeTicket || isProductTypeEquipment) {
+      return await axiosData("GET", "/api/user-event-types?populate=*");
     } else {
       return { data: [] };
     }
   };
 
   const filterCatsQuery = useQuery({
-    queryKey: ["qFilterCats", getType],
+    queryKey: ["qFilterCats", productType],
     queryFn: getFilterCatsQuery,
   });
 
   useEffect(() => {
     if (filterCatsQuery.isSuccess) {
-      const { data } = filterCatsQuery.data;
-      if (data) {
-        if (data.length === 0) {
-          return setFilterCategories([]);
-        }
-        const { categories } = data[0];
-        setFilterCategories(categories);
+      const data = filterCatsQuery.data?.data || [];
+      if (isProductTypeTicket || isProductTypeEquipment) {
+        const allCats = new Map<string, any>();
+        data.forEach((et: any) => {
+          const keep = isProductTypeTicket ? et.is_ticket : !et.is_ticket;
+          if (keep && et.categories) {
+            et.categories.forEach((c: any) => {
+              if (!allCats.has(c.title)) allCats.set(c.title, c);
+            });
+          }
+        });
+        setFilterCategories(Array.from(allCats.values()));
+      } else {
+        setFilterCategories([]);
       }
     }
-  }, [filterCatsQuery.isSuccess, filterCatsQuery.data]);
+  }, [filterCatsQuery.isSuccess, filterCatsQuery.data, isProductTypeTicket, isProductTypeEquipment]);
 
   useEffect(() => {
     const cleanMin = price?.min
@@ -340,6 +371,11 @@ export function ProductContent() {
     if (selectedLocation) setSelectedLocation("");
     if (eventDate) setEventDate("");
     if (activeCategory) setActiveCategory("");
+    // clear product type from URL
+    const searchParams = new URLSearchParams(params.toString());
+    searchParams.delete("type");
+    const base = router.pathname || "/products";
+    router.push(`${base}?${searchParams.toString()}`);
     setCurrentPage(1); // Reset to first page when filters change
   };
 
