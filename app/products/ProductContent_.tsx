@@ -90,39 +90,47 @@ export function ProductContent() {
       if (rawMax) priceFilterString += `&filters[main_price][$lte]=${rawMax}`;
     }
 
-    // Use custom sort logic based on variant prices if sorting by price
-    let sortParam = sortOption;
-
-    // For now we'll keep main_price sorting, but this will be handled client-side
-    // with variant price calculation
+    // decide sort parameters separately for products and tickets
+    // tickets collection does not have `main_price`, so fall back to updatedAt
+    let productSort = sortOption;
+    let ticketSort = sortOption;
     if (sortOption === "main_price:asc" || sortOption === "main_price:desc") {
-      sortParam = sortOption;
+      // keep for products, but override for tickets
+      ticketSort = "updatedAt:desc";
     }
 
-    // Build base query parameters
-    let baseParams = `populate=*&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}&sort[0]=${sortParam}`;
+    // Build base query parameters; we will copy these to create ticketParams later
+    let baseParams = `populate=*&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}&sort[0]=${productSort}`;
+    let ticketBaseParams = `populate=*&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}&sort[0]=${ticketSort}`;
 
     // Add search filter
     if (getSearch) {
       baseParams += `&filters[title][$containsi]=${encodeURIComponent(getSearch)}`;
+      ticketBaseParams += `&filters[title][$containsi]=${encodeURIComponent(getSearch)}`;
     }
 
     // Add category filter
     if (getCategory) {
       baseParams += `&filters[category][title][$eq]=${encodeURIComponent(getCategory)}`;
+      ticketBaseParams += `&filters[category][title][$eq]=${encodeURIComponent(getCategory)}`;
     }
 
-    // Add location filter
+    // Add location filter (matching tickets.kota_event or products.kabupaten)
     if (selectedLocation) {
-      baseParams += `&filters[kota_event][$eq]=${encodeURIComponent(selectedLocation)}`;
+      const locationFilter =
+        `&filters[$or][0][kota_event][$eq]=${encodeURIComponent(selectedLocation)}` +
+        `&filters[$or][1][kabupaten][$eq]=${encodeURIComponent(selectedLocation)}`;
+      baseParams += locationFilter;
+      ticketBaseParams += locationFilter;
     }
 
     // Add event date filter (for tickets)
     if (formattedDate) {
       baseParams += `&filters[event_date][$gte]=${formattedDate}`;
+      ticketBaseParams += `&filters[event_date][$gte]=${formattedDate}`;
     }
 
-    // Add price filters
+    // Add price filters (price applies only to products)
     baseParams += priceFilterString;
 
     try {
@@ -146,11 +154,10 @@ export function ProductContent() {
         try {
           ticketsRes = await axiosData(
             "GET",
-            `/api/tickets?${baseParams}&filters[state][$eq]=approved`
+            `/api/tickets?${ticketBaseParams}&filters[state][$eq]=approved`
           );
-        } catch (err) {
-          console.warn("tickets fetch failed, continuing with products only", err);
-          // ticketsRes remains empty
+        } catch (error) {
+          console.error("Error fetching tickets:", error);
         }
       }
 
@@ -290,44 +297,29 @@ export function ProductContent() {
     }
   }, [eventTypesQuery.isSuccess, eventTypesQuery.data]);
 
-  // Fetch locations based on selected event type
+  // Fetch unique kabupaten values from products so the location dropdown is always populated
   useEffect(() => {
     const fetchLocations = async () => {
-      if (!selectedEventType) {
-        setEventLocations([]);
-        return;
-      }
-
       try {
-        // Get event type details to check if it's a ticket or service
-        const eventTypeDetails = await axiosData(
+        // get all approved products (pageSize high enough for most use cases)
+        const res: any = await axiosData(
           "GET",
-          `/api/user-event-types?filters[name][$eq]=${encodeURIComponent(selectedEventType)}&populate=*`
+          "/api/products?pagination[pageSize]=1000&filters[state][$eq]=approved&fields=kabupaten"
         );
-
-        const eventTypeData = eventTypeDetails.data?.[0];
-        if (!eventTypeData) return;
-
-        // Determine which cities to use
-        const citiesField = eventTypeData.is_ticket ? "event_cities" : "service_cities";
-        const cities = eventTypeData[citiesField] || [];
-
-        // Convert cities array to options format
-        const cityOptions = cities.map((city: any) => ({
-          label: typeof city === "string" ? city : city.name || city,
-          value: typeof city === "string" ? city : city.name || city,
-        }));
-
-        setEventLocations(cityOptions);
-        setSelectedLocation(""); // Reset selected location when event type changes
+        const items = res.data || [];
+        const unique = Array.from(
+          new Set(items.map((p: any) => p.kabupaten).filter(Boolean))
+        ) as string[];
+        const options = unique.map((loc) => ({ label: loc, value: loc }));
+        setEventLocations(options);
       } catch (error) {
-        console.error("Error fetching locations:", error);
+        console.error("Error fetching product locations:", error);
         setEventLocations([]);
       }
     };
 
     fetchLocations();
-  }, [selectedEventType]);
+  }, []);
 
   const dataContent = query?.data?.data || [];
 
