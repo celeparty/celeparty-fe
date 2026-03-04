@@ -373,10 +373,8 @@ export function ProductContent() {
 
   if (query.isLoading) return <div>Loading produk...</div>;
   if (query.isError) return <ErrorNetwork />;
-  if (!dataContent || dataContent.length === 0) {
-    return <div>Tidak ada produk untuk kategori ini.</div>;
-  }
 
+  // always render layout so filter box stays visible, even if there are no items
   return (
     <div className="grid grid-cols-12 gap-6">
       {/* Product Filter Sidebar */}
