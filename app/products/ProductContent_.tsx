@@ -67,9 +67,6 @@ export function ProductContent() {
   const [eventTypes, setEventTypes] = useState<iSelectOption[]>([]);
 
   // New states for price range filter
-  const [minPrice, setMinPrice] = useState<string>("");
-  const [maxPrice, setMaxPrice] = useState<string>("");
-  
   // New state for apply filter
   const [applyFilters, setApplyFilters] = useState<boolean>(false);
 
@@ -78,17 +75,6 @@ export function ProductContent() {
       ? format(new Date(eventDate), "yyyy-MM-dd")
       : null;
 
-    // Prepare price range filter strings for API query
-    let priceFilterString = "";
-    if (minPrice) {
-      // Remove non-digit chars
-      const rawMin = minPrice.replace(/\D/g, "");
-      if (rawMin) priceFilterString += `&filters[main_price][$gte]=${rawMin}`;
-    }
-    if (maxPrice) {
-      const rawMax = maxPrice.replace(/\D/g, "");
-      if (rawMax) priceFilterString += `&filters[main_price][$lte]=${rawMax}`;
-    }
 
     // decide sort parameters separately for products and tickets
     // tickets collection does not have `main_price`, so fall back to updatedAt
@@ -130,8 +116,6 @@ export function ProductContent() {
       ticketBaseParams += `&filters[event_date][$gte]=${formattedDate}`;
     }
 
-    // Add price filters (price applies only to products)
-    baseParams += priceFilterString;
 
     try {
       // Build query parameters for products and tickets separately
@@ -170,12 +154,6 @@ export function ProductContent() {
         ...tickets.map((t: any) => ({ ...t, __productType: "ticket" })),
       ];
 
-      allItems.sort((a: any, b: any) => {
-        const dateA = new Date(a.updatedAt).getTime();
-        const dateB = new Date(b.updatedAt).getTime();
-        return dateB - dateA;
-      });
-
       const totalItems =
         (productsRes?.meta?.pagination?.total || 0) +
         (ticketsRes?.meta?.pagination?.total || 0);
@@ -210,8 +188,6 @@ export function ProductContent() {
       getCategory,
       selectedLocation,
       eventDate,
-      minPrice,
-      maxPrice,
       sortOption,
       currentPage,
     ],
@@ -236,8 +212,6 @@ export function ProductContent() {
     getCategory,
     selectedLocation,
     eventDate,
-    minPrice,
-    maxPrice,
     sortOption,
   ]);
 
@@ -336,8 +310,6 @@ export function ProductContent() {
     setSelectedLocation("");
     setEventDate("");
     setActiveCategory(null);
-    setMinPrice("");
-    setMaxPrice("");
     setSortOption("updatedAt:desc");
     setCurrentPage(1);
   };
@@ -359,8 +331,6 @@ export function ProductContent() {
     !!eventDate ||
     !!selectedLocation ||
     !!activeCategory ||
-    !!minPrice ||
-    !!maxPrice ||
     sortOption !== "updatedAt:desc";
 
   if (query.isLoading) return <div>Loading produk...</div>;
@@ -383,10 +353,6 @@ export function ProductContent() {
           setActiveCategory(cat);
           handleFilter(cat ? cat : "");
         }}
-        minPrice={minPrice}
-        maxPrice={maxPrice}
-        onMinPriceChange={setMinPrice}
-        onMaxPriceChange={setMaxPrice}
         sortOption={sortOption}
         onSortChange={setSortOption}
         onResetFilters={resetFilters}

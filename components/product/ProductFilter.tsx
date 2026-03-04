@@ -33,11 +33,6 @@ interface ProductFilterProps {
   activeCategory: string | null;
   onCategoryChange: (category: string | null) => void;
 
-  // Price Range
-  minPrice: string;
-  maxPrice: string;
-  onMinPriceChange: (price: string) => void;
-  onMaxPriceChange: (price: string) => void;
 
   // Sort
   sortOption: string;
@@ -67,10 +62,6 @@ export const ProductFilter: React.FC<ProductFilterProps> = ({
   categories,
   activeCategory,
   onCategoryChange,
-  minPrice,
-  maxPrice,
-  onMinPriceChange,
-  onMaxPriceChange,
   sortOption,
   onSortChange,
   onResetFilters,
@@ -85,7 +76,6 @@ export const ProductFilter: React.FC<ProductFilterProps> = ({
     eventType: true,
     location: true,
     category: true,
-    price: true,
     sort: false,
   });
 
@@ -96,13 +86,6 @@ export const ProductFilter: React.FC<ProductFilterProps> = ({
     }));
   };
 
-  const handlePriceInput = (
-    value: string,
-    setter: (value: string) => void
-  ) => {
-    const digits = value.replace(/\D/g, "");
-    setter(digits ? formatRupiah(Number(digits)) : "");
-  };
 
   return (
     <div className="col-span-12 md:col-span-3">
@@ -137,8 +120,6 @@ export const ProductFilter: React.FC<ProductFilterProps> = ({
                     selectedEventType && "jenis event",
                     selectedLocation && "lokasi",
                     activeCategory && "kategori",
-                    minPrice && "harga min",
-                    maxPrice && "harga max",
                   ]
                     .filter(Boolean).length}
                 </span>
@@ -219,40 +200,7 @@ export const ProductFilter: React.FC<ProductFilterProps> = ({
                 </div>
               </FilterSection>
 
-              {/* Filter: Price Range */}
-              <FilterSection
-                title="Kisaran Harga"
-                icon={<DollarSign size={18} />}
-                isExpanded={expandedSections.price}
-                onToggle={() => toggleSection("price")}
-              >
-                <div className="space-y-3">
-                  <div className="relative">
-                    <label className="text-xs font-semibold text-blue-100 block mb-2">
-                      Harga Minimum (Rp)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="0"
-                      value={minPrice}
-                      onChange={(e) => handlePriceInput(e.target.value, onMinPriceChange)}
-                      className="w-full rounded-lg px-4 py-3 text-gray-800 bg-white border-2 border-blue-200 focus:border-c-blue focus:ring-2 focus:ring-blue-300 outline-none transition placeholder-gray-400"
-                    />
-                  </div>
-                  <div className="relative">
-                    <label className="text-xs font-semibold text-blue-100 block mb-2">
-                      Harga Maksimum (Rp)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="0"
-                      value={maxPrice}
-                      onChange={(e) => handlePriceInput(e.target.value, onMaxPriceChange)}
-                      className="w-full rounded-lg px-4 py-3 text-gray-800 bg-white border-2 border-blue-200 focus:border-c-blue focus:ring-2 focus:ring-blue-300 outline-none transition placeholder-gray-400"
-                    />
-                  </div>
-                </div>
-              </FilterSection>
+
 
               {/* Filter: Sort By */}
               <FilterSection
