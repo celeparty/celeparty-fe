@@ -126,34 +126,52 @@ export function ProductContent() {
     baseParams += priceFilterString;
 
     try {
-      // Fetch products and tickets - note: tickets collection doesn't have user_event_type field
-      // Only apply event_type filter to /api/products endpoint
-      const productsParams = baseParams + (selectedEventType ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}` : '');
-      
-      const [productsRes, ticketsRes] = await Promise.all([
-        axiosData("GET", `/api/products?${productsParams}&filters[state][$eq]=approved`),
-        axiosData("GET", `/api/tickets?${baseParams}&filters[state][$eq]=approved`)
-      ]);
+      // Build query parameters for products and tickets separately
+      const productsParams = baseParams +
+        (selectedEventType
+          ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}`
+          : "");
 
-      // Extract data arrays
+      let productsRes: any;
+      let ticketsRes: any = { data: [], meta: { pagination: { total: 0 } } };
+
+      // always fetch products (event type filter applied here)
+      productsRes = await axiosData(
+        "GET",
+        `/api/products?${productsParams}&filters[state][$eq]=approved`
+      );
+
+      // only attempt tickets request when no event type filter is set
+      if (!selectedEventType) {
+        try {
+          ticketsRes = await axiosData(
+            "GET",
+            `/api/tickets?${baseParams}&filters[state][$eq]=approved`
+          );
+        } catch (err) {
+          console.warn("tickets fetch failed, continuing with products only", err);
+          // ticketsRes remains empty
+        }
+      }
+
       const products = productsRes?.data || [];
       const tickets = ticketsRes?.data || [];
 
-      // Mark items with type for proper handling
+      // combine and tag
       const allItems = [
-        ...products.map((p: any) => ({ ...p, __productType: 'equipment' })),
-        ...tickets.map((t: any) => ({ ...t, __productType: 'ticket' }))
+        ...products.map((p: any) => ({ ...p, __productType: "equipment" })),
+        ...tickets.map((t: any) => ({ ...t, __productType: "ticket" })),
       ];
 
-      // Sort by updatedAt descending (most recent first)
       allItems.sort((a: any, b: any) => {
         const dateA = new Date(a.updatedAt).getTime();
         const dateB = new Date(b.updatedAt).getTime();
         return dateB - dateA;
       });
 
-      // Calculate pagination info for combined results
-      const totalItems = (productsRes?.meta?.pagination?.total || 0) + (ticketsRes?.meta?.pagination?.total || 0);
+      const totalItems =
+        (productsRes?.meta?.pagination?.total || 0) +
+        (ticketsRes?.meta?.pagination?.total || 0);
       const totalPages = Math.ceil(totalItems / pageSize);
 
       return {
@@ -163,14 +181,17 @@ export function ProductContent() {
             page: currentPage,
             pageSize: pageSize,
             pageCount: totalPages,
-            total: totalItems
-          }
-        }
+            total: totalItems,
+          },
+        },
       };
     } catch (error) {
-      console.error("Error fetching products and tickets:", error);
-      // Fallback to just products if error
-      return await axiosData("GET", `/api/products?${baseParams}&filters[state][$eq]=approved`);
+      console.error("Error fetching products:", error);
+      // ensure we still apply the event type filter when falling back
+      return await axiosData(
+        "GET",
+        `/api/products?${baseParams}${selectedEventType ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}` : ""}&filters[state][$eq]=approved`
+      );
     }
   };
 
