@@ -215,8 +215,8 @@ export const ProductFilter: React.FC<ProductFilterProps> = ({
                   className="w-full rounded-lg px-4 py-3 text-gray-800 bg-white border-2 border-blue-200 focus:border-c-blue focus:ring-2 focus:ring-blue-300 outline-none transition"
                 >
                   <option value="updatedAt:desc">🆕 Terbaru</option>
-                  <option value="main_price:asc">📉 Harga: Rendah ke Tinggi</option>
-                  <option value="main_price:desc">📈 Harga: Tinggi ke Rendah</option>
+                  <option value="price:asc">📉 Harga : Rendah ke Tinggi</option>
+                  <option value="price:desc">📈 Harga : Tinggi ke Rendah</option>
                 </select>
               </FilterSection>
 

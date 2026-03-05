@@ -76,18 +76,41 @@ export function ProductContent() {
       : null;
 
 
+    // determine whether we're sorting by price (client-side) or letting the API sort
+    const isPriceSort =
+      sortOption === "price:asc" || sortOption === "price:desc";
+
     // decide sort parameters separately for products and tickets
-    // tickets collection does not have `main_price`, so fall back to updatedAt
-    let productSort = sortOption;
-    let ticketSort = sortOption;
-    if (sortOption === "main_price:asc" || sortOption === "main_price:desc") {
-      // keep for products, but override for tickets
+    // If we're sorting by price we must not send that field to Strapi (it doesn't exist),
+    // otherwise the API returns 400. Tickets don't have variants either so we always
+    // fall back to updatedAt for them.
+    let productSort = "";
+    let ticketSort = "";
+    if (!isPriceSort) {
+      productSort = sortOption;
+      ticketSort = sortOption;
+      // ticketSort override is only relevant when the non-price sort happens to be price,
+      // but since price sorts are disabled server-side, we never send them here.
+      if (
+        sortOption === "price:asc" ||
+        sortOption === "price:desc"
+      ) {
+        ticketSort = "updatedAt:desc";
+      }
+    } else {
+      // for price-sorting we still want tickets ordered by newest
       ticketSort = "updatedAt:desc";
     }
 
     // Build base query parameters; we will copy these to create ticketParams later
-    let baseParams = `populate=*&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}&sort[0]=${productSort}`;
-    let ticketBaseParams = `populate=*&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}&sort[0]=${ticketSort}`;
+    let baseParams = `populate=*&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}`;
+    if (productSort) {
+      baseParams += `&sort[0]=${productSort}`;
+    }
+    let ticketBaseParams = `populate=*&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}`;
+    if (ticketSort) {
+      ticketBaseParams += `&sort[0]=${ticketSort}`;
+    }
 
     // Add search filter
     if (getSearch) {
@@ -149,10 +172,30 @@ export function ProductContent() {
       const tickets = ticketsRes?.data || [];
 
       // combine and tag
-      const allItems = [
+      let allItems = [
         ...products.map((p: any) => ({ ...p, __productType: "equipment" })),
         ...tickets.map((t: any) => ({ ...t, __productType: "ticket" })),
       ];
+
+      // if we're sorting by price, do it locally using the lowest variant price
+      if (isPriceSort) {
+        const getItemPrice = (item: any) => {
+          if (item.variant && item.variant.length > 0) {
+            return getLowestVariantPrice(item.variant);
+          }
+          // no price information available
+          return 0;
+        };
+
+        allItems.sort((a: any, b: any) => {
+          const priceA = getItemPrice(a);
+          const priceB = getItemPrice(b);
+          if (sortOption === "price:asc") {
+            return priceA - priceB;
+          }
+          return priceB - priceA;
+        });
+      }
 
       const totalItems =
         (productsRes?.meta?.pagination?.total || 0) +
@@ -172,11 +215,25 @@ export function ProductContent() {
       };
     } catch (error) {
       console.error("Error fetching products:", error);
-      // ensure we still apply the event type filter when falling back
-      return await axiosData(
-        "GET",
-        `/api/products?${baseParams}${selectedEventType ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}` : ""}&filters[state][$eq]=approved`
-      );
+      // fallback attempt using same parameters (without invalid sort)
+      try {
+        const fallbackUrl =
+          `/api/products?${baseParams}${
+            selectedEventType
+              ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(
+                  selectedEventType
+                )}`
+              : ""
+          }&filters[state][$eq]=approved`;
+        const fallback = await axiosData("GET", fallbackUrl);
+        return {
+          data: fallback?.data || [],
+          meta: fallback?.meta || { pagination: {} },
+        };
+      } catch (inner) {
+        console.error("Fallback query also failed:", inner);
+        return { data: [], meta: { pagination: { page: currentPage, pageSize, pageCount: 0, total: 0 } } };
+      }
     }
   };
 
@@ -307,11 +364,15 @@ export function ProductContent() {
   };
 
   const resetFilters = () => {
+    // wipe all filter state values back to their defaults
+    setSelectedEventType("");
     setSelectedLocation("");
     setEventDate("");
     setActiveCategory(null);
     setSortOption("updatedAt:desc");
     setCurrentPage(1);
+    // force the query to run again so mainData contains every product
+    query.refetch();
   };
 
   const handleApplyFilters = () => {
@@ -380,7 +441,7 @@ export function ProductContent() {
                       price={
                         item?.variant && item.variant.length > 0
                           ? formatRupiah(getLowestVariantPrice(item.variant))
-                          : formatRupiah(item?.main_price || 0)
+                          : formatRupiah(0)
                       }
                       rate={item.rate ? `${item.rate}` : "1"}
                       sold={item.sold_count}
