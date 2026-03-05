@@ -124,14 +124,10 @@ export function ProductContent() {
       ticketBaseParams += `&filters[category][title][$eq]=${encodeURIComponent(getCategory)}`;
     }
 
-    // Add location filter (matching tickets.kota_event or products.kabupaten)
-    if (selectedLocation) {
-      const locationFilter =
-        `&filters[$or][0][kota_event][$eq]=${encodeURIComponent(selectedLocation)}` +
-        `&filters[$or][1][kabupaten][$eq]=${encodeURIComponent(selectedLocation)}`;
-      baseParams += locationFilter;
-      ticketBaseParams += locationFilter;
-    }
+    // location filtering will be performed on the combined result set based on
+    // the vendor's serviceLocation.subregion value; the API cannot filter this JSON
+    // field reliably, so we apply it after fetching items.
+    // (we leave `baseParams` untouched here)
 
     // Add event date filter (for tickets)
     if (formattedDate) {
@@ -176,6 +172,15 @@ export function ProductContent() {
         ...products.map((p: any) => ({ ...p, __productType: "equipment" })),
         ...tickets.map((t: any) => ({ ...t, __productType: "ticket" })),
       ];
+
+      // vendor location filter (subregion) applied after combination
+      if (selectedLocation) {
+        allItems = allItems.filter((item: any) => {
+          const vendor = item.users_permissions_user;
+          const locations = vendor?.serviceLocation || [];
+          return locations.some((loc: any) => loc.subregion === selectedLocation);
+        });
+      }
 
       // if we're sorting by price, do it locally using the lowest variant price
       if (isPriceSort) {
@@ -328,23 +333,29 @@ export function ProductContent() {
     }
   }, [eventTypesQuery.isSuccess, eventTypesQuery.data]);
 
-  // Fetch unique kabupaten values from products so the location dropdown is always populated
+  // Fetch vendor serviceLocation subregions to populate location dropdown
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-        // get all approved products (pageSize high enough for most use cases)
+        // fetch all vendor users; serviceLocation is stored as JSON on the user
+        // get all users; we'll ignore ones without serviceLocation.  role-based
+        // filtering proved brittle (role name might not be "Vendor"), so keep it broad.
         const res: any = await axiosData(
           "GET",
-          "/api/products?pagination[pageSize]=1000&filters[state][$eq]=approved&fields=kabupaten"
+          "/api/users?pagination[pageSize]=1000&fields=serviceLocation"
         );
-        const items = res.data || [];
-        const unique = Array.from(
-          new Set(items.map((p: any) => p.kabupaten).filter(Boolean))
+        const vendors = res.data || [];
+        const subregions = Array.from(
+          new Set(
+            vendors
+              .flatMap((u: any) => (u.serviceLocation || []).map((loc: any) => loc.subregion))
+              .filter(Boolean)
+          )
         ) as string[];
-        const options = unique.map((loc) => ({ label: loc, value: loc }));
+        const options = subregions.map((sr) => ({ label: sr, value: sr }));
         setEventLocations(options);
       } catch (error) {
-        console.error("Error fetching product locations:", error);
+        console.error("Error fetching vendor locations:", error);
         setEventLocations([]);
       }
     };
