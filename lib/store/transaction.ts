@@ -21,7 +21,13 @@ export const useTransaction = create(
 		}),
 		{
 			name: "transaction",
-			storage: createJSONStorage(() => sessionStorage),
+			// do not reference sessionStorage on server
+			storage: createJSONStorage(() => {
+				if (typeof window === "undefined") {
+					return null as any;
+				}
+				return sessionStorage;
+			}),
 		},
 	),
 );

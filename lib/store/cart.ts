@@ -163,7 +163,14 @@ export const useCart = create<CartStore>()(
 		}),
 		{
 			name: "cart",
-			storage: createJSONStorage(() => sessionStorage),
+			// When the module is imported during SSR there is no sessionStorage,
+			// so the callback protects against ReferenceError by returning null.
+			storage: createJSONStorage(() => {
+				if (typeof window === "undefined") {
+					return null as any;
+				}
+				return sessionStorage;
+			}),
 		},
 	),
 );

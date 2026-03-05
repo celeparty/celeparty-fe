@@ -11,7 +11,13 @@ export const useUser = create(
 		}),
 		{
 			name: "userMe",
-			storage: createJSONStorage(() => sessionStorage),
+			// guard against SSR: only use sessionStorage in browser
+			storage: createJSONStorage(() => {
+				if (typeof window === "undefined") {
+					return null as any;
+				}
+				return sessionStorage;
+			}),
 		},
 	),
 );
