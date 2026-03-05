@@ -333,29 +333,33 @@ export function ProductContent() {
     }
   }, [eventTypesQuery.isSuccess, eventTypesQuery.data]);
 
-  // Fetch vendor serviceLocation subregions to populate location dropdown
+  // Populate the location dropdown by grabbing subregions from vendors who
+  // actually have products.  This ensures the list isn't empty and matches the
+  // products shown on the page.
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-        // fetch all vendor users; serviceLocation is stored as JSON on the user
-        // get all users; we'll ignore ones without serviceLocation.  role-based
-        // filtering proved brittle (role name might not be "Vendor"), so keep it broad.
+        // retrieve approved products and ask Strapi to include the vendor's
+        // serviceLocation JSON field
         const res: any = await axiosData(
           "GET",
-          "/api/users?pagination[pageSize]=1000&fields=serviceLocation"
+          "/api/products?pagination[pageSize]=1000&filters[state][$eq]=approved&populate[users_permissions_user]=serviceLocation"
         );
-        const vendors = res.data || [];
+        const products = res.data || [];
         const subregions = Array.from(
           new Set(
-            vendors
-              .flatMap((u: any) => (u.serviceLocation || []).map((loc: any) => loc.subregion))
+            products
+              .flatMap((p: any) => {
+                const vendor = p.users_permissions_user;
+                return (vendor?.serviceLocation || []).map((loc: any) => loc.subregion);
+              })
               .filter(Boolean)
           )
         ) as string[];
         const options = subregions.map((sr) => ({ label: sr, value: sr }));
         setEventLocations(options);
       } catch (error) {
-        console.error("Error fetching vendor locations:", error);
+        console.error("Error fetching vendor locations from products:", error);
         setEventLocations([]);
       }
     };
