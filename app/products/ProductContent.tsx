@@ -3,25 +3,21 @@ import Box from "@/components/Box";
 import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
 import ItemProduct from "@/components/product/ItemProduct";
-import { LocationFilterBar } from "@/components/product/LocationFilterBar";
 import ProductFilters from "@/components/product/ProductFilters";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { iEventCategory } from "@/lib/interfaces/iCategory";
 import { iSelectOption } from "@/lib/interfaces/iCommon";
 import { getLowestVariantPrice } from "@/lib/productUtils";
 import { axiosData } from "@/lib/services";
-import { formatNumberWithDots, formatRupiah } from "@/lib/utils";
+import { formatRupiah } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import _ from "lodash";
-import { Bookmark, LucideX, LucideXCircle, Search, Filter } from "lucide-react";
-import { useCallback, useMemo } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Search } from "lucide-react";
+import { useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
-import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
-import { ItemCategory, ItemInfo } from "./ItemCategory";
 
 // === Helper untuk handle URL gambar ===
 const getImageUrl = (image: any): string => {
@@ -40,35 +36,31 @@ const getImageUrl = (image: any): string => {
 };
 
 export function ProductContent() {
-	const [sortDesc, setSortDesc] = useState<boolean>(true);
-	const [showOptions, setShowOptions] = useState<boolean>(false);
-	const [statusValue, setStatusValue] = useState<boolean>(true);
-	const [statusSortBy, setStatusSortBy] = useState<boolean>(true);
-	const [price, setPrice] = useState<{ min: any; max: any }>({
-		min: 0,
-		max: 0,
-	});
+	const params = useSearchParams();
+
+	// URL params
+	const getType = params.get("type") || "";
+	const getSearch = params.get("search") || "";
+	const getCategory = params.get("cat") || "";
+	const getSort = params.get("sort") || "updatedAt:desc";
+
+	// Component state
+	const [selectedEventType, setSelectedEventType] = useState<string>(getType);
+	const [searchInput, setSearchInput] = useState<string>(getSearch);
+	const [sortOption, setSortOption] = useState<string>(getSort);
+	const [price, setPrice] = useState<{ min: any; max: any }>({ min: "", max: "" });
+
 	const [mainData, setMainData] = useState<any>([]);
 	const [currentPage, setCurrentPage] = useState<number>(1);
 	const [totalPages, setTotalPages] = useState<number>(1);
-	const [pageSize] = useState<number>(15); // Number of items per page
-	const router = useRouter();
-	const params = useSearchParams();
-	const getType = params.get("type") || "";
-	const getSearch = params.get("search");
-	const getCategory = params.get("cat");
-	const [cat, setCat] = useState(`${getCategory ? getCategory : ""}`);
+	const [pageSize] = useState<number>(15);
 
 	const [eventDate, setEventDate] = useState<string>("");
 	const [eventLocations, setEventLocations] = useState<iSelectOption[]>([]);
 	const [selectedLocation, setSelectedLocation] = useState<string>("");
-	const [minimalOrder, setMinimalOrder] = useState<string>("");
 	const [activeCategory, setActiveCategory] = useState<string | null>(null);
-	// const {activeButton, setActiveButton} = useButtonStore()
-	const [activeButton, setActiveButton] = useState<string | null>(null);
-
 	const [filterCategories, setFilterCategories] = useState<iEventCategory[]>([]);
-	const [searchInput, setSearchInput] = useState<string>(getSearch || "");
+	const [eventTypes, setEventTypes] = useState<iSelectOption[]>([]);
 
 	// Debounced search handler
 	const handleSearchChange = useCallback(
@@ -81,33 +73,144 @@ export function ProductContent() {
 
 	const getCombinedQuery = async () => {
 		const formattedDate = eventDate ? format(new Date(eventDate), "yyyy-MM-dd") : null;
+		const isPriceSort = sortOption === "price:asc" || sortOption === "price:desc";
 
-		return await axiosData(
-			"GET",
-			`/api/products?populate=*&&sort=updatedAt:desc&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}${
-				getType ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(getType)}` : ""
-			}${getSearch ? `&filters[title][$containsi]=${encodeURIComponent(getSearch)}` : ""}${
-				getCategory ? `&filters[category][title][$eq]=${encodeURIComponent(cat)}` : ""
-			}${selectedLocation ? `&filters[region][$eq]=${encodeURIComponent(selectedLocation)}` : ""}${
-				formattedDate ? `&filters[minimal_order_date][$eq]=${formattedDate}` : ""
-			}${minimalOrder ? `&filters[minimal_order][$eq]=${minimalOrder}` : ""}`,
-		);
+		const productSort = isPriceSort ? "updatedAt:desc" : sortOption;
+		const ticketSort = isPriceSort ? "updatedAt:desc" : sortOption;
+
+		let baseParams = `populate=*&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}`;
+		if (productSort) {
+			baseParams += `&sort[0]=${encodeURIComponent(productSort)}`;
+		}
+
+		let ticketBaseParams = `populate=*&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}`;
+		if (ticketSort) {
+			ticketBaseParams += `&sort[0]=${encodeURIComponent(ticketSort)}`;
+		}
+
+		if (searchInput) {
+			baseParams += `&filters[title][$containsi]=${encodeURIComponent(searchInput)}`;
+			ticketBaseParams += `&filters[title][$containsi]=${encodeURIComponent(searchInput)}`;
+		}
+
+		if (getCategory) {
+			baseParams += `&filters[category][title][$eq]=${encodeURIComponent(getCategory)}`;
+			ticketBaseParams += `&filters[category][title][$eq]=${encodeURIComponent(getCategory)}`;
+		}
+
+		if (formattedDate) {
+			baseParams += `&filters[event_date][$gte]=${formattedDate}`;
+			ticketBaseParams += `&filters[event_date][$gte]=${formattedDate}`;
+		}
+
+		try {
+			const productsParams =
+				baseParams +
+				(selectedEventType
+					? `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}`
+					: "");
+
+			const productsRes: any = await axiosData(
+				"GET",
+				`/api/products?${productsParams}&filters[state][$eq]=approved`,
+			);
+
+			let ticketsRes: any = { data: [], meta: { pagination: { total: 0 } } };
+			if (!selectedEventType) {
+				try {
+					ticketsRes = await axiosData(
+						"GET",
+						`/api/tickets?${ticketBaseParams}&filters[state][$eq]=approved`,
+					);
+				} catch (error) {
+					console.error("Error fetching tickets:", error);
+				}
+			}
+
+			let allItems = [
+				...(productsRes?.data || []).map((p: any) => ({ ...p, __productType: "equipment" })),
+				...(ticketsRes?.data || []).map((t: any) => ({ ...t, __productType: "ticket" })),
+			];
+
+			if (selectedLocation) {
+				allItems = allItems.filter((item: any) => {
+					const vendor = item.users_permissions_user;
+					const locations = vendor?.serviceLocation || [];
+					if (Array.isArray(locations) && locations.length > 0) {
+						return locations.some((loc: any) => loc.subregion === selectedLocation);
+					}
+					return item.region === selectedLocation;
+				});
+			}
+
+			if (isPriceSort) {
+				const getItemPrice = (item: any) => {
+					if (item.variant && item.variant.length > 0) {
+						return getLowestVariantPrice(item.variant);
+					}
+					return item.main_price || 0;
+				};
+
+				allItems.sort((a: any, b: any) => {
+					const priceA = getItemPrice(a);
+					const priceB = getItemPrice(b);
+					return sortOption === "price:asc" ? priceA - priceB : priceB - priceA;
+				});
+			}
+
+			const totalItems =
+				(productsRes?.meta?.pagination?.total || 0) +
+				(ticketsRes?.meta?.pagination?.total || 0);
+			const totalPages = Math.ceil(totalItems / pageSize);
+
+			return {
+				data: allItems,
+				meta: {
+					pagination: {
+						page: currentPage,
+						pageSize,
+						pageCount: totalPages,
+						total: totalItems,
+					},
+				},
+			};
+		} catch (error) {
+			console.error("Error fetching products:", error);
+			try {
+				const fallbackUrl =
+					`/api/products?${baseParams}$
+						${
+							selectedEventType
+								? `&filters[user_event_type][name][$eq]=${encodeURIComponent(
+									selectedEventType,
+								)}`
+								: ""
+							}&filters[state][$eq]=approved`;
+				const fallback = await axiosData("GET", fallbackUrl);
+				return {
+					data: fallback?.data || [],
+					meta: fallback?.meta || { pagination: {} },
+				};
+			} catch (inner) {
+				console.error("Fallback query also failed:", inner);
+				return { data: [], meta: { pagination: { page: currentPage, pageSize, pageCount: 0, total: 0 } } };
+			}
+		}
 	};
 
 	const query = useQuery({
 		queryKey: [
 			"qProducts",
-			getType,
-			searchInput || getSearch,
+			selectedEventType,
+			searchInput,
 			getCategory,
 			selectedLocation,
 			eventDate,
-			minimalOrder,
+			sortOption,
 			currentPage,
 		],
 		queryFn: getCombinedQuery,
 		refetchOnWindowFocus: false,
-		staleTime: 5 * 60 * 1000, // 5 minutes
 	});
 
 	useEffect(() => {
@@ -123,17 +226,14 @@ export function ProductContent() {
 	// Reset to first page when filters change
 	useEffect(() => {
 		setCurrentPage(1);
-	}, [getType, getSearch, getCategory, selectedLocation, eventDate, minimalOrder]);
+	}, [selectedEventType, searchInput, getCategory, selectedLocation, eventDate, sortOption]);
 
 	const getFilterCatsQuery = async () => {
-		return await axiosData(
-			"GET",
-			`/api/user-event-types?populate=*${getType ? `&filters[name]=${encodeURIComponent(getType)}` : ""}`,
-		);
+		return await axiosData("GET", "/api/user-event-types?populate=*");
 	};
 
 	const filterCatsQuery = useQuery({
-		queryKey: ["qFilterCats", getType],
+		queryKey: ["qFilterCats"],
 		queryFn: getFilterCatsQuery,
 	});
 
@@ -152,17 +252,17 @@ export function ProductContent() {
 
 	useEffect(() => {
 		if (price?.min && price?.max) {
-			const dataSort: any = _.filter(dataContent, (item: any) => {
+			const dataSort: any = _.filter(mainData, (item: any) => {
 				return item.main_price >= price.min && item.main_price <= price.max;
 			});
 			setMainData(dataSort);
 		} else if (price?.min && !price?.max) {
-			const dataSort: any = _.filter(dataContent, (item: any) => {
+			const dataSort: any = _.filter(mainData, (item: any) => {
 				return item.main_price >= price.min;
 			});
 			setMainData(dataSort);
 		} else if (!price?.min && price?.max) {
-			const dataSort: any = _.filter(dataContent, (item: any) => {
+			const dataSort: any = _.filter(mainData, (item: any) => {
 				return item.main_price <= price.max;
 			});
 			setMainData(dataSort);
@@ -176,15 +276,15 @@ export function ProductContent() {
 		let dataSort: any[] = [];
 
 		if (cleanMin !== null && cleanMax !== null) {
-			dataSort = _.filter(dataContent, (item: any) => {
+			dataSort = _.filter(mainData, (item: any) => {
 				return item.main_price >= cleanMin && item.main_price <= cleanMax;
 			});
 		} else if (cleanMin !== null) {
-			dataSort = _.filter(dataContent, (item: any) => {
+			dataSort = _.filter(mainData, (item: any) => {
 				return item.main_price >= cleanMin;
 			});
 		} else if (cleanMax !== null) {
-			dataSort = _.filter(dataContent, (item: any) => {
+			dataSort = _.filter(mainData, (item: any) => {
 				return item.main_price <= cleanMax;
 			});
 		}
@@ -233,48 +333,9 @@ export function ProductContent() {
 		return <ErrorNetwork />;
 	}
 
-	const getSort = params.get("sort");
-	const getMin = params.get("min");
-	const getMax = params.get("max");
-	const dataContent = query?.data?.data || [];
-
-	const [variantPrice, setVariantPrice] = useState<number | null>(null);
-	//   (
-	//   dataContent?.variant[0]?.price
-	// );
-
-	useEffect(() => {
-		// if (query.isSuccess) {
-		//   const { variant } = dataContent;
-		//   const lowestPrice = getLowestVariantPrice(variant);
-		//   if (lowestPrice) {
-		//     setVariantPrice(lowestPrice);
-		if (query.isSuccess && Array.isArray(dataContent) && dataContent.length > 0) {
-			const firstItem = dataContent[0];
-			const lowestPrice = firstItem?.variant ? getLowestVariantPrice(firstItem.variant) : null;
-			setVariantPrice(lowestPrice);
-		}
-	}, [query.isSuccess, dataContent]);
-	// }, [dataContent]);
-
-	const handleSort = (sort: any) => {
-		const dataSort: any = _.sortBy(dataContent, (item) => {
-			return sort.sortBy === "sold_count"
-				? item.sold_count
-				: sort.sortBy === "main_price"
-					? item.main_price
-					: sort.sortBy === "price_min"
-						? item.price_min
-						: sort.sortBy === "price_max"
-							? item.price_max
-							: item.updatedAt;
-		});
-		setMainData(dataSort);
-		setCurrentPage(1); // Reset to first page when sorting
-	};
 
 	const handleFilter = (category: string) => {
-		const filterCategory: any = _.filter(dataContent, (item) => {
+		const filterCategory: any = _.filter(mainData, (item) => {
 			if (category === "Lainnya") {
 				return true;
 			} else {
@@ -285,17 +346,14 @@ export function ProductContent() {
 		setCurrentPage(1); // Reset to first page when filtering
 	};
 
-	const toggleDropdown = (): void => {
-		setSortDesc(!sortDesc);
-		setShowOptions(!showOptions);
-	};
-
 	const resetFilters = () => {
-		if (selectedLocation) setSelectedLocation("");
-		if (eventDate) setEventDate("");
-		if (minimalOrder) setMinimalOrder("");
-		if (activeCategory) setActiveCategory("");
-		setCurrentPage(1); // Reset to first page when filters change
+		setSelectedEventType("");
+		setSelectedLocation("");
+		setEventDate("");
+		setActiveCategory(null);
+		setSortOption("updatedAt:desc");
+		setCurrentPage(1);
+		query.refetch();
 	};
 
 	const handlePageChange = (page: number) => {
@@ -306,16 +364,7 @@ export function ProductContent() {
 
 	const isFilterCatsAvailable: boolean = filterCategories.length > 0;
 
-	// ✅ fallback UI
-	if (query.isLoading) {
-		return <div>Loading produk...</div>;
-	}
-
-	if (query.isError) {
-		return <div>Terjadi kesalahan jaringan. Silakan coba lagi.</div>;
-	}
-
-	if (!dataContent || dataContent.length === 0) {
+	if (!mainData || mainData.length === 0) {
 		return <div>Tidak ada produk untuk kategori ini.</div>;
 	}
 
@@ -330,8 +379,6 @@ selectedLocation={selectedLocation}
 setSelectedLocation={setSelectedLocation}
 eventDate={eventDate}
 setEventDate={setEventDate}
-minimalOrder={minimalOrder}
-setMinimalOrder={setMinimalOrder}
 eventLocations={eventLocations}
 price={price}
 setPrice={setPrice}
@@ -341,6 +388,11 @@ setActiveCategory={setActiveCategory}
 filterCategories={filterCategories}
 handleFilter={handleFilter}
 isFilterCatsAvailable={isFilterCatsAvailable}
+selectedEventType={selectedEventType}
+setSelectedEventType={setSelectedEventType}
+eventTypes={eventTypes}
+selectedCategory={activeCategory || ""}
+setSelectedCategory={setActiveCategory}
 />
 </div>
 )}
