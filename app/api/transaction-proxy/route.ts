@@ -10,9 +10,9 @@ export async function POST(req: NextRequest) {
 		const body = await req.json();
 		console.log("Transaction Proxy - Received payload:", JSON.stringify(body, null, 2));
 		
-		// BASE_API already includes /api, so don't add it again
-		// Strapi collectionName for transactions is plural: /transactions
-		const STRAPI_URL = `${process.env.BASE_API}/transactions`;
+		// Ensure we call the Strapi API path. BASE_API is expected to be the host (e.g. https://celeparty.com)
+		// so we append /api/transactions to reach the correct endpoint.
+		const STRAPI_URL = `${process.env.BASE_API}/api/transactions`;
 		console.log("Transaction Proxy - Posting to:", STRAPI_URL);
 		
 		const KEY_API = process.env.KEY_API;
@@ -85,9 +85,9 @@ export async function PUT(req: NextRequest) {
 		if (!id) {
 			return NextResponse.json({ error: "Missing transaction id." }, { status: 400 });
 		}
-	// BASE_API already includes /api, so don't add it again
-	// Strapi collectionName for transactions is plural: /transactions
-	const STRAPI_URL = `${process.env.BASE_API}/transactions/${id}`;
+	// Ensure we call the Strapi API path. BASE_API is expected to be the host (e.g. https://celeparty.com)
+	// so we append /api/transactions to reach the correct endpoint.
+	const STRAPI_URL = `${process.env.BASE_API}/api/transactions/${id}`;
 		const KEY_API = process.env.KEY_API;
 		if (!KEY_API) {
 			return NextResponse.json({ error: "KEY_API not set in environment" }, { status: 500 });
@@ -165,7 +165,7 @@ export async function GET(req: NextRequest) {
 			}
 
 			const queryString = url.searchParams.toString();
-			var strapiUrl = `${process.env.BASE_API}/transactions?${queryString}&populate=*`;
+			var strapiUrl = `${process.env.BASE_API}/api/transactions?${queryString}&populate=*`;
 		} else {
 			// Build proper Strapi URL with correct filter syntax
 			if (!vendorDocId) {
@@ -179,7 +179,7 @@ export async function GET(req: NextRequest) {
 				);
 			}
 
-			let strapiUrlLocal = `${process.env.BASE_API}/transactions?`;
+			let strapiUrlLocal = `${process.env.BASE_API}/api/transactions?`;
 			// Add filters - Strapi expects: filters[field][operator]=value
 			strapiUrlLocal += `filters[vendor_doc_id][$eq]=${encodeURIComponent(vendorDocId)}&`;
 			if (eventType) {
