@@ -45,6 +45,15 @@ const getImageUrl = (image: any): string => {
 export function ProductContent() {
 	const params = useSearchParams();
 
+	// Helper to extract fields from Strapi responses (supports {id, attributes: {...}} and flat objects)
+	const getStrapiField = (item: any, key: string) => {
+		if (!item) return undefined;
+		if (item[key] !== undefined) return item[key];
+		if (item.attributes?.[key] !== undefined) return item.attributes[key];
+		if (item.data?.attributes?.[key] !== undefined) return item.data.attributes[key];
+		return undefined;
+	};
+
 	// URL params
 	const getType = params.get("type") || "";
 	const getSearch = params.get("search") || "";
@@ -141,12 +150,16 @@ export function ProductContent() {
 
 			if (selectedLocation) {
 				allItems = allItems.filter((item: any) => {
-					const vendor = item.users_permissions_user;
-					const locations = vendor?.serviceLocation || [];
+					const vendor = getStrapiField(item, "users_permissions_user");
+					const locations =
+						vendor?.serviceLocation ??
+						vendor?.attributes?.serviceLocation ??
+						vendor?.data?.attributes?.serviceLocation ??
+						[];
 					if (Array.isArray(locations) && locations.length > 0) {
 						return locations.some((loc: any) => loc.subregion === selectedLocation);
 					}
-					return item.region === selectedLocation;
+					return getStrapiField(item, "region") === selectedLocation;
 				});
 			}
 
@@ -258,66 +271,92 @@ export function ProductContent() {
 			const data = filterCatsQuery.data?.data || [];
 
 			// Get categories from NON-TICKET event types only (equipment products)
+			// Supports both flattened (item.categories) and Strapi-v4 (item.attributes.categories.data) shapes
 			const allCategories = new Map<string, any>();
 
-			data.forEach((eventType: any) => {
-				if (!eventType.is_ticket) {
-					const categories = eventType.categories || [];
-					categories.forEach((cat: any) => {
-						if (!allCategories.has(cat.title)) {
-							allCategories.set(cat.title, cat);
-						}
-					});
-				}
+			const normalizeEventType = (raw: any) => {
+				if (!raw) return null;
+				if (raw.attributes) return { id: raw.id, ...raw.attributes };
+				return raw;
+			};
+
+			const normalizeCategory = (raw: any) => {
+				if (!raw) return null;
+				if (raw.attributes) return { id: raw.id, ...raw.attributes };
+				return raw;
+			};
+
+			data.forEach((rawEventType: any) => {
+				const eventType = normalizeEventType(rawEventType);
+				if (!eventType) return;
+				if (eventType.is_ticket) return;
+
+				const categories =
+					eventType.categories?.data ??
+					eventType.categories ??
+					[];
+
+				categories.forEach((cat: any) => {
+					const normalized = normalizeCategory(cat);
+					if (normalized?.title && !allCategories.has(normalized.title)) {
+						allCategories.set(normalized.title, normalized);
+					}
+				});
 			});
 
-			const categoriesArray = Array.from(allCategories.values());
-			setFilterCategories(categoriesArray);
+			setFilterCategories(Array.from(allCategories.values()));
 		}
 	}, [filterCatsQuery.isSuccess, filterCatsQuery.data]);
 
 	useEffect(() => {
 		if (eventTypesQuery.isSuccess) {
 			const data = eventTypesQuery.data?.data || [];
-			const options = data.map((item: any) => ({
-				label: item.name,
-				value: item.name,
-			}));
-			setEventTypes(options);
+			const options = data
+				.map((raw: any) => {
+					const item = raw?.attributes ? { id: raw.id, ...raw.attributes } : raw;
+					const name = item?.name;
+					return name ? { label: name, value: name } : null;
+				})
+				.filter(Boolean);
+			setEventTypes(options as iSelectOption[]);
 		}
 	}, [eventTypesQuery.isSuccess, eventTypesQuery.data]);
 
 	useEffect(() => {
-		const fetchLocations = async () => {
-			try {
-				const res: any = await axiosData(
-					"GET",
-					"/api/products?pagination[pageSize]=1000&filters[state][$eq]=approved&populate[users_permissions_user]=serviceLocation"
-				);
-				const products = res.data || [];
-				const subregions = Array.from(
-					new Set(
-						products
-							.flatMap((p: any) => {
-								const vendor = p.users_permissions_user;
-								return (vendor?.serviceLocation || []).map((loc: any) => loc.subregion);
-							})
-							.filter(Boolean),
-					),
-				) as string[];
-				const options = subregions.map((sr) => ({
-					label: sr,
-					value: sr,
-				}));
-				setEventLocations(options);
-			} catch (error) {
-				console.error("Error fetching vendor locations from products:", error);
-				setEventLocations([]);
+		const items = query.data?.data || [];
+		const seen = new Set<string>();
+		const locations: iSelectOption[] = [];
+
+		const addLocation = (subregion?: string) => {
+			if (!subregion) return;
+			const normalized = subregion.toString().trim();
+			if (!normalized) return;
+			if (!seen.has(normalized)) {
+				seen.add(normalized);
+				locations.push({ label: normalized, value: normalized });
 			}
 		};
 
-		fetchLocations();
-	}, []);
+		items.forEach((item: any) => {
+			// region field (legacy)
+			addLocation(getStrapiField(item, "region"));
+
+			// vendor serviceLocation (may be nested under attributes/data)
+			const vendor = getStrapiField(item, "users_permissions_user");
+			const serviceLocation =
+				vendor?.serviceLocation ??
+				vendor?.attributes?.serviceLocation ??
+				vendor?.data?.attributes?.serviceLocation;
+
+			if (Array.isArray(serviceLocation)) {
+				serviceLocation.forEach((loc: any) => {
+					addLocation(loc?.subregion || loc?.region || loc?.idSubRegion || loc?.id);
+				});
+			}
+		});
+
+		setEventLocations(locations);
+	}, [query.data]);
 
 	useEffect(() => {
 		const cleanMin = price?.min ? parseInt(price.min.replace(/\./g, ""), 10) : null;
@@ -388,9 +427,11 @@ export function ProductContent() {
 		const filterCategory: any = _.filter(dataContent, (item) => {
 			if (category === "Lainnya") {
 				return true;
-			} else {
-				return category ? item?.category?.title === category : item;
 			}
+
+			const itemCategory = getStrapiField(item, "category");
+			const itemCategoryTitle = getStrapiField(itemCategory, "title");
+			return category ? itemCategoryTitle === category : item;
 		});
 		setMainData(filterCategory);
 		setCurrentPage(1); // Reset to first page when filtering
