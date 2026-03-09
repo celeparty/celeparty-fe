@@ -5,6 +5,13 @@ import Skeleton from "@/components/Skeleton";
 import ItemProduct from "@/components/product/ItemProduct";
 import ProductFilters from "@/components/product/ProductFilters";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { iEventCategory } from "@/lib/interfaces/iCategory";
 import { iSelectOption } from "@/lib/interfaces/iCommon";
@@ -237,37 +244,80 @@ export function ProductContent() {
 		queryFn: getFilterCatsQuery,
 	});
 
+	const getEventTypesQuery = async () => {
+		return await axiosData("GET", "/api/user-event-types");
+	};
+
+	const eventTypesQuery = useQuery({
+		queryKey: ["qEventTypes"],
+		queryFn: getEventTypesQuery,
+	});
+
 	useEffect(() => {
 		if (filterCatsQuery.isSuccess) {
-			const { data } = filterCatsQuery.data;
-			if (data) {
-				if (data.length === 0) {
-					return setFilterCategories([]);
+			const data = filterCatsQuery.data?.data || [];
+
+			// Get categories from NON-TICKET event types only (equipment products)
+			const allCategories = new Map<string, any>();
+
+			data.forEach((eventType: any) => {
+				if (!eventType.is_ticket) {
+					const categories = eventType.categories || [];
+					categories.forEach((cat: any) => {
+						if (!allCategories.has(cat.title)) {
+							allCategories.set(cat.title, cat);
+						}
+					});
 				}
-				const { categories } = data[0];
-				setFilterCategories(categories);
-			}
+			});
+
+			const categoriesArray = Array.from(allCategories.values());
+			setFilterCategories(categoriesArray);
 		}
 	}, [filterCatsQuery.isSuccess, filterCatsQuery.data]);
 
 	useEffect(() => {
-		if (price?.min && price?.max) {
-			const dataSort: any = _.filter(mainData, (item: any) => {
-				return item.main_price >= price.min && item.main_price <= price.max;
-			});
-			setMainData(dataSort);
-		} else if (price?.min && !price?.max) {
-			const dataSort: any = _.filter(mainData, (item: any) => {
-				return item.main_price >= price.min;
-			});
-			setMainData(dataSort);
-		} else if (!price?.min && price?.max) {
-			const dataSort: any = _.filter(mainData, (item: any) => {
-				return item.main_price <= price.max;
-			});
-			setMainData(dataSort);
-		} else null;
-	}, [price]);
+		if (eventTypesQuery.isSuccess) {
+			const data = eventTypesQuery.data?.data || [];
+			const options = data.map((item: any) => ({
+				label: item.name,
+				value: item.name,
+			}));
+			setEventTypes(options);
+		}
+	}, [eventTypesQuery.isSuccess, eventTypesQuery.data]);
+
+	useEffect(() => {
+		const fetchLocations = async () => {
+			try {
+				const res: any = await axiosData(
+					"GET",
+					"/api/products?pagination[pageSize]=1000&filters[state][$eq]=approved&populate[users_permissions_user]=serviceLocation"
+				);
+				const products = res.data || [];
+				const subregions = Array.from(
+					new Set(
+						products
+							.flatMap((p: any) => {
+								const vendor = p.users_permissions_user;
+								return (vendor?.serviceLocation || []).map((loc: any) => loc.subregion);
+							})
+							.filter(Boolean),
+					),
+				) as string[];
+				const options = subregions.map((sr) => ({
+					label: sr,
+					value: sr,
+				}));
+				setEventLocations(options);
+			} catch (error) {
+				console.error("Error fetching vendor locations from products:", error);
+				setEventLocations([]);
+			}
+		};
+
+		fetchLocations();
+	}, []);
 
 	useEffect(() => {
 		const cleanMin = price?.min ? parseInt(price.min.replace(/\./g, ""), 10) : null;
@@ -295,31 +345,29 @@ export function ProductContent() {
 	}, [price]);
 
 	useEffect(() => {
-		if (mainData.length === 0) return;
+		const cleanMin = price?.min ? parseInt(price.min.replace(/\./g, ""), 10) : null;
+		const cleanMax = price?.max ? parseInt(price.max.replace(/\./g, ""), 10) : null;
 
-		const uniqueRegions = new Set<string>();
-		mainData.forEach((data: any) => {
-			if (data.region) {
-				uniqueRegions.add(data.region);
-			}
-		});
+		let dataSort: any[] = [];
 
-		const capitalizeFirstLetter = (str: string) => {
-			return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-		};
+		if (cleanMin !== null && cleanMax !== null) {
+			dataSort = _.filter(mainData, (item: any) => {
+				return item.main_price >= cleanMin && item.main_price <= cleanMax;
+			});
+		} else if (cleanMin !== null) {
+			dataSort = _.filter(mainData, (item: any) => {
+				return item.main_price >= cleanMin;
+			});
+		} else if (cleanMax !== null) {
+			dataSort = _.filter(mainData, (item: any) => {
+				return item.main_price <= cleanMax;
+			});
+		}
 
-		const newLocations = Array.from(uniqueRegions).map((region) => ({
-			label: capitalizeFirstLetter(region),
-			value: region.toLowerCase().replace(/\s+/g, "-"),
-		}));
-
-		setEventLocations((prevLocations) => {
-			const combined = [...prevLocations, ...newLocations];
-			return combined.filter(
-				(location, index, self) => index === self.findIndex((t) => t.value === location.value),
-			);
-		});
-	}, [mainData]);
+		if (dataSort.length || cleanMin !== null || cleanMax !== null) {
+			setMainData(dataSort);
+		}
+	}, [price]);
 
 	if (query.isLoading) {
 		return (
@@ -334,8 +382,10 @@ export function ProductContent() {
 	}
 
 
+	const dataContent = query.data?.data || [];
+
 	const handleFilter = (category: string) => {
-		const filterCategory: any = _.filter(mainData, (item) => {
+		const filterCategory: any = _.filter(dataContent, (item) => {
 			if (category === "Lainnya") {
 				return true;
 			} else {
@@ -395,7 +445,8 @@ setSelectedCategory={setActiveCategory}
 {/* Search Bar - Always visible */}
 <div className="col-span-12">
 <Box className="bg-gradient-to-r from-c-blue to-c-blue-light text-white shadow-lg p-4">
-<div className="flex items-center gap-4">
+<div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+<div className="flex items-center gap-4 w-full md:w-auto">
 <Search className="w-5 h-5 text-c-green" />
 <Input
 type="text"
@@ -404,6 +455,20 @@ defaultValue={searchInput}
 onChange={(e) => handleSearchChange(e.target.value)}
 className="bg-white text-black border-0 flex-1 max-w-md"
 />
+</div>
+<div className="flex items-center gap-2 w-full md:w-auto">
+<label className="text-white/80 text-sm">Urutkan:</label>
+<Select value={sortOption} onValueChange={setSortOption}>
+<SelectTrigger className="bg-white text-black border-0 h-10 rounded-lg">
+<SelectValue placeholder="Terbaru" />
+</SelectTrigger>
+<SelectContent>
+<SelectItem value="updatedAt:desc">Terbaru</SelectItem>
+<SelectItem value="price:asc">Harga terendah - tertinggi</SelectItem>
+<SelectItem value="price:desc">Harga tertinggi - terendah</SelectItem>
+</SelectContent>
+</Select>
+</div>
 </div>
 </Box>
 </div>
