@@ -362,17 +362,12 @@ export function ProductContent() {
 		window.scrollTo({ top: 0, behavior: "smooth" });
 	};
 
-	const isFilterCatsAvailable: boolean = filterCategories.length > 0;
-
-	if (!mainData || mainData.length === 0) {
-		return <div>Tidak ada produk untuk kategori ini.</div>;
-	}
+	const isFilterCatsAvailable: boolean = true;
 
 	// ✅ kalau semua aman, render produk
 
 return (
 <div className="grid grid-cols-12 gap-6">
-{isFilterCatsAvailable && (
 <div className="col-span-12 md:col-span-3">
 <ProductFilters
 selectedLocation={selectedLocation}
@@ -395,8 +390,7 @@ selectedCategory={activeCategory || ""}
 setSelectedCategory={setActiveCategory}
 />
 </div>
-)}
-<div className={`col-span-12 ${isFilterCatsAvailable ? "md:col-span-9" : "md:col-span-12"}`}>
+<div className="col-span-12 md:col-span-9">
 <div className="grid grid-cols-12 gap-6">
 {/* Search Bar - Always visible */}
 <div className="col-span-12">
