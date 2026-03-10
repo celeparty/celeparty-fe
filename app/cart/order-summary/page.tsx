@@ -81,28 +81,23 @@ export default function OrderSummaryPage() {
 			const order_id = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 			console.log("Generated order_id:", order_id);
 
-			// Consolidate all items into a single transaction
+			// Split ticket items vs non-ticket items (for separate Strapi tables)
+			const nonTicketItems = selectedCartItems.filter((item) => !ticketItems.includes(item));
+
+			// Consolidate recipients (for ticket payload)
 			const allRecipients = ticketItems.flatMap(item => item.recipients || []);
-			
-			// Use the first item for common details, assuming they are consistent for the order
-			const firstItem = selectedCartItems[0]; 
 
-			// Build products array matching Strapi schema (JSON field)
-			const productsData = selectedCartItems.map(item => ({
-				product_id: item.product_id,
-				product_name: item.product_name,
-				variant: item.variant_id || item.variant || "",
-				quantity: item.quantity,
-				price: item.price,
-				product_type: item.product_type,
-				note: item.note || "",
-				recipients: item.recipients || [], // Include recipients here
-			}));
+			// Use the first item for shared details, assuming these match for the whole order (e.g., vendor, customer details)
+			const firstItem = selectedCartItems[0];
 
-			// Calculate total price
-			const totalPrice = selectedCartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+			// Calculate totals
+			const totalTicketPrice = ticketItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+			const totalTicketQuantity = ticketItems.reduce((sum, item) => sum + item.quantity, 0);
+			const totalNonTicketPrice = nonTicketItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+			const totalNonTicketQuantity = nonTicketItems.reduce((sum, item) => sum + item.quantity, 0);
 
-			const transactionPayload = {
+			// Build payload for transaction (non-ticket items)
+			const transactionPayload = nonTicketItems.length > 0 ? {
 				data: {
 					order_id: order_id,
 					payment_status: "pending",
@@ -116,36 +111,93 @@ export default function OrderSummaryPage() {
 					note: selectedCartItems.map(item => item.note).filter(Boolean).join("; "),
 					vendor_doc_id: firstItem.vendor_doc_id || "",
 					event_type: ticketItems.length > 0 ? "Ticket" : "Equipment",
-					quantity: selectedCartItems.reduce((sum, item) => sum + item.quantity, 0),
-					total_price: totalPrice.toString(),
-					ticket_recipients: JSON.stringify(allRecipients),
-					products: productsData, // Use 'products' field from Strapi schema
+					quantity: totalNonTicketQuantity,
+					total_price: totalNonTicketPrice.toString(),
+					products: nonTicketItems.map(item => ({
+						product_id: item.product_id,
+						product_name: item.product_name,
+						variant: item.variant_id || item.variant || "",
+						quantity: item.quantity,
+						price: item.price,
+						product_type: item.product_type,
+						note: item.note || "",
+						recipients: item.recipients || [],
+					})),
 				}
-			};
+			} : null;
 
-			console.log("Creating unified transaction with payload:", transactionPayload);
+			// Build payload for transaction-ticket (ticket items)
+			const ticketTransactionPayload = ticketItems.length > 0 ? {
+				data: {
+					order_id: order_id,
+					payment_status: "pending",
+					customer_name: firstItem.customer_name || session?.user?.name || "",
+					customer_mail: session?.user?.email || "",
+					telp: firstItem.telp || session?.user?.phone || "",
+					note: selectedCartItems.map(item => item.note).filter(Boolean).join("; "),
+					vendor_doc_id: firstItem.vendor_doc_id || "",
+					event_type: "Ticket",
+					product_name: ticketItems[0]?.product_name || "",
+					variant: ticketItems[0]?.variant_id || ticketItems[0]?.variant || "",
+					price: ticketItems[0]?.price?.toString?.() || "0",
+					quantity: totalTicketQuantity.toString(),
+					total_price: totalTicketPrice.toString(),
+					recipients: allRecipients,
+				}
+			} : null;
 
-			// POST to the unified transaction proxy
-			const strapiRes = await fetch("/api/transaction-proxy", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(transactionPayload),
-			});
+			console.log("Creating unified transaction with payload:", { transactionPayload, ticketTransactionPayload });
 
-			console.log("Strapi unified transaction response status:", strapiRes.status);
+			// POST to the appropriate unified transaction proxy(s)
+			let ticketTransactionId: string | null = null;
+			let transactionId: string | null = null;
 
-			if (!strapiRes.ok) {
-				const errorBody = await strapiRes.text();
-				console.error("Failed to create transaction in Strapi. Response body:", errorBody);
-				throw new Error("Failed to create transaction in Strapi");
+			if (ticketTransactionPayload) {
+				const strapiRes = await fetch("/api/transaction-tickets-proxy", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify(ticketTransactionPayload),
+				});
+
+				console.log("Strapi ticket transaction response status:", strapiRes.status);
+
+				if (!strapiRes.ok) {
+					const errorBody = await strapiRes.text();
+					console.error("Failed to create ticket transaction in Strapi. Response body:", errorBody);
+					throw new Error("Failed to create ticket transaction in Strapi");
+				}
+
+				const ticketStrapiData = await strapiRes.json();
+				console.log("Strapi ticket transaction response data:", ticketStrapiData);
+				ticketTransactionId = ticketStrapiData?.data?.id;
 			}
 
-			const strapiData = await strapiRes.json();
-			console.log("Strapi unified transaction response data:", strapiData);
-			const transactionId = strapiData.data.id;
+			if (transactionPayload) {
+				const strapiRes = await fetch("/api/transaction-proxy", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify(transactionPayload),
+				});
 
+				console.log("Strapi unified transaction response status:", strapiRes.status);
+
+				if (!strapiRes.ok) {
+					const errorBody = await strapiRes.text();
+					console.error("Failed to create transaction in Strapi. Response body:", errorBody);
+					throw new Error("Failed to create transaction in Strapi");
+				}
+
+				const strapiData = await strapiRes.json();
+				console.log("Strapi unified transaction response data:", strapiData);
+				transactionId = strapiData?.data?.id;
+			}
+
+			const finalTransactionId = ticketTransactionId || transactionId;
+// *** End Patch
 			// Prepare payment data for Midtrans (remains the same)
 			const paymentData = selectedCartItems.map((item: any) => ({
 				id: item.product_id,
@@ -189,7 +241,7 @@ export default function OrderSummaryPage() {
 
 			// Save transaction summary to sessionStorage
 			const transactionSummary = {
-				orderId: transactionId,
+				orderId: finalTransactionId,
 				products: selectedCartItems,
 				total: totalAmount,
 				order_id: order_id,
