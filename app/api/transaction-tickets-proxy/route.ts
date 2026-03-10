@@ -10,6 +10,9 @@ export async function POST(req: NextRequest) {
 		const STRAPI_URL = `${process.env.BASE_API}/transaction-tickets`;
 		const KEY_API = process.env.KEY_API;
 
+		console.log("[transaction-tickets-proxy] Posting to:", STRAPI_URL);
+		console.log("[transaction-tickets-proxy] Payload:", body);
+
 		if (!KEY_API) {
 			return NextResponse.json({ error: "KEY_API not set in environment" }, { status: 500 });
 		}
@@ -23,12 +26,29 @@ export async function POST(req: NextRequest) {
 			body: JSON.stringify(body),
 		});
 
-		const data = await strapiRes.json();
+		const contentType = strapiRes.headers.get("content-type") || "";
+		let data: any = null;
+		try {
+			if (contentType.includes("application/json")) {
+				data = await strapiRes.json();
+			} else {
+				data = await strapiRes.text();
+			}
+		} catch (parseErr) {
+			try {
+				data = await strapiRes.text();
+			} catch (tErr) {
+				data = `Failed to parse response body: ${String(parseErr)}`;
+			}
+		}
+
+		console.log("[transaction-tickets-proxy] Strapi Response status:", strapiRes.status);
+		console.log("[transaction-tickets-proxy] Strapi Response body:", data);
 
 		if (!strapiRes.ok) {
 			return NextResponse.json(
 				{
-					error: data.error || data,
+					error: typeof data === "object" ? data.error || data : String(data),
 					status: strapiRes.status,
 					details: data,
 				},
