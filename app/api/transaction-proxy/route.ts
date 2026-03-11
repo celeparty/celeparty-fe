@@ -10,9 +10,9 @@ export async function POST(req: NextRequest) {
 		const body = await req.json();
 		console.log("Transaction Proxy - Received payload:", JSON.stringify(body, null, 2));
 		
-		// Ensure we call the Strapi API path. BASE_API is expected to be the host (e.g. https://celeparty.com)
-		// so we append /api/transactions to reach the correct endpoint.
-		const STRAPI_URL = `${process.env.BASE_API}/api/transactions`;
+		// Ensure we call the Strapi API path. Normalize BASE_API so it works whether it includes /api or not.
+		const baseApi = (process.env.BASE_API || "").replace(/\/api\/?$/, "");
+		const STRAPI_URL = `${baseApi}/api/transactions`;
 		console.log("Transaction Proxy - Posting to:", STRAPI_URL);
 		
 		const KEY_API = process.env.KEY_API;
@@ -85,9 +85,9 @@ export async function PUT(req: NextRequest) {
 		if (!id) {
 			return NextResponse.json({ error: "Missing transaction id." }, { status: 400 });
 		}
-	// Ensure we call the Strapi API path. BASE_API is expected to be the host (e.g. https://celeparty.com)
-	// so we append /api/transactions to reach the correct endpoint.
-	const STRAPI_URL = `${process.env.BASE_API}/api/transactions/${id}`;
+	// Normalize BASE_API so it works whether env includes /api or not.
+	const baseApi = (process.env.BASE_API || "").replace(/\/api\/?$/, "");
+	const STRAPI_URL = `${baseApi}/api/transactions/${id}`;
 		const KEY_API = process.env.KEY_API;
 		if (!KEY_API) {
 			return NextResponse.json({ error: "KEY_API not set in environment" }, { status: 500 });
@@ -143,6 +143,9 @@ export async function GET(req: NextRequest) {
 		console.log("[TransactionProxy GET] Full incoming URL:", req.url);
 		console.log("[TransactionProxy GET] Incoming searchParams:", Array.from(searchParams.entries()));
 
+		// Normalize BASE_API so it works whether env includes /api or not
+		const baseApi = (process.env.BASE_API || "").replace(/\/api\/?$/, "");
+
 		// Try to support two incoming shapes:
 		// 1) Simplified params: vendor_doc_id, event_type, pageSize, page, sort
 		// 2) Strapi-style params: filters[vendor_doc_id][$eq]=..., filters[event_type][$eq]=..., pagination[...], sort=...
@@ -165,7 +168,7 @@ export async function GET(req: NextRequest) {
 			}
 
 			const queryString = url.searchParams.toString();
-			var strapiUrl = `${process.env.BASE_API}/api/transactions?${queryString}&populate=*`;
+			var strapiUrl = `${baseApi}/api/transactions?${queryString}&populate=*`;
 		} else {
 			// Build proper Strapi URL with correct filter syntax
 			if (!vendorDocId) {
@@ -179,7 +182,7 @@ export async function GET(req: NextRequest) {
 				);
 			}
 
-			let strapiUrlLocal = `${process.env.BASE_API}/api/transactions?`;
+			let strapiUrlLocal = `${baseApi}/api/transactions?`;
 			// Add filters - Strapi expects: filters[field][operator]=value
 			strapiUrlLocal += `filters[vendor_doc_id][$eq]=${encodeURIComponent(vendorDocId)}&`;
 			if (eventType) {

@@ -6,8 +6,9 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
 	try {
 		const body = await req.json();
-		// BASE_API already includes /api, so don't add it again
-		const STRAPI_URL = `${process.env.BASE_API}/transaction-tickets`;
+		// Normalize BASE_API so it works whether env includes /api or not
+		const baseApi = (process.env.BASE_API || "").replace(/\/api\/?$/, "");
+		const STRAPI_URL = `${baseApi}/api/transaction-tickets`;
 		const KEY_API = process.env.KEY_API;
 
 		console.log("[transaction-tickets-proxy] Posting to:", STRAPI_URL);
@@ -114,6 +115,9 @@ export async function GET(req: NextRequest) {
 		console.log("[transaction-tickets-proxy GET] Full incoming URL:", req.url);
 		console.log("[transaction-tickets-proxy GET] Incoming searchParams:", Array.from(searchParams.entries()));
 
+		// Normalize BASE_API so it works whether env includes /api or not
+		const baseApi = (process.env.BASE_API || "").replace(/\/api\/?$/, "");
+
 		// Support simplified params and Strapi-style params
 		const vendorDocId = searchParams.get('vendor_doc_id') || searchParams.get('filters[vendor_doc_id][$eq]');
 		const pageSize = searchParams.get('pageSize') || searchParams.get('pagination[pageSize]') || '100';
@@ -131,7 +135,7 @@ export async function GET(req: NextRequest) {
 				return NextResponse.json({ error: "Missing vendor_doc_id parameter in filters", statusCode: 400 }, { status: 400 });
 			}
 			const queryString = url.searchParams.toString();
-			var strapiUrl = `${process.env.BASE_API}/transaction-tickets?${queryString}&populate[product][populate]=*&populate=variant&populate=recipients`;
+			var strapiUrl = `${baseApi}/api/transaction-tickets?${queryString}&populate[product][populate]=*&populate=variant&populate=recipients`;
 		} else {
 			// Validate vendor_doc_id is provided
 			if (!vendorDocId) {
@@ -146,7 +150,7 @@ export async function GET(req: NextRequest) {
 			}
 
 			// Build proper Strapi URL for transaction-tickets
-			let strapiUrlLocal = `${process.env.BASE_API}/transaction-tickets?`;
+			let strapiUrlLocal = `${baseApi}/api/transaction-tickets?`;
 			// Add filters
 			strapiUrlLocal += `filters[vendor_doc_id][$eq]=${encodeURIComponent(vendorDocId)}&`;
 			// Add pagination and sort
