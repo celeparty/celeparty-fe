@@ -116,7 +116,7 @@ export default function OrderSummaryPage() {
 					products: nonTicketItems.map(item => ({
 						product_id: item.product_id,
 						product_name: item.product_name,
-						variant: item.variant_id || item.variant || "",
+						variant: String(item.variant_id) || String(item.variant) || "",
 						quantity: item.quantity,
 						price: item.price,
 						product_type: item.product_type,
