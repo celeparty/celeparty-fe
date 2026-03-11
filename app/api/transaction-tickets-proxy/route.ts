@@ -11,8 +11,15 @@ export async function POST(req: NextRequest) {
 		const STRAPI_URL = `${baseApi}/api/transaction-tickets`;
 		const KEY_API = process.env.KEY_API;
 
+		// Ensure payload is wrapped in `data` (Strapi V4 expects that format)
+		let forwardedBody: any = body;
+		if (body && typeof body === "object" && !Object.prototype.hasOwnProperty.call(body, "data")) {
+			console.warn("[transaction-tickets-proxy] Request missing data wrapper, wrapping automatically.");
+			forwardedBody = { data: body };
+		}
+
 		console.log("[transaction-tickets-proxy] Posting to:", STRAPI_URL);
-		console.log("[transaction-tickets-proxy] Payload:", body);
+		console.log("[transaction-tickets-proxy] Payload:", forwardedBody);
 
 		if (!KEY_API) {
 			return NextResponse.json({ error: "KEY_API not set in environment" }, { status: 500 });
@@ -24,7 +31,7 @@ export async function POST(req: NextRequest) {
 				"Content-Type": "application/json",
 				Authorization: `Bearer ${KEY_API}`,
 			},
-			body: JSON.stringify(body),
+			body: JSON.stringify(forwardedBody),
 		});
 
 		const contentType = strapiRes.headers.get("content-type") || "";
@@ -71,8 +78,9 @@ export async function PUT(req: NextRequest) {
 		if (!id) {
 			return NextResponse.json({ error: "Missing transaction-ticket id." }, { status: 400 });
 		}
-		// BASE_API already includes /api, so don't add it again
-		const STRAPI_URL = `${process.env.BASE_API}/transaction-tickets/${id}`;
+		// Normalize BASE_API so it works whether env includes /api or not
+		const baseApi = (process.env.BASE_API || "").replace(/\/api\/?$/, "");
+		const STRAPI_URL = `${baseApi}/api/transaction-tickets/${id}`;
 		const KEY_API = process.env.KEY_API;
 
 		if (!KEY_API) {

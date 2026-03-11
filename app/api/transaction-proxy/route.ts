@@ -15,6 +15,13 @@ export async function POST(req: NextRequest) {
 		const STRAPI_URL = `${baseApi}/api/transactions`;
 		console.log("Transaction Proxy - Posting to:", STRAPI_URL);
 		
+		// Ensure payload is wrapped in `data` (Strapi V4 expects that format)
+		let forwardedBody: any = body;
+		if (body && typeof body === "object" && !Object.prototype.hasOwnProperty.call(body, "data")) {
+			console.warn("[transaction-proxy] Request missing data wrapper, wrapping automatically.");
+			forwardedBody = { data: body };
+		}
+
 		const KEY_API = process.env.KEY_API;
 		if (!KEY_API) {
 			return NextResponse.json({ error: "KEY_API not set in environment" }, { status: 500 });
@@ -26,7 +33,7 @@ export async function POST(req: NextRequest) {
 				"Content-Type": "application/json",
 				Authorization: `Bearer ${KEY_API}`,
 			},
-			body: JSON.stringify(body),
+			body: JSON.stringify(forwardedBody),
 		});
 
 		const contentType = strapiRes.headers.get("content-type") || "";
