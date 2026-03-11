@@ -7,21 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { iSelectOption } from "@/lib/interfaces/iCommon";
-import { formatNumberWithDots } from "@/lib/utils";
-import { Calendar, Filter, MapPin, Search, SlidersHorizontal, X } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import { Filter, MapPin, Search, SlidersHorizontal, X } from "lucide-react";
+import React, { useState } from "react";
 
 interface ProductFiltersProps {
 	selectedLocation: string;
 	setSelectedLocation: (value: string) => void;
-	eventDate: string;
-	setEventDate: (value: string) => void;
 	eventLocations: iSelectOption[];
 	selectedEventType: string;
 	setSelectedEventType: (value: string) => void;
 	eventTypes: iSelectOption[];
-	price: { min: any; max: any };
-	setPrice: (value: { min: any; max: any }) => void;
 	resetFilters: () => void;
 	activeCategory: string | null;
 	setActiveCategory: (value: string | null) => void;
@@ -31,19 +26,16 @@ interface ProductFiltersProps {
 	isMobile?: boolean;
 	selectedCategory: string;
 	setSelectedCategory: (value: string) => void;
+	filteredCount: number;
 }
 
 const ProductFilters: React.FC<ProductFiltersProps> = ({
 	selectedLocation,
 	setSelectedLocation,
-	eventDate,
-	setEventDate,
 	eventLocations,
 	selectedEventType,
 	setSelectedEventType,
 	eventTypes,
-	price,
-	setPrice,
 	resetFilters,
 	activeCategory,
 	setActiveCategory,
@@ -53,29 +45,17 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
 	isMobile = false,
 	selectedCategory,
 	setSelectedCategory,
+	filteredCount,
 }) => {
 	const [isExpanded, setIsExpanded] = useState(!isMobile);
 	const [searchTerm, setSearchTerm] = useState("");
 
-	const hasActiveFilters = selectedLocation || eventDate || price.min || price.max || activeCategory || selectedEventType;
+	const hasActiveFilters = selectedLocation || activeCategory || selectedEventType;
 
 	const filteredCategories = filterCategories.filter((cat) =>
 		cat.title.toLowerCase().includes(searchTerm.toLowerCase()),
 	);
 
-	const handlePriceChange = (field: "min" | "max", value: string) => {
-		const rawValue = value.replace(/\D/g, "");
-		const formatted = formatNumberWithDots(rawValue);
-		setPrice({ ...price, [field]: formatted });
-	};
-
-	const clearPriceFilter = () => {
-		setPrice({ min: "", max: "" });
-	};
-
-	const activeFiltersCount = [selectedLocation, eventDate, price.min, price.max, activeCategory].filter(
-		Boolean,
-	).length;
 
 	if (!isFilterCatsAvailable) {
 		return (
@@ -125,10 +105,11 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
 							Filter Produk
 						</CardTitle>
 						<div className="flex items-center gap-2">
-							{activeFiltersCount > 0 && (
+	
+								{filteredCount > 0 && (
 								<Badge variant="secondary" className="bg-c-green text-white">
-									{activeFiltersCount}
-								</Badge>
+										{filteredCount} produk
+									</Badge>
 							)}
 							<Button
 								variant="ghost"
@@ -147,7 +128,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
 					<div className="space-y-3">
 						<div className="flex items-center gap-2">
 							<MapPin className="w-4 h-4 text-c-green" />
-							<label className="text-sm font-semibold">Lokasi Acara</label>
+							<label className="text-sm font-semibold">Lokasi </label>
 						</div>
 						<Select onValueChange={setSelectedLocation} value={selectedLocation}>
 							<SelectTrigger className="bg-white text-black border-0 h-10 rounded-lg">
@@ -161,23 +142,6 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
 								))}
 							</SelectContent>
 						</Select>
-					</div>
-
-					<Separator className="bg-white/20" />
-
-					{/* Event Date Filter */}
-					<div className="space-y-3">
-						<div className="flex items-center gap-2">
-							<Calendar className="w-4 h-4 text-c-green" />
-							<label className="text-sm font-semibold">Tanggal Acara</label>
-						</div>
-					<Input
-						type="date"
-						value={eventDate}
-						onChange={(e) => setEventDate(e.target.value)}
-						className="bg-white text-black border-0 h-10 rounded-lg"
-						placeholder="Pilih tanggal"
-					/>
 					</div>
 
 					<Separator className="bg-white/20" />
@@ -207,7 +171,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
 					<Separator className="bg-white/20" />
 
 					{/* Price Range Filter */}
-					<div className="space-y-3">
+					{/* <div className="space-y-3">
 						<div className="flex items-center justify-between">
 							<label className="text-sm font-semibold">Kisaran Harga</label>
 							{(price.min || price.max) && (
@@ -237,7 +201,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
 								placeholder="Max"
 							/>
 						</div>
-					</div>
+					</div> */}
 
 					<Separator className="bg-white/20" />
 

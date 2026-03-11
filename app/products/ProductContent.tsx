@@ -64,14 +64,12 @@ export function ProductContent() {
 	const [selectedEventType, setSelectedEventType] = useState<string>(getType);
 	const [searchInput, setSearchInput] = useState<string>(getSearch);
 	const [sortOption, setSortOption] = useState<string>(getSort);
-	const [price, setPrice] = useState<{ min: any; max: any }>({ min: "", max: "" });
 
 	const [mainData, setMainData] = useState<any>([]);
 	const [currentPage, setCurrentPage] = useState<number>(1);
 	const [totalPages, setTotalPages] = useState<number>(1);
 	const [pageSize] = useState<number>(15);
 
-	const [eventDate, setEventDate] = useState<string>("");
 	const [eventLocations, setEventLocations] = useState<iSelectOption[]>([]);
 	const [selectedLocation, setSelectedLocation] = useState<string>("");
 	const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -88,7 +86,6 @@ export function ProductContent() {
 	);
 
 	const getCombinedQuery = async () => {
-		const formattedDate = eventDate ? format(new Date(eventDate), "yyyy-MM-dd") : null;
 		const isPriceSort = sortOption === "price:asc" || sortOption === "price:desc";
 
 		const productSort = isPriceSort ? "updatedAt:desc" : sortOption;
@@ -114,17 +111,38 @@ export function ProductContent() {
 			ticketBaseParams += `&filters[category][title][$eq]=${encodeURIComponent(getCategory)}`;
 		}
 
-		if (formattedDate) {
-			baseParams += `&filters[event_date][$gte]=${formattedDate}`;
-			ticketBaseParams += `&filters[event_date][$gte]=${formattedDate}`;
+		// Build category filter based on selected event type (event type -> categories relation)
+		let eventTypeCategoryFilter = "";
+		if (selectedEventType && filterCatsQuery.data?.data) {
+			const matchedEventType = (filterCatsQuery.data.data || []).find((raw: any) => {
+				const item = raw?.attributes ? { id: raw.id, ...raw.attributes } : raw;
+				return item?.name === selectedEventType;
+			});
+
+			const categories =
+				matchedEventType?.categories?.data ??
+				matchedEventType?.categories ??
+				[];
+
+			const categoryIds: number[] = Array.isArray(categories)
+				? categories
+					.map((cat: any) => (cat?.id ? cat.id : cat?.data?.id))
+					.filter(Boolean)
+				: [];
+
+			if (categoryIds.length) {
+				eventTypeCategoryFilter = `&filters[category][id][$in]=${categoryIds.join(",")}`;
+			}
+		}
+
+		// Apply category filter for selected event type
+		if (eventTypeCategoryFilter) {
+			baseParams += eventTypeCategoryFilter;
+			ticketBaseParams += eventTypeCategoryFilter;
 		}
 
 		try {
-			const productsParams =
-				baseParams +
-				(selectedEventType
-					? `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}`
-					: "");
+			const productsParams = baseParams;
 
 			const productsRes: any = await axiosData(
 				"GET",
@@ -222,10 +240,10 @@ export function ProductContent() {
 		queryKey: [
 			"qProducts",
 			selectedEventType,
+			filterCatsQuery.isSuccess,
 			searchInput,
 			getCategory,
 			selectedLocation,
-			eventDate,
 			sortOption,
 			currentPage,
 		],
@@ -246,7 +264,7 @@ export function ProductContent() {
 	// Reset to first page when filters change
 	useEffect(() => {
 		setCurrentPage(1);
-	}, [selectedEventType, searchInput, getCategory, selectedLocation, eventDate, sortOption]);
+	}, [selectedEventType, searchInput, getCategory, selectedLocation, sortOption]);
 
 	const getFilterCatsQuery = async () => {
 		return await axiosData("GET", "/api/user-event-types?populate=*");
@@ -358,55 +376,6 @@ export function ProductContent() {
 		setEventLocations(locations);
 	}, [query.data]);
 
-	useEffect(() => {
-		const cleanMin = price?.min ? parseInt(price.min.replace(/\./g, ""), 10) : null;
-		const cleanMax = price?.max ? parseInt(price.max.replace(/\./g, ""), 10) : null;
-
-		let dataSort: any[] = [];
-
-		if (cleanMin !== null && cleanMax !== null) {
-			dataSort = _.filter(mainData, (item: any) => {
-				return item.main_price >= cleanMin && item.main_price <= cleanMax;
-			});
-		} else if (cleanMin !== null) {
-			dataSort = _.filter(mainData, (item: any) => {
-				return item.main_price >= cleanMin;
-			});
-		} else if (cleanMax !== null) {
-			dataSort = _.filter(mainData, (item: any) => {
-				return item.main_price <= cleanMax;
-			});
-		}
-
-		if (dataSort.length || cleanMin !== null || cleanMax !== null) {
-			setMainData(dataSort);
-		}
-	}, [price]);
-
-	useEffect(() => {
-		const cleanMin = price?.min ? parseInt(price.min.replace(/\./g, ""), 10) : null;
-		const cleanMax = price?.max ? parseInt(price.max.replace(/\./g, ""), 10) : null;
-
-		let dataSort: any[] = [];
-
-		if (cleanMin !== null && cleanMax !== null) {
-			dataSort = _.filter(mainData, (item: any) => {
-				return item.main_price >= cleanMin && item.main_price <= cleanMax;
-			});
-		} else if (cleanMin !== null) {
-			dataSort = _.filter(mainData, (item: any) => {
-				return item.main_price >= cleanMin;
-			});
-		} else if (cleanMax !== null) {
-			dataSort = _.filter(mainData, (item: any) => {
-				return item.main_price <= cleanMax;
-			});
-		}
-
-		if (dataSort.length || cleanMin !== null || cleanMax !== null) {
-			setMainData(dataSort);
-		}
-	}, [price]);
 
 	if (query.isLoading) {
 		return (
@@ -440,7 +409,6 @@ export function ProductContent() {
 	const resetFilters = () => {
 		setSelectedEventType("");
 		setSelectedLocation("");
-		setEventDate("");
 		setActiveCategory(null);
 		setSortOption("updatedAt:desc");
 		setCurrentPage(1);
@@ -461,25 +429,22 @@ return (
 <div className="grid grid-cols-12 gap-6">
 <div className="col-span-12 md:col-span-3">
 <ProductFilters
-selectedLocation={selectedLocation}
-setSelectedLocation={setSelectedLocation}
-eventDate={eventDate}
-setEventDate={setEventDate}
-eventLocations={eventLocations}
-price={price}
-setPrice={setPrice}
-resetFilters={resetFilters}
-activeCategory={activeCategory}
-setActiveCategory={setActiveCategory}
-filterCategories={filterCategories}
-handleFilter={handleFilter}
-isFilterCatsAvailable={isFilterCatsAvailable}
-selectedEventType={selectedEventType}
-setSelectedEventType={setSelectedEventType}
-eventTypes={eventTypes}
-selectedCategory={activeCategory || ""}
-setSelectedCategory={setActiveCategory}
-/>
+			selectedLocation={selectedLocation}
+			setSelectedLocation={setSelectedLocation}
+			eventLocations={eventLocations}
+			resetFilters={resetFilters}
+			activeCategory={activeCategory}
+			setActiveCategory={setActiveCategory}
+			filterCategories={filterCategories}
+			handleFilter={handleFilter}
+			isFilterCatsAvailable={isFilterCatsAvailable}
+			selectedEventType={selectedEventType}
+			setSelectedEventType={setSelectedEventType}
+			eventTypes={eventTypes}
+			selectedCategory={activeCategory || ""}
+			setSelectedCategory={setActiveCategory}
+			filteredCount={query.data?.meta?.pagination?.total ?? 0}
+		/>
 </div>
 <div className="col-span-12 md:col-span-9">
 <div className="grid grid-cols-12 gap-6">
