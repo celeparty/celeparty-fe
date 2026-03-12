@@ -240,7 +240,6 @@ export function ProductContent() {
 		queryKey: [
 			"qProducts",
 			selectedEventType,
-			filterCatsQuery.isSuccess,
 			searchInput,
 			getCategory,
 			selectedLocation,
