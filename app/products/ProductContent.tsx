@@ -111,51 +111,37 @@ export function ProductContent() {
 			ticketBaseParams += `&filters[category][title][$eq]=${encodeURIComponent(getCategory)}`;
 		}
 
-		// Build event type filter (supports both category relations and explicit user_event_type relations)
+		// Build event type filter: gunakan kategori dari relasi event -> categories saja
 		let eventTypeCategoryFilter = "";
-		let eventTypeUserTypeFilter = "";
-		let matchedCategoryIds: number[] = [];
 
-		if (selectedEventType) {
-			eventTypeUserTypeFilter = `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}`;
+		if (selectedEventType && filterCatsQuery.data?.data) {
+			const matchedEventType = (filterCatsQuery.data.data || []).find((raw: any) => {
+				const item = raw?.attributes ? { id: raw.id, ...raw.attributes } : raw;
+				return item?.name === selectedEventType;
+			});
 
-			if (filterCatsQuery.data?.data) {
-				const matchedEventType = (filterCatsQuery.data.data || []).find((raw: any) => {
-					const item = raw?.attributes ? { id: raw.id, ...raw.attributes } : raw;
-					return item?.name === selectedEventType;
-				});
+			const categories =
+				matchedEventType?.categories?.data ??
+				matchedEventType?.categories ??
+				[];
 
-				const categories =
-					matchedEventType?.categories?.data ??
-					matchedEventType?.categories ??
-					[];
+			const matchedCategoryIds = Array.isArray(categories)
+				? categories
+					.map((cat: any) => (cat?.id ? cat.id : cat?.data?.id))
+					.filter(Boolean)
+				: [];
 
-				matchedCategoryIds = Array.isArray(categories)
-					? categories
-						.map((cat: any) => (cat?.id ? cat.id : cat?.data?.id))
-						.filter(Boolean)
-					: [];
-
-				if (matchedCategoryIds.length) {
-					eventTypeCategoryFilter = `&filters[category][id][$in]=${matchedCategoryIds.join(",")}`;
-				}
+			if (matchedCategoryIds.length) {
+				eventTypeCategoryFilter = `&filters[category][id][$in]=${matchedCategoryIds.join(",")}`;
+			} else {
+				// bila tidak ada kategori terkait, pastikan tidak ada produk (avoid unfiltered display)
+				eventTypeCategoryFilter = `&filters[category][id][$in]=0`;
 			}
 		}
 
-		// Apply event type filters
-		if (eventTypeCategoryFilter && eventTypeUserTypeFilter) {
-			// Use OR to include both direct user_event_type and category-related products
-			const orFilter =
-				`&filters[$or][0][category][id][$in]=${matchedCategoryIds.join(",")}` +
-				`&filters[$or][1][user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}`;
-			baseParams += orFilter;
-			ticketBaseParams += orFilter;
-		} else if (eventTypeCategoryFilter) {
+		if (eventTypeCategoryFilter) {
 			baseParams += eventTypeCategoryFilter;
 			ticketBaseParams += eventTypeCategoryFilter;
-		} else if (eventTypeUserTypeFilter) {
-			baseParams += eventTypeUserTypeFilter;
-			ticketBaseParams += eventTypeUserTypeFilter;
 		}
 
 		try {
@@ -232,15 +218,8 @@ export function ProductContent() {
 		} catch (error) {
 			console.error("Error fetching products:", error);
 			try {
-				const fallbackUrl =
-					`/api/products?${baseParams}$
-						${
-							selectedEventType
-								? `&filters[user_event_type][name][$eq]=${encodeURIComponent(
-									selectedEventType,
-								)}`
-								: ""
-							}&filters[state][$eq]=approved`;
+				const fallbackUrl = `/api/products?${baseParams}&filters[state][$eq]=approved`;
+
 				const fallback = await axiosData("GET", fallbackUrl);
 				return {
 					data: fallback?.data || [],

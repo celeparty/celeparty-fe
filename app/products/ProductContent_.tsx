@@ -137,11 +137,32 @@ export function ProductContent() {
 
 
     try {
-      // Build query parameters for products and tickets separately
-      const productsParams = baseParams +
-        (selectedEventType
-          ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}`
-          : "");
+      // Apply event type filter based on category relation (do not use user_event_type on products)
+      if (selectedEventType && filterCatsQuery.data?.data) {
+        const matchedEventType = (filterCatsQuery.data.data || []).find((raw: any) => {
+          const item = raw?.attributes ? { id: raw.id, ...raw.attributes } : raw;
+          return item?.name === selectedEventType;
+        });
+
+        const categories =
+          matchedEventType?.categories?.data ??
+          matchedEventType?.categories ??
+          [];
+
+        const matchedCategoryIds = Array.isArray(categories)
+          ? categories
+              .map((cat: any) => (cat?.id ? cat.id : cat?.data?.id))
+              .filter(Boolean)
+          : [];
+
+        if (matchedCategoryIds.length) {
+          baseParams += `&filters[category][id][$in]=${matchedCategoryIds.join(",")}`;
+        } else {
+          baseParams += `&filters[category][id][$in]=0`;
+        }
+      }
+
+      const productsParams = baseParams;
 
       let productsRes: any;
       let ticketsRes: any = { data: [], meta: { pagination: { total: 0 } } };
@@ -222,14 +243,7 @@ export function ProductContent() {
       console.error("Error fetching products:", error);
       // fallback attempt using same parameters (without invalid sort)
       try {
-        const fallbackUrl =
-          `/api/products?${baseParams}${
-            selectedEventType
-              ? `&filters[user_event_type][name][$eq]=${encodeURIComponent(
-                  selectedEventType
-                )}`
-              : ""
-          }&filters[state][$eq]=approved`;
+        const fallbackUrl = `/api/products?${baseParams}&filters[state][$eq]=approved`;
         const fallback = await axiosData("GET", fallbackUrl);
         return {
           data: fallback?.data || [],
