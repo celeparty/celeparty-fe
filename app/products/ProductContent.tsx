@@ -286,46 +286,64 @@ export function ProductContent() {
 	});
 
 	useEffect(() => {
-		if (filterCatsQuery.isSuccess) {
-			const data = filterCatsQuery.data?.data || [];
+		if (!filterCatsQuery.isSuccess) return;
 
-			// Get categories from NON-TICKET event types only (equipment products)
-			// Supports both flattened (item.categories) and Strapi-v4 (item.attributes.categories.data) shapes
-			const allCategories = new Map<string, any>();
+		const data = filterCatsQuery.data?.data || [];
 
-			const normalizeEventType = (raw: any) => {
-				if (!raw) return null;
-				if (raw.attributes) return { id: raw.id, ...raw.attributes };
-				return raw;
-			};
+		const normalizeEventType = (raw: any) => {
+			if (!raw) return null;
+			if (raw.attributes) return { id: raw.id, ...raw.attributes };
+			return raw;
+		};
 
-			const normalizeCategory = (raw: any) => {
-				if (!raw) return null;
-				if (raw.attributes) return { id: raw.id, ...raw.attributes };
-				return raw;
-			};
+		const normalizeCategory = (raw: any) => {
+			if (!raw) return null;
+			if (raw.attributes) return { id: raw.id, ...raw.attributes };
+			return raw;
+		};
 
-			data.forEach((rawEventType: any) => {
-				const eventType = normalizeEventType(rawEventType);
-				if (!eventType) return;
-				if (eventType.is_ticket) return;
+		const addCategories = (categories: any[]) => {
+			return (categories || [])
+				.map((cat: any) => normalizeCategory(cat))
+				.filter((cat: any) => cat && cat.title);
+		};
 
-				const categories =
-					eventType.categories?.data ??
-					eventType.categories ??
-					[];
-
-				categories.forEach((cat: any) => {
-					const normalized = normalizeCategory(cat);
-					if (normalized?.title && !allCategories.has(normalized.title)) {
-						allCategories.set(normalized.title, normalized);
-					}
-				});
+		if (selectedEventType) {
+			const matchedEventType = (data || []).find((raw: any) => {
+				const item = raw?.attributes ? { id: raw.id, ...raw.attributes } : raw;
+				return item?.name === selectedEventType;
 			});
 
-			setFilterCategories(Array.from(allCategories.values()));
+			const categories =
+				matchedEventType?.categories?.data ??
+				matchedEventType?.categories ??
+				[];
+
+			setFilterCategories(addCategories(categories));
+			return;
 		}
-	}, [filterCatsQuery.isSuccess, filterCatsQuery.data]);
+
+		// default: all non-ticket event types categories
+		const allCategories = new Map<string, any>();
+		(data || []).forEach((rawEventType: any) => {
+			const eventType = normalizeEventType(rawEventType);
+			if (!eventType) return;
+			if (eventType.is_ticket) return;
+
+			const categories =
+				eventType.categories?.data ??
+				eventType.categories ??
+				[];
+
+			addCategories(categories).forEach((cat: any) => {
+				if (!allCategories.has(cat.title)) {
+					allCategories.set(cat.title, cat);
+				}
+			});
+		});
+
+		setFilterCategories(Array.from(allCategories.values()));
+	}, [filterCatsQuery.isSuccess, filterCatsQuery.data, selectedEventType]);
 
 	useEffect(() => {
 		if (eventTypesQuery.isSuccess) {
