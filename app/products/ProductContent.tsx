@@ -111,34 +111,51 @@ export function ProductContent() {
 			ticketBaseParams += `&filters[category][title][$eq]=${encodeURIComponent(getCategory)}`;
 		}
 
-		// Build category filter based on selected event type (event type -> categories relation)
+		// Build event type filter (supports both category relations and explicit user_event_type relations)
 		let eventTypeCategoryFilter = "";
-		if (selectedEventType && filterCatsQuery.data?.data) {
-			const matchedEventType = (filterCatsQuery.data.data || []).find((raw: any) => {
-				const item = raw?.attributes ? { id: raw.id, ...raw.attributes } : raw;
-				return item?.name === selectedEventType;
-			});
+		let eventTypeUserTypeFilter = "";
+		let matchedCategoryIds: number[] = [];
 
-			const categories =
-				matchedEventType?.categories?.data ??
-				matchedEventType?.categories ??
-				[];
+		if (selectedEventType) {
+			eventTypeUserTypeFilter = `&filters[user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}`;
 
-			const categoryIds: number[] = Array.isArray(categories)
-				? categories
-					.map((cat: any) => (cat?.id ? cat.id : cat?.data?.id))
-					.filter(Boolean)
-				: [];
+			if (filterCatsQuery.data?.data) {
+				const matchedEventType = (filterCatsQuery.data.data || []).find((raw: any) => {
+					const item = raw?.attributes ? { id: raw.id, ...raw.attributes } : raw;
+					return item?.name === selectedEventType;
+				});
 
-			if (categoryIds.length) {
-				eventTypeCategoryFilter = `&filters[category][id][$in]=${categoryIds.join(",")}`;
+				const categories =
+					matchedEventType?.categories?.data ??
+					matchedEventType?.categories ??
+					[];
+
+				matchedCategoryIds = Array.isArray(categories)
+					? categories
+						.map((cat: any) => (cat?.id ? cat.id : cat?.data?.id))
+						.filter(Boolean)
+					: [];
+
+				if (matchedCategoryIds.length) {
+					eventTypeCategoryFilter = `&filters[category][id][$in]=${matchedCategoryIds.join(",")}`;
+				}
 			}
 		}
 
-		// Apply category filter for selected event type
-		if (eventTypeCategoryFilter) {
+		// Apply event type filters
+		if (eventTypeCategoryFilter && eventTypeUserTypeFilter) {
+			// Use OR to include both direct user_event_type and category-related products
+			const orFilter =
+				`&filters[$or][0][category][id][$in]=${matchedCategoryIds.join(",")}` +
+				`&filters[$or][1][user_event_type][name][$eq]=${encodeURIComponent(selectedEventType)}`;
+			baseParams += orFilter;
+			ticketBaseParams += orFilter;
+		} else if (eventTypeCategoryFilter) {
 			baseParams += eventTypeCategoryFilter;
 			ticketBaseParams += eventTypeCategoryFilter;
+		} else if (eventTypeUserTypeFilter) {
+			baseParams += eventTypeUserTypeFilter;
+			ticketBaseParams += eventTypeUserTypeFilter;
 		}
 
 		try {
@@ -273,6 +290,12 @@ export function ProductContent() {
 		queryKey: ["qFilterCats"],
 		queryFn: getFilterCatsQuery,
 	});
+
+	useEffect(() => {
+		if (selectedEventType && filterCatsQuery.isSuccess) {
+			query.refetch();
+		}
+	}, [selectedEventType, filterCatsQuery.isSuccess, query]);
 
 	const getEventTypesQuery = async () => {
 		return await axiosData("GET", "/api/user-event-types");
