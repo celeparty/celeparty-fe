@@ -85,6 +85,21 @@ export function ProductContent() {
 		[]
 	);
 
+	// Helper to safely extract category ID dari berbagai struktur Strapi
+	const extractCategoryId = (category: any): number | null => {
+		if (!category) return null;
+		
+		// Cek berbagai format id yang mungkin
+		const id =
+			category?.id ||
+			category?.data?.id ||
+			category?.attributes?.id ||
+			parseInt(category?.data?.documentId?.split('-')[0]) ||
+			parseInt(category?.documentId?.split('-')[0]);
+
+		return id ? parseInt(String(id)) : null;
+	};
+
 	const getCombinedQuery = async () => {
 		const isPriceSort = sortOption === "price:asc" || sortOption === "price:desc";
 
@@ -114,30 +129,64 @@ export function ProductContent() {
 		// Build event type filter: gunakan kategori dari relasi event -> categories saja
 		let eventTypeCategoryFilter = "";
 
-		if (selectedEventType && filterCatsQuery.data?.data) {
-			const matchedEventType = (filterCatsQuery.data.data || []).find((raw: any) => {
-				const item = raw?.attributes ? { id: raw.id, ...raw.attributes } : raw;
-				return item?.name === selectedEventType;
-			});
+		if (selectedEventType) {
+			// Pertimbangkan filterCategories yang sudah disiapkan berdasarkan selectedEventType
+			if (filterCategories.length > 0) {
+				const categoryIds = filterCategories
+					.map((cat: any) => extractCategoryId(cat))
+					.filter((id) => id !== null);
 
-			const categories =
-				matchedEventType?.categories?.data ??
-				matchedEventType?.categories ??
-				[];
+				if (categoryIds.length > 0) {
+					eventTypeCategoryFilter = `&filters[category][id][$in]=${categoryIds.join(",")}`;
+					console.log(
+						`[ProductContent] Event type filter applied: ${selectedEventType} -> category IDs: [${categoryIds.join(", ")}]`,
+					);
+				} else {
+					console.warn(
+						`[ProductContent] filterCategories available but no valid IDs extracted for event type: ${selectedEventType}`,
+						filterCategories,
+					);
+				}
+			} else if (filterCatsQuery.data?.data) {
+				// Fallback: cari kategori dari filterCatsQuery jika filterCategories masih kosong
+				const matchedEventType = (filterCatsQuery.data.data || []).find((raw: any) => {
+					const item = raw?.attributes ? { id: raw.id, ...raw.attributes } : raw;
+					return item?.name === selectedEventType;
+				});
 
-			const matchedCategoryIds = Array.isArray(categories)
-				? categories
-					.map((cat: any) => (cat?.id ? cat.id : cat?.data?.id))
-					.filter(Boolean)
-				: [];
+				const categories =
+					matchedEventType?.categories?.data ??
+					matchedEventType?.categories ??
+					[];
 
-			if (matchedCategoryIds.length) {
-				eventTypeCategoryFilter = `&filters[category][id][$in]=${matchedCategoryIds.join(",")}`;
-			} else {
-				// bila tidak ada kategori terkait, pastikan tidak ada produk (avoid unfiltered display)
+				const matchedCategoryIds = Array.isArray(categories)
+					? categories
+						.map((cat: any) => extractCategoryId(cat))
+						.filter((id) => id !== null)
+					: [];
+
+				if (matchedCategoryIds.length > 0) {
+					eventTypeCategoryFilter = `&filters[category][id][$in]=${matchedCategoryIds.join(",")}`;
+					console.log(
+						`[ProductContent] Event type filter applied (fallback): ${selectedEventType} -> category IDs: [${matchedCategoryIds.join(", ")}]`,
+					);
+				} else {
+					console.warn(
+						`[ProductContent] No categories found for event type: ${selectedEventType}`,
+						matchedEventType,
+					);
+				}
+			}
+
+			if (!eventTypeCategoryFilter && selectedEventType) {
+				// Jika benar2 tidak ada kategori, set empty filter untuk menghindari menampilkan semua produk
 				eventTypeCategoryFilter = `&filters[category][id][$in]=0`;
+				console.warn(
+					`[ProductContent] No categories for event type "${selectedEventType}", applying empty filter`,
+				);
 			}
 		}
+
 
 		if (eventTypeCategoryFilter) {
 			baseParams += eventTypeCategoryFilter;
@@ -146,10 +195,12 @@ export function ProductContent() {
 
 		try {
 			const productsParams = baseParams;
+			const productsUrl = `/api/products?${productsParams}&filters[state][$eq]=approved`;
+			console.log(`[ProductContent] Fetching products from: ${productsUrl}`);
 
 			const productsRes: any = await axiosData(
 				"GET",
-				`/api/products?${productsParams}&filters[state][$eq]=approved`,
+				productsUrl,
 			);
 
 			let ticketsRes: any = { data: [], meta: { pagination: { total: 0 } } };
@@ -314,12 +365,28 @@ export function ProductContent() {
 				return item?.name === selectedEventType;
 			});
 
+			console.log(
+				`[FilterCategories] Matched event type for "${selectedEventType}":`,
+				matchedEventType,
+			);
+
 			const categories =
 				matchedEventType?.categories?.data ??
 				matchedEventType?.categories ??
 				[];
 
-			setFilterCategories(addCategories(categories));
+			console.log(
+				`[FilterCategories] Raw categories structure:`,
+				categories,
+			);
+
+			const finalCategories = addCategories(categories);
+			const categoryIds = finalCategories.map((cat: any) => extractCategoryId(cat));
+			
+			console.log(
+				`[FilterCategories] Event type: ${selectedEventType}, categories count: ${finalCategories.length}, IDs: [${categoryIds.join(", ")}]`,
+			);
+			setFilterCategories(finalCategories);
 			return;
 		}
 
@@ -342,7 +409,11 @@ export function ProductContent() {
 			});
 		});
 
-		setFilterCategories(Array.from(allCategories.values()));
+		const finalCategories = Array.from(allCategories.values());
+		console.log(
+			`[FilterCategories] Default categories (no event type selected), count: ${finalCategories.length}`,
+		);
+		setFilterCategories(finalCategories);
 	}, [filterCatsQuery.isSuccess, filterCatsQuery.data, selectedEventType]);
 
 	useEffect(() => {
