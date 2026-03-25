@@ -130,6 +130,7 @@ export function ProductContent() {
 		let eventTypeCategoryFilter = "";
 
 		if (selectedEventType) {
+			const selectedTypeNormalized = selectedEventType.toString().trim().toLowerCase();
 			// Pertimbangkan filterCategories yang sudah disiapkan berdasarkan selectedEventType
 			if (filterCategories.length > 0) {
 				const categoryIds = filterCategories
@@ -151,7 +152,8 @@ export function ProductContent() {
 				// Fallback: cari kategori dari filterCatsQuery jika filterCategories masih kosong
 				const matchedEventType = (filterCatsQuery.data.data || []).find((raw: any) => {
 					const item = raw?.attributes ? { id: raw.id, ...raw.attributes } : raw;
-					return item?.name === selectedEventType;
+					const name = item?.name?.toString?.().trim().toLowerCase();
+					return name === selectedTypeNormalized;
 				});
 
 				const categories =
@@ -360,9 +362,11 @@ export function ProductContent() {
 		};
 
 		if (selectedEventType) {
+			const selectedTypeNormalized = selectedEventType.toString().trim().toLowerCase();
 			const matchedEventType = (data || []).find((raw: any) => {
 				const item = raw?.attributes ? { id: raw.id, ...raw.attributes } : raw;
-				return item?.name === selectedEventType;
+				const name = item?.name?.toString?.().trim().toLowerCase();
+				return name === selectedTypeNormalized;
 			});
 
 			console.log(
