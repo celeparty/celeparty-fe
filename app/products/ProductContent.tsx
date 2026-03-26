@@ -126,6 +126,14 @@ export function ProductContent() {
 		if (effectiveCategory) {
 			baseParams += `&filters[category][title][$eq]=${encodeURIComponent(effectiveCategory)}`;
 			ticketBaseParams += `&filters[category][title][$eq]=${encodeURIComponent(effectiveCategory)}`;
+		} else if (filterCategories.length > 0) {
+			const categoryIds = filterCategories
+				.map((cat: any) => extractCategoryId(cat))
+				.filter((id) => id !== null);
+			if (categoryIds.length > 0) {
+				baseParams += `&filters[category][id][$in]=${categoryIds.join(",")}`;
+				ticketBaseParams += `&filters[category][id][$in]=${categoryIds.join(",")}`;
+			}
 		}
 
 		// Build event type filter: gunakan kategori dari relasi event -> categories saja
@@ -192,7 +200,7 @@ export function ProductContent() {
 		}
 
 
-		if (eventTypeCategoryFilter) {
+		if (!effectiveCategory && eventTypeCategoryFilter) {
 			baseParams += eventTypeCategoryFilter;
 			ticketBaseParams += eventTypeCategoryFilter;
 		}
@@ -297,6 +305,7 @@ export function ProductContent() {
 			sortOption,
 			activeCategory,
 			currentPage,
+			filterCategories,
 		],
 		queryFn: getCombinedQuery,
 		refetchOnWindowFocus: false,
@@ -315,7 +324,7 @@ export function ProductContent() {
 	// Reset to first page when filters change
 	useEffect(() => {
 		setCurrentPage(1);
-	}, [selectedEventType, searchInput, getCategory, selectedLocation, sortOption, activeCategory]);
+	}, [selectedEventType, searchInput, getCategory, selectedLocation, sortOption, activeCategory, filterCategories]);
 
 	const getFilterCatsQuery = async () => {
 		return await axiosData("GET", "/api/user-event-types?populate=*");
