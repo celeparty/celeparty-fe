@@ -121,9 +121,11 @@ export function ProductContent() {
 			ticketBaseParams += `&filters[title][$containsi]=${encodeURIComponent(searchInput)}`;
 		}
 
-		if (getCategory) {
-			baseParams += `&filters[category][title][$eq]=${encodeURIComponent(getCategory)}`;
-			ticketBaseParams += `&filters[category][title][$eq]=${encodeURIComponent(getCategory)}`;
+		// Kategori dari URL atau pilihan UI
+		const effectiveCategory = activeCategory && activeCategory !== "Lainnya" ? activeCategory : getCategory;
+		if (effectiveCategory) {
+			baseParams += `&filters[category][title][$eq]=${encodeURIComponent(effectiveCategory)}`;
+			ticketBaseParams += `&filters[category][title][$eq]=${encodeURIComponent(effectiveCategory)}`;
 		}
 
 		// Build event type filter: gunakan kategori dari relasi event -> categories saja
@@ -293,6 +295,7 @@ export function ProductContent() {
 			getCategory,
 			selectedLocation,
 			sortOption,
+			activeCategory,
 			currentPage,
 		],
 		queryFn: getCombinedQuery,
@@ -312,7 +315,7 @@ export function ProductContent() {
 	// Reset to first page when filters change
 	useEffect(() => {
 		setCurrentPage(1);
-	}, [selectedEventType, searchInput, getCategory, selectedLocation, sortOption]);
+	}, [selectedEventType, searchInput, getCategory, selectedLocation, sortOption, activeCategory]);
 
 	const getFilterCatsQuery = async () => {
 		return await axiosData("GET", "/api/user-event-types?populate=*");
@@ -487,16 +490,11 @@ export function ProductContent() {
 	const dataContent = query.data?.data || [];
 
 	const handleFilter = (category: string) => {
-		const filterCategory: any = _.filter(dataContent, (item) => {
-			if (category === "Lainnya") {
-				return true;
-			}
-
-			const itemCategory = getStrapiField(item, "category");
-			const itemCategoryTitle = getStrapiField(itemCategory, "title");
-			return category ? itemCategoryTitle === category : item;
-		});
-		setMainData(filterCategory);
+		if (category === "Lainnya") {
+			setActiveCategory(null);
+		} else {
+			setActiveCategory(category);
+		}
 		setCurrentPage(1); // Reset to first page when filtering
 	};
 
