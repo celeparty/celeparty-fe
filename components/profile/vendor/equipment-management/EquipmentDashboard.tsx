@@ -34,46 +34,67 @@ export const EquipmentDashboard: React.FC = () => {
 
 	// Fetch equipment summary
 	const getEquipmentSummary = async (): Promise<iEquipmentSummary[]> => {
-		if (!session?.jwt) return [];
+		if (!session?.jwt || !session?.user?.documentId) return [];
 		try {
-			// Call the general transaction proxy to get equipment orders
-			// Assuming Strapi filters: filter by product type 'equipment' and populate product details
+			// Call the transaction proxy to get equipment orders for this vendor
+			const vendorId = session.user.documentId;
+			const params = new URLSearchParams();
+			params.append('vendor_doc_id', vendorId);
+			params.append('sort', 'createdAt:desc');
+			params.append('pageSize', '1000');
+
 			const response = await axiosUser(
 				"GET",
-				"/api/transaction-proxy?filters[product][product_type][$eq]=equipment&populate=product",
+				`/api/transaction-proxy?${params.toString()}`,
 				session.jwt
 			);
-            
-            const strapiTransactions = response.data; // Assuming response.data is an array of transactions
+
+            const transactions = response.data?.data || [];
+            console.log("EquipmentDashboard - Vendor's equipment transactions received:", {
+				count: transactions.length,
+				data: transactions
+			});
 
             const equipmentSummaryMap = new Map<string, iEquipmentSummary>();
 
-            strapiTransactions.forEach((transaction: any) => {
-                const product = transaction.attributes.product?.data;
-                if (!product) {
-                    console.warn("Skipping transaction due to missing product data:", transaction);
+            transactions.forEach((transaction: any) => {
+                const attrs = transaction.attributes;
+                const paymentStatus = attrs.payment_status;
+
+                // Only count paid transactions
+                if (paymentStatus !== "paid" && paymentStatus !== "settlement") {
                     return;
                 }
 
-                const productId = product.id;
-                const productTitle = product.attributes.title;
-                const price = parseFloat(transaction.attributes.amount) || 0; // Assuming amount is the price of the order
+                // Process products array from transaction
+                const products = attrs.products || [];
+                products.forEach((product: any) => {
+                    if (product.product_type !== 'equipment') return;
 
-                if (!equipmentSummaryMap.has(productId)) {
-                    equipmentSummaryMap.set(productId, {
-                        product_id: productId,
-                        product_title: productTitle,
-                        total_orders: 0,
-                        total_revenue: 0,
-                    });
-                }
+                    const productId = product.product_id;
+                    const productTitle = product.product_name || "Equipment Tanpa Nama";
+                    const quantity = product.quantity || 1;
+                    const price = product.price || 0;
+                    const revenue = price * quantity;
 
-                const currentSummary = equipmentSummaryMap.get(productId)!;
-                currentSummary.total_orders += 1;
-                currentSummary.total_revenue += price;
+                    if (!equipmentSummaryMap.has(productId)) {
+                        equipmentSummaryMap.set(productId, {
+                            product_id: productId,
+                            product_title: productTitle,
+                            total_orders: 0,
+                            total_revenue: 0,
+                        });
+                    }
+
+                    const currentSummary = equipmentSummaryMap.get(productId)!;
+                    currentSummary.total_orders += quantity; // Count individual items
+                    currentSummary.total_revenue += revenue;
+                });
             });
 
-            return Array.from(equipmentSummaryMap.values());
+            const result = Array.from(equipmentSummaryMap.values());
+            console.log("EquipmentDashboard - Final equipment summary:", result);
+            return result;
 
 		} catch (error) {
 			console.error("Error fetching equipment summary:", error);

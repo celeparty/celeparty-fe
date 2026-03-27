@@ -320,16 +320,78 @@ export async function POST(req: NextRequest) {
 					console.log(`[Webhook] Successfully updated transaction payment status to: ${paymentStatus}`);
 				}
 
-				// If payment is successful AND it wasn't already marked as successful, handle ticket transaction
+				// If payment is successful AND it wasn't already marked as successful, handle post-payment actions
 				if (
 					(paymentStatus === "success" || paymentStatus === "settlement") &&
 					currentPaymentStatus !== "success" &&
 					currentPaymentStatus !== "settlement"
 				) {
 					console.log(
-						`[Webhook] Payment successful for transaction ${transactionDocumentId}. Processing tickets...`,
+						`[Webhook] Payment successful for transaction ${transactionDocumentId}. Processing post-payment actions...`,
 					);
-					await handleSuccessfulTicketTransaction(transactionDocumentId, BASE_API, KEY_API);
+
+					// Send invoice email to customer
+					try {
+						const invoiceEmailUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/send-invoice-email`;
+						const transactionSummary = transactionDocument.attributes;
+
+						fetch(invoiceEmailUrl, {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								customerEmail: transactionSummary.email || transactionSummary.customer_mail,
+								customerName: transactionSummary.customer_name,
+								orderId: transactionSummary.order_id,
+								items: transactionSummary.products || [],
+								totalAmount: parseFloat(transactionSummary.total_price || "0"),
+								transactionDate: new Date().toLocaleDateString("id-ID"),
+							}),
+						}).catch((error) => {
+							console.error(`[Webhook] Error queuing invoice email for transaction ${transactionDocumentId}:`, error);
+						});
+					} catch (emailError) {
+						console.error(`[Webhook] Error preparing invoice email for transaction ${transactionDocumentId}:`, emailError);
+					}
+
+					// If this is a ticket transaction, send e-tickets
+					if (eventType === "Ticket") {
+						await handleSuccessfulTicketTransaction(transactionDocumentId, BASE_API, KEY_API);
+					} else {
+						// For non-ticket transactions, send order details email
+						try {
+							const orderDetailsEmailUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/send-order-details-email`;
+							const transactionSummary = transactionDocument.attributes;
+
+							fetch(orderDetailsEmailUrl, {
+								method: "POST",
+								headers: {
+									"Content-Type": "application/json",
+								},
+								body: JSON.stringify({
+									customerEmail: transactionSummary.email || transactionSummary.customer_mail,
+									customerName: transactionSummary.customer_name,
+									orderId: transactionSummary.order_id,
+									items: transactionSummary.products || [],
+									totalAmount: parseFloat(transactionSummary.total_price || "0"),
+									orderDate: new Date().toLocaleDateString("id-ID"),
+									shippingInfo: {
+										customer_name: transactionSummary.customer_name,
+										telp: transactionSummary.telp,
+										event_date: transactionSummary.event_date,
+										loading_date: transactionSummary.loading_date,
+										shipping_location: transactionSummary.shipping_location,
+										note: transactionSummary.note,
+									},
+								}),
+							}).catch((error) => {
+								console.error(`[Webhook] Error queuing order details email for transaction ${transactionDocumentId}:`, error);
+							});
+						} catch (emailError) {
+							console.error(`[Webhook] Error preparing order details email for transaction ${transactionDocumentId}:`, emailError);
+						}
+					}
 				}
 
 				return NextResponse.json({
@@ -394,17 +456,43 @@ export async function POST(req: NextRequest) {
 					// Still, we might want to proceed if the status is already success.
 				}
 
-				// If payment is successful AND it wasn't already marked as successful, create the e-ticket
+				// If payment is successful AND it wasn't already marked as successful, process post-payment actions
 				if (
-				(paymentStatus === "settlement") &&
-				currentPaymentStatus !== "settlement"
-			) {
-				console.log(
-					`[Webhook] Processing legacy transaction-ticket: ${ticketDocumentId}`,
-			);
-			// Note: Legacy handler would be different - keeping original logic for backward compatibility
-			// await handleSuccessfulTicketTransaction(ticketDocumentId, BASE_API, KEY_API);
-		}
+					(paymentStatus === "settlement") &&
+					currentPaymentStatus !== "settlement"
+				) {
+					console.log(
+						`[Webhook] Payment successful for legacy transaction-ticket ${ticketDocumentId}. Processing post-payment actions...`,
+					);
+
+					// Send invoice email to customer
+					try {
+						const invoiceEmailUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/send-invoice-email`;
+						const transactionSummary = ticketDocument.attributes;
+
+						fetch(invoiceEmailUrl, {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								customerEmail: transactionSummary.customer_mail,
+								customerName: transactionSummary.customer_name,
+								orderId: transactionSummary.order_id,
+								items: [], // For legacy tickets, we might not have detailed items
+								totalAmount: parseFloat(transactionSummary.total_price || "0"),
+								transactionDate: new Date().toLocaleDateString("id-ID"),
+							}),
+						}).catch((error) => {
+							console.error(`[Webhook] Error queuing invoice email for legacy transaction ${ticketDocumentId}:`, error);
+						});
+					} catch (emailError) {
+						console.error(`[Webhook] Error preparing invoice email for legacy transaction ${ticketDocumentId}:`, emailError);
+					}
+
+					// For legacy transaction-tickets, send e-tickets
+					await handleSuccessfulTicketTransaction(ticketDocumentId, BASE_API, KEY_API);
+				}
 
 		return NextResponse.json({
 			success: true,
