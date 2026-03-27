@@ -31,7 +31,7 @@ export default function OrderSummaryPage() {
 	}, [selectedCartItems, router]);
 	*/
 
-	const totalAmount = selectedCartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+	const totalAmount = selectedCartItems.reduce((total: number, item: CartItem) => total + item.price * item.quantity, 0);
 
 	const handleProceedToPayment = async () => {
 		setIsProcessing(true);
@@ -112,8 +112,8 @@ export default function OrderSummaryPage() {
 
 				// Create transaction for non-ticket items
 				if (nonTicketItems.length > 0) {
-					const totalNonTicketPrice = nonTicketItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-					const totalNonTicketQuantity = nonTicketItems.reduce((sum, item) => sum + item.quantity, 0);
+					const totalNonTicketPrice = nonTicketItems.reduce((sum: number, item: CartItem) => sum + (item.price * item.quantity), 0);
+					const totalNonTicketQuantity = nonTicketItems.reduce((sum: number, item: CartItem) => sum + item.quantity, 0);
 
 					const transactionPayload = {
 						data: {
@@ -157,8 +157,8 @@ export default function OrderSummaryPage() {
 
 				// Create transaction-ticket for ticket items
 				if (ticketItems.length > 0) {
-					const totalTicketPrice = ticketItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-					const totalTicketQuantity = ticketItems.reduce((sum, item) => sum + item.quantity, 0);
+					const totalTicketPrice = ticketItems.reduce((sum: number, item: CartItem) => sum + (item.price * item.quantity), 0);
+					const totalTicketQuantity = ticketItems.reduce((sum: number, item: CartItem) => sum + item.quantity, 0);
 					const allRecipients = ticketItems.flatMap(item => item.recipients || []);
 
 					const ticketTransactionPayload = {
