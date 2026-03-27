@@ -138,19 +138,7 @@ export default function OrderSummaryPage() {
 					vendor_doc_id: firstItem.vendor_doc_id || "",
 					event_type: "Ticket",
 					product_name: ticketItems[0]?.product_name || "",
-					variant: ticketItems[0]?.variant_id || ticketItems[0]?.variant || "",
-					price: ticketItems[0]?.price?.toString?.() || "0",
-					quantity: totalTicketQuantity.toString(),
-					total_price: totalTicketPrice.toString(),
-					recipients: allRecipients,
-				}
-			} : null;
-
-			console.log("Creating unified transaction with payload:", { transactionPayload, ticketTransactionPayload });
-
-			// POST to the appropriate unified transaction proxy(s)
-			let ticketTransactionId: string | null = null;
-			let transactionId: string | null = null;
+						variant: String(ticketItems[0]?.variant_id || ticketItems[0]?.variant || ""),
 
 			if (ticketTransactionPayload) {
 				const strapiRes = await fetch("/api/transaction-tickets-proxy", {

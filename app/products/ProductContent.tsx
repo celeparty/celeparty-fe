@@ -126,13 +126,14 @@ export function ProductContent() {
 		if (effectiveCategory) {
 			baseParams += `&filters[category][title][$eq]=${encodeURIComponent(effectiveCategory)}`;
 			ticketBaseParams += `&filters[category][title][$eq]=${encodeURIComponent(effectiveCategory)}`;
-		} else if (filterCategories.length > 0) {
+		} else if (!selectedEventType && filterCategories.length > 0) {
+			// Jika tidak ada event type yang dipilih, hanya terapkan filter kategori default ke produk, bukan tiket
 			const categoryIds = filterCategories
 				.map((cat: any) => extractCategoryId(cat))
 				.filter((id) => id !== null);
 			if (categoryIds.length > 0) {
 				baseParams += `&filters[category][id][$in]=${categoryIds.join(",")}`;
-				ticketBaseParams += `&filters[category][id][$in]=${categoryIds.join(",")}`;
+				// Jangan terapkan filter kategori ke tiket ketika tidak ada event type yang dipilih
 			}
 		}
 
