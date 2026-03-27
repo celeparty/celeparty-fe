@@ -145,6 +145,11 @@ export default function OrderSummaryPage() {
 					recipients: allRecipients,
 				}
 			} : null;
+
+			let ticketTransactionId: string | null = null;
+			let transactionId: string | null = null;
+
+			if (ticketTransactionPayload) {
 				const strapiRes = await fetch("/api/transaction-tickets-proxy", {
 					method: "POST",
 					headers: {
