@@ -131,7 +131,7 @@ export default function OrderSummaryPage() {
 							event_type: "Equipment",
 							quantity: totalNonTicketQuantity,
 							total_price: totalNonTicketPrice.toString(),
-							products: nonTicketItems.map(item => ({
+							products: nonTicketItems.map(item=> ({
 								product_id: item.product_id,
 								product_name: item.product_name,
 								variant: String(item.variant_id) || String(item.variant) || "",
