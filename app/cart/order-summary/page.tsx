@@ -51,7 +51,7 @@ export default function OrderSummaryPage() {
 		console.log("Selected cart items:", selectedCartItems);
 
 		// Validate recipients for all ticket items
-		const ticketItems = selectedCartItems.filter((item) => item.product_type === "ticket" || item.user_event_type?.toLowerCase() === "ticket"  || item.user_event_type?.toLowerCase() === "tiket");
+		const ticketItems = selectedCartItems.filter((item: CartItem) => item.product_type === "ticket" || item.user_event_type?.toLowerCase() === "ticket"  || item.user_event_type?.toLowerCase() === "tiket");
 		for (const ticketItem of ticketItems) {
 			if (ticketItem.quantity >= 1) {
 				const recipientsValid =
@@ -84,7 +84,7 @@ export default function OrderSummaryPage() {
 			// Group items by vendor for separate transactions
 			const vendorGroups = new Map();
 
-			selectedCartItems.forEach(item => {
+			selectedCartItems.forEach((item: CartItem) => {
 				const vendorId = item.vendor_doc_id || "unknown";
 				if (!vendorGroups.has(vendorId)) {
 					vendorGroups.set(vendorId, {
@@ -126,12 +126,12 @@ export default function OrderSummaryPage() {
 							event_date: nonTicketItems[0].event_date || "",
 							loading_date: nonTicketItems[0].loading_date || "",
 							loading_time: nonTicketItems[0].loading_time || "",
-							note: nonTicketItems.map(item => item.note).filter(Boolean).join("; "),
+							note: nonTicketItems.map((item: CartItem) => item.note).filter(Boolean).join("; "),
 							vendor_doc_id: vendorId,
 							event_type: "Equipment",
 							quantity: totalNonTicketQuantity,
 							total_price: totalNonTicketPrice.toString(),
-							products: nonTicketItems.map(item=> ({
+							products: nonTicketItems.map((item: CartItem) => ({
 								product_id: item.product_id,
 								product_name: item.product_name,
 								variant: String(item.variant_id) || String(item.variant) || "",
@@ -159,7 +159,7 @@ export default function OrderSummaryPage() {
 				if (ticketItems.length > 0) {
 					const totalTicketPrice = ticketItems.reduce((sum: number, item: CartItem) => sum + (item.price * item.quantity), 0);
 					const totalTicketQuantity = ticketItems.reduce((sum: number, item: CartItem) => sum + item.quantity, 0);
-					const allRecipients = ticketItems.flatMap(item => item.recipients || []);
+					const allRecipients = ticketItems.flatMap((item: CartItem) => item.recipients || []);
 
 					const ticketTransactionPayload = {
 						data: {
@@ -168,18 +168,18 @@ export default function OrderSummaryPage() {
 							customer_name: ticketItems[0].customer_name || session?.user?.name || "",
 							customer_mail: session?.user?.email || "",
 							telp: ticketItems[0].telp || session?.user?.phone || "",
-							note: ticketItems.map(item => item.note).filter(Boolean).join("; "),
+							note: ticketItems.map((item: CartItem) => item.note).filter(Boolean).join("; "),
 							vendor_doc_id: vendorId,
 							event_type: "Ticket",
 							// For multiple products, store as combined info
-							product_name: ticketItems.map(item => item.product_name).join(", "),
-							variant: ticketItems.map(item => String(item.variant_id) || String(item.variant) || "").join(", "),
+							product_name: ticketItems.map((item: CartItem) => item.product_name).join(", "),
+							variant: ticketItems.map((item: CartItem) => String(item.variant_id) || String(item.variant) || "").join(", "),
 							price: ticketItems[0]?.price?.toString?.() || "0", // Use first item's price as reference
 							quantity: totalTicketQuantity.toString(),
 							total_price: totalTicketPrice.toString(),
 							recipients: allRecipients,
 							// Store detailed products info for dashboard
-							products: ticketItems.map(item => ({
+							products: ticketItems.map((item: CartItem) => ({
 								product_id: item.product_id,
 								product_name: item.product_name,
 								variant: String(item.variant_id) || String(item.variant) || "",
@@ -215,11 +215,11 @@ export default function OrderSummaryPage() {
 			const finalTransactionId = ticketTransactionId || transactionId;
 // *** End Patch
 			// Prepare payment data for Midtrans (remains the same)
-			const paymentData = selectedCartItems.map((item: any) => ({
+			const paymentData = selectedCartItems.map((item: CartItem) => ({
 				id: item.product_id,
 				name: item.product_name,
 				image: item.image,
-				price: parseInt(item.price),
+				price: item.price,
 				quantity: item.quantity,
 				note: item.note,
 				totalPriceItem: item.price * item.quantity,
@@ -256,7 +256,9 @@ export default function OrderSummaryPage() {
 			}
 
 			// Save transaction summary to sessionStorage
-			const transactionSummary = {
+			const allRecipients = selectedCartItems.flatMap((item: CartItem) => item.recipients || []);
+
+		const transactionSummary = {
 				orderId: finalTransactionId,
 				products: selectedCartItems,
 				total: totalAmount,
@@ -323,7 +325,7 @@ export default function OrderSummaryPage() {
 						<Box className="mb-6">
 							<h2 className="text-xl font-semibold mb-4 text-c-blue">Item yang Dipilih</h2>
 							<div className="space-y-4">
-								{selectedCartItems.map((item, index) => (
+								{selectedCartItems.map((item: CartItem, index: number) => (
 									<div
 										key={index}
 										className="flex items-center space-x-4 p-4 border border-c-gray-200 rounded-lg shadow-soft"
@@ -375,11 +377,11 @@ export default function OrderSummaryPage() {
 						</Box>
 
 						{/* Customer Information or Recipients Information */}
-						{selectedCartItems.some((item) => item.recipients && item.recipients.length > 0) ? (
+						{selectedCartItems.some((item: CartItem) => item.recipients && item.recipients.length > 0) ? (
 							<Box>
 								<h2 className="text-xl font-semibold mb-4 text-c-blue">Detail Penerima Tiket</h2>
 								<div className="space-y-4">
-									{selectedCartItems.map((item, itemIndex) => (
+									{selectedCartItems.map((item: CartItem, itemIndex: number) => (
 										<div key={itemIndex} className="border rounded-lg p-4">
 											<h3 className="font-semibold text-c-blue mb-3">
 												{item.product_name} - {item.quantity} Tiket
@@ -407,13 +409,13 @@ export default function OrderSummaryPage() {
 									))}
 								</div>
 							</Box>
-						) : selectedCartItems.some((item) => item.product_type !== "ticket") ? (
+						) : selectedCartItems.some((item: CartItem) => item.product_type !== "ticket") ? (
 							<Box>
 								<h2 className="text-xl font-semibold mb-4 text-c-blue">Detail Pemesanan Perlengkapan</h2>
 								<div className="space-y-4">
 									{selectedCartItems
-										.filter((item) => item.product_type !== "ticket")
-										.map((item, index) => (
+										.filter((item: CartItem) => item.product_type !== "ticket")
+										.map((item: CartItem, index: number) => (
 											<div key={index} className="border rounded-lg p-4">
 												<h3 className="font-semibold text-c-blue mb-3">{item.product_name}</h3>
 												<div className="space-y-2 text-sm">
