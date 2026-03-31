@@ -131,25 +131,26 @@ export function ProductContent() {
 		// Build event type filter: gunakan kategori dari relasi event -> categories saja
 		let eventTypeCategoryFilter = "";
 
+		const buildCategoryTitleFilter = (categories: any[]) => {
+			const titles = (categories || [])
+				.map((cat: any) => cat?.title)
+				.filter((title: any) => typeof title === "string" && title.trim().length > 0)
+				.map((title: string) => encodeURIComponent(title.trim()));
+
+			return titles.length > 0 ? `&filters[category][title][$in]=${titles.join(",")}` : "";
+		};
+
 		if (selectedEventType) {
 			const selectedTypeNormalized = selectedEventType.toString().trim().toLowerCase();
 			// Pertimbangkan filterCategories yang sudah disiapkan berdasarkan selectedEventType
-			if (filterCategories.length > 0) {
-				const categoryIds = filterCategories
-					.map((cat: any) => extractCategoryId(cat))
-					.filter((id) => id !== null);
-
-				if (categoryIds.length > 0) {
-					eventTypeCategoryFilter = `&filters[category][id][$in]=${categoryIds.join(",")}`;
-					console.log(
-						`[ProductContent] Event type filter applied: ${selectedEventType} -> category IDs: [${categoryIds.join(", ")}]`,
-					);
-				} else {
-					console.warn(
-						`[ProductContent] filterCategories available but no valid IDs extracted for event type: ${selectedEventType}`,
-						filterCategories,
-					);
-				}
+			if (!effectiveCategory && filterCategories.length > 0) {
+				eventTypeCategoryFilter = buildCategoryTitleFilter(filterCategories);
+				console.log(
+					`[ProductContent] Event type filter applied: ${selectedEventType} -> dropdown category titles [${filterCategories
+						.map((cat: any) => cat?.title)
+						.filter(Boolean)
+						.join(", ")} ]`,
+				);
 			} else if (filterCatsQuery.data?.data) {
 				// Fallback: cari kategori dari filterCatsQuery jika filterCategories masih kosong
 				const matchedEventType = (filterCatsQuery.data.data || []).find((raw: any) => {
@@ -332,6 +333,12 @@ export function ProductContent() {
 			query.refetch();
 		}
 	}, [selectedEventType, filterCatsQuery.isSuccess, query]);
+
+	useEffect(() => {
+		if (selectedEventType) {
+			setActiveCategory(null);
+		}
+	}, [selectedEventType]);
 
 	const getEventTypesQuery = async () => {
 		return await axiosData("GET", "/api/user-event-types");
@@ -629,3 +636,4 @@ export default function SectionProductContent() {
 		</Suspense>
 	);
 }
+
