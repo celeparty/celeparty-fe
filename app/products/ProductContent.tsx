@@ -131,27 +131,26 @@ export function ProductContent() {
 		// Build event type filter: gunakan kategori dari relasi event -> categories saja
 		let eventTypeCategoryFilter = "";
 
-		const buildCategoryTitleFilter = (categories: any[]) => {
-			const titles = (categories || [])
-				.map((cat: any) => cat?.title)
-				.filter((title: any) => typeof title === "string" && title.trim().length > 0)
-				.map((title: string) => encodeURIComponent(title.trim()));
+		const buildCategoryIdFilter = (categories: any[]) => {
+			const ids = (categories || [])
+				.map((cat: any) => extractCategoryId(cat))
+				.filter((id) => id !== null);
 
-			return titles.length > 0 ? `&filters[category][title][$in]=${titles.join(",")}` : "";
+			return ids.length > 0 ? `&filters[category][id][$in]=${ids.join(",")}` : "";
 		};
 
 		if (selectedEventType) {
 			const selectedTypeNormalized = selectedEventType.toString().trim().toLowerCase();
 			// Pertimbangkan filterCategories yang sudah disiapkan berdasarkan selectedEventType
 			if (!effectiveCategory && filterCategories.length > 0) {
-				eventTypeCategoryFilter = buildCategoryTitleFilter(filterCategories);
+				eventTypeCategoryFilter = buildCategoryIdFilter(filterCategories);
 				console.log(
-					`[ProductContent] Event type filter applied: ${selectedEventType} -> dropdown category titles [${filterCategories
-						.map((cat: any) => cat?.title)
-						.filter(Boolean)
+					`[ProductContent] Event type filter applied: ${selectedEventType} -> category IDs [${filterCategories
+						.map((cat: any) => extractCategoryId(cat))
+						.filter((id) => id !== null)
 						.join(", ")} ]`,
 				);
-			} else if (filterCatsQuery.data?.data) {
+			} else if (!effectiveCategory && filterCatsQuery.isSuccess) {
 				// Fallback: cari kategori dari filterCatsQuery jika filterCategories masih kosong
 				const matchedEventType = (filterCatsQuery.data.data || []).find((raw: any) => {
 					const item = raw?.attributes ? { id: raw.id, ...raw.attributes } : raw;
@@ -183,7 +182,7 @@ export function ProductContent() {
 				}
 			}
 
-			if (!eventTypeCategoryFilter && selectedEventType) {
+			if (filterCatsQuery.isSuccess && !eventTypeCategoryFilter && selectedEventType) {
 				// Jika benar2 tidak ada kategori, set empty filter untuk menghindari menampilkan semua produk
 				eventTypeCategoryFilter = `&filters[category][id][$in]=0`;
 				console.warn(
@@ -193,7 +192,7 @@ export function ProductContent() {
 		}
 
 
-		if (!effectiveCategory && eventTypeCategoryFilter) {
+		if (eventTypeCategoryFilter) {
 			baseParams += eventTypeCategoryFilter;
 			ticketBaseParams += eventTypeCategoryFilter;
 		}

@@ -54,13 +54,15 @@ const getProvinces = async (): Promise<iSelectOption[]> => {
 			? items.value
 			: [];
 
-		return (list || [])
+		const provinceOptions: iSelectOption[] = (list || [])
 			.filter((item: any) => item)
-			.map((item: any) => ({
+			.map((item: any): iSelectOption => ({
 				value: String(item?.id ?? item?.value ?? item?.kode ?? item?.code ?? item?.name ?? item?.label ?? ""),
 				label: String(item?.name ?? item?.label ?? item?.nama ?? item?.province ?? item?.value ?? ""),
 			}))
-			.filter((option) => option.value && option.label);
+			.filter((option: iSelectOption) => option.value && option.label);
+
+		return provinceOptions;
 	} catch (error) {
 		console.error("Failed to load province list:", error);
 		return [];
@@ -104,7 +106,7 @@ export default function ProfilePage() {
 		reset,
 	} = formMethods;
 
-	const { fields, append, remove } = useFieldArray({
+	const { fields, append, remove } = useFieldArray<iMerchantProfile, "serviceLocation">({
 		control,
 		name: "serviceLocation",
 	});
@@ -407,7 +409,7 @@ export default function ProfilePage() {
 										<Controller
 											name="birthdate"
 											control={control}
-											render={({ field }) => (
+											render={({ field }: { field: any }): React.ReactNode => (
 												<DatePickerInput
 													textLabel="Tanggal Lahir"
 													onChange={(date) => {
@@ -458,7 +460,7 @@ export default function ProfilePage() {
 								</h2>
 								<FormProvider {...formMethods}>
 									<div>
-										{fields.map((field, index) => (
+										{fields.map((field: any, index: number): React.ReactNode => (
 											<React.Fragment key={index}>
 												<div className="mb-4 p-4 border-2 border-dashed border-gray-300 rounded-lg">
 													<div className="flex justify-between items-start mb-3">

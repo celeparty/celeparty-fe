@@ -25,6 +25,10 @@
       }
     ],
     "baseUrl": ".",
+    "typeRoots": [
+      "./types",
+      "./node_modules/@types"
+    ],
     "paths": {
       "@/*": [
         "./*"
@@ -41,6 +45,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "**/*.d.ts",
     ".next/types/**/*.ts"
   ],
   "exclude": [
