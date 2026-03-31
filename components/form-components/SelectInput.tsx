@@ -12,14 +12,14 @@ interface iSelectInputProps {
 export const SelectInput: React.FC<iSelectInputProps> = ({ label, options, onChange, value }) => {
 	return (
 		<>
-			<Select onValueChange={(e) => onChange(e)} value={value ?? ""}>
+			<Select onValueChange={(e) => onChange(e)} value={String(value ?? "")}>
 				<SelectTrigger>
 					<SelectValue placeholder={label} />
 				</SelectTrigger>
 				<SelectContent>
 					{options.map((opt, index) => (
 						<React.Fragment key={index}>
-							<SelectItem value={opt.value}>{opt.label}</SelectItem>
+							<SelectItem value={String(opt.value)}>{opt.label}</SelectItem>
 						</React.Fragment>
 					))}
 				</SelectContent>

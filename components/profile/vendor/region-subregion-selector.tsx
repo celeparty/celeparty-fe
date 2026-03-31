@@ -42,11 +42,12 @@ const RegionSubregionSelector: React.FC<RegionSubregionSelectorProps> = ({ index
 		const fetchSubregion = async () => {
 			if (!regionValue) return;
 			try {
-				const response = await axiosRegion("GET", "kabupaten", regionValue);
+				const response = await axiosRegion("GET", "kabupaten", String(regionValue));
+				const items = response?.value || response?.data || response || [];
 				setSubregionOptions(
-					(response?.value || []).map((item: iSubregionRes) => ({
+					(items || []).map((item: iSubregionRes) => ({
 						label: item.name,
-						value: item.id,
+						value: String(item.id),
 					})),
 				);
 			} catch (error) {

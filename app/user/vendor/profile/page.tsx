@@ -44,9 +44,10 @@ type SessionData = {
 
 const getProvinces = async (): Promise<iSelectOption[]> => {
 	const response = await axiosRegion("GET", "provinsi");
+	const items = response?.value || response?.data || response || [];
 	return (
-		response?.value?.map((item: any) => ({
-			value: item.id,
+		(items || []).map((item: any) => ({
+			value: String(item.id),
 			label: item.name,
 		})) || []
 	);
@@ -197,7 +198,8 @@ export default function ProfilePage() {
 
 			console.log("Profile update response:", response);
 
-			if (response && (response.status === 200 || response.status === 201 || response.data)) {
+			const hasError = response && (response?.error || response?.errors);
+			if (response && !hasError) {
 				setNotif(true);
 				toast({
 					title: "Sukses",
@@ -205,11 +207,11 @@ export default function ProfilePage() {
 					className: eAlertType.SUCCESS,
 				});
 				setTimeout(() => setNotif(false), 3000);
-			} else if (!response) {
-				console.error("Empty response from profile update");
+			} else {
+				console.error("Failed profile update response:", response);
 				toast({
 					title: "Gagal",
-					description: "Tidak ada respons dari server. Coba lagi.",
+					description: "Tidak ada respons yang valid dari server. Coba lagi.",
 					className: eAlertType.FAILED,
 				});
 			}
@@ -251,9 +253,65 @@ export default function ProfilePage() {
 		staleTime: 5 * 60 * 1000,
 	});
 
+	const normalizeServiceLocation = (value: any): any[] => {
+		if (Array.isArray(value) && value.length > 0) {
+			return value.map((loc) => ({
+				region: String(loc?.region ?? ""),
+				subregion: String(loc?.subregion ?? ""),
+				id: String(loc?.id ?? ""),
+				idSubRegion: String(loc?.idSubRegion ?? ""),
+			}));
+		}
+
+		if (typeof value === "string") {
+			try {
+				const parsed = JSON.parse(value);
+				if (Array.isArray(parsed) && parsed.length > 0) {
+					return parsed.map((loc: any) => ({
+						region: String(loc?.region ?? ""),
+						subregion: String(loc?.subregion ?? ""),
+						id: String(loc?.id ?? ""),
+						idSubRegion: String(loc?.idSubRegion ?? ""),
+					}));
+				}
+				if (parsed && typeof parsed === "object") {
+					return [{
+						region: String(parsed?.region ?? ""),
+						subregion: String(parsed?.subregion ?? ""),
+						id: String(parsed?.id ?? ""),
+						idSubRegion: String(parsed?.idSubRegion ?? ""),
+					}];
+				}
+			} catch {
+				// Ignore malformed JSON and fallback to empty service location
+			}
+		}
+
+		if (value && typeof value === "object") {
+			return [{
+				region: String(value?.region ?? ""),
+				subregion: String(value?.subregion ?? ""),
+				id: String(value?.id ?? ""),
+				idSubRegion: String(value?.idSubRegion ?? ""),
+			}];
+		}
+
+		return [
+			{
+				region: "",
+				subregion: "",
+				id: "",
+				idSubRegion: "",
+			},
+		];
+	};
+
 	useEffect(() => {
 		if (query.data && dataContent) {
-			formMethods.reset(dataContent);
+			formMethods.reset({
+				...dataContent,
+				serviceLocation: normalizeServiceLocation(dataContent?.serviceLocation),
+			});
 		}
 	}, [query.data, reset]);
 
