@@ -43,12 +43,22 @@ const RegionSubregionSelector: React.FC<RegionSubregionSelectorProps> = ({ index
 			if (!regionValue) return;
 			try {
 				const response = await axiosRegion("GET", "kabupaten", String(regionValue));
-				const items = response?.value || response?.data || response || [];
+				const items = response?.value ?? response?.data ?? response ?? [];
+				const list = Array.isArray(items)
+					? items
+					: Array.isArray(items?.data)
+					? items.data
+					: Array.isArray(items?.value)
+					? items.value
+					: [];
 				setSubregionOptions(
-					(items || []).map((item: iSubregionRes) => ({
-						label: item.name,
-						value: String(item.id),
-					})),
+					(list || [])
+						.filter((item: any) => item)
+						.map((item: any) => ({
+							label: String(item?.name ?? item?.label ?? item?.nama ?? ""),
+							value: String(item?.id ?? item?.value ?? item?.kode ?? ""),
+						}))
+						.filter((opt) => opt.value && opt.label),
 				);
 			} catch (error) {
 				console.error("Error fetching subregions:", error);

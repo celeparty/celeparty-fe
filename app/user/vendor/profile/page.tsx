@@ -43,14 +43,28 @@ type SessionData = {
 };
 
 const getProvinces = async (): Promise<iSelectOption[]> => {
-	const response = await axiosRegion("GET", "provinsi");
-	const items = response?.value || response?.data || response || [];
-	return (
-		(items || []).map((item: any) => ({
-			value: String(item.id),
-			label: item.name,
-		})) || []
-	);
+	try {
+		const response = await axiosRegion("GET", "provinsi");
+		const items = response?.value ?? response?.data ?? response ?? [];
+		const list = Array.isArray(items)
+			? items
+			: Array.isArray(items?.data)
+			? items.data
+			: Array.isArray(items?.value)
+			? items.value
+			: [];
+
+		return (list || [])
+			.filter((item: any) => item)
+			.map((item: any) => ({
+				value: String(item?.id ?? item?.value ?? item?.kode ?? item?.code ?? item?.name ?? item?.label ?? ""),
+				label: String(item?.name ?? item?.label ?? item?.nama ?? item?.province ?? item?.value ?? ""),
+			}))
+			.filter((option) => option.value && option.label);
+	} catch (error) {
+		console.error("Failed to load province list:", error);
+		return [];
+	}
 };
 
 // Email validation regex
@@ -173,27 +187,39 @@ export default function ProfilePage() {
 		try {
 			console.log("Submitting vendor profile with data:", formData);
 			
-			// Use documentId if available, otherwise fall back to id
-			const userId = formData.documentId || formData.id;
-			console.log("User ID to update:", userId, "From documentId:", formData.documentId, "From id:", formData.id);
-			
-			if (!userId) {
-				throw new Error("User ID not found in form data");
-			}
-			
-			
-			// Sanitize data but ensure id/documentId are not sent in the PUT payload
-			const { id, documentId, ...dataToSubmit } = sanitizeVendorData(formData);
-			
-			const updatedFormData = { ...dataToSubmit };
-			
-			console.log("Sanitized data to submit:", updatedFormData);
-			
-			const response = await axiosUser(
+// Use form id or session user id to build update path
+				const userId = formData?.id ?? formData?.documentId ?? session?.user?.id;
+				console.log("User ID to update:", userId, "From documentId:", formData.documentId, "From id:", formData.id, "From session:", session?.user?.id);
+				if (!userId) {
+					throw new Error("User ID not found in form data or session");
+				}
+
+				// Sanitize data but ensure id/documentId are not sent in the PUT payload
+				const { id, documentId, ...dataToSubmit } = sanitizeVendorData(formData);
+				const updatedFormData: any = { ...dataToSubmit };
+
+				if (Array.isArray(updatedFormData?.serviceLocation)) {
+					updatedFormData.serviceLocation = updatedFormData.serviceLocation
+						.filter((loc: any) => loc && (loc.region || loc.subregion || loc.id || loc.idSubRegion))
+						.map((loc: any) => ({
+							region: String(loc?.region ?? ""),
+							subregion: String(loc?.subregion ?? ""),
+							id: String(loc?.id ?? ""),
+							idSubRegion: String(loc?.idSubRegion ?? ""),
+						}));
+
+					if (updatedFormData.serviceLocation.length === 0) {
+						delete updatedFormData.serviceLocation;
+					}
+				}
+
+				console.log("Sanitized data to submit:", updatedFormData);
+
+				const response = await axiosUser(
 				"PUT",
 				`/api/users/${userId}`,
-				`${session && session?.jwt}`,
-				{ data: updatedFormData }, // Wrap updatedFormData in a 'data' object
+				session?.jwt,
+				updatedFormData,
 			);
 
 			console.log("Profile update response:", response);
