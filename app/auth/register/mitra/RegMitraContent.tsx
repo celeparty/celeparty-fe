@@ -73,7 +73,7 @@ const Registration = () => {
 		control,
 		reset,
 		formState: { errors },
-	} = useForm({
+	} = useForm<SignUpFormData>({
 		resolver: zodResolver(signUpSchema),
 		defaultValues: {
 			name: "",
@@ -285,7 +285,7 @@ const Registration = () => {
 					</div>
 					<div className="bg-[#553AA9] px-4 py-5 rounded-lg">
 						<h5 className="mb-5">Silahkan isi lokasi pelayanan</h5>
-						{fields.map((item: FieldArrayWithId<typeof fields>, index: number) => (
+						{fields.map((item: FieldArrayWithId<SignUpFormData, "serviceLocation">, index: number) => (
 							<div key={item.id} className="relative flex flex-col lg:flex-row gap-2 items-center mb-5">
 								<select
 									className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
