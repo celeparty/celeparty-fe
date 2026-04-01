@@ -12,6 +12,10 @@ declare module "react-hook-form" {
   export type Path<T> = string;
   export type PathValue<T, P extends Path<T>> = any;
 
+  export type FieldArrayWithId<TFieldValues extends FieldValues = FieldValues, TName extends string = string> = {
+    id: string;
+  } & Record<string, any>;
+
   export type UseFormRegisterReturn = {
     onChange: React.ChangeEventHandler<any>;
     onBlur: React.FocusEventHandler<any>;
@@ -53,7 +57,7 @@ declare module "react-hook-form" {
   } & Record<string, any>;
 
   export type UseFieldArrayReturn<TFieldValues extends FieldValues = FieldValues, TName extends string = string> = {
-    fields: Array<{ id: string } & Record<string, any>>;
+    fields: Array<FieldArrayWithId<TFieldValues, TName>>;
     append: (value: any) => void;
     remove: (index: number) => void;
     update?: (index: number, value: any) => void;
