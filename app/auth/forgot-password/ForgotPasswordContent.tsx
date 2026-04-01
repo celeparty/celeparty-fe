@@ -23,7 +23,7 @@ export default function ForgotPasswordContent() {
 		control,
 		reset,
 		formState: { errors },
-	} = useForm<z.infer<typeof passwordSchema>>({
+	} = useForm({
 		resolver: zodResolver(passwordSchema),
 		defaultValues: {
 			email: "",
