@@ -12,7 +12,9 @@ import { useQuery } from "@tanstack/react-query";
 import _, { get } from "lodash";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ChangeEvent } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
+import type { FieldArrayWithId } from "react-hook-form";
 import { IoMdAddCircleOutline, IoMdRemoveCircle, IoMdRemoveCircleOutline } from "react-icons/io";
 import { z } from "zod";
 
@@ -63,13 +65,15 @@ const Registration = () => {
 		queryFn: getQuery,
 	});
 
+	type SignUpFormData = z.infer<typeof signUpSchema>;
+
 	const {
 		register,
 		handleSubmit,
 		control,
 		reset,
 		formState: { errors },
-	} = useForm<z.infer<typeof signUpSchema>>({
+	} = useForm({
 		resolver: zodResolver(signUpSchema),
 		defaultValues: {
 			name: "",
@@ -88,7 +92,7 @@ const Registration = () => {
 			password: "",
 			confirmPassword: "",
 		},
-	});
+	} as const);
 
 	const dataProvince = query?.data?.value;
 
@@ -281,12 +285,12 @@ const Registration = () => {
 					</div>
 					<div className="bg-[#553AA9] px-4 py-5 rounded-lg">
 						<h5 className="mb-5">Silahkan isi lokasi pelayanan</h5>
-						{fields.map((item, index) => (
+						{fields.map((item: FieldArrayWithId<SignUpFormData, "serviceLocation">, index: number) => (
 							<div key={item.id} className="relative flex flex-col lg:flex-row gap-2 items-center mb-5">
 								<select
 									className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
 									{...register(`serviceLocation.${index}.region`, {
-										onChange: async (e) => {
+										onChange: async (e: ChangeEvent<HTMLSelectElement>) => {
 											const regionId = e.target.value;
 											await handleRegionChange(regionId, index);
 										},
@@ -303,7 +307,7 @@ const Registration = () => {
 								<select
 									className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
 									{...register(`serviceLocation.${index}.subregion`, {
-										onChange: (e) => {
+										onChange: (e: ChangeEvent<HTMLSelectElement>) => {
 											const subregionId = e.target.value;
 											handleSubregionChange(subregionId, index);
 										},

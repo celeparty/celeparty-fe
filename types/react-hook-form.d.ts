@@ -52,11 +52,18 @@ declare module "react-hook-form" {
     formState: FormState<TFieldValues>;
   } & Record<string, any>;
 
+  export type UseFieldArrayReturn<TFieldValues extends FieldValues = FieldValues, TName extends string = string> = {
+    fields: Array<{ id: string } & Record<string, any>>;
+    append: (value: any) => void;
+    remove: (index: number) => void;
+    update?: (index: number, value: any) => void;
+  };
+
   export function useForm<TFieldValues extends FieldValues = FieldValues>(props?: UseFormProps<TFieldValues>): UseFormReturn<TFieldValues>;
   export function useFieldArray<TFieldValues extends FieldValues = FieldValues, TName extends string = string>(props: {
     control: Control<TFieldValues>;
     name: TName;
-  }): any;
+  }): UseFieldArrayReturn<TFieldValues, TName>;
   export function useWatch(): any;
   export function useFormContext<TFieldValues extends FieldValues = FieldValues>(): UseFormReturn<TFieldValues>;
 
