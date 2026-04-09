@@ -207,8 +207,8 @@ export default function ProfilePage() {
 					throw new Error("User ID not found in form data or session");
 				}
 
-				// Sanitize data but ensure id/documentId are not sent in the PUT payload
-				const { id, documentId, ...dataToSubmit } = sanitizeVendorData(formData);
+				// Sanitize data - only send editable fields
+				const dataToSubmit = sanitizeVendorData(formData);
 				const updatedFormData: any = { ...dataToSubmit };
 
 				if (Array.isArray(updatedFormData?.serviceLocation)) {
@@ -388,7 +388,7 @@ export default function ProfilePage() {
 										placeholder="Masukkan nama lengkap"
 										value={name}
 										error={fieldErrors.name}
-										{...register("name", { required: true })}
+										{...register("name")}
 										helperText="Gunakan nama sesuai identitas"
 									/>
 									<div className="mb-4">
@@ -410,7 +410,7 @@ export default function ProfilePage() {
 										placeholder="08xx atau +62xxx"
 										value={phone}
 										error={fieldErrors.phone}
-										{...register("phone", { required: true })}
+										{...register("phone")}
 										helperText="Format: 08xx atau +62xxx"
 									/>
 									<div>
@@ -420,7 +420,7 @@ export default function ProfilePage() {
 										<Controller
 											name="birthdate"
 											control={control}
-											render={({ field }: { field: any }): React.ReactNode => (
+											render={({ field }: { field: any }) => (
 												<DatePickerInput
 													textLabel="Tanggal Lahir"
 													onChange={(date) => {
@@ -438,7 +438,7 @@ export default function ProfilePage() {
 								<ValidatedInput
 									label="Tempat Lahir"
 									placeholder="Masukkan tempat lahir"
-									{...register("birthplace", { required: true })}
+									{...register("birthplace")}
 								/>
 							</div>
 
@@ -453,13 +453,13 @@ export default function ProfilePage() {
 									placeholder="Masukkan nama usaha"
 									value={companyName}
 									error={fieldErrors.companyName}
-									{...register("companyName", { required: true })}
+									{...register("companyName")}
 									helperText="Nama resmi perusahaan/toko"
 								/>
 								<ValidatedTextarea
 									label="Alamat Usaha"
 									placeholder="Masukkan alamat lengkap usaha"
-									{...register("address", { required: true })}
+									{...register("address")}
 								/>
 							</div>
 
@@ -529,7 +529,7 @@ export default function ProfilePage() {
 									placeholder="BCA, Mandiri, BRI, dsb"
 									value={bankName}
 									error={fieldErrors.bankName}
-									{...register("bankName", { required: true })}
+									{...register("bankName")}
 									helperText="Masukkan nama bank"
 								/>
 								<ValidatedInput
@@ -537,7 +537,7 @@ export default function ProfilePage() {
 									placeholder="Masukkan nomor rekening"
 									value={accountNumber}
 									error={fieldErrors.accountNumber}
-									{...register("accountNumber", { required: true })}
+									{...register("accountNumber")}
 									helperText="Minimal 10 digit, hanya angka"
 								/>
 								<ValidatedInput
@@ -545,7 +545,7 @@ export default function ProfilePage() {
 									placeholder="Nama pemilik rekening"
 									value={accountName}
 									error={fieldErrors.accountName}
-									{...register("accountName", { required: true })}
+									{...register("accountName")}
 									helperText="Sesuai dengan nama di rekening bank"
 								/>
 							</div>

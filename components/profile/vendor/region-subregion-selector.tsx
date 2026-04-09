@@ -61,6 +61,8 @@ useEffect(() => {
 		}
 	}
 }, [currentSubregionName, subregionValue, regionValue, subregionOptions, index, setValue]);
+
+	useEffect(() => {
 		const fetchSubregion = async () => {
 			if (!regionValue) return;
 			try {
@@ -80,7 +82,7 @@ useEffect(() => {
 							label: String(item?.name ?? item?.label ?? item?.nama ?? ""),
 							value: String(item?.id ?? item?.value ?? item?.kode ?? ""),
 						}))
-						.filter((opt) => opt.value && opt.label),
+						.filter((opt: any) => opt.value && opt.label),
 				);
 			} catch (error) {
 				console.error("Error fetching subregions:", error);
