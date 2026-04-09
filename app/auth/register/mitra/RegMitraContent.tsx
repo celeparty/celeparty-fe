@@ -285,16 +285,19 @@ const Registration = () => {
 					</div>
 					<div className="bg-[#553AA9] px-4 py-5 rounded-lg">
 						<h5 className="mb-5">Silahkan isi lokasi pelayanan</h5>
-						{fields.map((item: FieldArrayWithId<SignUpFormData, "serviceLocation">, index: number) => (
-							<div key={item.id} className="relative flex flex-col lg:flex-row gap-2 items-center mb-5">
+						{fields.map((item: FieldArrayWithId<SignUpFormData, "serviceLocation">, index: number) => {
+							const regionField = register(`serviceLocation.${index}.region` as any);
+							const subregionField = register(`serviceLocation.${index}.subregion` as any);
+							return (
+								<div key={item.id} className="relative flex flex-col lg:flex-row gap-2 items-center mb-5">
 								<select
 									className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-									{...register(`serviceLocation.${index}.region`, {
-										onChange: async (e: ChangeEvent<HTMLSelectElement>) => {
-											const regionId = e.target.value;
-											await handleRegionChange(regionId, index);
-										},
-									})}
+									                                    {...regionField}
+                                    onChange={async (e: ChangeEvent<HTMLSelectElement>) => {
+                                        regionField.onChange(e);
+                                        const regionId = e.target.value;
+                                        await handleRegionChange(regionId, index);
+                                    }}
 								>
 									<option value="">Provinsi</option>
 									{dataProvince?.map((prov: any) => (
@@ -306,12 +309,12 @@ const Registration = () => {
 
 								<select
 									className="text-black px-4 py-2 rounded-lg min-w-[270px] w-full"
-									{...register(`serviceLocation.${index}.subregion`, {
-										onChange: (e: ChangeEvent<HTMLSelectElement>) => {
-											const subregionId = e.target.value;
-											handleSubregionChange(subregionId, index);
-										},
-									})}
+									                                    {...subregionField}
+                                    onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                                        subregionField.onChange(e);
+                                        const subregionId = e.target.value;
+                                        handleSubregionChange(subregionId, index);
+                                    }}
 								>
 									<option value="">Kota/Kabupaten</option>
 									{subRegions[index]?.map((kab: any) => (
@@ -328,7 +331,8 @@ const Registration = () => {
 									<IoMdRemoveCircleOutline />
 								</button>
 							</div>
-						))}
+							);
+						})}
 
 						<button
 							type="button"
@@ -423,3 +427,6 @@ const SignUp = () => {
 };
 
 export default SignUp;
+
+
+
