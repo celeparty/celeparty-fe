@@ -146,7 +146,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 		"lokasi_event"
 	]);
 
-	const isFormValid = watchedFields.every(field => field && field.toString().trim() !== "");
+	const isFormValid = watchedFields.every((field: unknown) => field && String(field).trim() !== "");
 
 	const addVariant = () => {
 		appendVariant({
