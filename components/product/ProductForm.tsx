@@ -97,7 +97,7 @@ export const ProductForm = ({
 		"kabupaten"
 	]);
 
-	const isFormValid = watchedFields.every(field => field && field.toString().trim() !== "") && (hideCategory || stateCategory.status);
+	const isFormValid = watchedFields.every((field: unknown) => field && String(field).trim() !== "") && (hideCategory || stateCategory.status);
 
 
 	const convertAndSetEditImages = async (): Promise<void> => {
