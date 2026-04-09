@@ -74,7 +74,7 @@ export const ProductForm = ({
 		fields: mainImageFields,
 		append: appendMainImage,
 		remove: removeMainImage,
-	} = useFieldArray({
+	} = useFieldArray<iProductReq, "main_image">({
 		control,
 		name: "main_image",
 	});
@@ -382,7 +382,7 @@ export const ProductForm = ({
 							<div className="image-item">
 								<FileUploader
 									key={field.id}
-									image={field}
+									image={field as unknown as iProductImage}
 									onFileChange={(file) => handleFileChange(index, file)}
 									onRemove={() => handleRemoveImage(index)}
 								/>
@@ -432,13 +432,7 @@ export const ProductForm = ({
 					<input
 						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
 						placeholder="Nama Produk"
-						{...register("title", {
-							required: true,
-							onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-								const value = e.target.value;
-								setValue("title", value);
-							},
-						})}
+						{...register("title")}
 					/>
 					{errors.title && <p className="text-red-500 text-[10px]">{`${errors.title.message}`}</p>}
 				</ProductItemInput>
