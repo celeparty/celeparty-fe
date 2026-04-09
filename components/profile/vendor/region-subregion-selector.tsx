@@ -17,28 +17,50 @@ const RegionSubregionSelector: React.FC<RegionSubregionSelectorProps> = ({ index
 
 	const regionValue = watch(`serviceLocation.${index}.id`);
 	const subregionValue = watch(`serviceLocation.${index}.idSubRegion`);
-	const allServiceLocations = watch("serviceLocation") || [];
+const currentRegionName = watch(`serviceLocation.${index}.region`);
+const currentSubregionName = watch(`serviceLocation.${index}.subregion`);
+const allServiceLocations = watch("serviceLocation") || [];
 
-	// Check for duplicate cities
-	useEffect(() => {
-		const currentSubregion = allServiceLocations[index]?.subregion;
-		if (!currentSubregion) {
-			setDuplicateError("");
-			return;
-		}
+// Check for duplicate cities
+useEffect(() => {
+	const currentSubregion = allServiceLocations[index]?.subregion;
+	if (!currentSubregion) {
+		setDuplicateError("");
+		return;
+	}
 
-		const hasDuplicate = allServiceLocations.some((loc: any, idx: number) => 
-			idx !== index && loc?.subregion === currentSubregion
+	const hasDuplicate = allServiceLocations.some((loc: any, idx: number) => 
+		idx !== index && loc?.subregion === currentSubregion
+	);
+
+	if (hasDuplicate) {
+		setDuplicateError(`Kota "${currentSubregion}" sudah dipilih sebelumnya`);
+	} else {
+		setDuplicateError("");
+	}
+}, [allServiceLocations, index, subregionValue]);
+
+useEffect(() => {
+	if (currentRegionName && !regionValue && provinceOptions.length > 0) {
+		const matchedProvince = provinceOptions.find(
+			(pv) => pv.label === currentRegionName || pv.value === currentRegionName,
 		);
-
-		if (hasDuplicate) {
-			setDuplicateError(`Kota "${currentSubregion}" sudah dipilih sebelumnya`);
-		} else {
-			setDuplicateError("");
+		if (matchedProvince) {
+			setValue(`serviceLocation.${index}.id`, matchedProvince.value);
 		}
-	}, [allServiceLocations, index, subregionValue]);
+	}
+}, [currentRegionName, regionValue, provinceOptions, index, setValue]);
 
-	useEffect(() => {
+useEffect(() => {
+	if (regionValue && currentSubregionName && !subregionValue && subregionOptions.length > 0) {
+		const matchedSubregion = subregionOptions.find(
+			(sr) => sr.label === currentSubregionName || sr.value === currentSubregionName,
+		);
+		if (matchedSubregion) {
+			setValue(`serviceLocation.${index}.idSubRegion`, matchedSubregion.value);
+		}
+	}
+}, [currentSubregionName, subregionValue, regionValue, subregionOptions, index, setValue]);
 		const fetchSubregion = async () => {
 			if (!regionValue) return;
 			try {

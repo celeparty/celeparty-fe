@@ -95,7 +95,18 @@ export default function ProfilePage() {
 
 	const { toast } = useToast();
 
-	const formMethods = useForm<iMerchantProfile>();
+	const formMethods = useForm<iMerchantProfile>({
+		defaultValues: {
+			serviceLocation: [
+				{
+					region: "",
+					subregion: "",
+					id: "",
+					idSubRegion: "",
+				},
+			],
+		},
+	});
 
 	const {
 		register,
