@@ -57,8 +57,20 @@ export const formatMoneyReq = (price: string | number) => {
 };
 
 export const sanitizeVendorData = (formData: iMerchantProfile) => {
-	const { role, password, resetPasswordToken, confirmationToken, ...cleanData } = formData;
-	return cleanData;
+	return {
+		name: formData.name,
+		phone: formData.phone,
+		address: formData.address,
+		birthplace: formData.birthplace,
+		birthdate: formData.birthdate,
+		nik: formData.nik,
+		companyName: formData.companyName,
+		serviceLocation: formData.serviceLocation,
+		bankName: formData.bankName,
+		accountNumber: formData.accountNumber,
+		accountName: formData.accountName,
+		email: formData.email,
+	};
 };
 
 export const formatDate = (isoString: string) => {
