@@ -597,10 +597,6 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 						placeholder="Nama Produk"
 						{...register("title", {
 							required: true,
-							onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-								const value = e.target.value;
-								setValue("title", value);
-							},
 						})}
 					/>
 					{errors.title && <p className="text-red-500 text-[10px]">{`${errors.title.message}`}</p>}
@@ -683,10 +679,6 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 						type="time"
 						{...register("waktu_event", {
 							required: true,
-							onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-								const value = e.target.value;
-								setValue("waktu_event", value);
-							},
 						})}
 					/>
 					{errors.waktu_event && (
@@ -733,10 +725,6 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 						type="time"
 						{...register("end_time", {
 							required: true,
-							onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-								const value = e.target.value;
-								setValue("end_time", value);
-							},
 						})}
 					/>
 					{errors.end_time && (
@@ -768,10 +756,6 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 						placeholder="Lokasi Acara"
 						{...register("lokasi_event", {
 							required: true,
-							onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-								const value = e.target.value;
-								setValue("lokasi_event", value);
-							},
 						})}
 					/>
 					{errors.lokasi_event && (
