@@ -9,5 +9,17 @@ export const SchemaTicket = z.object({
 	end_time: z.string().min(1, { message: "Jam selesai harus diisi" }),
 	kota_event: z.string().min(1, { message: "Kota acara harus diisi" }),
 	lokasi_event: z.string().min(1, { message: "Lokasi acara harus diisi" }),
+	main_image: z.array(z.object({
+		id: z.string(),
+		url: z.string(),
+		mime: z.string(),
+		file: z.instanceof(File).optional(),
+	})).min(1, { message: "Minimal 1 gambar harus diunggah" }),
+	variant: z.array(z.object({
+		name: z.string().min(1, { message: "Nama variant harus diisi" }),
+		price: z.number().min(0, { message: "Harga harus lebih dari 0" }),
+		quota: z.string().min(1, { message: "Kuota harus diisi" }),
+		purchase_deadline: z.string().min(1, { message: "Deadline pembelian harus diisi" }),
+	})).min(1, { message: "Minimal 1 variant harus ditambahkan" }),
 	terms_conditions: z.string().optional().default(""),
 });
