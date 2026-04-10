@@ -568,18 +568,21 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 
 			<form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 				<div className="image-upload-container flex flex-wrap gap-2 mb-5">
-					{mainImageFields.map((field, index) => (
-						<React.Fragment key={index}>
-							<div className="image-item  w-[20%]">
-								<FileUploader
-									key={field.id}
-									image={field}
-									onFileChange={(file) => handleFileChange(index, file)}
-									onRemove={() => handleRemoveImage(index)}
-								/>
-							</div>
-						</React.Fragment>
-					))}
+					{mainImageFields.map((field, index) => {
+						const imageData = getValues(`main_image.${index}`) as iProductImage;
+						return (
+							<React.Fragment key={index}>
+								<div className="image-item  w-[20%]">
+									<FileUploader
+										key={field.id}
+										image={imageData}
+										onFileChange={(file) => handleFileChange(index, file)}
+										onRemove={() => handleRemoveImage(index)}
+									/>
+								</div>
+							</React.Fragment>
+						);
+					})}
 					<div className="w-full">
 						{mainImageFields.length < MAX_IMAGES && (
 							<Button type="button" variant={"default"} onClick={handleAddImage}>
