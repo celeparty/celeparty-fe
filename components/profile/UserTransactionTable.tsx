@@ -1,5 +1,6 @@
 import { iOrderItem } from "@/lib/interfaces/iOrder";
 import { getStatusConfig } from "@/lib/orderStatusUtils";
+import { PaymentStatus } from "@/lib/interfaces/iOrder";
 import { formatDate } from "@/lib/utils";
 import { exportToCSV, exportToExcel, exportToPDF, type ExportData } from "@/lib/utils/exportUtils";
 import { useQuery } from "@tanstack/react-query";
@@ -226,7 +227,7 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 				qty: item.quantity,
 				hargaSatuan: item.unit_price,
 				totalPembayaran: item.total_payment,
-				statusPembayaran: getStatusConfig(item.payment_status).text,
+				statusPembayaran: getStatusConfig(item.payment_status as PaymentStatus).text,
 				telepon: item.telp,
 				lokasi: item.shipping_location,
 			}));
