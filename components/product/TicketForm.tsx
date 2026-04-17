@@ -631,9 +631,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 					<input
 						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
 						placeholder="Nama Produk"
-						{...register("title", {
-							required: true,
-						})}
+						{...register("title")}
 					/>
 					{errors.title && <p className="text-red-500 text-[10px]">{`${errors.title.message}`}</p>}
 				</ProductItemInput>
@@ -713,9 +711,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 					<input
 						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
 						type="time"
-						{...register("waktu_event", {
-							required: true,
-						})}
+						{...register("waktu_event")}
 					/>
 					{errors.waktu_event && (
 						<p className="text-red-500 text-[10px]">{`${errors.waktu_event.message}`}</p>
@@ -759,9 +755,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 					<input
 						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
 						type="time"
-						{...register("end_time", {
-							required: true,
-						})}
+						{...register("end_time")}
 					/>
 					{errors.end_time && (
 						<p className="text-red-500 text-[10px]">{`${errors.end_time.message}`}</p>
@@ -790,9 +784,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 					<input
 						className="border border-gray-300 rounded-md py-2 px-5 w-full text-[14px] lg:text-[16px]"
 						placeholder="Lokasi Acara"
-						{...register("lokasi_event", {
-							required: true,
-						})}
+						{...register("lokasi_event")}
 					/>
 					{errors.lokasi_event && (
 						<p className="text-red-500 text-[10px]">{`${errors.lokasi_event.message}`}</p>
