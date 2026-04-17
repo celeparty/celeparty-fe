@@ -131,16 +131,8 @@ export default function OrderSummaryPage() {
 							event_type: "Equipment",
 							quantity: totalNonTicketQuantity,
 							total_price: totalNonTicketPrice.toString(),
-							products: nonTicketItems.map((item: CartItem) => ({
-								product_id: item.product_id,
-								product_name: item.product_name,
-								variant: String(item.variant_id) || String(item.variant) || "",
-								quantity: item.quantity,
-								price: item.price,
-								product_type: item.product_type,
-								note: item.note || "",
-								recipients: item.recipients || [],
-							})),
+							product_id: nonTicketItems[0]?.product_id || "",
+							variant_id: nonTicketItems[0]?.variant_id || "",
 						}
 					};
 
@@ -172,21 +164,14 @@ export default function OrderSummaryPage() {
 							vendor_doc_id: vendorId,
 							event_type: "Ticket",
 							// For multiple products, store as combined info
+							product_id: ticketItems[0]?.product_id || "",
 							product_name: ticketItems.map((item: CartItem) => item.product_name).join(", "),
+							variant_id: ticketItems[0]?.variant_id || "",
 							variant: ticketItems.map((item: CartItem) => String(item.variant_id) || String(item.variant) || "").join(", "),
 							price: ticketItems[0]?.price?.toString?.() || "0", // Use first item's price as reference
 							quantity: totalTicketQuantity.toString(),
 							total_price: totalTicketPrice.toString(),
 							recipients: allRecipients,
-							// Store detailed products info for dashboard
-							products: ticketItems.map((item: CartItem) => ({
-								product_id: item.product_id,
-								product_name: item.product_name,
-								variant: String(item.variant_id) || String(item.variant) || "",
-								quantity: item.quantity,
-								price: item.price,
-								recipients: item.recipients || [],
-							})),
 						}
 					};
 

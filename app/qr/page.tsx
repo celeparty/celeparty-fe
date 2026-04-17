@@ -58,7 +58,7 @@ function QRPageContent() {
 			setCanVerify(false);
 			setIsChecking(false);
 			if (isLoggedIn) {
-				setNotif({ message: "Hanya akun vendor yang dapat melakukan verifikasi.", type: "error" });
+				setNotif({ message: "❌ Hanya akun vendor yang dapat melakukan verifikasi.", type: "error" });
 			}
 			return;
 		}
@@ -74,33 +74,58 @@ function QRPageContent() {
 			const data = await res.json();
 
 			if (!res.ok) {
+				console.error(`❌ QR Verify Error: ${data.error}`);
 				throw new Error(data.error || "Gagal mengambil data tiket.");
 			}
 
 			const detail = data.data.attributes;
 			setTicketDetail(data.data);
 
-			const eventStatus = getEventStatus(detail.ticket_product.data.attributes.date);
-			const ticketVendorId = detail.ticket_product.data.attributes.vendor?.data?.id;
+			// Get vendor information from product
+			const productVendorId = detail.product?.data?.attributes?.users_permissions_user?.data?.id;
 			const currentUserId = userData?.id;
 
-			const isVendorMatch = ticketVendorId && currentUserId && ticketVendorId === currentUserId;
+			// Validate vendor ownership
+			const isVendorMatch = productVendorId && currentUserId && productVendorId === currentUserId;
 			setVendorMatch(isVendorMatch);
 
-			if (isVendorMatch && eventStatus.active && !detail.is_verified) {
-				setCanVerify(true);
-			} else {
+			// Check event status
+			const eventStatus = getEventStatus(detail.product?.data?.attributes?.date);
+
+			// Determine verification eligibility
+			if (!isVendorMatch) {
+				setNotif({ 
+					message: "❌ Anda bukan vendor pemilik produk tiket ini. Akses ditolak.", 
+					type: "error" 
+				});
+				console.warn(`❌ Vendor mismatch: Ticket product vendor: ${productVendorId}, Current user: ${currentUserId}`);
 				setCanVerify(false);
-				if (!isVendorMatch) {
-					setNotif({ message: "Anda bukan vendor untuk tiket ini.", type: "error" });
-				} else if (!eventStatus.active) {
-					setNotif({ message: "Tiket ini sudah kedaluwarsa.", type: "error" });
-				} else if (detail.is_verified) {
-					setNotif({ message: "Tiket ini sudah pernah diverifikasi.", type: "success" });
-				}
+			} else if (!eventStatus.active) {
+				setNotif({ 
+					message: "⏰ Tiket ini sudah kedaluwarsa. Verifikasi tidak dapat dilakukan.", 
+					type: "error" 
+				});
+				setCanVerify(false);
+			} else if (detail.verification_status === 'verified' || detail.is_verified) {
+				setNotif({ 
+					message: "✅ Tiket ini sudah pernah diverifikasi sebelumnya.", 
+					type: "success" 
+				});
+				setCanVerify(false);
+			} else if (detail.payment_status !== 'paid' && detail.payment_status !== 'settlement') {
+				setNotif({ 
+					message: "💳 Pembayaran tiket belum selesai. Verifikasi tidak dapat dilakukan.", 
+					type: "error" 
+				});
+				setCanVerify(false);
+			} else {
+				setNotif(null);
+				setCanVerify(true);
+				console.log(`✅ Ticket ready for verification: ${code}`);
 			}
 		} catch (error: any) {
-			setNotif({ message: error.message, type: "error" });
+			console.error(`❌ Error checking ticket: ${error.message}`);
+			setNotif({ message: `❌ ${error.message}`, type: "error" });
 			setCanVerify(false);
 			setVendorMatch(null);
 		} finally {
@@ -161,14 +186,25 @@ function QRPageContent() {
 	const renderTicketDetails = () => {
 		if (!ticketDetail) return null;
 		const { attributes: ticket } = ticketDetail;
-		const { attributes: product } = ticket.ticket_product.data;
+		const product = ticket.product?.data?.attributes || ticket.ticket_product?.data?.attributes;
+		
+		if (!product) {
+			return (
+				<CardContent className="mt-6">
+					<div className="text-center text-red-600">
+						❌ Informasi produk tidak ditemukan
+					</div>
+				</CardContent>
+			);
+		}
+
 		const eventStatus = getEventStatus(product.date);
 
 		return (
 			<CardContent className="mt-6 space-y-3">
 				<div>
 					<p className="font-bold text-lg">{product.name}</p>
-					<p className="text-sm text-gray-600">{product.location}</p>
+					<p className="text-sm text-gray-600">{product.location || "Lokasi tidak tersedia"}</p>
 				</div>
 				<hr />
 				<div className="grid grid-cols-2 gap-x-4 gap-y-2">
@@ -186,13 +222,19 @@ function QRPageContent() {
 					</div>
 					<div>
 						<p className="text-xs text-gray-500">Email</p>
-						<p>{ticket.recipient_email}</p>
+						<p className="text-sm">{ticket.recipient_email}</p>
+					</div>
+					<div>
+						<p className="text-xs text-gray-500">Pembayaran</p>
+						<p className={ticket.payment_status === 'paid' || ticket.payment_status === 'settlement' ? "text-green-600 font-semibold" : "text-orange-600 font-semibold"}>
+							{ticket.payment_status === 'paid' || ticket.payment_status === 'settlement' ? "✅ Dibayar" : "⏳ Pending"}
+						</p>
 					</div>
 				</div>
 				<div className="flex justify-between items-center pt-4">
 					<Badge variant={eventStatus.active ? "secondary" : "destructive"}>{eventStatus.label}</Badge>
-					<Badge variant={ticket.is_verified ? "default" : "outline"}>
-						{ticket.is_verified ? "Sudah Diverifikasi" : "Belum Diverifikasi"}
+					<Badge variant={ticket.verification_status === 'verified' || ticket.is_verified ? "default" : "outline"}>
+						{ticket.verification_status === 'verified' || ticket.is_verified ? "✅ Diverifikasi" : "⏳ Belum Verifikasi"}
 					</Badge>
 				</div>
 			</CardContent>
@@ -245,7 +287,8 @@ function QRPageContent() {
 							{ticketDetail && vendorMatch && renderTicketDetails()}
 							{ticketDetail && vendorMatch === false && !isChecking && (
 								<div className="mt-6 text-center text-red-700 font-bold bg-red-100 p-4 rounded-md">
-									Anda tidak memiliki akses untuk memverifikasi tiket ini.
+								🔒 Akses Ditolak<br/>
+								<span className="text-sm">Anda bukan vendor pemilik produk tiket ini. Hanya vendor pemilik yang dapat melakukan verifikasi.</span>
 								</div>
 							)}
 						</>

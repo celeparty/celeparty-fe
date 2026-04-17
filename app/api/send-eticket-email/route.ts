@@ -68,6 +68,17 @@ function generateEmailTemplate(
 			margin-bottom: 20px;
 			letter-spacing: 2px;
 		}
+		.barcode-info {
+			text-align: center;
+			font-size: 12px;
+			color: #666;
+			margin: 10px 0;
+			font-family: monospace;
+			background-color: #fff;
+			padding: 8px;
+			border-radius: 4px;
+			border: 1px solid #ddd;
+		}
 		.qr-code {
 			text-align: center;
 			margin: 20px 0;
@@ -146,6 +157,9 @@ function generateEmailTemplate(
 
 			<div class="ticket-box">
 				<div class="ticket-code">${ticketCode}</div>
+				<div class="barcode-info">
+					Barcode untuk scanning: ${ticketCode.split('-').slice(1).join('-') || ticketCode}
+				</div>
 				<div class="qr-code">
 					<p style="font-size: 12px; color: #666; margin-bottom: 10px;">Scan QR Code untuk verifikasi:</p>
 					<img src="${qrCodeUrl}" alt="QR Code untuk Tiket">

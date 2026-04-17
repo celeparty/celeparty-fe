@@ -15,11 +15,13 @@ import {
 } from "@/lib/interfaces/iProduct";
 import { getLowestVariantPrice } from "@/lib/productUtils";
 import { axiosUser } from "@/lib/services";
+import { sendEmailNotification, generateProductCreatedEmail, generateProductUpdatedEmail } from "@/lib/services/emailService";
 import { fetchAndConvertToFile, formatMoneyReq } from "@/lib/utils";
 import { format, isValid as isDateValid, parse, parseISO } from "date-fns";
 import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import { DatePickerInput } from "../form-components/DatePicker";
 import { SearchableSelectInput } from "../form-components/SearchableSelectInput";
 import { indonesianRegions } from "@/lib/static/indonesian-regions";
@@ -471,7 +473,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 					payload,
 				);
 			} else {
-				response = await axiosUser("POST", "/api/products", session?.jwt || "", payload);
+				response = await axiosUser("POST", "/api/products?status=draft", session?.jwt || "", payload);
 			}
 
 			if (response) {
@@ -481,6 +483,40 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 					description: `Sukses ${isEdit ? "edit" : "menambahkan"} tiket!`,
 					className: eAlertType.SUCCESS,
 				});
+
+				// Send email notification asynchronously (don't block on it)
+				try {
+					if (session?.user?.email && data?.title) {
+						const vendorName = session?.user?.name || "Mitra";
+						const productUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/user/vendor/products`;
+						
+						if (isEdit) {
+							// Ticket updated
+							const emailHtml = generateProductUpdatedEmail(vendorName, data.title);
+							sendEmailNotification({
+								to: session.user.email,
+								subject: `Tiket "${data.title}" Berhasil Diperbarui - Celeparty`,
+								html: emailHtml,
+							}, session?.jwt).catch((err) => {
+								console.error("Failed to send ticket update email:", err);
+							});
+						} else {
+							// Ticket created
+							const emailHtml = generateProductCreatedEmail(vendorName, data.title, productUrl);
+							sendEmailNotification({
+								to: session.user.email,
+								subject: `Tiket "${data.title}" Berhasil Ditambahkan - Celeparty`,
+								html: emailHtml,
+							}, session?.jwt).catch((err) => {
+								console.error("Failed to send ticket created email:", err);
+							});
+						}
+					}
+				} catch (emailError) {
+					console.error("Error in email notification:", emailError);
+					// Don't throw - email failure shouldn't block the flow
+				}
+
 				if (!isEdit) reset({} as iTicketFormReq);
 				window.location.href = "/user/vendor/products";
 			}

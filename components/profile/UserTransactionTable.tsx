@@ -1,11 +1,13 @@
 import { iOrderItem } from "@/lib/interfaces/iOrder";
 import { getStatusConfig } from "@/lib/orderStatusUtils";
 import { formatDate } from "@/lib/utils";
+import { exportToCSV, exportToExcel, exportToPDF, type ExportData } from "@/lib/utils/exportUtils";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { ChevronDown, ChevronUp, Download, Eye } from "lucide-react";
+import { ChevronDown, ChevronUp, Download, Eye, FileText } from "lucide-react";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 import ErrorNetwork from "../ErrorNetwork";
 import { InvoiceViewer } from "../InvoiceViewer";
 import Skeleton from "../Skeleton";
@@ -208,8 +210,85 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 		// Implement your API call here
 	};
 
+	// Export handlers
+	const handleExportTransactions = async (format: 'csv' | 'excel' | 'pdf') => {
+		try {
+			if (dataContent.length === 0) {
+				toast.error("Tidak ada data untuk diekspor");
+				return;
+			}
+
+			const exportData: ExportData[] = dataContent.map((item) => ({
+				orderId: item.order_id,
+				tanggal: formatDate(item.createdAt),
+				namaPelanggan: item.customer_name,
+				produk: item.products?.map((p) => p.title).join(", ") || "N/A",
+				qty: item.quantity,
+				hargaSatuan: item.unit_price,
+				totalPembayaran: item.total_payment,
+				statusPembayaran: getStatusConfig(item.payment_status).text,
+				telepon: item.telp,
+				lokasi: item.shipping_location,
+			}));
+
+			const timestamp = new Date().toISOString().slice(0, 10);
+			const filename = `transaksi_${timestamp}`;
+
+			switch (format) {
+				case 'csv':
+					exportToCSV(exportData, `${filename}.csv`);
+					toast.success("File CSV berhasil diunduh");
+					break;
+				case 'excel':
+					exportToExcel(exportData, `${filename}.xlsx`);
+					toast.success("File Excel berhasil diunduh");
+					break;
+				case 'pdf':
+					exportToPDF(exportData, `${filename}.pdf`);
+					toast.success("File PDF berhasil diunduh");
+					break;
+			}
+		} catch (error) {
+			console.error("Export error:", error);
+			toast.error(`Gagal mengekspor ke ${format.toUpperCase()}`);
+		}
+	};
+
 	return (
 		<>
+			{/* Export Buttons */}
+			{dataContent && dataContent.length > 0 && (
+				<div className="mb-4 flex flex-wrap gap-2">
+					<Button 
+						size="sm" 
+						variant="outline"
+						onClick={() => handleExportTransactions('csv')}
+						className="flex items-center gap-2"
+					>
+						<Download className="h-4 w-4" />
+						Export CSV
+					</Button>
+					<Button 
+						size="sm" 
+						variant="outline"
+						onClick={() => handleExportTransactions('excel')}
+						className="flex items-center gap-2"
+					>
+						<FileText className="h-4 w-4" />
+						Export Excel
+					</Button>
+					<Button 
+						size="sm" 
+						variant="outline"
+						onClick={() => handleExportTransactions('pdf')}
+						className="flex items-center gap-2"
+					>
+						<Download className="h-4 w-4" />
+						Export PDF
+					</Button>
+				</div>
+			)}
+
 			<Table>
 				<TableHeader className="bg-white">
 					<TableRow>

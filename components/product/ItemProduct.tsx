@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { FaStar } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
+import ProductStatusBadge from "./ProductStatusBadge";
 
 interface iItemProduct {
 	id?: number;
@@ -24,9 +25,7 @@ export default function ItemProduct(props: iItemProduct) {
 			<section className=" rounded-lg shadow-md flex flex-col justify-between h-full p-3 relative">
 				{props.status && (
 					<div className="absolute top-2 right-2 z-10">
-						<span className={`px-2 py-1 text-xs font-bold rounded-full text-white ${props.status === 'published' ? 'bg-green-500' : 'bg-yellow-500'}`}>
-							{props.status === 'published' ? 'Tiket Aktif' : 'Menunggu Persetujuan'}
-						</span>
+						<ProductStatusBadge status={props.status} />
 					</div>
 				)}
 				<div>

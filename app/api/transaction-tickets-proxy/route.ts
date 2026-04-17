@@ -6,24 +6,32 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
 	try {
 		const body = await req.json();
+		console.log("🔵 [transaction-tickets-proxy] POST received");
+		console.log("📦 [transaction-tickets-proxy] Payload:", JSON.stringify(body, null, 2));
+		
 		// Normalize BASE_API so it works whether env includes /api or not
 		const baseApi = (process.env.BASE_API || "").replace(/\/api\/?$/, "");
 		const STRAPI_URL = `${baseApi}/api/transaction-tickets`;
 		const KEY_API = process.env.KEY_API;
 
+		console.log("🔗 [transaction-tickets-proxy] URL:", STRAPI_URL);
+
 		// Ensure payload is wrapped in `data` (Strapi V4 expects that format)
 		let forwardedBody: any = body;
 		if (body && typeof body === "object" && !Object.prototype.hasOwnProperty.call(body, "data")) {
-			console.warn("[transaction-tickets-proxy] Request missing data wrapper, wrapping automatically.");
+			console.warn("[transaction-tickets-proxy] ⚠️ Request missing data wrapper, wrapping automatically.");
 			forwardedBody = { data: body };
 		}
 
-		console.log("[transaction-tickets-proxy] Posting to:", STRAPI_URL);
-		console.log("[transaction-tickets-proxy] Payload:", forwardedBody);
+		console.log("[transaction-tickets-proxy] Payload after wrapping:", forwardedBody);
 
 		if (!KEY_API) {
+			console.error("❌ [transaction-tickets-proxy] ERROR: KEY_API not set");
 			return NextResponse.json({ error: "KEY_API not set in environment" }, { status: 500 });
 		}
+		console.log(`✅ [transaction-tickets-proxy] KEY_API present (length: ${KEY_API.length})`);
+		console.log("📤 [transaction-tickets-proxy] Sending to Strapi...");
+
 
 		const strapiRes = await fetch(STRAPI_URL, {
 			method: "POST",
@@ -50,10 +58,12 @@ export async function POST(req: NextRequest) {
 			}
 		}
 
-		console.log("[transaction-tickets-proxy] Strapi Response status:", strapiRes.status);
-		console.log("[transaction-tickets-proxy] Strapi Response body:", data);
+		console.log("[transaction-tickets-proxy] Strapi Response Status:", strapiRes.status);
+		console.log("[transaction-tickets-proxy] Strapi Response Body:", JSON.stringify(data, null, 2));
 
 		if (!strapiRes.ok) {
+			console.error("❌ [transaction-tickets-proxy] FAILED - Status:", strapiRes.status);
+			console.error("❌ [transaction-tickets-proxy] Error details:", data);
 			return NextResponse.json(
 				{
 					error: typeof data === "object" ? data.error || data : String(data),
@@ -64,6 +74,7 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
+		console.log("✅ [transaction-tickets-proxy] SUCCESS - Transaction created");
 		return NextResponse.json(data);
 	} catch (err: any) {
 		console.error("Error in POST transaction-tickets-proxy:", err);
@@ -128,29 +139,33 @@ export async function GET(req: NextRequest) {
 
 		// Support simplified params and Strapi-style params
 		const vendorDocId = searchParams.get('vendor_doc_id') || searchParams.get('filters[vendor_doc_id][$eq]');
+		const customerEmail = searchParams.get('customer_mail') || searchParams.get('email') || searchParams.get('filters[customer_mail][$eq]');
 		const pageSize = searchParams.get('pageSize') || searchParams.get('pagination[pageSize]') || '100';
 		const page = searchParams.get('page') || searchParams.get('pagination[page]') || '1';
 		const sort = searchParams.get('sort') || 'createdAt:desc';
 
-		console.log("[transaction-tickets-proxy GET] Extracted params:", { vendorDocId, pageSize, page, sort });
+		console.log("[transaction-tickets-proxy GET] Extracted params:", { vendorDocId, customerEmail, pageSize, page, sort });
 
-		// If client sent Strapi-style query, forward as-is (but require vendor_doc_id)
+		// If client sent Strapi-style query, forward as-is (but require vendor_doc_id or email)
 		const hasStrapiFilters = Array.from(searchParams.keys()).some((k) => k.startsWith('filters[') || k.startsWith('pagination['));
 
+		let strapiUrl = "";
+
 		if (hasStrapiFilters) {
-			if (!vendorDocId) {
-				console.error("[transaction-tickets-proxy GET] Missing vendor_doc_id in provided filters");
-				return NextResponse.json({ error: "Missing vendor_doc_id parameter in filters", statusCode: 400 }, { status: 400 });
+			// Forward Strapi-style query as-is, but ensure at least one filter is present
+			if (!vendorDocId && !customerEmail) {
+				console.error("[transaction-tickets-proxy GET] Missing both vendor_doc_id and customer_mail in provided filters");
+				return NextResponse.json({ error: "Missing vendor_doc_id or customer_mail parameter", statusCode: 400 }, { status: 400 });
 			}
 			const queryString = url.searchParams.toString();
-			var strapiUrl = `${baseApi}/api/transaction-tickets?${queryString}&populate[product][populate]=*&populate=variant&populate=recipients`;
+			strapiUrl = `${baseApi}/api/transaction-tickets?${queryString}&populate[product][populate]=*&populate=variant&populate=recipients`;
 		} else {
-			// Validate vendor_doc_id is provided
-			if (!vendorDocId) {
-				console.error("[transaction-tickets-proxy GET] Missing vendor_doc_id parameter");
+			// Validate at least one filter is provided
+			if (!vendorDocId && !customerEmail) {
+				console.error("[transaction-tickets-proxy GET] Missing both vendor_doc_id and customer_mail parameters");
 				return NextResponse.json(
 					{
-						error: "Missing vendor_doc_id parameter",
+						error: "Missing vendor_doc_id or customer_mail parameter",
 						statusCode: 400,
 					},
 					{ status: 400 }
@@ -159,15 +174,20 @@ export async function GET(req: NextRequest) {
 
 			// Build proper Strapi URL for transaction-tickets
 			let strapiUrlLocal = `${baseApi}/api/transaction-tickets?`;
-			// Add filters
-			strapiUrlLocal += `filters[vendor_doc_id][$eq]=${encodeURIComponent(vendorDocId)}&`;
+			// Add filters - vendor OR customer
+			if (vendorDocId) {
+				strapiUrlLocal += `filters[vendor_doc_id][$eq]=${encodeURIComponent(vendorDocId)}&`;
+			} else if (customerEmail) {
+				// For customers, filter by customer_mail
+				strapiUrlLocal += `filters[customer_mail][$eq]=${encodeURIComponent(customerEmail)}&`;
+			}
 			// Add pagination and sort
 			strapiUrlLocal += `pagination[pageSize]=${encodeURIComponent(pageSize)}&`;
 			strapiUrlLocal += `pagination[page]=${encodeURIComponent(page)}&`;
 			strapiUrlLocal += `sort=${encodeURIComponent(sort)}&`;
 			// Add populate for deep relations
 			strapiUrlLocal += `populate[product][populate]=*&populate=variant&populate=recipients`;
-			var strapiUrl = strapiUrlLocal;
+			strapiUrl = strapiUrlLocal;
 		}
 
 		console.log("[transaction-tickets-proxy GET] Final Strapi URL:", strapiUrl);

@@ -9,12 +9,16 @@ import Skeleton from "@/components/Skeleton";
 import ErrorNetwork from "@/components/ErrorNetwork";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TransactionProductList from "@/components/vendor/transaction/TransactionProductList";
+import VendorDashboardSummary from "@/components/vendor/transaction/VendorDashboardSummary";
+import { TransactionFilterBar } from "@/components/vendor/transaction/TransactionFilterBar";
 import { useQuery } from "@tanstack/react-query";
 
 export default function VendorInformasiTransaksiPage() {
 	const { data: session, status } = useSession();
 	const router = useRouter();
 	const [activeTab, setActiveTab] = useState("tiket");
+	const [filteredTiketData, setFilteredTiketData] = useState<any[]>([]);
+	const [filteredUmumData, setFilteredUmumData] = useState<any[]>([]);
 
 	// Redirect jika tidak vendor
 	useEffect(() => {
@@ -144,6 +148,11 @@ export default function VendorInformasiTransaksiPage() {
 						⚠️ Vendor ID tidak ditemukan. Silakan logout dan login kembali.
 					</div>
 				)}
+
+				{/* Dashboard Summary */}
+				<div className="mb-8">
+					<VendorDashboardSummary />
+				</div>
 
 				<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
 					<TabsList className="grid w-full grid-cols-2 mb-6">

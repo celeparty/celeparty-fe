@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
 import { axiosRegion, axiosUser } from "@/lib/services";
+import { sendEmailNotification, generateProfileUpdatedEmail } from "@/lib/services/emailService";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 
@@ -245,6 +246,25 @@ export default function ProfilePage() {
 					description: "Update profile berhasil!",
 					className: eAlertType.SUCCESS,
 				});
+
+				// Send email notification asynchronously
+				try {
+					if (formData?.email) {
+						const vendorName = formData?.name || "Mitra";
+						const emailHtml = generateProfileUpdatedEmail(vendorName);
+						sendEmailNotification({
+							to: formData.email,
+							subject: "Profil Anda Berhasil Diperbarui - Celeparty",
+							html: emailHtml,
+						}, session?.jwt).catch((err) => {
+							console.error("Failed to send profile update email:", err);
+						});
+					}
+				} catch (emailError) {
+					console.error("Error in email notification:", emailError);
+					// Don't block on email failure
+				}
+
 				setTimeout(() => setNotif(false), 3000);
 			} else {
 				console.error("Failed profile update response:", response);

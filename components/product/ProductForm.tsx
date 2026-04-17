@@ -6,12 +6,14 @@ import { formatYearDate } from "@/lib/dateUtils";
 import { eAlertType } from "@/lib/enums/eAlert";
 import { iProductImage, iProductReq, iProductRes, iProductVariant } from "@/lib/interfaces/iProduct";
 import { axiosUser } from "@/lib/services";
+import { sendEmailNotification, generateProductCreatedEmail, generateProductUpdatedEmail } from "@/lib/services/emailService";
 import { fetchAndConvertToFile, formatMoneyReq, formatNumberWithDots } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import React, { ReactNode, useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import Skeleton from "../Skeleton";
 import SubTitle from "../SubTitle";
 import { Button } from "../ui/button";
@@ -285,6 +287,40 @@ export const ProductForm = ({
 					description: `Sukses ${isEdit ? "edit" : "menambahkan"} produk!`,
 					className: eAlertType.SUCCESS,
 				});
+
+				// Send email notification asynchronously (don't block on it)
+				try {
+					if (session?.user?.email && data?.title) {
+						const vendorName = session?.user?.name || "Mitra";
+						const productUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/user/vendor/products`;
+						
+						if (isEdit) {
+							// Product updated
+							const emailHtml = generateProductUpdatedEmail(vendorName, data.title);
+							sendEmailNotification({
+								to: session.user.email,
+								subject: `Produk "${data.title}" Berhasil Diperbarui - Celeparty`,
+								html: emailHtml,
+							}, session?.jwt).catch((err) => {
+								console.error("Failed to send product update email:", err);
+							});
+						} else {
+							// Product created
+							const emailHtml = generateProductCreatedEmail(vendorName, data.title, productUrl);
+							sendEmailNotification({
+								to: session.user.email,
+								subject: `Produk "${data.title}" Berhasil Ditambahkan - Celeparty`,
+								html: emailHtml,
+							}, session?.jwt).catch((err) => {
+								console.error("Failed to send product created email:", err);
+							});
+						}
+					}
+				} catch (emailError) {
+					console.error("Error in email notification:", emailError);
+					// Don't throw - email failure shouldn't block the flow
+				}
+
 				if (!isEdit) reset({} as iProductReq);
 				window.location.href = "/user/vendor/products";
 			}

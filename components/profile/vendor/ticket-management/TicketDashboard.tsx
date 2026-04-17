@@ -15,6 +15,25 @@ export const TicketDashboard: React.FC = () => {
 	const { data: session } = useSession();
 	const [selectedProduct, setSelectedProduct] = useState<iTicketSummary | null>(null);
 
+	// Fetch product image from product details
+	const fetchProductImage = async (productId: string, jwt: string): Promise<string> => {
+		try {
+			const response = await axios.get(
+				`/api/products/${productId}?populate=main_image`,
+				{
+					headers: {
+						Authorization: `Bearer ${jwt}`,
+					},
+				}
+			);
+			const imageUrl = response.data?.data?.attributes?.main_image?.[0]?.url || "";
+			return imageUrl;
+		} catch (error) {
+			console.warn(`Failed to fetch image for product ${productId}:`, error);
+			return "";
+		}
+	};
+
 	// Fetch ticket summary
 	const getTicketSummary = async () => {
 		if (!session?.jwt || !session?.user?.documentId) {
