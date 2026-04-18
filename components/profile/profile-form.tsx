@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format, isValid, parse } from "date-fns";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { type ControllerRenderProps, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -54,6 +54,12 @@ const formSchema = z.object({
 	}),
 });
 
+type ProfileFormValues = z.infer<typeof formSchema>;
+
+type FormFieldRenderProps = {
+	field: ControllerRenderProps<ProfileFormValues, any>;
+};
+
 export const ProfileForm = () => {
 	const { toast } = useToast();
 	const { data: session, status } = useSession();
@@ -71,9 +77,9 @@ export const ProfileForm = () => {
 		},
 	];
 
-	const form = useForm<z.infer<typeof formSchema>>({
+	const form = useForm<ProfileFormValues>({
 		resolver: zodResolver(formSchema),
-		defaultValues: {} as iUserReq,
+		defaultValues: {} as ProfileFormValues,
 	});
 
 	useEffect(() => {
@@ -141,7 +147,7 @@ export const ProfileForm = () => {
 				<FormField
 					control={form.control}
 					name="name"
-					render={({ field }) => (
+					render={({ field }: FormFieldRenderProps) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col lg:items-center items-start gap-1">
 								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px] text-start">
@@ -166,7 +172,7 @@ export const ProfileForm = () => {
 				<FormField
 					control={form.control}
 					name="birthdate"
-					render={({ field }) => (
+					render={({ field }: FormFieldRenderProps) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
 								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
@@ -196,7 +202,7 @@ export const ProfileForm = () => {
 				<FormField
 					control={form.control}
 					name="gender"
-					render={({ field }) => (
+					render={({ field }: FormFieldRenderProps) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
 								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
@@ -226,7 +232,7 @@ export const ProfileForm = () => {
 				<FormField
 					control={form.control}
 					name="email"
-					render={({ field }) => (
+					render={({ field }: FormFieldRenderProps) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
 								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
@@ -251,7 +257,7 @@ export const ProfileForm = () => {
 				<FormField
 					control={form.control}
 					name="phone"
-					render={({ field }) => (
+					render={({ field }: FormFieldRenderProps) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
 								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
@@ -276,7 +282,7 @@ export const ProfileForm = () => {
 				<FormField
 					control={form.control}
 					name="bankName"
-					render={({ field }) => (
+					render={({ field }: FormFieldRenderProps) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
 								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
@@ -302,7 +308,7 @@ export const ProfileForm = () => {
 				<FormField
 					control={form.control}
 					name="accountName"
-					render={({ field }) => (
+					render={({ field }: FormFieldRenderProps) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
 								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
@@ -328,7 +334,7 @@ export const ProfileForm = () => {
 				<FormField
 					control={form.control}
 					name="accountNumber"
-					render={({ field }) => (
+					render={({ field }: FormFieldRenderProps) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
 								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
