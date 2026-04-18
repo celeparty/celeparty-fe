@@ -27,7 +27,9 @@ declare module "react-hook-form" {
     name: FieldPath<TFieldValues>
   ) => UseFormRegisterReturn;
 
-  export type Control<TFieldValues extends FieldValues = FieldValues> = any;
+  export type Control<TFieldValues extends FieldValues = FieldValues> = {
+    _fieldValues?: TFieldValues;
+  };
 
   export type UseFormProps<TFieldValues extends FieldValues = FieldValues> = {
     defaultValues?: Partial<TFieldValues>;
@@ -72,19 +74,28 @@ declare module "react-hook-form" {
   export function useFormContext<TFieldValues extends FieldValues = FieldValues>(): UseFormReturn<TFieldValues>;
 
   export type RegisterOptions = any;
-  export type ControllerRenderProps = {
+  export type ControllerRenderProps<
+    TFieldValues extends FieldValues = FieldValues,
+    TName extends Path<TFieldValues> = Path<TFieldValues>
+  > = {
     field: any;
     fieldState?: any;
     formState?: any;
   };
 
-  export type ControllerProps = {
-    name: string;
-    control?: any;
+  export type ControllerProps<
+    TFieldValues extends FieldValues = FieldValues,
+    TName extends Path<TFieldValues> = Path<TFieldValues>
+  > = {
+    name: TName;
+    control?: Control<TFieldValues>;
     rules?: any;
-    render: (props: ControllerRenderProps) => React.ReactElement | null;
+    render: (props: ControllerRenderProps<TFieldValues, TName>) => React.ReactElement | null;
   };
 
-  export const Controller: React.ComponentType<ControllerProps>;
+  export function Controller<
+    TFieldValues extends FieldValues = FieldValues,
+    TName extends Path<TFieldValues> = Path<TFieldValues>
+  >(props: ControllerProps<TFieldValues, TName>): React.ReactElement | null;
   export const FormProvider: React.ComponentType<any>;
 }
