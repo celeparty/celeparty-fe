@@ -75,13 +75,13 @@ export const TransactionFilterBar: React.FC<iTransactionFilterBarProps> = ({
 			const transactionDate = attributes.createdAt || attributes.transaction_date;
 
 			// Date range filter
-			if (dateFrom) {
+			if (dateFrom && transactionDate) {
 				const filterDate = new Date(dateFrom);
 				const transDate = new Date(transactionDate);
 				if (transDate < filterDate) return false;
 			}
 
-			if (dateTo) {
+			if (dateTo && transactionDate) {
 				const filterDate = new Date(dateTo);
 				filterDate.setHours(23, 59, 59, 999);
 				const transDate = new Date(transactionDate);
