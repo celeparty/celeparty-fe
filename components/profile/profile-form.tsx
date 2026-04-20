@@ -1,4 +1,4 @@
-import { DatePickerInput } from "@/components/form-components/DatePicker";
+﻿import { DatePickerInput } from "@/components/form-components/DatePicker";
 import { SelectInput } from "@/components/form-components/SelectInput";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format, isValid, parse } from "date-fns";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type ControllerRenderProps } from "react-hook-form";
 import { z } from "zod";
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -143,7 +143,7 @@ export const ProfileForm = () => {
 				<FormField
 					control={form.control}
 					name="name"
-					render={({ field }) => (
+					render={({ field }: { field: any }) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col lg:items-center items-start gap-1">
 								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px] text-start">
@@ -168,7 +168,7 @@ export const ProfileForm = () => {
 				<FormField
 					control={form.control}
 					name="birthdate"
-					render={({ field }) => (
+					render={({ field }: { field: any }) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
 								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
@@ -198,7 +198,7 @@ export const ProfileForm = () => {
 				<FormField
 					control={form.control}
 					name="gender"
-					render={({ field }) => (
+					render={({ field }: { field: any }) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
 								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
@@ -228,7 +228,7 @@ export const ProfileForm = () => {
 				<FormField
 					control={form.control}
 					name="email"
-					render={({ field }) => (
+					render={({ field }: { field: any }) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
 								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
@@ -253,7 +253,7 @@ export const ProfileForm = () => {
 				<FormField
 					control={form.control}
 					name="phone"
-					render={({ field }) => (
+					render={({ field }: { field: any }) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
 								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
@@ -278,7 +278,7 @@ export const ProfileForm = () => {
 				<FormField
 					control={form.control}
 					name="bankName"
-					render={({ field }) => (
+					render={({ field }: { field: any }) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
 								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
@@ -304,7 +304,7 @@ export const ProfileForm = () => {
 				<FormField
 					control={form.control}
 					name="accountName"
-					render={({ field }) => (
+					render={({ field }: { field: any }) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
 								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
@@ -330,7 +330,7 @@ export const ProfileForm = () => {
 				<FormField
 					control={form.control}
 					name="accountNumber"
-					render={({ field }) => (
+					render={({ field }: { field: any }) => (
 						<FormItem className="mb-4">
 							<div className="flex lg:flex-row flex-col items-start lg:items-center gap-1">
 								<FormLabel className="lg:w-[30%] w-[50%] text-black font-semibold font-hind lg:text-[16px] text-[14px]">
@@ -370,3 +370,4 @@ export const ProfileForm = () => {
 		</Form>
 	);
 };
+

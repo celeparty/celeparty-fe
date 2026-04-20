@@ -1,4 +1,4 @@
-import { SelectInput } from "@/components/form-components/SelectInput";
+﻿import { SelectInput } from "@/components/form-components/SelectInput";
 import { iSelectOption } from "@/lib/interfaces/iCommon";
 import { iServiceLocation, iSubregionRes } from "@/lib/interfaces/iMerchant";
 import { axiosRegion } from "@/lib/services";
@@ -79,8 +79,8 @@ useEffect(() => {
 					(list || [])
 						.filter((item: any) => item)
 						.map((item: any) => ({
-							label: String(item?.name ?? item?.label ?? item?.nama ?? ""),
-							value: String(item?.id ?? item?.value ?? item?.kode ?? ""),
+							label: String(item?.name ?? item?.label ?? item?.nama ?? item?.province ?? item?.value ?? ""),
+							value: String(item?.id ?? item?.value ?? item?.kode ?? item?.id_subregion ?? item?.id_provinsi ?? ""),
 						}))
 						.filter((opt: any) => opt.value && opt.label),
 				);
@@ -157,3 +157,4 @@ useEffect(() => {
 };
 
 export default RegionSubregionSelector;
+

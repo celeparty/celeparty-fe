@@ -6,7 +6,7 @@ import ErrorNetwork from "@/components/ErrorNetwork";
 import Skeleton from "@/components/Skeleton";
 import { axiosRegion, axiosUser } from "@/lib/services";
 import { sendEmailNotification, generateProfileUpdatedEmail } from "@/lib/services/emailService";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 
 import { DatePickerInput } from "@/components/form-components/DatePicker";
@@ -109,6 +109,7 @@ export default function ProfilePage() {
 		},
 	});
 
+	const queryClient = useQueryClient();
 	const {
 		register,
 		handleSubmit,
@@ -202,8 +203,8 @@ export default function ProfilePage() {
 			console.log("Submitting vendor profile with data:", formData);
 			
 // Use form id or session user id to build update path
-				const userId = formData?.id ?? formData?.documentId ?? session?.user?.id;
-				console.log("User ID to update:", userId, "From documentId:", formData.documentId, "From id:", formData.id, "From session:", session?.user?.id);
+const userId = dataContent?.id ?? formData?.id ?? formData?.documentId ?? session?.user?.id;
+			console.log("User ID to update:", userId, "From dataContent:", dataContent?.id, "From formData.id:", formData?.id, "From documentId:", formData?.documentId, "From session:", session?.user?.id);
 				if (!userId) {
 					throw new Error("User ID not found in form data or session");
 				}
@@ -240,6 +241,13 @@ export default function ProfilePage() {
 
 			const hasError = response && (response?.error || response?.errors);
 			if (response && !hasError) {
+				const responseData = response?.data && typeof response?.data === "object" ? response.data : response;
+				const normalizedResponse = {
+					...responseData,
+					serviceLocation: normalizeServiceLocation(responseData?.serviceLocation),
+				};
+				reset(normalizedResponse);
+				queryClient.invalidateQueries({ queryKey: ["qUserProfile"] as const });
 				setNotif(true);
 				toast({
 					title: "Sukses",
