@@ -58,8 +58,8 @@ const getProvinces = async (): Promise<iSelectOption[]> => {
 		const provinceOptions: iSelectOption[] = (list || [])
 			.filter((item: any) => item)
 			.map((item: any): iSelectOption => ({
-				value: String(item?.id ?? item?.value ?? item?.kode ?? item?.code ?? item?.name ?? item?.label ?? ""),
-				label: String(item?.name ?? item?.label ?? item?.nama ?? item?.province ?? item?.value ?? ""),
+				value: String(item?.id ?? item?.value ?? item?.kode ?? item?.code ?? item?.provinsi ?? item?.name ?? item?.label ?? ""),
+				label: String(item?.name ?? item?.label ?? item?.nama ?? item?.province ?? item?.provinsi ?? item?.value ?? ""),
 			}))
 			.filter((option: iSelectOption) => option.value && option.label);
 
@@ -231,13 +231,13 @@ const userId = dataContent?.id ?? formData?.id ?? formData?.documentId ?? sessio
 				console.log("Sanitized data to submit:", updatedFormData);
 
 				const response = await axiosUser(
-				"PUT",
-				`/api/users/${userId}`,
-				session?.jwt,
-				updatedFormData,
-			);
+					"PUT",
+					`/api/users/${userId}`,
+					session?.jwt,
+					{ data: updatedFormData },
+				);
 
-			console.log("Profile update response:", response);
+				console.log("Profile update response:", response);
 
 			const hasError = response && (response?.error || response?.errors);
 			if (response && !hasError) {
