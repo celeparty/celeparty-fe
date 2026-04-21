@@ -98,6 +98,16 @@ export default function ProfilePage() {
 
 	const formMethods = useForm<iMerchantProfile>({
 		defaultValues: {
+			name: "",
+			email: "",
+			phone: "",
+			birthdate: "",
+			birthplace: "",
+			address: "",
+			companyName: "",
+			bankName: "",
+			accountNumber: "",
+			accountName: "",
 			serviceLocation: [
 				{
 					region: "",
@@ -126,7 +136,6 @@ export default function ProfilePage() {
 
 	// Watch all fields for live validation
 	const name = watch("name");
-	const email = watch("email");
 	const phone = watch("phone");
 	const companyName = watch("companyName");
 	const bankName = watch("bankName");
@@ -147,11 +156,6 @@ export default function ProfilePage() {
 			delete errors.name;
 		}
 
-		if (email && !validateEmail(email)) {
-			errors.email = "Format email tidak valid";
-		} else {
-			delete errors.email;
-		}
 
 		if (phone && !validatePhone(phone)) {
 			errors.phone = "Format nomor telepon tidak valid (gunakan 08xx atau +62)";
@@ -186,7 +190,7 @@ export default function ProfilePage() {
 		}
 
 		setFieldErrors(errors);
-	}, [name, email, phone, companyName, bankName, accountNumber, accountName]);
+	}, [name, phone, companyName, bankName, accountNumber, accountName]);
 
 	const onSubmit: SubmitHandler<iMerchantProfile> = async (formData: iMerchantProfile) => {
 		if (Object.keys(fieldErrors).length > 0) {
@@ -375,12 +379,13 @@ const userId = dataContent?.id ?? formData?.id ?? formData?.documentId ?? sessio
 
 	useEffect(() => {
 		if (query.data && dataContent) {
-			formMethods.reset({
+			const normalizedData = {
 				...dataContent,
 				serviceLocation: normalizeServiceLocation(dataContent?.serviceLocation),
-			});
+			};
+			formMethods.reset(normalizedData);
 		}
-	}, [query.data, reset]);
+	}, [query.data, formMethods]);
 
 	if (query.isLoading) {
 		return (
