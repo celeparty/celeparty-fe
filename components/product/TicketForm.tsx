@@ -40,6 +40,7 @@ interface iTicketFormProps {
 	formDefaultData: iTicketFormReq;
 	isEdit: boolean;
 	slug?: string;
+	isTicket?: boolean;
 }
 
 export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData, slug }) => {
@@ -464,23 +465,24 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 			// DEBUG: Log final payload before API call
 			console.log("Payload siap dikirim:", JSON.stringify(payload, null, 2));
 
+			const endpointBase = isTicket ? "/api/tickets" : "/api/products";
 			if (isEdit) {
 				const ticketSlug = slug || (formDefaultData as any).documentId;
 				response = await axiosUser(
 					"PUT",
-					`/api/products/${ticketSlug}`,
+					`${endpointBase}/${ticketSlug}`,
 					`${session && session?.jwt}`,
 					payload,
 				);
 			} else {
-				response = await axiosUser("POST", "/api/products?status=draft", session?.jwt || "", payload);
+				response = await axiosUser("POST", `${endpointBase}?status=draft`, session?.jwt || "", payload);
 			}
 
 			if (response) {
 				console.log("API Response Success:", response);
 				toast({
 					title: "Sukses",
-					description: `Sukses ${isEdit ? "edit" : "menambahkan"} tiket!`,
+					description: isEdit ? "Update berhasil dan menunggu verifikasi oleh admin." : "Produk berhasil ditambahkan dan menunggu verifikasi oleh admin.",
 					className: eAlertType.SUCCESS,
 				});
 
@@ -518,7 +520,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 				}
 
 				if (!isEdit) reset({} as iTicketFormReq);
-				window.location.href = "/user/vendor/products";
+				window.location.href = isTicket ? "/user/vendor/tickets" : "/user/vendor/products";
 			}
 		} catch (error: any) {
 			console.error("===== TICKET SUBMISSION ERROR =====");
@@ -809,7 +811,7 @@ export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData
 				</div>
 				<div className="flex justify-center">
 					<button
-						disabled={!isValid || loading}
+						disabled={!isFormValid || loading}
 						type="submit"
 						className="border border-gray-300 rounded-[30px] py-4 px-7 min-w-[250px] hover:bg-slate-300 cursor-pointer bg-c-green text-white shadow text-[14px] lg:text-[16px]"
 					>

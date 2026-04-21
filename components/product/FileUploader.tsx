@@ -10,6 +10,19 @@ interface FileUploaderProps {
 export const FileUploader = ({ image, onFileChange, onRemove }: FileUploaderProps) => {
 	const inputRef = useRef<HTMLInputElement>(null);
 
+	const getImageSrc = (url?: string) => {
+		if (!url) return "";
+		// already absolute or blob
+		if (url.startsWith("http") || url.startsWith("blob:")) return url;
+		// determine public strapi/base url (client-side env)
+		const publicBase = process.env.NEXT_PUBLIC_STRAPI_URL || process.env.NEXT_PUBLIC_API_BASE_URL || (process.env.NEXT_PUBLIC_BASE_API || "").replace(/\/(api\/?)?$/, "");
+		if (url.startsWith("/")) {
+			if (publicBase) return `${publicBase}${url}`;
+			return url;
+		}
+		return publicBase ? `${publicBase}/${url}` : url;
+	};
+
 	const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0] || null;
 		onFileChange(file);
@@ -23,7 +36,7 @@ export const FileUploader = ({ image, onFileChange, onRemove }: FileUploaderProp
 		<div className="border rounded-lg p-4 relative">
 			{image.url ? (
 				<>
-					<img src={image.url} alt="Product preview" className="w-full h-32 object-contain" />
+					<img src={getImageSrc(image.url)} alt="Product preview" className="w-full h-32 object-contain" />
 				</>
 			) : (
 				<div

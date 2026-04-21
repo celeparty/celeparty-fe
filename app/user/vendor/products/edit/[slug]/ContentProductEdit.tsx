@@ -210,6 +210,7 @@ export default function ContentProductEdit(props: any) {
                 isEdit={true}
                 formDefaultData={defaultTicketFormData}
                 slug={props.slug}
+                isTicket={true}
               ></TicketForm>
             </>
           ) : (

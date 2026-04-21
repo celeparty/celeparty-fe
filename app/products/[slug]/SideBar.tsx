@@ -68,7 +68,19 @@ export default function SideBar({
   const addCart = () => {
     console.log("SideBar addCart dataProducts.user_event_type:", dataProducts.user_event_type);
     console.log("SideBar addCart productTypeName:", productTypeName);
-    
+
+    // Prevent adding if product is inactive
+    if (dataProducts && typeof dataProducts.is_active !== 'undefined' && dataProducts.is_active === false) {
+      toast({ description: 'Produk tidak tersedia untuk dibeli', className: eAlertType.FAILED });
+      return;
+    }
+
+    // Prevent adding if selected variant is inactive
+    if (selectedVariant && typeof selectedVariant.active !== 'undefined' && selectedVariant.active === false) {
+      toast({ description: 'Varian tidak tersedia untuk dibeli', className: eAlertType.FAILED });
+      return;
+    }
+
     notifCart(`${dataProducts.title} berhasil dimasukan ke keranjang`);
     let variantName = "";
     if (
@@ -273,21 +285,17 @@ export default function SideBar({
             <input
               type="button"
               disabled={
-                qtyValue >= 1 &&
-                (dataProducts.variant && dataProducts.variant.length > 1
-                  ? selectedVariantId !== null
-                  : true)
-                  ? false
-                  : true
+                !(qtyValue >= 1 && (dataProducts.variant && dataProducts.variant.length > 1 ? selectedVariantId !== null : true)) ||
+                (dataProducts && typeof dataProducts.is_active !== 'undefined' && dataProducts.is_active === false) ||
+                (selectedVariant && typeof selectedVariant.active !== 'undefined' && selectedVariant.active === false)
               }
               value="+ Keranjang"
               className={`${
-                qtyValue >= 1 &&
-                (dataProducts.variant && dataProducts.variant.length > 1
-                  ? selectedVariantId !== null
-                  : true)
-                  ? "bg-c-green cursor-pointer"
-                  : "bg-c-gray-text2 opacity-30 cursor-default"
+                !(qtyValue >= 1 && (dataProducts.variant && dataProducts.variant.length > 1 ? selectedVariantId !== null : true)) ||
+                (dataProducts && typeof dataProducts.is_active !== 'undefined' && dataProducts.is_active === false) ||
+                (selectedVariant && typeof selectedVariant.active !== 'undefined' && selectedVariant.active === false)
+                  ? "bg-c-gray-text2 opacity-30 cursor-default"
+                  : "bg-c-green cursor-pointer"
               }  mt-5 text-white text-[15px] py-3 w-full rounded-lg `}
               onClick={addCart}
             />
