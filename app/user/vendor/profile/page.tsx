@@ -206,9 +206,14 @@ export default function ProfilePage() {
 		try {
 			console.log("Submitting vendor profile with data:", formData);
 			
-			// Use session user documentId - this is the correct ID format for Strapi
-			const userId = session?.user?.documentId || session?.user?.id;
-			console.log("User ID to update:", userId, "From session:", session?.user);
+			// Use session user id (numeric ID, NOT documentId)
+			// For API calls, we need the numeric ID: session.user.id
+			const userId = session?.user?.id;
+			console.log("User ID to update:", userId, "Session user:", {
+				id: session?.user?.id,
+				documentId: session?.user?.documentId,
+				email: session?.user?.email
+			});
 			
 			if (!userId) {
 				throw new Error("User ID not found in session");
