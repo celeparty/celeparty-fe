@@ -203,25 +203,19 @@ export const TicketForm: React.FC<iTicketFormProps> = (props) => {
 	const convertAndSetEditImages = async () => {
 		if (!formDefaultData?.main_image) return;
 
-		// Convert all images to File objects (for preview) while keeping original data
-		const processedImages = await Promise.all(
-			formDefaultData.main_image.map(async (img) => {
-				if (img.url && !img.url.startsWith("blob:")) {
-					try {
-						const file = await fetchAndConvertToFile(img);
-						return {
-							...img,
-							file, // Temporary file reference
-							url: URL.createObjectURL(file), // Create preview URL
-						};
-					} catch (error) {
-						console.error("Failed to convert image:", error);
-						return img;
-					}
-				}
-				return img;
-			}),
-		);
+		// For existing images: keep original data, use direct Strapi URL for preview
+		// FileUploader handles Strapi URLs directly - no blob conversion needed
+		// Only set 'file' if needed for upload (existing images don't need re-upload)
+		const processedImages = formDefaultData.main_image.map((img) => {
+			// Use original img.url directly (FileUploader getImageSrc handles Strapi paths)
+			// Don't create blob URL - avoids fetch/CORS issues
+			return {
+				...img,
+				// No file for existing images - handleUploadImage skips if id exists
+			};
+		});
+
+		console.log("Processed existing images (direct URLs):", processedImages.map(i => ({id: i.id, url: i.url})));
 
 		// Set form values
 		setValue("main_image", processedImages);
@@ -469,13 +463,14 @@ export const TicketForm: React.FC<iTicketFormProps> = (props) => {
 
 			const endpointBase = isTicket ? "/api/tickets" : "/api/products";
 			if (isEdit) {
-				const ticketSlug = slug || (formDefaultData as any).documentId;
-				response = await axiosUser(
-					"PUT",
-					`${endpointBase}/${ticketSlug}`,
-					`${session && session?.jwt}`,
-					payload,
-				);
+			const ticketSlug = slug || (formDefaultData as any)?.documentId || (formDefaultData as any)?.id;
+			console.log("[TicketForm] PUT endpoint:", `${endpointBase}/${ticketSlug}`, "Payload keys:", Object.keys(payload));
+			response = await axiosUser(
+				"PUT",
+				`${endpointBase}/${ticketSlug}`,
+				session?.jwt || "",
+				payload,
+			);
 			} else {
 				response = await axiosUser("POST", `${endpointBase}?status=draft`, session?.jwt || "", payload);
 			}
