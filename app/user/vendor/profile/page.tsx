@@ -206,51 +206,63 @@ export default function ProfilePage() {
 		try {
 			console.log("Submitting vendor profile with data:", formData);
 			
-// Use form id or session user id to build update path
-const userId = dataContent?.id ?? formData?.id ?? formData?.documentId ?? session?.user?.id;
-			console.log("User ID to update:", userId, "From dataContent:", dataContent?.id, "From formData.id:", formData?.id, "From documentId:", formData?.documentId, "From session:", session?.user?.id);
-				if (!userId) {
-					throw new Error("User ID not found in form data or session");
+			// Use session user id from current query data to ensure we have the correct user ID
+			const currentData = queryClient.getQueryData(["qUserProfile"]) as any;
+			const userId = currentData?.id ?? formData?.id ?? formData?.documentId ?? session?.user?.id;
+			console.log("User ID to update:", userId, "From currentData:", currentData?.id, "From formData.id:", formData?.id, "From documentId:", formData?.documentId, "From session:", session?.user?.id);
+			
+			if (!userId) {
+				throw new Error("User ID not found in form data or session");
+			}
+
+			// Sanitize data - only send editable fields
+			const dataToSubmit = sanitizeVendorData(formData);
+			const updatedFormData: any = { ...dataToSubmit };
+
+			if (Array.isArray(updatedFormData?.serviceLocation)) {
+				updatedFormData.serviceLocation = updatedFormData.serviceLocation
+					.filter((loc: any) => loc && (loc.region || loc.subregion || loc.id || loc.idSubRegion))
+					.map((loc: any) => ({
+						region: String(loc?.region ?? ""),
+						subregion: String(loc?.subregion ?? ""),
+						id: String(loc?.id ?? ""),
+						idSubRegion: String(loc?.idSubRegion ?? ""),
+					}));
+
+				if (updatedFormData.serviceLocation.length === 0) {
+					delete updatedFormData.serviceLocation;
 				}
+			}
 
-				// Sanitize data - only send editable fields
-				const dataToSubmit = sanitizeVendorData(formData);
-				const updatedFormData: any = { ...dataToSubmit };
+			console.log("Sanitized data to submit:", updatedFormData);
 
-				if (Array.isArray(updatedFormData?.serviceLocation)) {
-					updatedFormData.serviceLocation = updatedFormData.serviceLocation
-						.filter((loc: any) => loc && (loc.region || loc.subregion || loc.id || loc.idSubRegion))
-						.map((loc: any) => ({
-							region: String(loc?.region ?? ""),
-							subregion: String(loc?.subregion ?? ""),
-							id: String(loc?.id ?? ""),
-							idSubRegion: String(loc?.idSubRegion ?? ""),
-						}));
+			const response = await axiosUser(
+				"PUT",
+				`/api/users/${userId}`,
+				session?.jwt,
+				{ data: updatedFormData },
+			);
 
-					if (updatedFormData.serviceLocation.length === 0) {
-						delete updatedFormData.serviceLocation;
-					}
+			console.log("Profile update response:", response);
+
+			// Check if response is successful - API returns the updated data directly
+			if (response && !response?.error && !response?.errors) {
+				// Get the actual response data
+				const responseData = response?.data || response;
+				
+				// Ensure we have valid data to reset form with
+				if (responseData && typeof responseData === "object") {
+					const normalizedResponse = {
+						...responseData,
+						serviceLocation: normalizeServiceLocation(responseData?.serviceLocation),
+					};
+					// Reset form with the updated data from server
+					reset(normalizedResponse);
+				} else {
+					// If response doesn't contain proper data, refetch from server
+					await queryClient.refetchQueries({ queryKey: ["qUserProfile"] as const });
 				}
-
-				console.log("Sanitized data to submit:", updatedFormData);
-
-				const response = await axiosUser(
-					"PUT",
-					`/api/users/${userId}`,
-					session?.jwt,
-					{ data: updatedFormData },
-				);
-
-				console.log("Profile update response:", response);
-
-			const hasError = response && (response?.error || response?.errors);
-			if (response && !hasError) {
-				const responseData = response?.data && typeof response?.data === "object" ? response.data : response;
-				const normalizedResponse = {
-					...responseData,
-					serviceLocation: normalizeServiceLocation(responseData?.serviceLocation),
-				};
-				reset(normalizedResponse);
+				
 				queryClient.invalidateQueries({ queryKey: ["qUserProfile"] as const });
 				setNotif(true);
 				toast({
@@ -259,7 +271,7 @@ const userId = dataContent?.id ?? formData?.id ?? formData?.documentId ?? sessio
 					className: eAlertType.SUCCESS,
 				});
 
-				// Send email notification asynchronously
+				// Send email notification asynchronously (don't block on failure)
 				try {
 					if (formData?.email) {
 						const vendorName = formData?.name || "Mitra";
@@ -270,6 +282,7 @@ const userId = dataContent?.id ?? formData?.id ?? formData?.documentId ?? sessio
 							html: emailHtml,
 						}, session?.jwt).catch((err) => {
 							console.error("Failed to send profile update email:", err);
+							// Don't break on email failure
 						});
 					}
 				} catch (emailError) {
@@ -282,7 +295,7 @@ const userId = dataContent?.id ?? formData?.id ?? formData?.documentId ?? sessio
 				console.error("Failed profile update response:", response);
 				toast({
 					title: "Gagal",
-					description: "Tidak ada respons yang valid dari server. Coba lagi.",
+					description: response?.error?.message || "Tidak ada respons yang valid dari server. Coba lagi.",
 					className: eAlertType.FAILED,
 				});
 			}
