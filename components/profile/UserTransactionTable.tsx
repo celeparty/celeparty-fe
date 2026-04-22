@@ -80,9 +80,14 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 			// Add vendor filter if vendor
 			if (isVendor && session.user?.documentId) {
 				url += `&filters[vendor_doc_id][$eq]=${session.user.documentId}`;
+				console.log("UserTransactionTable - Vendor filter applied for:", session.user.documentId);
 			} else if (!isVendor && session.user?.email) {
 				// For customer, filter by email
 				url += `&filters[email][$eq]=${session.user.email}`;
+				console.log("UserTransactionTable - Customer filter applied for:", session.user.email);
+			} else {
+				console.warn("UserTransactionTable - No valid filter params");
+				return [];
 			}
 			
 			console.log("UserTransactionTable - Fetching URL:", url);
@@ -101,7 +106,8 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 				status: error.response?.status,
 				data: error.response?.data
 			});
-			throw error;
+			// Return empty array instead of throwing to prevent component from showing error
+			return [];
 		}
 	};
 
@@ -109,8 +115,8 @@ export const UserTransactionTable: React.FC<iTableDataProps> = ({ isVendor, acti
 		queryKey: ["qUserTransactions", activeTab, isVendor, session?.user?.documentId, session?.user?.email],
 		queryFn: getTransactionsQuery,
 		staleTime: 5000,
-		enabled: !!session,
-		retry: 3,
+		enabled: !!session && (isVendor ? !!session?.user?.documentId : !!session?.user?.email),
+		retry: 1,
 	});
 
 	const toggleRow = (id: string) => {

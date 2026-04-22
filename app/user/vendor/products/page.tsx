@@ -91,6 +91,10 @@ export default function Products() {
 
 	const handleUpdateProduct = async (documentId: string, productUpdated: iUpdateProduct) => {
 		try {
+			if (!userMe?.jwt) {
+				toast.error("Session expired. Please login again.");
+				return;
+			}
 			const res = await axios.put(
 				`${process.env.BASE_API}/api/products/${documentId}`,
 				{
@@ -98,7 +102,7 @@ export default function Products() {
 				},
 				{
 					headers: {
-						Authorization: `Bearer ${process.env.KEY_API}`,
+						Authorization: `Bearer ${userMe.jwt}`,
 						"Content-Type": "application/json",
 					},
 				},
@@ -120,10 +124,14 @@ export default function Products() {
 		if (!isConfirmed) return;
 
 		try {
+			if (!userMe?.jwt) {
+				toast.error("Session expired. Please login again.");
+				return;
+			}
 			const endpoint = productType === 'ticket' ? '/api/tickets' : '/api/products';
 			const res = await axios.delete(`${process.env.BASE_API}${endpoint}/${documentId}`, {
 				headers: {
-					Authorization: `Bearer ${process.env.KEY_API}`,
+					Authorization: `Bearer ${userMe.jwt}`,
 				},
 			});
 			// Refetch data after delete instead of manually updating state

@@ -37,20 +37,21 @@ export const TicketDashboard: React.FC = () => {
 	// Fetch ticket summary
 	const getTicketSummary = async () => {
 		if (!session?.jwt || !session?.user?.documentId) {
-			console.warn("TicketDashboard - Missing session or documentId");
+			console.warn("TicketDashboard - Missing session or documentId", {
+				hasJwt: !!session?.jwt,
+				hasDocumentId: !!session?.user?.documentId,
+				session: session?.user
+			});
 			return [];
 		}
 		try {
 			// 1. Fetch all ticket transactions using transaction-tickets endpoint
-			console.log("TicketDashboard - Fetching vendor's ticket transactions...");
+			console.log("TicketDashboard - Fetching vendor's ticket transactions for:", session.user.documentId);
 			const vendorId = session.user.documentId;
 			
-			const params = new URLSearchParams();
-			params.append('vendor_doc_id', vendorId);
-			params.append('sort', 'createdAt:desc');
-			params.append('pageSize', '1000');
+			// Build URL with proper encoding
+			const url = `/api/transaction-tickets-proxy?filters[vendor_doc_id][$eq]=${encodeURIComponent(vendorId)}&sort=createdAt:desc&pagination[pageSize]=1000`;
 			
-			const url = `/api/transaction-tickets-proxy?${params.toString()}`;
 			console.log("TicketDashboard - Request URL:", url);
 			
 			const transactionsResponse = await axios.get(url, {
@@ -62,7 +63,7 @@ export const TicketDashboard: React.FC = () => {
 			const transactions = transactionsResponse.data?.data || [];
 			console.log("TicketDashboard - Vendor's ticket transactions received:", {
 				count: transactions.length,
-				data: transactions
+				firstItem: transactions[0],
 			});
 
 			// 2. Initialize productsMap to aggregate data by product
@@ -265,6 +266,7 @@ export const TicketDashboard: React.FC = () => {
 		queryFn: getTicketSummary,
 		enabled: !!session?.jwt && !!session?.user?.documentId,
 		staleTime: 5 * 60 * 1000,
+		retry: 1,
 	});
 
 	if (summaryQuery.isLoading) {

@@ -40,8 +40,8 @@ export const ProductVariantItem = ({ index, register, onRemove, errors, control 
 								value={field.value ? formatNumberWithDots(field.value.toString()) : ""}
 								onChange={(e) => {
 									const rawValue = e.target.value.replace(/\D/g, "");
-									const formatted = formatNumberWithDots(rawValue);
-									field.onChange(formatted);
+									const numericValue = rawValue ? parseInt(rawValue) : 0;
+									field.onChange(numericValue);
 								}}
 								className="border border-gray-300 rounded-md py-2 px-5 w-full"
 								placeholder="Harga Produk (Rp)"

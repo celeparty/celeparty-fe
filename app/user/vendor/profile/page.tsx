@@ -206,13 +206,12 @@ export default function ProfilePage() {
 		try {
 			console.log("Submitting vendor profile with data:", formData);
 			
-			// Use session user id from current query data to ensure we have the correct user ID
-			const currentData = queryClient.getQueryData(["qUserProfile"]) as any;
-			const userId = currentData?.id ?? formData?.id ?? formData?.documentId ?? session?.user?.id;
-			console.log("User ID to update:", userId, "From currentData:", currentData?.id, "From formData.id:", formData?.id, "From documentId:", formData?.documentId, "From session:", session?.user?.id);
+			// Use session user documentId - this is the correct ID format for Strapi
+			const userId = session?.user?.documentId || session?.user?.id;
+			console.log("User ID to update:", userId, "From session:", session?.user);
 			
 			if (!userId) {
-				throw new Error("User ID not found in form data or session");
+				throw new Error("User ID not found in session");
 			}
 
 			// Sanitize data - only send editable fields
