@@ -43,7 +43,9 @@ interface iTicketFormProps {
 	isTicket?: boolean;
 }
 
-export const TicketForm: React.FC<iTicketFormProps> = ({ isEdit, formDefaultData, slug }) => {
+export const TicketForm: React.FC<iTicketFormProps> = (props) => {
+	const { isEdit, formDefaultData, slug } = props;
+	const isTicket = props.isTicket ?? true;
 	// TODO: USe when request with selector
 	// const [subregionOptions, setSubregionOptions] = useState<iSelectOption[]>([]);
 	// const [selectedProvince, setSelectedProvince] = useState<string>("");
