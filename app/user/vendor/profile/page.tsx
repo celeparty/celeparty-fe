@@ -439,7 +439,7 @@ export default function ProfilePage() {
 									<ValidatedInput
 										label="Nama Lengkap"
 										placeholder="Masukkan nama lengkap"
-										value={name}
+
 										error={fieldErrors.name}
 										{...register("name")}
 										helperText="Gunakan nama sesuai identitas"
@@ -461,7 +461,7 @@ export default function ProfilePage() {
 									<ValidatedInput
 										label="Nomor Telepon"
 										placeholder="08xx atau +62xxx"
-										value={phone}
+
 										error={fieldErrors.phone}
 										{...register("phone")}
 										helperText="Format: 08xx atau +62xxx"
@@ -504,7 +504,7 @@ export default function ProfilePage() {
 								<ValidatedInput
 									label="Nama Usaha"
 									placeholder="Masukkan nama usaha"
-									value={companyName}
+
 									error={fieldErrors.companyName}
 									{...register("companyName")}
 									helperText="Nama resmi perusahaan/toko"
@@ -580,7 +580,6 @@ export default function ProfilePage() {
 								<ValidatedInput
 									label="Nama Bank"
 									placeholder="BCA, Mandiri, BRI, dsb"
-									value={bankName}
 									error={fieldErrors.bankName}
 									{...register("bankName")}
 									helperText="Masukkan nama bank"
@@ -588,7 +587,6 @@ export default function ProfilePage() {
 								<ValidatedInput
 									label="Nomor Rekening"
 									placeholder="Masukkan nomor rekening"
-									value={accountNumber}
 									error={fieldErrors.accountNumber}
 									{...register("accountNumber")}
 									helperText="Minimal 10 digit, hanya angka"
@@ -596,7 +594,6 @@ export default function ProfilePage() {
 								<ValidatedInput
 									label="Atas Nama Rekening"
 									placeholder="Nama pemilik rekening"
-									value={accountName}
 									error={fieldErrors.accountName}
 									{...register("accountName")}
 									helperText="Sesuai dengan nama di rekening bank"
