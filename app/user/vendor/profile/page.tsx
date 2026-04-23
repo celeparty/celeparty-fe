@@ -93,6 +93,7 @@ export default function ProfilePage() {
 	const [notif, setNotif] = React.useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+	const isInitialLoadRef = React.useRef(true);
 
 	const { toast } = useToast();
 
@@ -395,12 +396,14 @@ export default function ProfilePage() {
 	};
 
 	useEffect(() => {
-		if (query.data && dataContent) {
+		// Only reset form on initial load, not on subsequent query updates
+		if (query.data && dataContent && isInitialLoadRef.current) {
 			const normalizedData = {
 				...dataContent,
 				serviceLocation: normalizeServiceLocation(dataContent?.serviceLocation),
 			};
 			formMethods.reset(normalizedData);
+			isInitialLoadRef.current = false;
 		}
 	}, [query.data, formMethods]);
 
