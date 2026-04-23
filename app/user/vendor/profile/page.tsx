@@ -439,9 +439,9 @@ export default function ProfilePage() {
 									<ValidatedInput
 										label="Nama Lengkap"
 										placeholder="Masukkan nama lengkap"
-
+										value={name}
 										error={fieldErrors.name}
-										{...register("name")}
+										{...(register("name") as any)}
 										helperText="Gunakan nama sesuai identitas"
 									/>
 									<div className="mb-4">
@@ -461,9 +461,9 @@ export default function ProfilePage() {
 									<ValidatedInput
 										label="Nomor Telepon"
 										placeholder="08xx atau +62xxx"
-
+										value={phone}
 										error={fieldErrors.phone}
-										{...register("phone")}
+										{...(register("phone") as any)}
 										helperText="Format: 08xx atau +62xxx"
 									/>
 									<div>
@@ -491,7 +491,7 @@ export default function ProfilePage() {
 								<ValidatedInput
 									label="Tempat Lahir"
 									placeholder="Masukkan tempat lahir"
-									{...register("birthplace")}
+								{...(register("birthplace") as any)}
 								/>
 							</div>
 
@@ -504,15 +504,15 @@ export default function ProfilePage() {
 								<ValidatedInput
 									label="Nama Usaha"
 									placeholder="Masukkan nama usaha"
-
+									value={companyName}
 									error={fieldErrors.companyName}
-									{...register("companyName")}
+								{...(register("companyName") as any)}
 									helperText="Nama resmi perusahaan/toko"
 								/>
 								<ValidatedTextarea
 									label="Alamat Usaha"
 									placeholder="Masukkan alamat lengkap usaha"
-									{...register("address")}
+								{...(register("address") as any)}
 								/>
 							</div>
 
@@ -580,22 +580,25 @@ export default function ProfilePage() {
 								<ValidatedInput
 									label="Nama Bank"
 									placeholder="BCA, Mandiri, BRI, dsb"
+									value={bankName}
 									error={fieldErrors.bankName}
-									{...register("bankName")}
+								{...(register("bankName") as any)}
 									helperText="Masukkan nama bank"
 								/>
 								<ValidatedInput
 									label="Nomor Rekening"
 									placeholder="Masukkan nomor rekening"
+									value={accountNumber}
 									error={fieldErrors.accountNumber}
-									{...register("accountNumber")}
+								{...(register("accountNumber") as any)}
 									helperText="Minimal 10 digit, hanya angka"
 								/>
 								<ValidatedInput
 									label="Atas Nama Rekening"
 									placeholder="Nama pemilik rekening"
+									value={accountName}
 									error={fieldErrors.accountName}
-									{...register("accountName")}
+								{...(register("accountName") as any)}
 									helperText="Sesuai dengan nama di rekening bank"
 								/>
 							</div>

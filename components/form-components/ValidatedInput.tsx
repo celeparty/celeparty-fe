@@ -14,12 +14,15 @@ interface ValidatedInputProps {
   children?: React.ReactNode;
   helperText?: string;
   className?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  name?: string;
 }
 
 /**
  * Input field with live validation indicators
  */
-export const ValidatedInput: React.FC<ValidatedInputProps & React.InputHTMLAttributes<HTMLInputElement>> = ({
+export const ValidatedInput = React.forwardRef<HTMLInputElement, ValidatedInputProps>(({
   label,
   value,
   error,
@@ -30,9 +33,12 @@ export const ValidatedInput: React.FC<ValidatedInputProps & React.InputHTMLAttri
   minLength,
   helperText,
   className = "",
+  onChange,
+  onBlur,
+  name,
   children,
   ...props
-}) => {
+}, ref) => {
   const hasError = Boolean(error);
   const hasValue = Boolean(value);
   const isValid = hasValue && !hasError;
@@ -45,11 +51,15 @@ export const ValidatedInput: React.FC<ValidatedInputProps & React.InputHTMLAttri
       </label>
       <div className="relative">
         <input
+          ref={ref}
           type={type}
+          name={name}
           value={value}
           placeholder={placeholder}
           maxLength={maxLength}
           minLength={minLength}
+          onChange={onChange}
+          onBlur={onBlur}
           className={`w-full px-4 py-3 border-2 rounded-lg transition-colors outline-none focus:ring-2 focus:ring-offset-0 ${
             hasError
               ? "border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200"
@@ -77,14 +87,14 @@ export const ValidatedInput: React.FC<ValidatedInputProps & React.InputHTMLAttri
       )}
     </div>
   );
-};
+});
+
+ValidatedInput.displayName = "ValidatedInput";
 
 /**
  * Textarea field with live validation indicators
  */
-export const ValidatedTextarea: React.FC<
-  ValidatedInputProps & React.TextareaHTMLAttributes<HTMLTextAreaElement>
-> = ({
+export const ValidatedTextarea = React.forwardRef<HTMLTextAreaElement, ValidatedInputProps>(({
   label,
   value,
   error,
@@ -94,8 +104,11 @@ export const ValidatedTextarea: React.FC<
   minLength,
   helperText,
   className = "",
+  onChange,
+  onBlur,
+  name,
   ...props
-}) => {
+}, ref) => {
   const hasError = Boolean(error);
   const hasValue = Boolean(value);
   const isValid = hasValue && !hasError;
@@ -108,10 +121,14 @@ export const ValidatedTextarea: React.FC<
       </label>
       <div className="relative">
         <textarea
+          ref={ref}
+          name={name}
           value={value}
           placeholder={placeholder}
           maxLength={maxLength}
           minLength={minLength}
+          onChange={onChange as any}
+          onBlur={onBlur as any}
           className={`w-full px-4 py-3 border-2 rounded-lg transition-colors outline-none focus:ring-2 focus:ring-offset-0 min-h-[100px] ${
             hasError
               ? "border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200"
@@ -133,4 +150,6 @@ export const ValidatedTextarea: React.FC<
       )}
     </div>
   );
-};
+});
+
+ValidatedTextarea.displayName = "ValidatedTextarea";
