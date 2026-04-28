@@ -128,6 +128,7 @@ export default function ProfilePage() {
 		formState: { errors },
 		control,
 		reset,
+		getValues,
 	} = formMethods;
 
 	const { fields, append, remove } = useFieldArray<iMerchantProfile, "serviceLocation">({
@@ -205,7 +206,10 @@ export default function ProfilePage() {
 
 		setIsSubmitting(true);
 		try {
-			console.log("Submitting vendor profile with data:", formData);
+			// Get the actual current values from form
+			const currentFormValues = getValues();
+			console.log("Current form values:", currentFormValues);
+			console.log("Submitting vendor profile with data:", currentFormValues);
 			
 			// Use session user id (numeric ID, NOT documentId)
 			// For API calls, we need the numeric ID: session.user.id
@@ -221,7 +225,7 @@ export default function ProfilePage() {
 			}
 
 			// Sanitize data - only send editable fields
-			const dataToSubmit = sanitizeVendorData(formData);
+			const dataToSubmit = sanitizeVendorData(currentFormValues);
 			const updatedFormData: any = { ...dataToSubmit };
 
 			if (Array.isArray(updatedFormData?.serviceLocation)) {
@@ -278,11 +282,11 @@ export default function ProfilePage() {
 
 				// Send email notification asynchronously (don't block on failure)
 				try {
-					if (formData?.email) {
-						const vendorName = formData?.name || "Mitra";
+					if (currentFormValues?.email) {
+						const vendorName = currentFormValues?.name || "Mitra";
 						const emailHtml = generateProfileUpdatedEmail(vendorName);
 						sendEmailNotification({
-							to: formData.email,
+							to: currentFormValues.email,
 							subject: "Profil Anda Berhasil Diperbarui - Celeparty",
 							html: emailHtml,
 						}, session?.jwt).catch((err) => {
@@ -436,13 +440,18 @@ export default function ProfilePage() {
 									Informasi Pribadi
 								</h2>
 								<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-									<ValidatedInput
-										label="Nama Lengkap"
-										placeholder="Masukkan nama lengkap"
-										value={name}
-										error={fieldErrors.name}
-										{...(register("name") as any)}
-										helperText="Gunakan nama sesuai identitas"
+								<Controller
+									name="name"
+									control={control}
+									render={({ field }) => (
+										<ValidatedInput
+											label="Nama Lengkap"
+											placeholder="Masukkan nama lengkap"
+											error={fieldErrors.name}
+											helperText="Gunakan nama sesuai identitas"
+											{...field}
+										/>
+									)}
 									/>
 									<div className="mb-4">
 										<label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -458,13 +467,18 @@ export default function ProfilePage() {
 									</div>
 								</div>
 								<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-									<ValidatedInput
-										label="Nomor Telepon"
-										placeholder="08xx atau +62xxx"
-										value={phone}
-										error={fieldErrors.phone}
-										{...(register("phone") as any)}
-										helperText="Format: 08xx atau +62xxx"
+								<Controller
+									name="phone"
+									control={control}
+									render={({ field }) => (
+										<ValidatedInput
+											label="Nomor Telepon"
+											placeholder="08xx atau +62xxx"
+											error={fieldErrors.phone}
+											helperText="Format: 08xx atau +62xxx"
+											{...field}
+										/>
+									)}
 									/>
 									<div>
 										<label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -488,10 +502,16 @@ export default function ProfilePage() {
 										/>
 									</div>
 								</div>
-								<ValidatedInput
-									label="Tempat Lahir"
-									placeholder="Masukkan tempat lahir"
-								{...(register("birthplace") as any)}
+								<Controller
+									name="birthplace"
+									control={control}
+									render={({ field }) => (
+										<ValidatedInput
+											label="Tempat Lahir"
+											placeholder="Masukkan tempat lahir"
+											{...field}
+										/>
+									)}
 								/>
 							</div>
 
@@ -501,18 +521,29 @@ export default function ProfilePage() {
 									<span className="w-6 h-6 bg-c-blue text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
 									Informasi Usaha
 								</h2>
-								<ValidatedInput
-									label="Nama Usaha"
-									placeholder="Masukkan nama usaha"
-									value={companyName}
-									error={fieldErrors.companyName}
-								{...(register("companyName") as any)}
-									helperText="Nama resmi perusahaan/toko"
+							<Controller
+								name="companyName"
+								control={control}
+								render={({ field }) => (
+									<ValidatedInput
+										label="Nama Usaha"
+										placeholder="Masukkan nama usaha"
+										error={fieldErrors.companyName}
+										helperText="Nama resmi perusahaan/toko"
+										{...field}
+									/>
+								)}
 								/>
-								<ValidatedTextarea
-									label="Alamat Usaha"
-									placeholder="Masukkan alamat lengkap usaha"
-								{...(register("address") as any)}
+								<Controller
+									name="address"
+									control={control}
+									render={({ field }) => (
+										<ValidatedTextarea
+											label="Alamat Usaha"
+											placeholder="Masukkan alamat lengkap usaha"
+											{...field}
+										/>
+									)}
 								/>
 							</div>
 
@@ -577,29 +608,44 @@ export default function ProfilePage() {
 										💡 Informasi perbankan digunakan untuk proses pembayaran. Pastikan data benar dan sesuai dengan rekening pemilik bisnis.
 									</p>
 								</div>
-								<ValidatedInput
-									label="Nama Bank"
-									placeholder="BCA, Mandiri, BRI, dsb"
-									value={bankName}
-									error={fieldErrors.bankName}
-								{...(register("bankName") as any)}
-									helperText="Masukkan nama bank"
+							<Controller
+								name="bankName"
+								control={control}
+								render={({ field }) => (
+									<ValidatedInput
+										label="Nama Bank"
+										placeholder="BCA, Mandiri, BRI, dsb"
+										error={fieldErrors.bankName}
+										helperText="Masukkan nama bank"
+										{...field}
+									/>
+								)}
 								/>
-								<ValidatedInput
-									label="Nomor Rekening"
-									placeholder="Masukkan nomor rekening"
-									value={accountNumber}
-									error={fieldErrors.accountNumber}
-								{...(register("accountNumber") as any)}
-									helperText="Minimal 10 digit, hanya angka"
+							<Controller
+								name="accountNumber"
+								control={control}
+								render={({ field }) => (
+									<ValidatedInput
+										label="Nomor Rekening"
+										placeholder="Masukkan nomor rekening"
+										error={fieldErrors.accountNumber}
+										helperText="Minimal 10 digit, hanya angka"
+										{...field}
+									/>
+								)}
 								/>
-								<ValidatedInput
-									label="Atas Nama Rekening"
-									placeholder="Nama pemilik rekening"
-									value={accountName}
-									error={fieldErrors.accountName}
-								{...(register("accountName") as any)}
-									helperText="Sesuai dengan nama di rekening bank"
+							<Controller
+								name="accountName"
+								control={control}
+								render={({ field }) => (
+									<ValidatedInput
+										label="Atas Nama Rekening"
+										placeholder="Nama pemilik rekening"
+										error={fieldErrors.accountName}
+										helperText="Sesuai dengan nama di rekening bank"
+										{...field}
+									/>
+								)}
 								/>
 							</div>
 
