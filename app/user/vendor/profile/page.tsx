@@ -259,16 +259,31 @@ export default function ProfilePage() {
 				// Get the actual response data
 				const responseData = response?.data || response;
 				
+				console.log("Response data received:", responseData);
+				
 				// Ensure we have valid data to reset form with
 				if (responseData && typeof responseData === "object") {
 					const normalizedResponse = {
 						...responseData,
 						serviceLocation: normalizeServiceLocation(responseData?.serviceLocation),
 					};
+					
+					console.log("Normalized response to reset form:", normalizedResponse);
+					
 					// Reset form with the updated data from server
 					reset(normalizedResponse);
+					
+					// Wait for query to refetch to ensure sync
+					try {
+						await queryClient.refetchQueries({ queryKey: ["qUserProfile"] as const });
+						console.log("Query refetched successfully");
+					} catch (refetchError) {
+						console.error("Error refetching query:", refetchError);
+						// Continue even if refetch fails
+					}
 				} else {
 					// If response doesn't contain proper data, refetch from server
+					console.log("Response data not suitable, refetching from server");
 					await queryClient.refetchQueries({ queryKey: ["qUserProfile"] as const });
 				}
 				
@@ -400,14 +415,19 @@ export default function ProfilePage() {
 	};
 
 	useEffect(() => {
-		// Only reset form on initial load, not on subsequent query updates
-		if (query.data && dataContent && isInitialLoadRef.current) {
+		// Reset form on initial load AND when query data changes (after refetch)
+		if (query.data) {
 			const normalizedData = {
-				...dataContent,
-				serviceLocation: normalizeServiceLocation(dataContent?.serviceLocation),
+				...query.data,
+				serviceLocation: normalizeServiceLocation(query.data?.serviceLocation),
 			};
+			console.log("Effect: Resetting form with query data:", normalizedData);
 			formMethods.reset(normalizedData);
-			isInitialLoadRef.current = false;
+			
+			// Only mark as not initial load after first successful load
+			if (isInitialLoadRef.current) {
+				isInitialLoadRef.current = false;
+			}
 		}
 	}, [query.data, formMethods]);
 
